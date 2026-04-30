@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JustClover Free</title>
+  <meta name="theme-color" content="#7c3aed" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icons/icon.svg" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="background"></div>
+  <header class="topbar">
+    <div class="brand">🍀 JustClover</div>
+    <div class="top-actions">
+      <span id="topUser">Гость</span>
+      <button id="openProfileBtn" class="ghost hidden">Профиль</button>
+      <button id="logoutBtn" class="ghost hidden">Выйти</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="setupWarning" class="setup-warning hidden">
+      <h2>Нужно подключить Firebase</h2>
+      <p>Открой <code>public/firebase-config.js</code> и вставь config из Firebase Console. Инструкция есть в <code>README_RU.md</code>.</p>
+    </section>
+
+    <section id="authView" class="auth-grid">
+      <div class="hero-card">
+        <p class="eyebrow">Serverless watch party</p>
+        <h1>Смотри вместе без домашнего сервера</h1>
+        <p>Профили, комнаты, чат, online-статус, YouTube/direct video и задел под Android/Windows.</p>
+      </div>
+      <div class="auth-card">
+        <div class="tabs">
+          <button id="loginTab" class="active">Вход</button>
+          <button id="registerTab">Регистрация</button>
+          <button id="guestTab">Гость</button>
+        </div>
+        <form id="authForm">
+          <label id="nickLabel" class="hidden">Ник<input id="nickInput" placeholder="Например: Clover" maxlength="24" /></label>
+          <label>Email<input id="emailInput" type="email" placeholder="you@mail.com" autocomplete="email" /></label>
+          <label>Пароль<input id="passwordInput" type="password" placeholder="минимум 6 символов" autocomplete="current-password" /></label>
+          <button id="authSubmit" class="primary">Войти</button>
+        </form>
+        <button id="guestSubmit" class="primary hidden">Войти как гость</button>
+        <p id="authStatus" class="status"></p>
+      </div>
+    </section>
+
+    <section id="appView" class="app-grid hidden">
+      <aside class="panel profile-panel">
+        <div id="miniProfile" class="mini-profile">
+          <div class="cover"></div>
+          <img id="miniAvatar" class="avatar" src="" alt="avatar" />
+          <div class="profile-info"><h3 id="miniName">User</h3><p id="miniTag">#0000</p><p id="miniStatus">online</p></div>
+        </div>
+        <div class="panel-title">Комната</div>
+        <div class="stack">
+          <input id="roomNameInput" placeholder="Название комнаты" maxlength="40" />
+          <button id="createRoomBtn">Создать комнату</button>
+          <div class="row"><input id="joinRoomInput" placeholder="Код комнаты" /><button id="joinRoomBtn">Войти</button></div>
+          <button id="copyInviteBtn" class="ghost">Скопировать invite-ссылку</button>
+          <div class="row"><button id="openRoomBtn" class="ghost">Открыть</button><button id="closeRoomBtn" class="ghost">Закрыть</button></div>
+          <div class="row"><button id="publicRoomBtn" class="ghost">Публичная</button><button id="inviteRoomBtn" class="ghost">По ссылке</button></div>
+          <p id="roomStatus" class="status">Создай комнату или войди по ссылке.</p>
+        </div>
+        <div class="panel-title small">Участники</div><div id="membersList" class="list"></div>
+        <div class="panel-title small">Голос</div><button id="voiceBtn" class="ghost">🎙️ Включить голос</button><p id="voiceStatus" class="status">Голос выключен.</p><div id="remoteAudio"></div>
+      </aside>
+
+      <section class="watch-column">
+        <div class="player-panel panel">
+          <div class="source-grid">
+            <select id="sourceType"><option value="youtube">YouTube</option><option value="direct">Прямая mp4/webm ссылка</option><option value="drive">Google Drive — эксперимент</option><option value="yandex">Яндекс Диск — внешняя ссылка</option><option value="external">Внешняя ссылка</option></select>
+            <input id="sourceUrl" placeholder="Вставь ссылку на видео" />
+            <input id="sourceTitle" placeholder="Название источника" />
+            <button id="setSourceBtn">Применить источник</button>
+          </div>
+          <p id="sourceNote" class="notice">Лучший бесплатный вариант — YouTube. Для Google/Yandex Drive нужна публичная ссылка; прямой video-поток может работать не всегда.</p>
+          <div class="player-stage">
+            <video id="videoPlayer" controls playsinline class="hidden"></video>
+            <div id="youtubePlayer" class="hidden"></div>
+            <div id="externalPlayer" class="external-player hidden"><h3>Внешний источник</h3><p id="externalText"></p><a id="externalLink" target="_blank" rel="noreferrer">Открыть ссылку</a></div>
+            <div id="emptyPlayer" class="empty-player">Выбери источник видео</div>
+          </div>
+        </div>
+        <div class="panel"><div class="panel-title">Публичные открытые комнаты</div><div id="publicRoomsList" class="cards-list"></div></div>
+        <div class="panel"><div class="panel-title">Кто онлайн</div><div id="onlineUsersList" class="cards-list"></div></div>
+      </section>
+
+      <aside class="panel chat-panel">
+        <div class="panel-title">Чат</div><div id="chatMessages" class="chat-messages"></div>
+        <form id="chatForm" class="chat-form"><input id="chatInput" placeholder="Сообщение..." maxlength="500" /><button>➤</button></form>
+      </aside>
+    </section>
+  </main>
+
+  <dialog id="profileDialog" class="profile-dialog">
+    <form method="dialog" class="dialog-inner">
+      <div class="dialog-head"><h2>Профиль</h2><button value="cancel" class="ghost">✕</button></div>
+      <label>Ник<input id="profileNick" maxlength="24" /></label>
+      <label>Тэг<input id="profileTag" maxlength="12" placeholder="Например: 0420" /></label>
+      <label>Аватарка URL<input id="profileAvatar" placeholder="https://..." /></label>
+      <label>Обложка URL<input id="profileCover" placeholder="https://..." /></label>
+      <label>Статус<input id="profileStatusText" maxlength="80" placeholder="Смотрю с друзьями" /></label>
+      <label>О себе<textarea id="profileBio" maxlength="280"></textarea></label>
+      <label>Акцент<input id="profileAccent" type="color" value="#a855f7" /></label>
+      <button id="saveProfileBtn" class="primary" value="default">Сохранить</button>
+      <p id="profileSaveStatus" class="status"></p>
+    </form>
+  </dialog>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

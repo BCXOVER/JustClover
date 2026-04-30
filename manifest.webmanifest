@@ -1,0 +1,18 @@
+{
+  "name": "JustClover Free",
+  "short_name": "JustClover",
+  "description": "Serverless watch party with profiles, rooms, chat, sync and voice.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#06040f",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
