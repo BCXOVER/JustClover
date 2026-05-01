@@ -5146,3 +5146,275 @@ function jc26Patch(){
 }
 
 setTimeout(jc26Patch, 1000);
+
+
+/* =========================================================
+   JustClover Stage 26.1 — Player overlay FORCE FIX JS
+   Version: stage26-1-player-overlay-forcefix-20260501-1
+   ========================================================= */
+
+let jc261Messages = [];
+let jc261DockTimer = null;
+
+function jc261Toast(text){
+  if(typeof jcStage5Toast === 'function') jcStage5Toast(text);
+  else status?.(els?.voiceStatus || els?.roomStatus, text);
+}
+
+function jc261EnsureFixedOverlay(){
+  if(!document.querySelector('.jc-rave-fixed-dock')){
+    const dock = document.createElement('div');
+    dock.className = 'jc-rave-fixed-dock';
+    dock.innerHTML = `
+      <button class="jc-rave-mini-btn muted" type="button" data-rave-mic title="Микрофон">🎙<span class="jc-live-dot"></span></button>
+      <button class="jc-rave-mini-btn" type="button" data-rave-chat title="Чат">💬</button>
+      <button class="jc-rave-mini-btn" type="button" data-rave-catalog title="Каталог">＋</button>
+      <button class="jc-rave-mini-btn" type="button" data-rave-cinema title="Кино-режим">⛶</button>
+    `;
+    document.body.appendChild(dock);
+
+    dock.querySelector('[data-rave-mic]').onclick = jc261ToggleMic;
+    dock.querySelector('[data-rave-chat]').onclick = jc261ToggleChat;
+    dock.querySelector('[data-rave-catalog]').onclick = () => {
+      if(typeof jcStage8OpenCatalog === 'function') jcStage8OpenCatalog('youtube');
+      else document.querySelector('.toolbar-chip[data-jc-action="catalog-overlay"]')?.click();
+    };
+    dock.querySelector('[data-rave-cinema]').onclick = () => {
+      document.body.classList.toggle('cinema-mode');
+      jc261PositionOverlay();
+      jc261SyncButtons();
+    };
+  }
+
+  if(!document.querySelector('.jc-rave-top-strip')){
+    const strip = document.createElement('div');
+    strip.className = 'jc-rave-top-strip';
+    strip.innerHTML = `<img src="" alt=""><div></div>`;
+    document.body.appendChild(strip);
+  }
+
+  if(!document.querySelector('.jc-rave-ribbon')){
+    const rib = document.createElement('div');
+    rib.className = 'jc-rave-ribbon';
+    rib.innerHTML = `<div class="jc-rave-ribbon-inner"></div>`;
+    document.body.appendChild(rib);
+  }
+
+  if(!document.querySelector('.jc-rave-mic-toast')){
+    const toast = document.createElement('div');
+    toast.className = 'jc-rave-mic-toast';
+    document.body.appendChild(toast);
+  }
+
+  if(!document.querySelector('.jc-rave-fullscreen-note')){
+    const note = document.createElement('div');
+    note.className = 'jc-rave-fullscreen-note';
+    note.textContent = 'Для микрофона поверх видео используй кнопку «Кино» здесь. Нативный fullscreen внутри VK/YouTube не разрешает сайту рисовать кнопки поверх.';
+    document.body.appendChild(note);
+  }
+}
+
+function jc261WatchActive(){
+  const active = document.querySelector('.section.active')?.id === 'watchSection';
+  document.body.classList.toggle('jc-watch-active', active || document.body.classList.contains('cinema-mode'));
+}
+
+function jc261PositionOverlay(){
+  jc261EnsureFixedOverlay();
+  jc261WatchActive();
+
+  const dock = document.querySelector('.jc-rave-fixed-dock');
+  const strip = document.querySelector('.jc-rave-top-strip');
+  const ribbon = document.querySelector('.jc-rave-ribbon');
+  const toast = document.querySelector('.jc-rave-mic-toast');
+
+  if(document.body.classList.contains('cinema-mode')){
+    [dock, strip, ribbon, toast].forEach(el => {
+      if(el){
+        el.style.left = '';
+        el.style.top = '';
+        el.style.bottom = '';
+      }
+    });
+    return;
+  }
+
+  const frame = document.querySelector('.player-frame');
+  if(!frame || !dock) return;
+
+  const r = frame.getBoundingClientRect();
+  const visible = r.width > 80 && r.height > 80 && r.bottom > 0 && r.top < innerHeight;
+
+  if(!visible){
+    document.body.classList.remove('jc-watch-active');
+    return;
+  }
+
+  const dockTop = Math.max(84, Math.min(innerHeight - 70, r.bottom - 70));
+  const centerX = Math.max(90, Math.min(innerWidth - 90, r.left + r.width / 2));
+
+  dock.style.left = centerX + 'px';
+  dock.style.top = dockTop + 'px';
+  dock.style.bottom = 'auto';
+
+  if(strip){
+    strip.style.left = centerX + 'px';
+    strip.style.top = Math.max(76, r.top + 12) + 'px';
+    strip.style.width = Math.min(760, Math.max(260, r.width - 32)) + 'px';
+  }
+
+  if(ribbon){
+    ribbon.style.left = centerX + 'px';
+    ribbon.style.top = Math.max(116, r.top + 58) + 'px';
+    ribbon.style.width = Math.min(860, Math.max(260, r.width - 32)) + 'px';
+  }
+
+  if(toast){
+    toast.style.left = centerX + 'px';
+    toast.style.top = dockTop + 'px';
+    toast.style.bottom = 'auto';
+  }
+}
+
+async function jc261ToggleMic(){
+  try{
+    if(typeof voiceOn !== 'undefined' && voiceOn){
+      await stopVoice();
+      jc261MicToast('Микрофон выключен');
+    }else{
+      await startVoice();
+      jc261MicToast((typeof voiceOn !== 'undefined' && voiceOn) ? 'Микрофон включён' : 'Микрофон недоступен');
+    }
+  }catch(e){
+    jc261MicToast('Микрофон недоступен');
+  }
+  jc261SyncButtons();
+}
+
+function jc261ToggleChat(){
+  if(innerWidth <= 760){
+    document.body.classList.toggle('mobile-chat-open');
+  }else{
+    document.body.classList.toggle('chat-hidden');
+  }
+  jc261SyncButtons();
+}
+
+function jc261MicToast(text){
+  const box = document.querySelector('.jc-rave-mic-toast');
+  if(!box) return;
+  box.textContent = text;
+  box.classList.add('show');
+  clearTimeout(box._timer);
+  box._timer = setTimeout(() => box.classList.remove('show'), 1600);
+}
+
+function jc261SyncButtons(){
+  const mic = document.querySelector('[data-rave-mic]');
+  if(mic){
+    const on = typeof voiceOn !== 'undefined' && !!voiceOn;
+    mic.classList.toggle('active', on);
+    mic.classList.toggle('muted', !on);
+    mic.title = on ? 'Выключить микрофон' : 'Включить микрофон';
+  }
+
+  const chat = document.querySelector('[data-rave-chat]');
+  if(chat){
+    const active = innerWidth <= 760 ? document.body.classList.contains('mobile-chat-open') : !document.body.classList.contains('chat-hidden');
+    chat.classList.toggle('active', active);
+  }
+
+  const cinema = document.querySelector('[data-rave-cinema]');
+  if(cinema) cinema.classList.toggle('active', document.body.classList.contains('cinema-mode'));
+}
+
+function jc261ShowMessage(m){
+  jc261EnsureFixedOverlay();
+  jc261PositionOverlay();
+
+  if(!m || (!m.text && !m.mediaUrl)) return;
+
+  const strip = document.querySelector('.jc-rave-top-strip');
+  if(!strip) return;
+
+  const img = strip.querySelector('img');
+  const text = strip.querySelector('div');
+
+  const name = `${esc(m.nickname || 'User')}#${esc(m.tag || '0000')}`;
+  const msg = m.type === 'gif' ? 'GIF' : String(m.text || '').slice(0, 150);
+
+  if(img) img.src = m.avatarUrl || avatar(m.nickname || 'JC');
+  if(text) text.innerHTML = `<b>${name}</b>${esc(msg)}`;
+
+  strip.classList.add('show');
+  clearTimeout(strip._timer);
+  strip._timer = setTimeout(() => strip.classList.remove('show'), 5400);
+
+  jc261PushRibbon(name, msg);
+}
+
+function jc261PushRibbon(name, msg){
+  const ribbon = document.querySelector('.jc-rave-ribbon');
+  const inner = document.querySelector('.jc-rave-ribbon-inner');
+  if(!ribbon || !inner) return;
+
+  jc261Messages.push({name, msg, t:Date.now()});
+  jc261Messages = jc261Messages.filter(x => Date.now() - x.t < 20000).slice(-5);
+
+  inner.innerHTML = jc261Messages
+    .map(x => `<span class="jc-rave-ribbon-item"><b>${esc(x.name)}</b> ${esc(x.msg)}</span>`)
+    .join('');
+
+  ribbon.classList.remove('show');
+  inner.style.animation = 'none';
+  void inner.offsetWidth;
+  inner.style.animation = '';
+  ribbon.classList.add('show');
+
+  clearTimeout(ribbon._timer);
+  ribbon._timer = setTimeout(() => ribbon.classList.remove('show'), 14000);
+}
+
+/* Если Stage26 уже оборачивал addChat, всё равно добавляем fixed-strip поверх */
+const jc261PrevAddChat = addChat;
+addChat = function(m){
+  jc261PrevAddChat(m);
+  setTimeout(() => jc261ShowMessage(m), 70);
+};
+
+const jc261PrevStartVoice = startVoice;
+startVoice = async function(){
+  const r = await jc261PrevStartVoice();
+  setTimeout(jc261SyncButtons, 80);
+  return r;
+};
+
+const jc261PrevStopVoice = stopVoice;
+stopVoice = async function(){
+  const r = await jc261PrevStopVoice();
+  setTimeout(jc261SyncButtons, 80);
+  return r;
+};
+
+function jc261Patch(){
+  jc261EnsureFixedOverlay();
+  jc261PositionOverlay();
+  jc261SyncButtons();
+
+  ['scroll','resize'].forEach(ev => {
+    window.addEventListener(ev, () => {
+      clearTimeout(jc261DockTimer);
+      jc261DockTimer = setTimeout(jc261PositionOverlay, 40);
+    }, {passive:true});
+  });
+
+  setInterval(() => {
+    jc261EnsureFixedOverlay();
+    jc261PositionOverlay();
+    jc261SyncButtons();
+  }, 450);
+
+  console.log('JustClover Stage 26.1 player overlay FORCE FIX active: stage26-1-player-overlay-forcefix-20260501-1');
+}
+
+setTimeout(jc261Patch, 800);
