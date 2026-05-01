@@ -5483,3 +5483,63 @@ function jc262Patch(){
 }
 
 setTimeout(jc262Patch, 900);
+
+
+/* =========================================================
+   JustClover Stage 26.3 — clean SVG player icons JS
+   Version: stage26-3-player-ui-clean-icons-20260501-1
+   ========================================================= */
+
+function jc263Icon(name){
+  const icons = {
+    mic: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/><path d="M8 21h8"/></svg><i class="jc-muted-slash"></i>`,
+    chat: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2h9A3.5 3.5 0 0 1 20 5.5v6A3.5 3.5 0 0 1 16.5 15H11l-5 4v-4.2A3.5 3.5 0 0 1 4 11.5v-6Z"/><path d="M8 7h8"/><path d="M8 10.5h5"/></svg>`,
+    plus: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>`,
+    cinema: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>`
+  };
+  return icons[name] || '';
+}
+
+function jc263SetBtn(btn, icon, tip){
+  if(!btn) return;
+  btn.innerHTML = jc263Icon(icon) + `<span class="jc-tooltip">${esc(tip || '')}</span>`;
+  btn.dataset.tip = tip || '';
+  btn.title = tip || '';
+}
+
+function jc263Polish(){
+  const dock = document.querySelector('.jc-rave-fixed-dock');
+  if(dock){
+    jc263SetBtn(dock.querySelector('[data-rave-mic]'), 'mic', (typeof voiceOn !== 'undefined' && voiceOn) ? 'Выключить микрофон' : 'Включить микрофон');
+    jc263SetBtn(dock.querySelector('[data-rave-chat]'), 'chat', 'Чат');
+    jc263SetBtn(dock.querySelector('[data-rave-catalog]'), 'plus', 'Каталог');
+    jc263SetBtn(dock.querySelector('[data-rave-cinema]'), 'cinema', document.body.classList.contains('cinema-mode') ? 'Выйти из кино' : 'Кино-режим');
+  }
+
+  if(els?.voiceBtn){
+    els.voiceBtn.textContent = '';
+    els.voiceBtn.title = (typeof voiceOn !== 'undefined' && voiceOn) ? 'Выключить микрофон' : 'Включить микрофон';
+  }
+
+  if(els?.externalLink){
+    els.externalLink.textContent = 'Открыть';
+  }
+}
+
+const jc263PrevSync = typeof jc261SyncButtons === 'function' ? jc261SyncButtons : null;
+if(jc263PrevSync){
+  jc261SyncButtons = function(){
+    jc263PrevSync();
+    jc263Polish();
+  };
+}
+
+function jc263Patch(){
+  jc263Polish();
+
+  setInterval(jc263Polish, 700);
+
+  console.log('JustClover Stage 26.3 player UI clean icons active: stage26-3-player-ui-clean-icons-20260501-1');
+}
+
+setTimeout(jc263Patch, 900);
