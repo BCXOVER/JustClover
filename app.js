@@ -2983,3 +2983,205 @@ function jc189FinalFix(){
 }
 
 setTimeout(jc189FinalFix, 450);
+
+
+/* =========================================================
+   JustClover MEGA Stage 19-21 JS
+   Version: mega-stage19-21-live-bg-mobile-20260501-1
+   Live backgrounds + appearance polish + mobile polish
+   ========================================================= */
+
+function jc1921Toast(text){
+  if(typeof jcStage5Toast === 'function') jcStage5Toast(text);
+  else status?.(els?.roomStatus, text);
+}
+
+const jcLiveBackgrounds = [
+  {id:'calm', title:'Calm Dark', a:'#020617', b:'#8b5cf6'},
+  {id:'aurora', title:'Aurora Night', a:'#111827', b:'#22d3ee'},
+  {id:'clover', title:'Black Clover', a:'#020405', b:'#22c55e'},
+  {id:'demon', title:'Crimson Demon', a:'#090203', b:'#ef4444'},
+  {id:'winter', title:'Зима', a:'#020617', b:'#67e8f9'},
+  {id:'spring', title:'Весна', a:'#04110a', b:'#f0abfc'},
+  {id:'summer', title:'Лето', a:'#120903', b:'#facc15'},
+  {id:'autumn', title:'Осень', a:'#100807', b:'#fb7185'}
+];
+
+function jcEnsureLiveLayer(){
+  if(document.querySelector('.jc-live-bg')) return;
+  const layer = document.createElement('div');
+  layer.className = 'jc-live-bg';
+  document.body.prepend(layer);
+}
+
+function jcApplyLiveBackground(id){
+  id = id || localStorage.getItem('jc-live-bg') || 'calm';
+  if(id === 'none') id = 'calm';
+  document.body.dataset.liveBg = id;
+  localStorage.setItem('jc-live-bg', id);
+  document.querySelectorAll('.jc-live-bg-btn').forEach(b => b.classList.toggle('active', b.dataset.liveBg === id));
+}
+
+function jcApplyLiveSettings(){
+  const opacity = localStorage.getItem('jc-live-opacity') || '.34';
+  const speed = localStorage.getItem('jc-live-speed') || '1';
+  const blur = localStorage.getItem('jc-live-blur') || '0';
+  const reduce = localStorage.getItem('jc-reduced-motion') === '1';
+
+  document.documentElement.style.setProperty('--jc-live-opacity', opacity);
+  document.documentElement.style.setProperty('--jc-live-speed', speed);
+  document.documentElement.style.setProperty('--jc-live-blur', blur + 'px');
+  document.body.classList.toggle('jc-reduced-motion', reduce);
+
+  const op = document.querySelector('#jcLiveOpacity');
+  const sp = document.querySelector('#jcLiveSpeed');
+  const bl = document.querySelector('#jcLiveBlur');
+  if(op) op.value = opacity;
+  if(sp) sp.value = speed;
+  if(bl) bl.value = blur;
+}
+
+function jcBuildLiveThemePanel(){
+  const section = document.querySelector('#appearanceSection');
+  if(!section || section.dataset.liveStage === '1') return;
+  section.dataset.liveStage = '1';
+
+  const panel = document.createElement('div');
+  panel.className = 'jc-live-theme-panel';
+  panel.innerHTML = `
+    <h3>Живые фоны</h3>
+    <p>Анимированные фоны поверх темы. Можно сделать спокойно, ярко или почти незаметно, чтобы не мешало просмотру.</p>
+    <div class="jc-live-grid">
+      ${jcLiveBackgrounds.map(bg => `
+        <button class="jc-live-bg-btn" type="button" data-live-bg="${bg.id}" style="--a:${bg.a};--b:${bg.b}">
+          ${bg.title}
+        </button>
+      `).join('')}
+    </div>
+    <div class="jc-live-controls">
+      <label>Яркость фона
+        <input id="jcLiveOpacity" type="range" min="0.05" max="0.75" step="0.01">
+      </label>
+      <label>Скорость
+        <input id="jcLiveSpeed" type="range" min="0.35" max="1.8" step="0.05">
+      </label>
+      <label>Размытие
+        <input id="jcLiveBlur" type="range" min="0" max="16" step="1">
+      </label>
+    </div>
+    <div class="jc-motion-row">
+      <button class="btn soft" type="button" id="jcReduceMotionBtn">Экономный режим</button>
+      <button class="btn soft" type="button" id="jcLiveOffBtn">Сделать спокойнее</button>
+      <button class="btn primary" type="button" id="jcLiveRoomBtn">Применить к комнате</button>
+    </div>
+  `;
+  section.appendChild(panel);
+
+  panel.querySelectorAll('.jc-live-bg-btn').forEach(btn => {
+    btn.onclick = () => {
+      jcApplyLiveBackground(btn.dataset.liveBg);
+      jc1921Toast('Живой фон: ' + btn.textContent.trim());
+    };
+  });
+
+  panel.querySelector('#jcLiveOpacity').oninput = e => {
+    localStorage.setItem('jc-live-opacity', e.target.value);
+    jcApplyLiveSettings();
+  };
+  panel.querySelector('#jcLiveSpeed').oninput = e => {
+    localStorage.setItem('jc-live-speed', e.target.value);
+    jcApplyLiveSettings();
+  };
+  panel.querySelector('#jcLiveBlur').oninput = e => {
+    localStorage.setItem('jc-live-blur', e.target.value);
+    jcApplyLiveSettings();
+  };
+
+  panel.querySelector('#jcReduceMotionBtn').onclick = () => {
+    const next = localStorage.getItem('jc-reduced-motion') === '1' ? '0' : '1';
+    localStorage.setItem('jc-reduced-motion', next);
+    jcApplyLiveSettings();
+    jc1921Toast(next === '1' ? 'Экономный режим включён' : 'Анимации включены');
+  };
+
+  panel.querySelector('#jcLiveOffBtn').onclick = () => {
+    localStorage.setItem('jc-live-opacity', '.14');
+    localStorage.setItem('jc-live-speed', '.55');
+    localStorage.setItem('jc-live-blur', '2');
+    jcApplyLiveSettings();
+    jc1921Toast('Фон стал спокойнее');
+  };
+
+  panel.querySelector('#jcLiveRoomBtn').onclick = async () => {
+    const bg = localStorage.getItem('jc-live-bg') || 'calm';
+    if(currentRoomId && currentRoom?.ownerUid === currentUser?.uid){
+      await update(ref(db,`rooms/${currentRoomId}/theme`), {
+        liveBg:bg,
+        opacity:localStorage.getItem('jc-live-opacity') || '.34',
+        updatedAt:Date.now()
+      }).catch(()=>{});
+      jc1921Toast('Фон комнаты сохранён');
+    } else {
+      jc1921Toast('Тема применена лично тебе');
+    }
+  };
+
+  jcApplyLiveBackground();
+  jcApplyLiveSettings();
+}
+
+function jcRoomThemeListener(){
+  if(!currentRoomId || window.__jcRoomThemeId === currentRoomId) return;
+  window.__jcRoomThemeId = currentRoomId;
+
+  onValue(ref(db,`rooms/${currentRoomId}/theme`), s => {
+    const t = s.val();
+    if(!t?.liveBg) return;
+    jcApplyLiveBackground(t.liveBg);
+    if(t.opacity) localStorage.setItem('jc-live-opacity', String(t.opacity));
+    jcApplyLiveSettings();
+  });
+}
+
+function jcMobilePolish(){
+  // Bottom nav active sync
+  const sync = () => {
+    const active = document.querySelector('.section.active')?.id || 'homeSection';
+    document.querySelectorAll('.jc-mobile-nav button').forEach(b => b.classList.toggle('active', b.dataset.section === active));
+  };
+  sync();
+  document.querySelectorAll('.nav-btn, .jc-mobile-nav button').forEach(b => {
+    if(b.dataset.mobilePolish === '1') return;
+    b.dataset.mobilePolish = '1';
+    b.addEventListener('click', () => setTimeout(sync, 50));
+  });
+
+  // Кнопка чата показывает состояние
+  const chatBtn = document.querySelector('.jc-mobile-chat-toggle');
+  if(chatBtn && chatBtn.dataset.mobilePolish !== '1'){
+    chatBtn.dataset.mobilePolish = '1';
+    chatBtn.addEventListener('click', () => {
+      setTimeout(() => {
+        chatBtn.textContent = document.body.classList.contains('mobile-chat-open') ? 'Закрыть чат' : 'Чат';
+      }, 30);
+    });
+  }
+}
+
+function jc1921Patch(){
+  jcEnsureLiveLayer();
+  jcBuildLiveThemePanel();
+  jcApplyLiveBackground();
+  jcApplyLiveSettings();
+  jcMobilePolish();
+
+  setInterval(() => {
+    jcBuildLiveThemePanel();
+    jcRoomThemeListener();
+    jcMobilePolish();
+  }, 1500);
+
+  console.log('JustClover MEGA Stage 19-21 live backgrounds/mobile active: mega-stage19-21-live-bg-mobile-20260501-1');
+}
+
+setTimeout(jc1921Patch, 1200);
