@@ -49,7 +49,7 @@ body{background:radial-gradient(circle at 15% 0%,rgba(34,197,94,.14),transparent
 /* ===== Embedded profile/themes/android hotfix fullprofile-20260501-9 ===== */
 /* =========================================================
    JustClover Profile + Themes + Catalog + Android Hotfix
-   Version: fullprofile-20260501-9
+   Version: socialinvitebg-20260501-10
 
    Подключить ПОСЛЕ style.css и rave-menu-hotfix.css:
    <link rel="stylesheet" href="./jc-profilethemes-hotfix.css?v=fullprofile-20260501-9" />
@@ -705,5 +705,120 @@ body[data-theme="midnight"]{
   }
   .top-actions{
     justify-content:flex-start!important;
+  }
+}
+
+
+
+/* ===== Social / Invite / Background hotfix socialinvitebg-20260501-10 ===== */
+.room-create-advanced,.room-join-advanced {
+  grid-template-columns: 1fr 1fr;
+}
+#quickInviteBtn {
+  min-width: 132px;
+}
+.anime-nowbar-actions {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+#roomInviteStatus.mini {
+  font-size:12px;
+  opacity:.92;
+}
+body[data-has-room="0"] .home-manual-source {
+  opacity:.64;
+  filter:saturate(.8);
+}
+body[data-has-room="0"] .home-manual-source::before {
+  content:"Сначала создай комнату, потом запускай видео";
+  display:block;
+  margin:0 0 8px;
+  color:var(--muted);
+  font-size:13px;
+}
+.home-room-card {
+  box-shadow:0 26px 70px rgba(0,0,0,.38), 0 0 40px color-mix(in srgb,var(--primary) 16%, transparent);
+}
+.search-card,.friend-card,.room-card {
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.search-card:hover,.friend-card:hover,.room-card:hover {
+  transform:translateY(-4px);
+  box-shadow:0 18px 40px rgba(0,0,0,.25), 0 0 24px color-mix(in srgb,var(--primary) 16%, transparent);
+}
+.jc-live-bg {
+  position:fixed;
+  inset:0;
+  z-index:-3;
+  pointer-events:none;
+  overflow:hidden;
+}
+.jc-live-bg .blob {
+  position:absolute;
+  width:40vmax;
+  height:40vmax;
+  border-radius:50%;
+  filter:blur(40px);
+  opacity:.17;
+  animation:jcBlobFloat 24s ease-in-out infinite alternate;
+}
+.jc-live-bg .b1 {
+  left:-8vmax; top:-10vmax;
+  background:radial-gradient(circle, color-mix(in srgb,var(--primary) 84%, white) 0%, transparent 68%);
+}
+.jc-live-bg .b2 {
+  right:-10vmax; top:10vh;
+  background:radial-gradient(circle, color-mix(in srgb,var(--primary2) 80%, white) 0%, transparent 70%);
+  animation-duration:29s;
+}
+.jc-live-bg .b3 {
+  left:30vw; bottom:-12vmax;
+  background:radial-gradient(circle, rgba(34,197,94,.92) 0%, transparent 68%);
+  animation-duration:33s;
+}
+.jc-live-bg .spark {
+  position:absolute;
+  width:7px; height:7px;
+  border-radius:50%;
+  background:rgba(255,255,255,.72);
+  box-shadow:0 0 14px rgba(255,255,255,.45), 0 0 28px color-mix(in srgb,var(--primary) 40%, transparent);
+  animation:jcSparkMove 14s linear infinite;
+}
+.jc-live-bg .s1 { left:12vw; top:84vh; animation-delay:-1s; }
+.jc-live-bg .s2 { left:62vw; top:78vh; animation-delay:-6s; }
+.jc-live-bg .s3 { left:84vw; top:88vh; animation-delay:-10s; }
+@keyframes jcBlobFloat {
+  0% { transform:translate3d(0,0,0) scale(1); }
+  50% { transform:translate3d(4vw, -3vh, 0) scale(1.1); }
+  100% { transform:translate3d(-4vw, 4vh, 0) scale(.96); }
+}
+@keyframes jcSparkMove {
+  0% { transform:translateY(0) scale(.8); opacity:0; }
+  20% { opacity:.95; }
+  80% { opacity:.65; }
+  100% { transform:translateY(-80vh) scale(1.2); opacity:0; }
+}
+body[data-theme="winter"] .jc-live-bg .spark {
+  background:#dff6ff;
+}
+body[data-theme="autumn"] .jc-live-bg .spark {
+  background:#ffd2a6;
+}
+body[data-theme="anime"] .jc-live-bg .spark,
+body[data-theme="sakura"] .jc-live-bg .spark {
+  background:#ffd8f1;
+}
+@media(max-width:900px) {
+  .room-create-advanced,.room-join-advanced,.anime-nowbar-actions {
+    grid-template-columns:1fr;
+    display:grid;
+  }
+  .room-create-advanced input,.room-join-advanced input {
+    min-width:0;
+  }
+  #quickInviteBtn,.big-pick {
+    width:100%;
   }
 }

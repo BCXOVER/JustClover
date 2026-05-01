@@ -2,7 +2,7 @@ import { firebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInAnonymously,signInWithPopup,GoogleAuthProvider,signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { getDatabase,ref,get,set,update,push,remove,onValue,onChildAdded,onDisconnect,serverTimestamp,query,orderByChild,equalTo,off } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
-console.log('JustClover full profile app.js loaded: fullprofile-20260501-9');
+console.log('JustClover social invite bg app.js loaded: socialinvitebg-20260501-10');
 window.addEventListener('error', e => console.error('JustClover runtime error:', e.message, e.error));
 const $=id=>document.getElementById(id);
 const els={setupWarning:$('setupWarning'),authView:$('authView'),appView:$('appView'),topUser:$('topUser'),logoutBtn:$('logoutBtn'),openProfileBtn:$('openProfileBtn'),loginTab:$('loginTab'),registerTab:$('registerTab'),guestTab:$('guestTab'),authForm:$('authForm'),guestSubmit:$('guestSubmit'),googleSubmit:$('googleSubmit'),authSubmit:$('authSubmit'),nickLabel:$('nickLabel'),nickInput:$('nickInput'),emailInput:$('emailInput'),passwordInput:$('passwordInput'),authStatus:$('authStatus'),miniProfile:$('miniProfile'),miniAvatar:$('miniAvatar'),miniName:$('miniName'),miniTag:$('miniTag'),miniStatus:$('miniStatus'),roomNameInput:$('roomNameInput'),createRoomBtn:$('createRoomBtn'),joinRoomInput:$('joinRoomInput'),joinRoomBtn:$('joinRoomBtn'),copyInviteBtn:$('copyInviteBtn'),openRoomBtn:$('openRoomBtn'),closeRoomBtn:$('closeRoomBtn'),publicRoomBtn:$('publicRoomBtn'),inviteRoomBtn:$('inviteRoomBtn'),roomStatus:$('roomStatus'),membersList:$('membersList'),sourceType:$('sourceType'),sourceUrl:$('sourceUrl'),localVideoFile:$('localVideoFile'),sourceTitle:$('sourceTitle'),setSourceBtn:$('setSourceBtn'),sourceOpenBtn:$('sourceOpenBtn'),sourceOpenBtnMirror:$('sourceOpenBtnMirror'),sourceHelp:$('sourceHelp'),sourceNote:$('sourceNote'),videoPlayer:$('videoPlayer'),youtubePlayer:$('youtubePlayer'),youtubeWrap:$('youtubeWrap'),iframePlayer:$('iframePlayer'),externalPlayer:$('externalPlayer'),externalText:$('externalText'),externalLink:$('externalLink'),emptyPlayer:$('emptyPlayer'),publicRoomsList:$('publicRoomsList'),onlineUsersList:$('onlineUsersList'),chatMessages:$('chatMessages'),chatForm:$('chatForm'),chatInput:$('chatInput'),voiceBtn:$('voiceBtn'),voiceStatus:$('voiceStatus'),remoteAudio:$('remoteAudio'),profileNick:$('profileNick'),profileTag:$('profileTag'),profileAvatar:$('profileAvatar'),profileCover:$('profileCover'),profileStatusText:$('profileStatusText'),profileBio:$('profileBio'),profileAccent:$('profileAccent'),saveProfileBtn:$('saveProfileBtn'),profileSaveStatus:$('profileSaveStatus'),profilePreviewCard:$('profilePreviewCard'),profilePreviewAvatar:$('profilePreviewAvatar'),profilePreviewName:$('profilePreviewName'),profilePreviewTag:$('profilePreviewTag'),friendSearchInput:$('friendSearchInput'),friendSearchBtn:$('friendSearchBtn'),friendSearchResults:$('friendSearchResults'),incomingRequestsList:$('incomingRequestsList'),friendsList:$('friendsList'),dmEmptyState:$('dmEmptyState'),dmTitle:$('dmTitle'),dmMessages:$('dmMessages'),dmForm:$('dmForm'),dmText:$('dmText'),dmMediaUrl:$('dmMediaUrl'),sendDmBtn:$('sendDmBtn'),friendRoomJoinBtn:$('friendRoomJoinBtn'),mediaPicker:$('mediaPicker'),mediaPickerBackdrop:$('mediaPickerBackdrop'),mediaPickerCloseBtn:$('mediaPickerCloseBtn'),mediaSearchForm:$('mediaSearchForm'),mediaSearchInput:$('mediaSearchInput'),mediaPickerResults:$('mediaPickerResults'),mediaPickerHint:$('mediaPickerHint'),mediaPasteBtn:$('mediaPasteBtn'),mediaExternalBtn:$('mediaExternalBtn'),youtubeApiBox:$('youtubeApiBox'),ytApiKeyInput:$('ytApiKeyInput'),saveYtApiKeyBtn:$('saveYtApiKeyBtn'),emojiBtn:$('emojiBtn'),gifBtn:$('gifBtn'),emojiPanel:$('emojiPanel'),reactionBurst:$('reactionBurst'),gifPicker:$('gifPicker'),gifPickerBackdrop:$('gifPickerBackdrop'),gifPickerCloseBtn:$('gifPickerCloseBtn'),gifSearchForm:$('gifSearchForm'),gifSearchInput:$('gifSearchInput'),gifPickerResults:$('gifPickerResults'),gifPickerHint:$('gifPickerHint'),giphyApiKeyInput:$('giphyApiKeyInput'),saveGiphyApiKeyBtn:$('saveGiphyApiKeyBtn'),gifPasteBtn:$('gifPasteBtn'),openGiphyFromPickerBtn:$('openGiphyFromPickerBtn')};
@@ -412,3 +412,234 @@ function initHotfix() {
 }
 
 waitFor(() => document.body && JC_HOTFIX_$('profileSection') && JC_HOTFIX_$('appearanceSection'), initHotfix);
+
+
+
+/* ===== Social / Invite / Background hotfix socialinvitebg-20260501-10 ===== */
+console.log('JustClover social invite/bg hotfix loaded: socialinvitebg-20260501-10');
+els.roomCustomCodeInput = document.getElementById('roomCustomCodeInput');
+els.roomPasswordCreateInput = document.getElementById('roomPasswordCreateInput');
+els.roomJoinPasswordInput = document.getElementById('roomJoinPasswordInput');
+els.quickInviteBtn = document.getElementById('quickInviteBtn');
+els.roomInviteStatus = document.getElementById('roomInviteStatus');
+
+function jcNormalize(v){
+  return String(v||'')
+    .toLowerCase()
+    .trim()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .replace(/[#@]/g,'')
+    .replace(/\s+/g,' ');
+}
+
+async function jcLoadAllUsers(){
+  if(Array.isArray(allUsersCache) && allUsersCache.length) return allUsersCache;
+  const snap = await get(ref(db,'users'));
+  const arr = [];
+  snap.forEach(x=>arr.push(x.val()));
+  allUsersCache = arr;
+  return arr;
+}
+
+searchFriends = async function(){
+  const raw = (els.friendSearchInput?.value || '').trim();
+  const q = jcNormalize(raw);
+  if(!q){
+    els.friendSearchResults.innerHTML = '<p class="status">Введи ник, тег или часть ника.</p>';
+    return;
+  }
+  els.friendSearchResults.innerHTML = '<p class="status">Ищу пользователей...</p>';
+  const users = await jcLoadAllUsers();
+  const results = users.filter(u=>u.uid!==currentUser?.uid).filter(u=>{
+    const nick = jcNormalize(u.nickname || '');
+    const tagv = jcNormalize(String(u.tag || ''));
+    const full = jcNormalize(`${u.nickname||''} #${u.tag||''}`);
+    return nick.includes(q) || tagv.includes(q) || full.includes(q);
+  }).slice(0, 25);
+
+  els.friendSearchResults.innerHTML = results.length ? '' : '<p class="status">Ничего не найдено. Попробуй точнее ник или тег.</p>';
+  results.forEach(u=>{
+    const c = document.createElement('div');
+    c.className = 'search-card';
+    c.innerHTML = `<img src="${esc(u.avatarUrl||avatar(u.nickname))}"><div class="card-main"><strong>${esc(u.nickname||'User')}#${esc(u.tag||'0000')}</strong><span>${esc(u.statusText||'')}</span></div><button class="btn primary">Добавить</button>`;
+    c.querySelector('button').onclick = ()=>sendFriendRequest(u);
+    els.friendSearchResults.appendChild(c);
+  });
+};
+if(els.friendSearchBtn) els.friendSearchBtn.onclick = searchFriends;
+if(els.friendSearchInput) {
+  els.friendSearchInput.onkeydown = e=>{ if(e.key==='Enter'){e.preventDefault();searchFriends();} };
+  els.friendSearchInput.oninput = ()=> {
+    if((els.friendSearchInput.value||'').trim().length >= 2) searchFriends();
+    if(!(els.friendSearchInput.value||'').trim()) els.friendSearchResults.innerHTML='';
+  };
+}
+
+async function jcFindRoomByIdOrCode(value){
+  const input = String(value||'').trim();
+  if(!input) return null;
+  const direct = await get(ref(db,`rooms/${input}`));
+  if(direct.exists()) return direct.val();
+  const snap = await get(ref(db,'rooms'));
+  let found = null;
+  snap.forEach(x=>{
+    const room = x.val();
+    if(found) return;
+    if(String(room.roomCode||'').toLowerCase() === input.toLowerCase()) found = room;
+  });
+  return found;
+}
+
+function jcInviteLink(room){
+  const u = new URL(location.href);
+  u.searchParams.set('room', room.roomCode || room.id || currentRoomId);
+  if(room.roomPassword) u.searchParams.set('pass', room.roomPassword);
+  return u.toString();
+}
+
+async function jcCopyInvite(){
+  if(!currentRoomId || !currentRoom) return status(els.roomStatus,'Сначала создай комнату.');
+  const text = jcInviteLink(currentRoom);
+  await navigator.clipboard.writeText(text).catch(()=>{});
+  status(els.roomStatus, 'Invite-ссылка скопирована.');
+  if(els.roomInviteStatus){
+    els.roomInviteStatus.textContent = 'Ссылка скопирована — отправь другу.';
+    els.roomInviteStatus.classList.remove('hidden');
+    setTimeout(()=>els.roomInviteStatus?.classList.add('hidden'), 2200);
+  }
+}
+
+createRoom = async function(){
+  if(!currentUser || !profile) return;
+  const rr = push(ref(db,'rooms'));
+  const id = rr.key;
+  const name = (els.roomNameInput?.value || '').trim() || `${profile.nickname}'s room`;
+  const codeRaw = (els.roomCustomCodeInput?.value || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,24);
+  const pass = (els.roomPasswordCreateInput?.value || '').trim().slice(0,32);
+
+  if(codeRaw){
+    const snap = await get(ref(db,'rooms'));
+    let taken = false;
+    snap.forEach(x=>{ const r=x.val(); if(String(r.roomCode||'').toLowerCase()===codeRaw) taken=true; });
+    if(taken) return status(els.roomStatus,'Такой код комнаты уже занят.');
+  }
+
+  const room = {
+    id,
+    name,
+    roomCode: codeRaw || '',
+    roomPassword: pass || '',
+    ownerUid: currentUser.uid,
+    ownerName: handle(profile),
+    ownerAvatar: profile.avatarUrl || avatar(profile.nickname),
+    visibility: 'open',
+    joinMode: 'invite',
+    publicOpen: false,
+    source: {type:'none'},
+    playback: {time:0,playing:false,updatedAt:Date.now(),byUid:''},
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+  await set(rr, room);
+  await joinRoom(codeRaw || id);
+  section('watchSection');
+};
+
+joinRoom = async function(value){
+  if(!currentUser || !profile) return;
+  const input = String(value || '').trim();
+  if(!input) return status(els.roomStatus,'Введи код комнаты или invite-ссылку.');
+  let roomKey = input;
+  try {
+    const maybeUrl = new URL(input);
+    roomKey = maybeUrl.searchParams.get('room') || roomKey;
+    if(els.roomJoinPasswordInput && maybeUrl.searchParams.get('pass') && !els.roomJoinPasswordInput.value) {
+      els.roomJoinPasswordInput.value = maybeUrl.searchParams.get('pass');
+    }
+  } catch {}
+
+  const r = await jcFindRoomByIdOrCode(roomKey);
+  if(!r) return status(els.roomStatus,'Комната не найдена.');
+  if(r.visibility !== 'open' && r.ownerUid !== currentUser.uid) return status(els.roomStatus,'Комната закрыта.');
+  if(r.roomPassword && r.ownerUid !== currentUser.uid){
+    const entered = (els.roomJoinPasswordInput?.value || '').trim() || new URL(location.href).searchParams.get('pass') || '';
+    if(entered !== r.roomPassword) return status(els.roomStatus,'Неверный пароль комнаты.');
+  }
+
+  await leaveRoom(false);
+  currentRoomId = r.id;
+  currentRoom = r;
+  if(els.joinRoomInput) els.joinRoomInput.value = r.roomCode || r.id;
+  setRoomUrl(r.roomCode || r.id);
+
+  await set(ref(db,`rooms/${r.id}/members/${currentUser.uid}`), {
+    uid: currentUser.uid,
+    nickname: profile.nickname,
+    tag: profile.tag,
+    avatarUrl: profile.avatarUrl || avatar(profile.nickname),
+    joinedAt: Date.now()
+  });
+  await update(ref(db,`users/${currentUser.uid}`), {
+    activeRoomId: r.id,
+    activeRoomName: r.name || 'Комната',
+    activeRoomOpen: r.visibility === 'open',
+    activeRoomPublic: r.joinMode === 'public',
+    updatedAt: Date.now()
+  });
+  await update(ref(db,`presence/${currentUser.uid}`), {activeRoomId:r.id});
+  subRoom(r.id);
+  status(els.roomStatus, `Ты в комнате: ${r.name || r.id}`);
+  section('watchSection');
+};
+
+const jcOldRenderRoom = renderRoom;
+renderRoom = function(){
+  jcOldRenderRoom();
+  if(!currentRoom) return;
+  const bits = [];
+  if(currentRoom.roomCode) bits.push(`код: ${currentRoom.roomCode}`);
+  if(currentRoom.roomPassword) bits.push(`пароль: ${currentRoom.roomPassword}`);
+  const extra = bits.length ? ' • ' + bits.join(' • ') : '';
+  status(els.roomStatus, `${currentRoom.name||currentRoom.id} — ${currentRoom.visibility==='open'?'открыта':'закрыта'}, ${currentRoom.joinMode==='public'?'публичная':'по invite'}${extra}`);
+  syncRoomDependentUi();
+};
+
+const jcOldSetSource = setSource;
+setSource = async function(...args){
+  if(!currentRoomId) return status(els.sourceNote, 'Сначала создай комнату, потом запускай видео.');
+  return jcOldSetSource.apply(this, args);
+};
+if(els.setSourceBtn) els.setSourceBtn.onclick = setSource;
+
+function syncRoomDependentUi(){
+  const hasRoom = !!currentRoomId;
+  document.body.dataset.hasRoom = hasRoom ? '1' : '0';
+  const targets = [els.setSourceBtn, els.sourceUrl, els.sourceTitle, els.localVideoFile];
+  targets.forEach(el => { if(el) el.disabled = !hasRoom; });
+  const note = hasRoom
+    ? 'Клик по карточке или кнопка “Запустить” отправляет источник в текущую комнату.'
+    : 'Сначала создай комнату или войди по invite-коду — потом запускай видео.';
+  status(els.sourceNote, note);
+  if(els.quickInviteBtn) els.quickInviteBtn.disabled = !hasRoom;
+  if(els.copyInviteBtn) els.copyInviteBtn.disabled = !hasRoom;
+}
+
+function ensureLiveThemeBackdrop(){
+  if(document.querySelector('.jc-live-bg')) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'jc-live-bg';
+  wrap.innerHTML = '<span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span>';
+  document.body.appendChild(wrap);
+}
+
+function patchBindingsAfterHotfix(){
+  if(els.createRoomBtn) els.createRoomBtn.onclick = createRoom;
+  if(els.joinRoomBtn) els.joinRoomBtn.onclick = ()=>joinRoom(els.joinRoomInput?.value);
+  if(els.copyInviteBtn) els.copyInviteBtn.onclick = jcCopyInvite;
+  if(els.quickInviteBtn) els.quickInviteBtn.onclick = jcCopyInvite;
+  syncRoomDependentUi();
+}
+ensureLiveThemeBackdrop();
+patchBindingsAfterHotfix();
+setTimeout(patchBindingsAfterHotfix, 600);
