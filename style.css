@@ -4728,7 +4728,7 @@ body.jc-wallpaper-paused #jcWallpaperMediaLayer img{
    ========================================================= */
 
 html::after{
-  content:'28.1 CLEAN';
+  content:'28.2 CLEAN';
   position:fixed;
   left:8px;
   bottom:8px;
@@ -5220,7 +5220,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'28.1 CLEAN'!important;
+  content:'28.2 CLEAN'!important;
 }
 
 /* В CSS-кино держим плеер внутри вкладки, без системного fullscreen overlay */
@@ -5271,4 +5271,103 @@ body.jc28-cinema .player-frame{
   #jc28CinemaHint{
     display:none!important;
   }
+}
+
+
+/* =========================================================
+   JustClover Stage 28.2 — VK crop cinema
+   Причина больших рамок: VK рисует черные поля внутри своего iframe.
+   Их нельзя убрать изнутри iframe, поэтому в кино-режиме делаем управляемый crop/zoom.
+   ========================================================= */
+
+html::after{
+  content:'28.2 CLEAN'!important;
+}
+
+/* В кино iframe не просто 16:9, а заполняет экран с умным zoom.
+   Для VK zoom ставит JS: по умолчанию ~1.42, чтобы убрать боковые поля. */
+body.jc28-cinema .player-frame iframe,
+body.jc28-cinema .player-frame #iframePlayer,
+body.jc28-cinema .player-frame #youtubePlayer{
+  left:50%!important;
+  top:50%!important;
+  width:max(100vw, 177.7778vh)!important;
+  height:max(56.25vw, 100vh)!important;
+  transform:translate(-50%, -50%) scale(var(--jc28-cinema-zoom, 1.04))!important;
+  transform-origin:center center!important;
+  background:#000!important;
+}
+
+/* VK-iframe сильнее растягиваем, потому что черные поля находятся внутри VK-плеера */
+body.jc28-cinema.jc28-vk-source .player-frame #iframePlayer,
+body.jc28-cinema.jc28-vk-source .player-frame iframe#iframePlayer{
+  transform:translate(-50%, -50%) scale(var(--jc28-cinema-zoom, 1.42))!important;
+}
+
+/* YouTube/MP4 не кропаем агрессивно */
+body.jc28-cinema:not(.jc28-vk-source) .player-frame #youtubePlayer,
+body.jc28-cinema:not(.jc28-vk-source) .player-frame #videoPlayer{
+  transform:translate(-50%, -50%) scale(var(--jc28-cinema-zoom, 1.02))!important;
+}
+
+/* Кнопки zoom теперь понятнее */
+#jc28ZoomBox{
+  left:14px!important;
+  top:14px!important;
+  display:none;
+  gap:6px!important;
+  padding:6px!important;
+  border-radius:999px!important;
+  z-index:2147483004!important;
+}
+
+body.jc28-cinema #jc28ZoomBox{
+  display:flex!important;
+}
+
+#jc28ZoomBox button{
+  width:auto!important;
+  min-width:34px!important;
+  height:34px!important;
+  padding:0 10px!important;
+  border-radius:999px!important;
+  font-size:12px!important;
+  line-height:1!important;
+}
+
+#jc28ZoomBox button[data-z="reset"]{
+  min-width:54px!important;
+}
+
+/* Текстовая подсказка короче и не перекрывает видео */
+#jc28CinemaHint{
+  top:12px!important;
+  max-width:min(520px,calc(100vw - 140px))!important;
+  font-size:10px!important;
+  opacity:0!important;
+}
+
+body.jc28-cinema #jc28CinemaHint.show{
+  opacity:.78!important;
+}
+
+/* Если нет источника — не открывать кино и не показывать пустой fullscreen */
+body.jc28-no-source #jc28Panel [data-jc28-act="cinema"]{
+  opacity:.48!important;
+  filter:saturate(.5)!important;
+}
+
+/* Кнопка выхода всегда выше всего */
+#jc28Exit{
+  z-index:2147483005!important;
+}
+
+/* В обычном режиме добавляем лёгкий фон за VK, но НЕ кропаем — чтобы не потерять native controls */
+body:not(.jc28-cinema) .player-frame{
+  background:#000!important;
+}
+
+/* Тестовые CSS переменные */
+body::before{
+  --jc28-2-ready: 1;
 }

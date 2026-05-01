@@ -4951,12 +4951,12 @@ setTimeout(jc251Patch, 1000);
    JustClover Stage 28 CLEAN — player/cinema JS
    Version: stage28-clean-cinema-player-20260502-1
    ========================================================= */
-console.log("JustClover Stage 28.1 CLEAN loaded:", "stage28-1-no-browser-fullscreen-20260502-1");
-window.JUSTCLOVER_BUILD = "stage28-1-no-browser-fullscreen-20260502-1";
+console.log("JustClover Stage 28.2 CLEAN loaded:", "stage28-2-vk-crop-cinema-20260502-1");
+window.JUSTCLOVER_BUILD = "stage28-2-vk-crop-cinema-20260502-1";
 
 (function(){
-  const BUILD = "stage28-clean-cinema-player-20260502-1";
-  let zoom = Number(localStorage.getItem('jc28CinemaZoom') || '1.035') || 1.035;
+  const BUILD = "stage28-2-vk-crop-cinema-20260502-1";
+  let zoom = Number(localStorage.getItem('jc28CinemaZoom') || '0') || 0;
 
   function svg(name){
     const icons = {
@@ -5011,9 +5011,10 @@ window.JUSTCLOVER_BUILD = "stage28-1-no-browser-fullscreen-20260502-1";
     if(!document.getElementById('jc28ZoomBox')){
       const box = document.createElement('div');
       box.id = 'jc28ZoomBox';
-      box.innerHTML = '<button type="button" data-z="-">−</button><button type="button" data-z="+">+</button>';
-      box.querySelector('[data-z="-"]').onclick = () => setZoom(zoom - 0.035);
-      box.querySelector('[data-z="+"]').onclick = () => setZoom(zoom + 0.035);
+      box.innerHTML = '<button type="button" data-z="-">−</button><button type="button" data-z="reset">100%</button><button type="button" data-z="+">+</button>';
+      box.querySelector('[data-z="-"]').onclick = () => setZoom(currentZoom() - 0.06, true);
+      box.querySelector('[data-z="+"]').onclick = () => setZoom(currentZoom() + 0.06, true);
+      box.querySelector('[data-z="reset"]').onclick = () => setZoom(defaultZoomForSource(), true);
       document.body.appendChild(box);
     }
 
@@ -5055,17 +5056,19 @@ window.JUSTCLOVER_BUILD = "stage28-1-no-browser-fullscreen-20260502-1";
 
   function hasPlayableSource(){
     try{
-      if(typeof currentSource !== 'undefined' && currentSource && currentSource.type && currentSource.type !== 'none') return true;
+      if(typeof currentSource !== 'undefined'){
+        return !!(currentSource && currentSource.type && currentSource.type !== 'none');
+      }
     }catch(e){}
-    const iframe = document.querySelector('#iframePlayer:not(.hidden), #youtubePlayer:not(.hidden)');
+    const iframe = document.querySelector('#iframePlayer:not(.hidden)');
+    const yt = document.querySelector('#youtubePlayer:not(.hidden)');
     const video = document.querySelector('#videoPlayer:not(.hidden)');
     if(video && (video.currentSrc || video.src)) return true;
     if(iframe){
       const src = iframe.getAttribute('src') || '';
-      if(src && src !== 'about:blank') return true;
-      // YouTube div can be non-empty after API creates iframe inside.
-      if(iframe.querySelector && iframe.querySelector('iframe')) return true;
+      return !!(src && src !== 'about:blank');
     }
+    if(yt && yt.querySelector && yt.querySelector('iframe')) return true;
     return false;
   }
 
@@ -5086,21 +5089,54 @@ window.JUSTCLOVER_BUILD = "stage28-1-no-browser-fullscreen-20260502-1";
     h._timer = setTimeout(() => h.classList.remove('show'), 4200);
   }
 
-  function applyZoom(){
-    document.documentElement.style.setProperty('--jc28-cinema-zoom', String(Math.max(1, Math.min(1.35, zoom))));
+  function sourceType(){
+    try{
+      if(typeof currentSource !== 'undefined' && currentSource && currentSource.type) return currentSource.type;
+    }catch(e){}
+    const src = document.querySelector('#iframePlayer')?.getAttribute('src') || '';
+    if(src.includes('vk.com')) return 'vk';
+    if(src.includes('youtube') || src.includes('youtu.be')) return 'youtube';
+    return '';
   }
 
-  function setZoom(v){
-    zoom = Math.max(1, Math.min(1.35, Number(v) || 1.035));
-    localStorage.setItem('jc28CinemaZoom', String(zoom));
+  function defaultZoomForSource(){
+    const t = sourceType();
+    if(t === 'vk') return 1.42;
+    if(t === 'local' || t === 'mp4') return 1.0;
+    return 1.04;
+  }
+
+  function currentZoom(){
+    return zoom || defaultZoomForSource();
+  }
+
+  function applyZoom(){
+    const z = Math.max(1, Math.min(1.8, currentZoom()));
+    document.documentElement.style.setProperty('--jc28-cinema-zoom', String(z));
+    document.body.classList.toggle('jc28-vk-source', sourceType() === 'vk');
+    const reset = document.querySelector('#jc28ZoomBox [data-z="reset"]');
+    if(reset) reset.textContent = Math.round(z * 100) + '%';
+  }
+
+  function setZoom(v, manual=false){
+    zoom = Math.max(1, Math.min(1.8, Number(v) || defaultZoomForSource()));
+    if(manual) localStorage.setItem('jc28CinemaZoom', String(zoom));
     applyZoom();
     toast('Zoom кино: ' + Math.round(zoom * 100) + '%');
+  }
+
+  function resetAutoZoom(){
+    if(!localStorage.getItem('jc28CinemaZoom')){
+      zoom = defaultZoomForSource();
+    }
+    applyZoom();
   }
 
   async function enterCinema(){
     try{ if(typeof section === 'function') section('watchSection'); }catch(e){}
 
     killOpen();
+    resetAutoZoom();
 
     if(!hasPlayableSource()){
       document.body.classList.add('jc28-no-source');
@@ -5264,6 +5300,7 @@ window.JUSTCLOVER_BUILD = "stage28-1-no-browser-fullscreen-20260502-1";
     }
 
     killOpen();
+    applyZoom();
   }
 
   // Лёгкий self-test в консоли
@@ -5280,7 +5317,9 @@ window.JUSTCLOVER_BUILD = "stage28-1-no-browser-fullscreen-20260502-1";
       reactionsHidden: !reactions || getComputedStyle(reactions).display === 'none',
       activeMediaTag: activeMedia()?.tagName || '',
       cinema: document.body.classList.contains('jc28-cinema'),
-      zoom
+      zoom: currentZoom(),
+      sourceType: sourceType(),
+      vkSourceClass: document.body.classList.contains('jc28-vk-source')
     };
     console.log('JustClover Stage28 audit', report);
     return report;
