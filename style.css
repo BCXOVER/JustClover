@@ -3965,3 +3965,235 @@ body > .bg{
 .jc-live-indicator{
   z-index:20000!important;
 }
+
+
+/* =========================================================
+   JustClover Stage 21.7 — Premium Live Backgrounds
+   Canvas aurora + particles + parallax, без дешёвых CSS-пятен.
+   ========================================================= */
+
+:root{
+  --jc-premium-bg-opacity:.68;
+  --jc-premium-glass:.54;
+  --jc-premium-glass-strong:.66;
+}
+
+/* Отключаем старый force CSS-слой, вместо него canvas */
+#jcLiveBgForce,
+.jc-live-bg{
+  display:none!important;
+}
+
+#jcPremiumBgCanvas{
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100vh;
+  z-index:1;
+  pointer-events:none;
+  opacity:var(--jc-premium-bg-opacity);
+  mix-blend-mode:screen;
+  transform:translateZ(0);
+}
+
+/* Мягкий затемняющий слой, чтобы текст не терялся */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 22%, rgba(255,255,255,.035), transparent 30%),
+    linear-gradient(180deg,rgba(2,3,8,.18),rgba(2,3,8,.42));
+}
+
+/* Интерфейс поверх canvas */
+.topbar,
+.main-shell,
+.shell,
+.app,
+#appView,
+#authView,
+.section,
+.rail,
+.watch-layout,
+.watch-stage,
+.watch-sidebar,
+.jc-mobile-nav,
+.jc-mobile-chat-toggle,
+.jc-catalog-layer{
+  position:relative!important;
+  z-index:5!important;
+}
+
+/* Более дорогой glass-вид, но не слишком прозрачный */
+.card,
+.side-card,
+.mini-card,
+.watch-stage,
+.watch-sidebar .side-card,
+.chat-card,
+.members-card,
+.voice-card,
+.rail,
+.rail-card,
+.jc-room-advanced,
+.jc-current-room-strip,
+.jc-source-panel,
+.jc-theme-pack,
+.jc-live-theme-panel,
+.jc-device-upload-panel,
+.jc-profile-file-panel,
+.room-card,
+.user-card,
+.profile-preview-card,
+.jc-catalog,
+.jc-catalog-panel{
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb,var(--primary2) 10%, transparent), transparent 34%),
+    linear-gradient(180deg,rgba(18,20,32,var(--jc-premium-glass-strong)),rgba(5,7,13,var(--jc-premium-glass)))!important;
+  backdrop-filter:blur(18px) saturate(140%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(140%)!important;
+  border-color:rgba(255,255,255,.115)!important;
+}
+
+body.jc-premium-ultra{
+  --jc-premium-bg-opacity:.82;
+  --jc-premium-glass:.44;
+  --jc-premium-glass-strong:.58;
+}
+
+body.jc-premium-lite{
+  --jc-premium-bg-opacity:.45;
+  --jc-premium-glass:.62;
+  --jc-premium-glass-strong:.74;
+}
+
+body.jc-premium-calm{
+  --jc-premium-bg-opacity:.50;
+}
+
+/* Плеер остаётся читаемым */
+.player-frame{
+  background:
+    radial-gradient(circle at 50% 35%, color-mix(in srgb,var(--primary2) 10%, transparent), transparent 30%),
+    linear-gradient(180deg,rgba(2,4,10,.83),rgba(2,4,10,.76))!important;
+}
+
+.empty-player{
+  background:
+    radial-gradient(circle at 50% 42%, color-mix(in srgb,var(--primary2) 14%, transparent), transparent 34%),
+    linear-gradient(180deg,rgba(2,4,10,.38),rgba(2,4,10,.68))!important;
+}
+
+/* Панель premium */
+.jc-premium-panel{
+  margin-top:18px;
+  padding:18px;
+  border-radius:28px;
+  border:1px solid rgba(255,255,255,.12);
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb,var(--primary2) 16%, transparent), transparent 34%),
+    linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.022));
+  backdrop-filter:blur(18px);
+}
+
+.jc-premium-panel h3{
+  margin:0 0 8px;
+  font-size:22px;
+  letter-spacing:-.04em;
+}
+
+.jc-premium-panel p{
+  margin:0 0 14px;
+  color:var(--muted);
+  line-height:1.55;
+}
+
+.jc-premium-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+.jc-premium-bg-btn{
+  min-height:92px;
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,.12);
+  background:
+    radial-gradient(circle at 72% 24%, var(--b), transparent 50%),
+    linear-gradient(135deg,var(--a),rgba(5,8,18,.72));
+  color:white;
+  font-weight:950;
+  cursor:pointer;
+  transition:.18s ease;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13);
+}
+
+.jc-premium-bg-btn:hover,
+.jc-premium-bg-btn.active{
+  transform:translateY(-2px);
+  border-color:rgba(255,255,255,.24);
+  box-shadow:
+    0 18px 50px rgba(0,0,0,.34),
+    0 0 48px color-mix(in srgb,var(--b) 32%, transparent);
+}
+
+.jc-premium-controls{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:12px;
+  margin-top:14px;
+}
+
+.jc-premium-controls label{
+  display:grid;
+  gap:6px;
+  color:var(--soft);
+  font-weight:850;
+  font-size:13px;
+}
+
+.jc-premium-controls input{
+  width:100%;
+  accent-color:var(--primary2);
+}
+
+.jc-premium-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:14px;
+}
+
+.jc-premium-actions .btn{
+  min-height:42px;
+  border-radius:15px;
+}
+
+.jc-premium-status{
+  margin-top:12px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+@media(max-width:760px){
+  #jcPremiumBgCanvas{
+    opacity:min(var(--jc-premium-bg-opacity), .58);
+  }
+
+  .jc-premium-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .jc-premium-controls{
+    grid-template-columns:1fr;
+  }
+
+  body.jc-premium-ultra{
+    --jc-premium-bg-opacity:.62;
+    --jc-premium-glass:.56;
+    --jc-premium-glass-strong:.68;
+  }
+}

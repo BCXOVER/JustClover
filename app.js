@@ -3383,3 +3383,448 @@ function jc216ForcePatch(){
 }
 
 setTimeout(jc216ForcePatch, 600);
+
+
+/* =========================================================
+   JustClover Stage 21.7 Premium Live Backgrounds JS
+   Version: stage21-7-premium-live-bg-20260501-1
+   Canvas aurora + particles + parallax.
+   ========================================================= */
+
+const jc217Palettes = {
+  aurora: {
+    title:'Aurora Premium',
+    bg:'#020617',
+    colors:['#8b5cf6','#22d3ee','#22c55e','#f0abfc']
+  },
+  clover: {
+    title:'Black Clover Magic',
+    bg:'#020405',
+    colors:['#22c55e','#10b981','#86efac','#8b5cf6']
+  },
+  demon: {
+    title:'Crimson Demon',
+    bg:'#080203',
+    colors:['#ef4444','#fb7185','#a855f7','#7f1d1d']
+  },
+  winter: {
+    title:'Winter Sky',
+    bg:'#020617',
+    colors:['#60a5fa','#67e8f9','#bae6fd','#a78bfa']
+  },
+  spring: {
+    title:'Spring Sakura',
+    bg:'#04110a',
+    colors:['#22c55e','#f0abfc','#86efac','#f9a8d4']
+  },
+  summer: {
+    title:'Summer Sunset',
+    bg:'#120903',
+    colors:['#f97316','#facc15','#22d3ee','#fb7185']
+  },
+  autumn: {
+    title:'Autumn Ember',
+    bg:'#100807',
+    colors:['#b45309','#fb7185','#fdba74','#ef4444']
+  },
+  calm: {
+    title:'Calm Deep',
+    bg:'#030712',
+    colors:['#6366f1','#14b8a6','#8b5cf6','#334155']
+  }
+};
+
+let jc217Canvas, jc217Ctx, jc217Anim = 0, jc217Particles = [], jc217Stars = [];
+let jc217Last = 0;
+let jc217Mouse = {x:.5,y:.5};
+let jc217Active = localStorage.getItem('jc-premium-bg') || localStorage.getItem('jc-live-bg') || 'aurora';
+
+function jc217Toast(text){
+  if(typeof jcStage5Toast === 'function') jcStage5Toast(text);
+  else status?.(els?.roomStatus, text);
+}
+
+function jc217HexToRgb(hex){
+  hex = String(hex || '#ffffff').replace('#','');
+  if(hex.length === 3) hex = hex.split('').map(x=>x+x).join('');
+  const n = parseInt(hex,16);
+  return {r:(n>>16)&255,g:(n>>8)&255,b:n&255};
+}
+
+function jc217Rgba(hex, a){
+  const c = jc217HexToRgb(hex);
+  return `rgba(${c.r},${c.g},${c.b},${a})`;
+}
+
+function jc217Quality(){
+  return localStorage.getItem('jc-premium-quality') || 'normal';
+}
+
+function jc217Settings(){
+  const quality = jc217Quality();
+  return {
+    quality,
+    intensity: Number(localStorage.getItem('jc-premium-intensity') || (quality === 'ultra' ? .86 : quality === 'lite' ? .46 : .68)),
+    speed: Number(localStorage.getItem('jc-premium-speed') || (quality === 'ultra' ? 1.05 : quality === 'lite' ? .52 : .78)),
+    particles: quality === 'ultra' ? 110 : quality === 'lite' ? 36 : 70,
+    waves: quality === 'ultra' ? 5 : quality === 'lite' ? 2 : 4,
+    dprCap: quality === 'ultra' ? 2 : 1.35
+  };
+}
+
+function jc217EnsureCanvas(){
+  if(jc217Canvas && document.body.contains(jc217Canvas)) return jc217Canvas;
+
+  jc217Canvas = document.createElement('canvas');
+  jc217Canvas.id = 'jcPremiumBgCanvas';
+  document.body.prepend(jc217Canvas);
+  jc217Ctx = jc217Canvas.getContext('2d', {alpha:true});
+
+  window.addEventListener('resize', jc217Resize);
+  window.addEventListener('pointermove', e => {
+    jc217Mouse.x = e.clientX / Math.max(1, innerWidth);
+    jc217Mouse.y = e.clientY / Math.max(1, innerHeight);
+  }, {passive:true});
+
+  jc217Resize();
+  return jc217Canvas;
+}
+
+function jc217Resize(){
+  if(!jc217Canvas) return;
+  const s = jc217Settings();
+  const dpr = Math.min(window.devicePixelRatio || 1, s.dprCap);
+  jc217Canvas.width = Math.floor(innerWidth * dpr);
+  jc217Canvas.height = Math.floor(innerHeight * dpr);
+  jc217Canvas.style.width = innerWidth + 'px';
+  jc217Canvas.style.height = innerHeight + 'px';
+  jc217Ctx.setTransform(dpr,0,0,dpr,0,0);
+  jc217Seed();
+}
+
+function jc217Seed(){
+  const s = jc217Settings();
+  const pal = jc217Palettes[jc217Active] || jc217Palettes.aurora;
+  jc217Particles = Array.from({length:s.particles}, (_,i) => ({
+    x: Math.random() * innerWidth,
+    y: Math.random() * innerHeight,
+    r: Math.random() * 2.8 + .55,
+    a: Math.random() * .55 + .14,
+    vx: (Math.random() - .5) * .18,
+    vy: -(Math.random() * .28 + .04),
+    c: pal.colors[i % pal.colors.length],
+    phase: Math.random() * Math.PI * 2
+  }));
+  jc217Stars = Array.from({length:Math.floor(s.particles * .55)}, (_,i) => ({
+    x:Math.random()*innerWidth,
+    y:Math.random()*innerHeight,
+    r:Math.random()*1.4+.35,
+    tw:Math.random()*Math.PI*2,
+    c:pal.colors[(i+1)%pal.colors.length]
+  }));
+}
+
+function jc217DrawAurora(t, s, pal){
+  const ctx = jc217Ctx;
+  const w = innerWidth, h = innerHeight;
+  const parX = (jc217Mouse.x - .5) * 34;
+  const parY = (jc217Mouse.y - .5) * 22;
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+
+  for(let i=0;i<s.waves;i++){
+    const color = pal.colors[i % pal.colors.length];
+    const yBase = h * (.18 + i * .125) + Math.sin(t*.00022*s.speed + i) * 48 + parY * (i+1) * .16;
+    const amp = 54 + i * 18;
+    const thick = 105 + i * 22;
+
+    const grad = ctx.createLinearGradient(0, yBase - thick, w, yBase + thick);
+    grad.addColorStop(0, jc217Rgba(color, 0));
+    grad.addColorStop(.35, jc217Rgba(color, .10 * s.intensity));
+    grad.addColorStop(.52, jc217Rgba(color, .36 * s.intensity));
+    grad.addColorStop(.72, jc217Rgba(color, .09 * s.intensity));
+    grad.addColorStop(1, jc217Rgba(color, 0));
+
+    ctx.beginPath();
+    ctx.moveTo(-120, h + 160);
+    for(let x=-120; x<=w+120; x+=28){
+      const wave =
+        Math.sin(x*.006 + t*.00042*s.speed + i*1.4) * amp +
+        Math.sin(x*.013 + t*.00027*s.speed + i*2.1) * amp * .34;
+      ctx.lineTo(x + parX*(i+1)*.08, yBase + wave);
+    }
+    ctx.lineTo(w+120, h+160);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.filter = `blur(${18 + i*3}px)`;
+    ctx.fill();
+  }
+
+  ctx.filter = 'none';
+  ctx.restore();
+}
+
+function jc217DrawOrbs(t, s, pal){
+  const ctx = jc217Ctx;
+  const w = innerWidth, h = innerHeight;
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+
+  const centers = [
+    [.18 + Math.sin(t*.00013*s.speed)*.05, .25, pal.colors[0]],
+    [.82 + Math.cos(t*.00011*s.speed)*.04, .30, pal.colors[1]],
+    [.55 + Math.sin(t*.00009*s.speed)*.08, .82, pal.colors[2]],
+    [.42 + Math.cos(t*.00012*s.speed)*.06, .48, pal.colors[3] || pal.colors[0]]
+  ];
+
+  centers.forEach(([cx,cy,c],i)=>{
+    const x = cx*w + (jc217Mouse.x-.5)*36*(i+1)*.12;
+    const y = cy*h + (jc217Mouse.y-.5)*28*(i+1)*.12;
+    const r = Math.max(w,h) * (.24 + i*.035);
+    const g = ctx.createRadialGradient(x,y,0,x,y,r);
+    g.addColorStop(0, jc217Rgba(c, .24*s.intensity));
+    g.addColorStop(.42, jc217Rgba(c, .08*s.intensity));
+    g.addColorStop(1, jc217Rgba(c, 0));
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,w,h);
+  });
+
+  ctx.restore();
+}
+
+function jc217DrawParticles(t, s){
+  const ctx = jc217Ctx;
+  const w = innerWidth, h = innerHeight;
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+
+  jc217Stars.forEach(st => {
+    const a = (.18 + Math.sin(t*.001 + st.tw)*.12) * s.intensity;
+    ctx.beginPath();
+    ctx.fillStyle = jc217Rgba(st.c, a);
+    ctx.arc(st.x, st.y, st.r, 0, Math.PI*2);
+    ctx.fill();
+  });
+
+  jc217Particles.forEach(p => {
+    p.x += (p.vx + Math.sin(t*.00045*s.speed + p.phase)*.06) * s.speed;
+    p.y += p.vy * s.speed;
+
+    if(p.y < -20){ p.y = h + 20; p.x = Math.random()*w; }
+    if(p.x < -20) p.x = w + 20;
+    if(p.x > w + 20) p.x = -20;
+
+    const flicker = .66 + Math.sin(t*.0012 + p.phase)*.34;
+    const a = p.a * flicker * s.intensity;
+
+    const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*5.8);
+    g.addColorStop(0, jc217Rgba(p.c, a));
+    g.addColorStop(.42, jc217Rgba(p.c, a*.28));
+    g.addColorStop(1, jc217Rgba(p.c, 0));
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r*5.8,0,Math.PI*2);
+    ctx.fill();
+  });
+
+  ctx.restore();
+}
+
+function jc217DrawVignette(pal){
+  const ctx = jc217Ctx;
+  const w = innerWidth, h = innerHeight;
+  const bg = pal.bg || '#020617';
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'source-over';
+
+  const g = ctx.createRadialGradient(w*.5,h*.38,0,w*.5,h*.5,Math.max(w,h)*.72);
+  g.addColorStop(0, jc217Rgba(bg, .08));
+  g.addColorStop(.52, jc217Rgba(bg, .36));
+  g.addColorStop(1, jc217Rgba(bg, .72));
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,w,h);
+
+  ctx.restore();
+}
+
+function jc217Loop(t=0){
+  if(!jc217Ctx || !jc217Canvas){
+    jc217Anim = requestAnimationFrame(jc217Loop);
+    return;
+  }
+
+  const s = jc217Settings();
+  const pal = jc217Palettes[jc217Active] || jc217Palettes.aurora;
+
+  jc217Ctx.clearRect(0,0,innerWidth,innerHeight);
+
+  // subtle base
+  const base = jc217Ctx.createLinearGradient(0,0,innerWidth,innerHeight);
+  base.addColorStop(0, jc217Rgba(pal.bg, .94));
+  base.addColorStop(.55, 'rgba(2,6,23,.42)');
+  base.addColorStop(1, jc217Rgba(pal.colors[0], .12));
+  jc217Ctx.fillStyle = base;
+  jc217Ctx.fillRect(0,0,innerWidth,innerHeight);
+
+  jc217DrawOrbs(t, s, pal);
+  jc217DrawAurora(t, s, pal);
+  jc217DrawParticles(t, s);
+  jc217DrawVignette(pal);
+
+  jc217Anim = requestAnimationFrame(jc217Loop);
+}
+
+function jc217Apply(id){
+  jc217Active = id || jc217Active || 'aurora';
+  localStorage.setItem('jc-premium-bg', jc217Active);
+  localStorage.setItem('jc-live-bg', jc217Active);
+
+  const pal = jc217Palettes[jc217Active] || jc217Palettes.aurora;
+  document.body.dataset.liveBg = jc217Active;
+  document.documentElement.style.setProperty('--jc-live-c1', pal.colors[0]);
+  document.documentElement.style.setProperty('--jc-live-c2', pal.colors[1]);
+  document.documentElement.style.setProperty('--jc-live-c3', pal.colors[2]);
+
+  document.querySelectorAll('.jc-premium-bg-btn, .jc-live-bg-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.premiumBg === jc217Active || btn.dataset.liveBg === jc217Active);
+  });
+
+  jc217Seed();
+}
+
+function jc217SetQuality(q){
+  localStorage.setItem('jc-premium-quality', q);
+  document.body.classList.toggle('jc-premium-lite', q === 'lite');
+  document.body.classList.toggle('jc-premium-ultra', q === 'ultra');
+  document.body.classList.toggle('jc-premium-calm', q === 'calm');
+  jc217Resize();
+  jc217Apply(jc217Active);
+}
+
+function jc217BuildPanel(){
+  const section = document.querySelector('#appearanceSection');
+  if(!section || section.dataset.premium217 === '1') return;
+  section.dataset.premium217 = '1';
+
+  const oldLive = section.querySelector('.jc-live-theme-panel');
+  if(oldLive) oldLive.style.display = 'none';
+
+  const panel = document.createElement('div');
+  panel.className = 'jc-premium-panel';
+  panel.innerHTML = `
+    <h3>Premium живые фоны</h3>
+    <p>Новый canvas-фон: плавная aurora-анимация, частицы, parallax и качество Lite/Normal/Ultra.</p>
+
+    <div class="jc-premium-grid">
+      ${Object.entries(jc217Palettes).map(([id,p]) => `
+        <button class="jc-premium-bg-btn" type="button" data-premium-bg="${id}" style="--a:${p.bg};--b:${p.colors[1]}">
+          ${p.title}
+        </button>
+      `).join('')}
+    </div>
+
+    <div class="jc-premium-controls">
+      <label>Интенсивность
+        <input id="jcPremiumIntensity" type="range" min="0.25" max="1" step="0.01">
+      </label>
+      <label>Скорость
+        <input id="jcPremiumSpeed" type="range" min="0.25" max="1.7" step="0.01">
+      </label>
+      <label>Прозрачность UI
+        <input id="jcPremiumGlass" type="range" min="0.36" max="0.78" step="0.01">
+      </label>
+    </div>
+
+    <div class="jc-premium-actions">
+      <button class="btn soft" type="button" data-q="lite">Lite</button>
+      <button class="btn primary" type="button" data-q="normal">Normal</button>
+      <button class="btn soft" type="button" data-q="ultra">Ultra</button>
+      <button class="btn soft" type="button" data-q="calm">Спокойно</button>
+      <button class="btn soft" type="button" id="jcPremiumReset">Сбросить</button>
+    </div>
+
+    <div class="jc-premium-status">Совет: для просмотра лучше Normal или Спокойно, для красоты — Ultra.</div>
+  `;
+
+  if(oldLive) oldLive.insertAdjacentElement('afterend', panel);
+  else section.appendChild(panel);
+
+  panel.querySelectorAll('.jc-premium-bg-btn').forEach(btn => {
+    btn.onclick = () => {
+      jc217Apply(btn.dataset.premiumBg);
+      jc217Toast('Premium фон: ' + btn.textContent.trim());
+    };
+  });
+
+  panel.querySelectorAll('[data-q]').forEach(btn => {
+    btn.onclick = () => {
+      jc217SetQuality(btn.dataset.q);
+      jc217Toast('Качество: ' + btn.textContent.trim());
+    };
+  });
+
+  const intensity = panel.querySelector('#jcPremiumIntensity');
+  const speed = panel.querySelector('#jcPremiumSpeed');
+  const glass = panel.querySelector('#jcPremiumGlass');
+
+  intensity.value = localStorage.getItem('jc-premium-intensity') || '.68';
+  speed.value = localStorage.getItem('jc-premium-speed') || '.78';
+  glass.value = getComputedStyle(document.documentElement).getPropertyValue('--jc-premium-glass').trim() || '.54';
+
+  intensity.oninput = e => {
+    localStorage.setItem('jc-premium-intensity', e.target.value);
+  };
+  speed.oninput = e => {
+    localStorage.setItem('jc-premium-speed', e.target.value);
+  };
+  glass.oninput = e => {
+    document.documentElement.style.setProperty('--jc-premium-glass', e.target.value);
+    document.documentElement.style.setProperty('--jc-premium-glass-strong', String(Math.min(.86, Number(e.target.value)+.12)));
+    localStorage.setItem('jc-premium-glass', e.target.value);
+  };
+
+  panel.querySelector('#jcPremiumReset').onclick = () => {
+    localStorage.setItem('jc-premium-intensity', '.68');
+    localStorage.setItem('jc-premium-speed', '.78');
+    localStorage.setItem('jc-premium-quality', 'normal');
+    localStorage.setItem('jc-premium-glass', '.54');
+    intensity.value = '.68';
+    speed.value = '.78';
+    glass.value = '.54';
+    document.documentElement.style.setProperty('--jc-premium-glass', '.54');
+    document.documentElement.style.setProperty('--jc-premium-glass-strong', '.66');
+    jc217SetQuality('normal');
+    jc217Apply('aurora');
+    jc217Toast('Premium фон сброшен');
+  };
+
+  jc217Apply(jc217Active);
+}
+
+function jc217Init(){
+  jc217EnsureCanvas();
+
+  const savedGlass = localStorage.getItem('jc-premium-glass');
+  if(savedGlass){
+    document.documentElement.style.setProperty('--jc-premium-glass', savedGlass);
+    document.documentElement.style.setProperty('--jc-premium-glass-strong', String(Math.min(.86, Number(savedGlass)+.12)));
+  }
+
+  jc217SetQuality(jc217Quality());
+  jc217Apply(jc217Active);
+  jc217BuildPanel();
+
+  if(jc217Anim) cancelAnimationFrame(jc217Anim);
+  jc217Loop(0);
+
+  setInterval(() => {
+    jc217EnsureCanvas();
+    jc217BuildPanel();
+  }, 1400);
+
+  console.log('JustClover Stage 21.7 Premium Live Backgrounds active: stage21-7-premium-live-bg-20260501-1');
+}
+
+setTimeout(jc217Init, 700);
