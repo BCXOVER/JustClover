@@ -5796,3 +5796,246 @@ function jc265Patch(){
 }
 
 setTimeout(jc265Patch, 1000);
+
+
+/* =========================================================
+   JustClover Stage 26.6 — CLEAN OVERLAY HARD RESET JS
+   Version: stage26-6-clean-overlay-hard-reset-20260501-1
+   ========================================================= */
+
+function jc266Svg(name){
+  const icons = {
+    mic:`<svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/><path d="M8 21h8"/></svg><i class="slash"></i>`,
+    chat:`<svg viewBox="0 0 24 24"><path d="M4 6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-5l-5 4v-4a3 3 0 0 1-3-3V6Z"/><path d="M8 8h8"/><path d="M8 11h5"/></svg>`,
+    plus:`<svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>`,
+    cinema:`<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>`
+  };
+  return icons[name] || '';
+}
+
+function jc266Ensure(){
+  if(!document.querySelector('#jcCleanPlayerDock')){
+    const dock = document.createElement('div');
+    dock.id = 'jcCleanPlayerDock';
+    dock.innerHTML = `
+      <button class="jc-clean-btn muted" type="button" data-act="mic">${jc266Svg('mic')}<span class="label">Мик</span></button>
+      <button class="jc-clean-btn" type="button" data-act="chat">${jc266Svg('chat')}<span class="label">Чат</span></button>
+      <button class="jc-clean-btn" type="button" data-act="catalog">${jc266Svg('plus')}<span class="label">Кат</span></button>
+      <button class="jc-clean-btn" type="button" data-act="cinema">${jc266Svg('cinema')}<span class="label">Кино</span></button>
+    `;
+    document.body.appendChild(dock);
+
+    dock.querySelector('[data-act="mic"]').onclick = jc266ToggleMic;
+    dock.querySelector('[data-act="chat"]').onclick = jc266ToggleChat;
+    dock.querySelector('[data-act="catalog"]').onclick = () => {
+      if(typeof jcStage8OpenCatalog === 'function') jcStage8OpenCatalog('youtube');
+      else document.querySelector('.toolbar-chip[data-jc-action="catalog-overlay"]')?.click();
+    };
+    dock.querySelector('[data-act="cinema"]').onclick = jc266ToggleCinema;
+  }
+
+  if(!document.querySelector('#jcCleanCinemaBtn')){
+    const b = document.createElement('button');
+    b.id = 'jcCleanCinemaBtn';
+    b.type = 'button';
+    b.textContent = 'Кино сайта';
+    b.onclick = jc266ToggleCinema;
+    document.body.appendChild(b);
+  }
+
+  if(!document.querySelector('#jcCleanTopStrip')){
+    const s = document.createElement('div');
+    s.id = 'jcCleanTopStrip';
+    s.innerHTML = `<img src="" alt=""><div></div>`;
+    document.body.appendChild(s);
+  }
+
+  if(!document.querySelector('#jcCleanMicToast')){
+    const t = document.createElement('div');
+    t.id = 'jcCleanMicToast';
+    document.body.appendChild(t);
+  }
+}
+
+function jc266IsWatch(){
+  return document.querySelector('.section.active')?.id === 'watchSection' || document.body.classList.contains('jc-site-cinema-clean');
+}
+
+function jc266Position(){
+  jc266Ensure();
+
+  const watch = jc266IsWatch();
+  document.body.classList.toggle('jc-watch-active', watch);
+
+  const dock = document.querySelector('#jcCleanPlayerDock');
+  const strip = document.querySelector('#jcCleanTopStrip');
+  const toast = document.querySelector('#jcCleanMicToast');
+
+  if(document.body.classList.contains('jc-site-cinema-clean')) return;
+
+  const frame = document.querySelector('.player-frame');
+  if(!frame || !dock || !watch) return;
+
+  const r = frame.getBoundingClientRect();
+  if(r.width < 80 || r.height < 80 || r.bottom < 0 || r.top > innerHeight){
+    document.body.classList.remove('jc-watch-active');
+    return;
+  }
+
+  const cx = Math.max(90, Math.min(innerWidth - 90, r.left + r.width/2));
+  const top = Math.max(86, Math.min(innerHeight - 74, r.bottom - 54));
+
+  dock.style.left = cx + 'px';
+  dock.style.top = top + 'px';
+
+  if(strip){
+    strip.style.left = cx + 'px';
+    strip.style.top = Math.max(76, r.top + 12) + 'px';
+    strip.style.width = Math.min(760, Math.max(260, r.width - 32)) + 'px';
+  }
+
+  if(toast){
+    toast.style.left = cx + 'px';
+    toast.style.top = top + 'px';
+  }
+}
+
+function jc266Sync(){
+  const mic = document.querySelector('#jcCleanPlayerDock [data-act="mic"]');
+  const chat = document.querySelector('#jcCleanPlayerDock [data-act="chat"]');
+  const cinema = document.querySelector('#jcCleanPlayerDock [data-act="cinema"]');
+  const cinemaBtn = document.querySelector('#jcCleanCinemaBtn');
+
+  const micOn = typeof voiceOn !== 'undefined' && !!voiceOn;
+  if(mic){
+    mic.classList.toggle('active', micOn);
+    mic.classList.toggle('muted', !micOn);
+    mic.querySelector('.label').textContent = micOn ? 'Вкл' : 'Мик';
+    mic.title = micOn ? 'Выключить микрофон' : 'Включить микрофон';
+  }
+
+  if(chat){
+    const active = innerWidth <= 760 ? document.body.classList.contains('mobile-chat-open') : !document.body.classList.contains('chat-hidden');
+    chat.classList.toggle('active', active);
+  }
+
+  if(cinema){
+    cinema.classList.toggle('active', document.body.classList.contains('jc-site-cinema-clean'));
+  }
+
+  if(cinemaBtn){
+    cinemaBtn.textContent = document.body.classList.contains('jc-site-cinema-clean') ? 'Выйти из кино' : 'Кино сайта';
+  }
+
+  if(els?.externalLink) els.externalLink.textContent = 'Открыть';
+}
+
+async function jc266ToggleMic(){
+  try{
+    if(typeof voiceOn !== 'undefined' && voiceOn){
+      await stopVoice();
+      jc266Toast('Микрофон выключен');
+    }else{
+      await startVoice();
+      jc266Toast((typeof voiceOn !== 'undefined' && voiceOn) ? 'Микрофон включён' : 'Микрофон недоступен');
+    }
+  }catch(e){
+    jc266Toast('Микрофон недоступен');
+  }
+  jc266Sync();
+}
+
+function jc266ToggleChat(){
+  if(innerWidth <= 760) document.body.classList.toggle('mobile-chat-open');
+  else document.body.classList.toggle('chat-hidden');
+  jc266Sync();
+}
+
+async function jc266EnterCinema(){
+  section?.('watchSection');
+  document.body.classList.add('jc-site-cinema-clean', 'jc-watch-active', 'chat-hidden');
+  try{
+    if(!document.fullscreenElement && document.documentElement.requestFullscreen){
+      await document.documentElement.requestFullscreen();
+    }
+  }catch(e){}
+  jc266Position();
+  jc266Sync();
+  jc266Toast('Кино сайта включено');
+}
+
+async function jc266ExitCinema(){
+  document.body.classList.remove('jc-site-cinema-clean');
+  try{
+    if(document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
+  }catch(e){}
+  jc266Position();
+  jc266Sync();
+}
+
+async function jc266ToggleCinema(){
+  if(document.body.classList.contains('jc-site-cinema-clean')) await jc266ExitCinema();
+  else await jc266EnterCinema();
+}
+
+function jc266Toast(text){
+  const t = document.querySelector('#jcCleanMicToast');
+  if(!t) return;
+  t.textContent = text;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 1600);
+}
+
+function jc266ShowMessage(m){
+  if(!m || (!m.text && !m.mediaUrl)) return;
+}
+
+function jc266ShowTopMessage(m){
+  jc266Ensure();
+  if(!m || (!m.text && !m.mediaUrl)) return;
+  const strip = document.querySelector('#jcCleanTopStrip');
+  if(!strip) return;
+  const img = strip.querySelector('img');
+  const div = strip.querySelector('div');
+  const name = `${esc(m.nickname || 'User')}#${esc(m.tag || '0000')}`;
+  const msg = m.type === 'gif' ? 'GIF' : String(m.text || '').slice(0, 150);
+  if(img) img.src = m.avatarUrl || avatar(m.nickname || 'JC');
+  if(div) div.innerHTML = `<b>${name}</b>${esc(msg)}`;
+  strip.classList.add('show');
+  clearTimeout(strip._timer);
+  strip._timer = setTimeout(() => strip.classList.remove('show'), 5200);
+}
+
+/* Wrap addChat one more time for clean strip */
+const jc266PrevAddChat = addChat;
+addChat = function(m){
+  jc266PrevAddChat(m);
+  setTimeout(() => jc266ShowTopMessage(m), 60);
+};
+
+document.addEventListener('fullscreenchange', () => {
+  if(!document.fullscreenElement && document.body.classList.contains('jc-site-cinema-clean')){
+    document.body.classList.remove('jc-site-cinema-clean');
+  }
+  setTimeout(() => { jc266Position(); jc266Sync(); }, 80);
+});
+
+function jc266Patch(){
+  jc266Ensure();
+  jc266Position();
+  jc266Sync();
+
+  window.addEventListener('scroll', () => setTimeout(jc266Position, 30), {passive:true});
+  window.addEventListener('resize', () => setTimeout(jc266Position, 30), {passive:true});
+
+  setInterval(() => {
+    jc266Ensure();
+    jc266Position();
+    jc266Sync();
+  }, 450);
+
+  console.log('JustClover Stage 26.6 clean overlay hard reset active: stage26-6-clean-overlay-hard-reset-20260501-1');
+}
+
+setTimeout(jc266Patch, 800);
