@@ -1195,3 +1195,268 @@ function jcStage10Hotfix(){
   console.log('JustClover Stage 10 chat/catalog CTA active: stage10-chat-catalog-cta-20260501-1');
 }
 setTimeout(jcStage10Hotfix, 720);
+
+
+/* =========================================================
+   JustClover MEGA Stage 11-15 JS
+   Version: mega-stage11-15-20260501-1
+   ========================================================= */
+
+function jcMegaToast(text){
+  if(typeof jcStage5Toast === 'function') return jcStage5Toast(text);
+  status?.(els?.roomStatus, text);
+}
+
+function jcMegaIsBadLink(text){
+  const v = String(text || '').trim();
+  if(!v) return 'Вставь ссылку.';
+  if(/javascript:|<script|document\.|location\.|params\.set|function\s*\(|=>|;\s*location|\bfetch\s*\(/i.test(v)) {
+    return 'Похоже, в поле попал JS-код, а не ссылка. Очисти поле и вставь ссылку YouTube / VK / MP4.';
+  }
+  if(!/^https?:\/\//i.test(v)) {
+    return 'Нужна ссылка, которая начинается с http:// или https://.';
+  }
+  try {
+    const u = new URL(v);
+    if(!['http:','https:'].includes(u.protocol)) return 'Поддерживаются только http/https ссылки.';
+  } catch {
+    return 'Это не похоже на корректную ссылку.';
+  }
+  return '';
+}
+
+function jcMegaCatalogWarning(text=''){
+  const panel = document.querySelector('.jc-catalog-panel');
+  if(!panel) return;
+  let w = panel.querySelector('.jc-catalog-warning');
+  if(!w){
+    w = document.createElement('div');
+    w.className = 'jc-catalog-warning';
+    panel.insertBefore(w, panel.firstChild);
+  }
+  w.textContent = text;
+  w.classList.toggle('show', !!text);
+}
+
+function jcMegaHardenCatalog(){
+  const input = document.querySelector('#jcCatalogUrl');
+  if(!input || input.dataset.mega === '1') return;
+  input.dataset.mega = '1';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'jc-catalog-url-wrap';
+  input.parentElement.insertBefore(wrap, input);
+  wrap.appendChild(input);
+
+  const clear = document.createElement('button');
+  clear.type = 'button';
+  clear.className = 'jc-catalog-clear';
+  clear.textContent = '×';
+  clear.title = 'Очистить поле';
+  wrap.appendChild(clear);
+
+  clear.onclick = () => {
+    input.value = '';
+    input.focus();
+    jcMegaCatalogWarning('');
+  };
+
+  input.addEventListener('input', () => {
+    const err = jcMegaIsBadLink(input.value);
+    jcMegaCatalogWarning(err && input.value.trim() ? err : '');
+  });
+
+  if(typeof jcStage8SetSourceFromFields === 'function' && !window.__jcMegaWrappedCatalogRun){
+    window.__jcMegaWrappedCatalogRun = true;
+    const oldRun = jcStage8SetSourceFromFields;
+    jcStage8SetSourceFromFields = async function(){
+      const val = document.querySelector('#jcCatalogUrl')?.value || '';
+      const selected = typeof jcStage8Selected !== 'undefined' ? jcStage8Selected : '';
+      if(selected !== 'local'){
+        const err = jcMegaIsBadLink(val);
+        if(err){
+          jcMegaCatalogWarning(err);
+          jcMegaToast('Проверь ссылку');
+          return;
+        }
+      }
+      jcMegaCatalogWarning('');
+      return oldRun();
+    };
+    const runBtn = document.querySelector('#jcCatalogRunBtn');
+    if(runBtn) runBtn.onclick = jcStage8SetSourceFromFields;
+  }
+}
+
+function jcMegaProfileUploads(){
+  if(!els?.profileAvatar || els.profileAvatar.dataset.megaUpload === '1') return;
+  els.profileAvatar.dataset.megaUpload = '1';
+
+  function makeUpload(afterEl, label, targetInput){
+    const row = document.createElement('div');
+    row.className = 'jc-upload-row';
+    row.innerHTML = `
+      <button class="btn soft" type="button">${label}</button>
+      <span class="jc-file-hint">PNG/JPG/GIF/WebP до 2.5 МБ. Файл сохранится как data-url в профиле.</span>
+      <input type="file" accept="image/*,.gif,.webp" hidden>
+    `;
+    afterEl.insertAdjacentElement('afterend', row);
+    const btn = row.querySelector('button');
+    const file = row.querySelector('input');
+    btn.onclick = () => file.click();
+    file.onchange = () => {
+      const f = file.files?.[0];
+      if(!f) return;
+      if(f.size > 2.5 * 1024 * 1024){
+        jcMegaToast('Файл слишком большой. Лучше до 2.5 МБ.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        targetInput.value = reader.result;
+        targetInput.dispatchEvent(new Event('input'));
+        renderPreview?.();
+        jcMegaToast(label + ' загружена');
+      };
+      reader.readAsDataURL(f);
+    };
+  }
+
+  makeUpload(els.profileAvatar, 'Загрузить аватар', els.profileAvatar);
+  if(els.profileCover) makeUpload(els.profileCover, 'Загрузить обложку', els.profileCover);
+}
+
+function jcMegaThemePack(){
+  const section = document.querySelector('#appearanceSection');
+  if(!section || section.dataset.megaThemes === '1') return;
+  section.dataset.megaThemes = '1';
+
+  const pack = document.createElement('div');
+  pack.className = 'jc-theme-pack';
+  pack.innerHTML = `
+    <h3>Быстрые темы</h3>
+    <div class="jc-theme-grid">
+      <button class="jc-theme-btn" data-theme="rave" style="--a:#7c3aed;--b:#22d3ee">Rave Night</button>
+      <button class="jc-theme-btn" data-theme="red" style="--a:#7f1d1d;--b:#fb7185">Crimson</button>
+      <button class="jc-theme-btn" data-theme="green" style="--a:#064e3b;--b:#22c55e">Clover</button>
+      <button class="jc-theme-btn" data-theme="blackclover" style="--a:#020405;--b:#22c55e">Black Clover</button>
+      <button class="jc-theme-btn" data-theme="winter" style="--a:#1e3a8a;--b:#67e8f9">Зима</button>
+      <button class="jc-theme-btn" data-theme="spring" style="--a:#16a34a;--b:#f0abfc">Весна</button>
+      <button class="jc-theme-btn" data-theme="summer" style="--a:#f97316;--b:#facc15">Лето</button>
+      <button class="jc-theme-btn" data-theme="autumn" style="--a:#78350f;--b:#fb7185">Осень</button>
+      <button class="jc-theme-btn" data-theme="demon" style="--a:#111827;--b:#ef4444">Demon</button>
+    </div>
+  `;
+  section.appendChild(pack);
+
+  pack.querySelectorAll('.jc-theme-btn').forEach(btn => {
+    btn.onclick = () => {
+      applyTheme?.(btn.dataset.theme);
+      pack.querySelectorAll('.jc-theme-btn').forEach(b => b.classList.toggle('active', b === btn));
+      jcMegaToast('Тема применена: ' + btn.textContent.trim());
+    };
+  });
+}
+
+const jcMegaOldSendChat = sendChat;
+sendChat = async function(t, extra={}){
+  const text = String(t || '').trim();
+  if(!text && !extra.mediaUrl && extra.type !== 'reaction') return;
+  if(!currentRoomId){
+    status(els.roomStatus, 'Сначала создай комнату или войди в комнату.');
+    if(extra.type === 'reaction' && typeof jcStage4FloatReaction === 'function') jcStage4FloatReaction(text || '✨', false);
+    if(extra.type === 'gif' && extra.mediaUrl && typeof jcStage4FloatReaction === 'function') jcStage4FloatReaction(extra.mediaUrl, true);
+    return;
+  }
+  await push(ref(db,`roomChats/${currentRoomId}`),{
+    uid: currentUser.uid,
+    nickname: profile.nickname,
+    tag: profile.tag,
+    avatarUrl: profile.avatarUrl || avatar(profile.nickname),
+    accentColor: profile.accentColor || '',
+    text,
+    type: extra.type || 'text',
+    mediaUrl: extra.mediaUrl || '',
+    createdAt: Date.now()
+  });
+};
+
+addChat = function(m){
+  if(!m) return;
+  if(m.type === 'reaction' && typeof jcStage4FloatReaction === 'function') jcStage4FloatReaction(m.text || '✨', false);
+  if(m.type === 'gif' && m.mediaUrl && typeof jcStage4FloatReaction === 'function') jcStage4FloatReaction(m.mediaUrl, true);
+
+  const d = document.createElement('div');
+  d.className = 'message jc-chat-bubble';
+  if(m.type === 'system') d.className = 'message jc-system-message';
+  if(m.type === 'reaction') d.classList.add('jc-reaction-message');
+
+  const name = `${esc(m.nickname || 'User')}#${esc(m.tag || '0000')}`;
+  const time = new Date(m.createdAt || Date.now()).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const av = esc(m.avatarUrl || avatar(m.nickname || 'JC'));
+  const color = esc(m.accentColor || 'var(--primary2)');
+  const text = esc(m.text || '');
+
+  if(m.type === 'system'){
+    d.innerHTML = `<div>${text}</div><time>${time}</time>`;
+  } else if(m.type === 'gif' && m.mediaUrl){
+    d.innerHTML = `
+      <img class="jc-msg-avatar" src="${av}" alt="">
+      <div class="jc-msg-body">
+        <div class="jc-msg-head"><strong style="color:${color}">${name}</strong><span class="jc-msg-time">${time}</span></div>
+        <div class="jc-msg-text">GIF</div>
+        <img class="jc-message-gif" src="${esc(m.mediaUrl)}" alt="GIF">
+      </div>`;
+  } else {
+    d.innerHTML = `
+      <img class="jc-msg-avatar" src="${av}" alt="">
+      <div class="jc-msg-body">
+        <div class="jc-msg-head"><strong style="color:${color}">${name}</strong><span class="jc-msg-time">${time}</span></div>
+        <div class="jc-msg-text">${text}</div>
+      </div>`;
+  }
+
+  els.chatMessages.appendChild(d);
+  els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+};
+
+function jcMegaMobileNav(){
+  if(document.querySelector('.jc-mobile-nav')) return;
+  const nav = document.createElement('div');
+  nav.className = 'jc-mobile-nav';
+  nav.innerHTML = `
+    <button data-section="homeSection">Комната</button>
+    <button data-section="watchSection">Плеер</button>
+    <button data-section="friendsSection">Друзья</button>
+    <button data-section="profileSection">Профиль</button>
+    <button data-section="appearanceSection">Темы</button>
+  `;
+  document.body.appendChild(nav);
+
+  nav.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+      section(btn.dataset.section);
+      nav.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+      document.body.classList.remove('mobile-chat-open');
+    };
+  });
+
+  const chat = document.createElement('button');
+  chat.className = 'jc-mobile-chat-toggle';
+  chat.type = 'button';
+  chat.textContent = 'Чат';
+  chat.onclick = () => document.body.classList.toggle('mobile-chat-open');
+  document.body.appendChild(chat);
+}
+
+function jcMegaPatch(){
+  jcMegaProfileUploads();
+  jcMegaThemePack();
+  jcMegaMobileNav();
+
+  // Каталог может быть создан только после открытия. Перехватываем момент открытия через периодическую мягкую проверку.
+  setInterval(jcMegaHardenCatalog, 700);
+
+  console.log('JustClover MEGA Stage 11-15 active: mega-stage11-15-20260501-1');
+}
+setTimeout(jcMegaPatch, 900);
