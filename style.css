@@ -6049,3 +6049,179 @@ body.jc-site-cinema .external-player{
     bottom:18px!important;
   }
 }
+
+
+/* =========================================================
+   JustClover Stage 26.5 — Clear Rave Cinema Buttons
+   - кнопки больше не пустые
+   - отдельная явная кнопка "Кино сайта"
+   - встроенный fullscreen VK/YouTube не нужен
+   ========================================================= */
+
+.jc-rave-fixed-dock{
+  gap:8px!important;
+  padding:8px 10px!important;
+  border-radius:999px!important;
+  background:rgba(3,6,14,.74)!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+}
+
+.jc-rave-mini-btn{
+  width:auto!important;
+  min-width:48px!important;
+  height:40px!important;
+  padding:0 12px!important;
+  border-radius:999px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  font-size:12px!important;
+  font-weight:950!important;
+  letter-spacing:-.02em!important;
+  color:#fff!important;
+  overflow:visible!important;
+}
+
+.jc-rave-mini-btn svg{
+  width:17px!important;
+  height:17px!important;
+  display:block!important;
+  flex:0 0 auto!important;
+}
+
+.jc-rave-mini-btn .jc-rave-label{
+  display:inline!important;
+  font-size:12px!important;
+  line-height:1!important;
+  color:#fff!important;
+}
+
+.jc-rave-mini-btn[data-rave-mic]{
+  min-width:58px!important;
+}
+
+.jc-rave-mini-btn[data-rave-cinema]{
+  min-width:86px!important;
+}
+
+.jc-rave-mini-btn[data-rave-mic].muted{
+  color:#fecdd3!important;
+}
+
+.jc-rave-mini-btn.active{
+  background:linear-gradient(135deg,var(--primary),var(--primary2))!important;
+  border-color:rgba(255,255,255,.25)!important;
+}
+
+.jc-rave-mini-btn.muted[data-rave-mic] .jc-muted-slash{
+  opacity:1!important;
+}
+
+/* Большая понятная кнопка, чтобы не нажимать fullscreen внутри VK */
+.jc-site-cinema-btn{
+  position:fixed;
+  z-index:99996;
+  right:22px;
+  bottom:92px;
+  min-height:40px;
+  padding:0 14px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.16);
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:#fff;
+  font-weight:950;
+  font-size:13px;
+  cursor:pointer;
+  box-shadow:0 16px 46px rgba(0,0,0,.42), var(--glow);
+  opacity:0;
+  pointer-events:none;
+  transition:.16s ease;
+}
+
+body.jc-watch-active .jc-site-cinema-btn{
+  opacity:.96;
+  pointer-events:auto;
+}
+
+body.jc-site-cinema .jc-site-cinema-btn{
+  z-index:50110;
+  right:22px;
+  bottom:22px;
+  background:rgba(3,6,14,.70);
+  backdrop-filter:blur(14px);
+}
+
+.jc-site-cinema-btn:hover{
+  transform:translateY(-2px);
+}
+
+/* В site fullscreen кнопки dock остаются текстовыми */
+body.jc-site-cinema .jc-rave-fixed-dock{
+  bottom:24px!important;
+}
+
+body.jc-site-cinema .jc-rave-mini-btn[data-rave-cinema]{
+  display:none!important;
+}
+
+/* Подсказка над нативной кнопкой fullscreen плеера */
+.jc-native-fullscreen-warning{
+  position:fixed;
+  z-index:99995;
+  right:22px;
+  bottom:138px;
+  width:min(320px,calc(100vw - 44px));
+  padding:10px 12px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(3,6,14,.68);
+  color:rgba(255,255,255,.82);
+  font-size:11px;
+  line-height:1.35;
+  backdrop-filter:blur(14px);
+  opacity:0;
+  pointer-events:none;
+  transition:.18s ease;
+}
+
+body.jc-watch-active .jc-native-fullscreen-warning.show{
+  opacity:.92;
+}
+
+body.jc-site-cinema .jc-native-fullscreen-warning{
+  display:none!important;
+}
+
+/* На маленьком экране оставляем короткие подписи */
+@media(max-width:760px){
+  .jc-rave-fixed-dock{
+    gap:6px!important;
+    padding:7px!important;
+  }
+
+  .jc-rave-mini-btn{
+    min-width:42px!important;
+    width:42px!important;
+    padding:0!important;
+  }
+
+  .jc-rave-mini-btn .jc-rave-label{
+    display:none!important;
+  }
+
+  .jc-rave-mini-btn[data-rave-cinema]{
+    min-width:42px!important;
+  }
+
+  .jc-site-cinema-btn{
+    right:12px;
+    bottom:82px;
+    font-size:12px;
+    min-height:38px;
+  }
+
+  .jc-native-fullscreen-warning{
+    display:none!important;
+  }
+}

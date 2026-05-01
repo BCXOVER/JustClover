@@ -5684,3 +5684,115 @@ function jc264Patch(){
 }
 
 setTimeout(jc264Patch, 1000);
+
+
+/* =========================================================
+   JustClover Stage 26.5 — Clear Rave Cinema Buttons JS
+   Version: stage26-5-clear-rave-cinema-buttons-20260501-1
+   ========================================================= */
+
+function jc265Icon(name){
+  const icons = {
+    mic: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/><path d="M8 21h8"/></svg><i class="jc-muted-slash"></i>`,
+    chat: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-5l-5 4v-4a3 3 0 0 1-3-3V6Z"/><path d="M8 8h8"/><path d="M8 11h5"/></svg>`,
+    plus: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>`,
+    cinema: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>`
+  };
+  return icons[name] || '';
+}
+
+function jc265SetButton(btn, icon, label, tip){
+  if(!btn) return;
+  btn.innerHTML = `${jc265Icon(icon)}<span class="jc-rave-label">${esc(label)}</span><span class="jc-tooltip">${esc(tip || label)}</span>`;
+  btn.dataset.tip = tip || label;
+  btn.title = tip || label;
+}
+
+function jc265PolishDock(){
+  const dock = document.querySelector('.jc-rave-fixed-dock');
+  if(!dock) return;
+
+  const micOn = typeof voiceOn !== 'undefined' && !!voiceOn;
+  jc265SetButton(dock.querySelector('[data-rave-mic]'), 'mic', micOn ? 'Вкл' : 'Мик', micOn ? 'Выключить микрофон' : 'Включить микрофон');
+  jc265SetButton(dock.querySelector('[data-rave-chat]'), 'chat', 'Чат', 'Открыть чат');
+  jc265SetButton(dock.querySelector('[data-rave-catalog]'), 'plus', 'Кат', 'Каталог источников');
+  jc265SetButton(dock.querySelector('[data-rave-cinema]'), 'cinema', 'Кино', document.body.classList.contains('jc-site-cinema') ? 'Выйти из кино' : 'Кино-режим сайта');
+
+  const mic = dock.querySelector('[data-rave-mic]');
+  if(mic){
+    mic.classList.toggle('active', micOn);
+    mic.classList.toggle('muted', !micOn);
+  }
+}
+
+function jc265EnsureCinemaButton(){
+  if(!document.querySelector('.jc-site-cinema-btn')){
+    const b = document.createElement('button');
+    b.className = 'jc-site-cinema-btn';
+    b.type = 'button';
+    b.textContent = 'Кино сайта';
+    b.onclick = async () => {
+      if(typeof jc264ToggleSiteCinema === 'function') await jc264ToggleSiteCinema();
+      else document.body.classList.toggle('jc-site-cinema');
+      jc265UpdateCinemaButton();
+    };
+    document.body.appendChild(b);
+  }
+
+  if(!document.querySelector('.jc-native-fullscreen-warning')){
+    const w = document.createElement('div');
+    w.className = 'jc-native-fullscreen-warning';
+    w.textContent = 'Чтобы микрофон и чат были поверх видео, нажимай «Кино сайта», а не fullscreen внутри VK/YouTube.';
+    document.body.appendChild(w);
+  }
+}
+
+function jc265UpdateCinemaButton(){
+  const b = document.querySelector('.jc-site-cinema-btn');
+  if(b) b.textContent = document.body.classList.contains('jc-site-cinema') ? 'Выйти из кино' : 'Кино сайта';
+
+  const w = document.querySelector('.jc-native-fullscreen-warning');
+  if(w && document.querySelector('.section.active')?.id === 'watchSection' && !document.body.classList.contains('jc-site-cinema')){
+    w.classList.add('show');
+    clearTimeout(w._t);
+    w._t = setTimeout(() => w.classList.remove('show'), 5200);
+  }
+}
+
+const jc265PrevPolish = typeof jc263Polish === 'function' ? jc263Polish : null;
+if(jc265PrevPolish){
+  jc263Polish = function(){
+    jc265PrevPolish();
+    jc265PolishDock();
+  };
+}
+
+const jc265PrevSync = typeof jc261SyncButtons === 'function' ? jc261SyncButtons : null;
+if(jc265PrevSync){
+  jc261SyncButtons = function(){
+    jc265PrevSync();
+    jc265PolishDock();
+    jc265UpdateCinemaButton();
+  };
+}
+
+function jc265Patch(){
+  jc265EnsureCinemaButton();
+  jc265PolishDock();
+  jc265UpdateCinemaButton();
+
+  document.addEventListener('fullscreenchange', () => setTimeout(() => {
+    jc265PolishDock();
+    jc265UpdateCinemaButton();
+  }, 80));
+
+  setInterval(() => {
+    jc265EnsureCinemaButton();
+    jc265PolishDock();
+    jc265UpdateCinemaButton();
+  }, 700);
+
+  console.log('JustClover Stage 26.5 clear rave cinema buttons active: stage26-5-clear-rave-cinema-buttons-20260501-1');
+}
+
+setTimeout(jc265Patch, 1000);
