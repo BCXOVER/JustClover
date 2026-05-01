@@ -1,0 +1,5 @@
+<!-- CSS: поставить после style.css и после rave-menu-hotfix.css, если он подключён -->
+<link rel="stylesheet" href="./jc-profilethemes-hotfix.css?v=profilethemes-20260501-8" />
+
+<!-- JS: поставить после app.js -->
+<script type="module" src="./jc-profilethemes-hotfix.js?v=profilethemes-20260501-8"></script>
