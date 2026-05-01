@@ -1607,3 +1607,320 @@ setTimeout(() => {
   jcProfileWireLiveInputs();
   if(profile) renderProfile();
 }, 1200);
+
+
+/* =========================================================
+   JustClover Device Background Upload Fix
+   Version: device-background-upload-fix-20260501-1
+   ========================================================= */
+
+function jcDeviceFileToDataUrl(file, maxMb = 4){
+  return new Promise((resolve, reject) => {
+    if(!file) return resolve('');
+    if(file.size > maxMb * 1024 * 1024){
+      reject(new Error(`Файл слишком большой. Лучше до ${maxMb} МБ.`));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('Не удалось прочитать файл.'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function jcApplyCustomBackground(){
+  const bg = localStorage.getItem('jc-custom-site-bg') || '';
+  const opacity = localStorage.getItem('jc-custom-site-bg-opacity') || '.34';
+  const blur = localStorage.getItem('jc-custom-site-bg-blur') || '0';
+
+  document.documentElement.style.setProperty('--jc-custom-bg', bg ? `url("${bg}")` : 'none');
+  document.documentElement.style.setProperty('--jc-custom-bg-opacity', opacity);
+  document.documentElement.style.setProperty('--jc-custom-bg-blur', `${blur}px`);
+
+  const preview = document.querySelector('.jc-bg-preview');
+  if(preview){
+    preview.style.backgroundImage = bg
+      ? `linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.42)),url("${bg}")`
+      : '';
+    preview.textContent = bg ? 'Фон сайта загружен с устройства' : 'Фон сайта не выбран';
+  }
+}
+
+function jcAddDeviceBackgroundPanel(){
+  const section = document.querySelector('#appearanceSection');
+  if(!section || section.dataset.deviceBg === '1') return;
+  section.dataset.deviceBg = '1';
+
+  const panel = document.createElement('div');
+  panel.className = 'jc-device-upload-panel';
+  panel.innerHTML = `
+    <h3>Фон сайта с устройства</h3>
+    <p>Можно загрузить PNG/JPG/WebP/GIF с устройства. Фон сохранится в этом браузере и будет работать без URL.</p>
+
+    <div class="jc-device-upload-grid">
+      <button class="btn primary" type="button" id="jcUploadSiteBgBtn">Загрузить фон сайта</button>
+      <button class="btn soft" type="button" id="jcClearSiteBgBtn">Убрать фон</button>
+      <button class="btn soft" type="button" id="jcApplyProfileCoverAsBgBtn">Взять обложку профиля</button>
+    </div>
+
+    <input id="jcUploadSiteBgFile" type="file" accept="image/*,.gif,.webp" hidden>
+
+    <div class="jc-bg-controls">
+      <label>Прозрачность фона
+        <input id="jcBgOpacity" type="range" min="0" max="0.75" step="0.01" value="${localStorage.getItem('jc-custom-site-bg-opacity') || '.34'}">
+      </label>
+      <label>Размытие фона
+        <input id="jcBgBlur" type="range" min="0" max="18" step="1" value="${localStorage.getItem('jc-custom-site-bg-blur') || '0'}">
+      </label>
+    </div>
+
+    <div class="jc-bg-preview">Фон сайта не выбран</div>
+  `;
+
+  section.appendChild(panel);
+
+  const file = panel.querySelector('#jcUploadSiteBgFile');
+  panel.querySelector('#jcUploadSiteBgBtn').onclick = () => file.click();
+
+  file.onchange = async () => {
+    try{
+      const data = await jcDeviceFileToDataUrl(file.files?.[0], 5);
+      if(!data) return;
+      localStorage.setItem('jc-custom-site-bg', data);
+      jcApplyCustomBackground();
+      jcStage5Toast?.('Фон сайта загружен');
+    }catch(e){
+      jcStage5Toast?.(e.message || 'Не удалось загрузить фон');
+    }
+  };
+
+  panel.querySelector('#jcClearSiteBgBtn').onclick = () => {
+    localStorage.removeItem('jc-custom-site-bg');
+    jcApplyCustomBackground();
+    jcStage5Toast?.('Фон сайта убран');
+  };
+
+  panel.querySelector('#jcApplyProfileCoverAsBgBtn').onclick = () => {
+    const cover = els.profileCover?.value || profile?.coverUrl || '';
+    const valid = jcProfileIsImageUrl?.(cover) || '';
+    if(!valid){
+      jcStage5Toast?.('Сначала загрузи обложку профиля');
+      return;
+    }
+    localStorage.setItem('jc-custom-site-bg', valid);
+    jcApplyCustomBackground();
+    jcStage5Toast?.('Обложка профиля стала фоном сайта');
+  };
+
+  panel.querySelector('#jcBgOpacity').oninput = e => {
+    localStorage.setItem('jc-custom-site-bg-opacity', e.target.value);
+    jcApplyCustomBackground();
+  };
+
+  panel.querySelector('#jcBgBlur').oninput = e => {
+    localStorage.setItem('jc-custom-site-bg-blur', e.target.value);
+    jcApplyCustomBackground();
+  };
+
+  jcApplyCustomBackground();
+}
+
+function jcImproveProfileUploadLabels(){
+  // Делает понятнее, что обложка тоже грузится с устройства.
+  const avatarRows = [...document.querySelectorAll('.jc-upload-row')];
+  avatarRows.forEach(row => {
+    const btn = row.querySelector('button');
+    if(!btn) return;
+    if(btn.textContent.includes('облож')) {
+      btn.textContent = 'Загрузить обложку/фон профиля';
+    }
+    if(btn.textContent.includes('аватар')) {
+      btn.textContent = 'Загрузить аватар с устройства';
+    }
+  });
+
+  if(els.profileCover && !document.querySelector('.jc-profile-bg-note')){
+    const note = document.createElement('div');
+    note.className = 'jc-profile-bg-note';
+    note.textContent = 'Обложку/фон профиля можно загрузить кнопкой выше: PNG/JPG/WebP/GIF, без URL.';
+    els.profileCover.insertAdjacentElement('afterend', note);
+  }
+}
+
+function jcDeviceBgPatch(){
+  jcAddDeviceBackgroundPanel();
+  jcImproveProfileUploadLabels();
+  jcApplyCustomBackground();
+  console.log('JustClover device background upload fix active: device-background-upload-fix-20260501-1');
+}
+
+setTimeout(jcDeviceBgPatch, 1300);
+setInterval(jcImproveProfileUploadLabels, 1500);
+
+
+/* =========================================================
+   JustClover Profile Device Avatar Strong Fix
+   Version: profile-device-avatar-strongfix-20260501-1
+   ========================================================= */
+
+function jcStrongFileToDataUrl(file, maxMb = 3){
+  return new Promise((resolve, reject) => {
+    if(!file) return resolve('');
+    if(file.size > maxMb * 1024 * 1024){
+      reject(new Error(`Файл слишком большой. Выбери до ${maxMb} МБ.`));
+      return;
+    }
+    if(!/^image\//i.test(file.type) && !/\.(gif|webp|png|jpe?g)$/i.test(file.name)){
+      reject(new Error('Нужна картинка: PNG/JPG/WebP/GIF.'));
+      return;
+    }
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(new Error('Не удалось прочитать файл.'));
+    r.readAsDataURL(file);
+  });
+}
+
+function jcStrongProfileStatus(text, ok=true){
+  let box = document.querySelector('.jc-profile-file-status');
+  if(!box) return;
+  box.style.color = ok ? '#86efac' : '#fecaca';
+  box.textContent = text || '';
+}
+
+function jcStrongSetProfileImage(target, dataUrl){
+  if(target === 'avatar'){
+    els.profileAvatar.value = dataUrl;
+    if(els.profilePreviewAvatar) els.profilePreviewAvatar.src = dataUrl;
+    if(els.miniAvatar) els.miniAvatar.src = dataUrl;
+    if(profile) profile.avatarUrl = dataUrl;
+    jcStrongProfileStatus('Аватар выбран с устройства. Нажми «Сохранить», чтобы закрепить его в профиле.');
+  }
+
+  if(target === 'cover'){
+    els.profileCover.value = dataUrl;
+    const pc = els.profilePreviewCard?.querySelector('.profile-preview-cover');
+    if(pc) pc.style.backgroundImage = `linear-gradient(135deg,rgba(0,0,0,.08),rgba(0,0,0,.52)),url("${dataUrl}")`;
+    const miniCover = els.miniProfile?.querySelector('.cover');
+    if(miniCover) miniCover.style.backgroundImage = `linear-gradient(135deg,rgba(0,0,0,.08),rgba(0,0,0,.52)),url("${dataUrl}")`;
+    if(profile) profile.coverUrl = dataUrl;
+    jcStrongProfileStatus('Обложка/фон профиля выбран с устройства. Нажми «Сохранить», чтобы закрепить.');
+  }
+
+  renderPreview?.();
+}
+
+function jcStrongAddProfileFilePanel(){
+  const section = document.querySelector('#profileSection');
+  if(!section || section.dataset.strongAvatar === '1') return;
+  section.dataset.strongAvatar = '1';
+
+  const formCard = els.profileNick?.closest('.card') || els.profileNick?.closest('form') || section.querySelector('.card');
+  if(!formCard) return;
+
+  const panel = document.createElement('div');
+  panel.className = 'jc-profile-file-panel';
+  panel.innerHTML = `
+    <h3>Загрузка с устройства</h3>
+    <p>URL не обязателен: выбери аватарку, GIF-аватарку или обложку/фон профиля прямо с компьютера/телефона.</p>
+
+    <div class="jc-profile-file-grid">
+      <button class="btn primary" type="button" id="jcPickAvatarFile">Аватар с устройства</button>
+      <button class="btn soft" type="button" id="jcPickGifAvatarFile">GIF-аватарка</button>
+      <button class="btn soft" type="button" id="jcPickCoverFile">Обложка/фон профиля</button>
+      <button class="btn soft" type="button" id="jcApplyCoverAsSiteBg">Обложку → фон сайта</button>
+      <button class="btn soft" type="button" id="jcResetAvatar">Сбросить аватар</button>
+      <button class="btn soft" type="button" id="jcResetCover">Сбросить обложку</button>
+    </div>
+
+    <div class="jc-profile-file-status"></div>
+
+    <input id="jcAvatarFileInput" type="file" accept="image/*,.gif,.webp" hidden>
+    <input id="jcCoverFileInput" type="file" accept="image/*,.gif,.webp" hidden>
+  `;
+
+  // Вставляем перед кнопкой Сохранить, чтобы было очевидно.
+  const saveBtn = els.saveProfileBtn;
+  if(saveBtn && saveBtn.parentElement === formCard){
+    formCard.insertBefore(panel, saveBtn);
+  } else {
+    formCard.appendChild(panel);
+  }
+
+  if(els.profileAvatar && !document.querySelector('#profileAvatar + .jc-url-optional-note')){
+    const n = document.createElement('div');
+    n.className = 'jc-url-optional-note';
+    n.textContent = 'Можно оставить URL, а можно выбрать файл кнопкой «Аватар с устройства».';
+    els.profileAvatar.insertAdjacentElement('afterend', n);
+  }
+
+  if(els.profileCover && !document.querySelector('#profileCover + .jc-url-optional-note')){
+    const n = document.createElement('div');
+    n.className = 'jc-url-optional-note';
+    n.textContent = 'Можно оставить URL, а можно выбрать файл кнопкой «Обложка/фон профиля».';
+    els.profileCover.insertAdjacentElement('afterend', n);
+  }
+
+  const avatarInput = panel.querySelector('#jcAvatarFileInput');
+  const coverInput = panel.querySelector('#jcCoverFileInput');
+
+  panel.querySelector('#jcPickAvatarFile').onclick = () => avatarInput.click();
+  panel.querySelector('#jcPickGifAvatarFile').onclick = () => avatarInput.click();
+  panel.querySelector('#jcPickCoverFile').onclick = () => coverInput.click();
+
+  avatarInput.onchange = async () => {
+    try {
+      const data = await jcStrongFileToDataUrl(avatarInput.files?.[0], 3);
+      if(data) jcStrongSetProfileImage('avatar', data);
+    } catch(e) {
+      jcStrongProfileStatus(e.message || 'Не удалось загрузить аватар.', false);
+      jcStage5Toast?.(e.message || 'Не удалось загрузить аватар');
+    }
+  };
+
+  coverInput.onchange = async () => {
+    try {
+      const data = await jcStrongFileToDataUrl(coverInput.files?.[0], 5);
+      if(data) jcStrongSetProfileImage('cover', data);
+    } catch(e) {
+      jcStrongProfileStatus(e.message || 'Не удалось загрузить обложку.', false);
+      jcStage5Toast?.(e.message || 'Не удалось загрузить обложку');
+    }
+  };
+
+  panel.querySelector('#jcApplyCoverAsSiteBg').onclick = () => {
+    const cover = els.profileCover?.value || profile?.coverUrl || '';
+    if(!cover || !/^data:image\//i.test(cover) && !/^https?:\/\//i.test(cover)){
+      jcStrongProfileStatus('Сначала выбери обложку/фон профиля.', false);
+      return;
+    }
+    localStorage.setItem('jc-custom-site-bg', cover);
+    jcApplyCustomBackground?.();
+    jcStrongProfileStatus('Обложка профиля применена как фон сайта.');
+    jcStage5Toast?.('Обложка стала фоном сайта');
+  };
+
+  panel.querySelector('#jcResetAvatar').onclick = () => {
+    const n = els.profileNick?.value || profile?.nickname || 'JC';
+    const a = avatar(n);
+    els.profileAvatar.value = a;
+    jcStrongSetProfileImage('avatar', a);
+    jcStrongProfileStatus('Аватар сброшен. Нажми «Сохранить».');
+  };
+
+  panel.querySelector('#jcResetCover').onclick = () => {
+    els.profileCover.value = '';
+    if(profile) profile.coverUrl = '';
+    renderPreview?.();
+    const pc = els.profilePreviewCard?.querySelector('.profile-preview-cover');
+    if(pc) pc.style.backgroundImage = '';
+    const miniCover = els.miniProfile?.querySelector('.cover');
+    if(miniCover) miniCover.style.backgroundImage = '';
+    jcStrongProfileStatus('Обложка сброшена. Нажми «Сохранить».');
+  };
+
+  console.log('JustClover profile device avatar strong fix active: profile-device-avatar-strongfix-20260501-1');
+}
+
+setTimeout(jcStrongAddProfileFilePanel, 1400);
+setInterval(jcStrongAddProfileFilePanel, 2000);

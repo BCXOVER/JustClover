@@ -2399,3 +2399,190 @@ input[type="color"]{
   padding:4px!important;
   cursor:pointer;
 }
+
+
+/* =========================================================
+   JustClover Device Background Upload Fix
+   Обложки/фоны можно грузить с устройства, не только URL.
+   ========================================================= */
+
+:root{
+  --jc-custom-bg: none;
+  --jc-custom-bg-opacity: .34;
+  --jc-custom-bg-blur: 0px;
+}
+
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  pointer-events:none;
+  background-image:var(--jc-custom-bg);
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  opacity:var(--jc-custom-bg-opacity);
+  filter:blur(var(--jc-custom-bg-blur));
+  transform:scale(1.02);
+}
+
+.jc-device-upload-panel{
+  margin-top:18px;
+  padding:18px;
+  border-radius:26px;
+  border:1px solid var(--line);
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb,var(--primary2) 12%, transparent), transparent 34%),
+    linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.02));
+}
+
+.jc-device-upload-panel h3{
+  margin:0 0 8px;
+  font-size:20px;
+  letter-spacing:-.03em;
+}
+
+.jc-device-upload-panel p{
+  margin:0 0 14px;
+  color:var(--muted);
+  line-height:1.55;
+}
+
+.jc-device-upload-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.jc-device-upload-grid .btn{
+  min-height:44px;
+  border-radius:16px;
+}
+
+.jc-bg-controls{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:14px;
+}
+
+.jc-bg-controls label{
+  display:grid;
+  gap:6px;
+  color:var(--soft);
+  font-size:13px;
+  font-weight:800;
+}
+
+.jc-bg-controls input[type="range"]{
+  width:100%;
+}
+
+.jc-bg-preview{
+  margin-top:14px;
+  height:150px;
+  border-radius:20px;
+  border:1px solid var(--line);
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.42)),
+    var(--jc-custom-bg);
+  background-size:cover;
+  background-position:center;
+  display:grid;
+  place-items:center;
+  color:rgba(255,255,255,.82);
+  font-weight:900;
+  overflow:hidden;
+}
+
+.jc-profile-bg-note{
+  margin-top:8px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.45;
+}
+
+.jc-upload-row .btn{
+  background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.035));
+}
+
+.jc-upload-row .btn:hover{
+  border-color:color-mix(in srgb,var(--primary2) 38%,var(--line));
+  box-shadow:var(--glow);
+}
+
+@media(max-width:900px){
+  .jc-device-upload-grid,
+  .jc-bg-controls{
+    grid-template-columns:1fr;
+  }
+}
+
+
+/* =========================================================
+   JustClover Profile Device Avatar Strong Fix
+   Аватарки/обложки/фон профиля с устройства, без обязательного URL.
+   ========================================================= */
+
+.jc-profile-file-panel{
+  margin:12px 0 16px;
+  padding:14px;
+  border-radius:22px;
+  border:1px solid var(--line);
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb,var(--primary2) 12%, transparent), transparent 34%),
+    linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.02));
+}
+
+.jc-profile-file-panel h3{
+  margin:0 0 8px;
+  font-size:18px;
+  letter-spacing:-.03em;
+}
+
+.jc-profile-file-panel p{
+  margin:0 0 12px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+}
+
+.jc-profile-file-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:9px;
+}
+
+.jc-profile-file-grid .btn{
+  min-height:42px;
+  border-radius:15px;
+  white-space:normal;
+  line-height:1.2;
+}
+
+.jc-profile-file-status{
+  margin-top:10px;
+  color:#86efac;
+  font-size:12px;
+  line-height:1.45;
+  min-height:16px;
+}
+
+.jc-url-optional-note{
+  margin-top:6px;
+  color:var(--muted);
+  font-size:11.5px;
+  line-height:1.35;
+}
+
+#profileAvatar,
+#profileCover{
+  opacity:.9;
+}
+
+@media(max-width:900px){
+  .jc-profile-file-grid{
+    grid-template-columns:1fr;
+  }
+}
