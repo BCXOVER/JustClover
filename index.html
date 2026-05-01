@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#080912" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icons/icon.svg" />
-  <link rel="stylesheet" href="./style.css?v=roomfirst-20260501-13" />
+  <link rel="stylesheet" href="./style.css?v=roomclean-20260501-14" />
 </head>
 <body>
   <div class="bg"><div class="orb orb-a"></div><div class="orb orb-b"></div><div class="grid-bg"></div></div>
@@ -90,6 +90,7 @@
           <div class="home-catalog-bg"><span></span><span></span><span></span></div>
           <div class="home-catalog-layout">
             <main class="home-catalog-main panel">
+              <div class="room-ready-label">Комната активна — теперь можно выбрать видео</div>
               <div class="catalog-topbar home-catalog-topbar">
                 <button class="catalog-top-icon anime-pulse" type="button" aria-hidden="true">🍀</button>
                 <button class="catalog-top-icon" type="button" aria-hidden="true">☰</button>
@@ -101,9 +102,9 @@
 
               <div class="home-catalog-hero">
                 <div>
-                  <span class="kicker">Room first</span>
-                  <h2>Сначала комната, потом видео</h2>
-                  <p>Создай комнату или войди по invite-коду. После этого каталог разблокируется, и можно запускать YouTube, VK, Drive, Disk и GIF прямо в комнату.</p>
+                  <span class="kicker">Room</span>
+                  <h2>Комната</h2>
+                  <p>Создай комнату или войди по invite-коду. После этого появится каталог видео и GIF.</p>
                 </div>
                 <div class="hero-actions">
                   <button id="focusRoomCreateBtn" class="btn primary hover-spark" type="button">Создать комнату</button>
@@ -169,7 +170,7 @@
                   <button id="copyInviteBtn" class="btn soft hover-spark" type="button">Скопировать invite-ссылку</button>
                   <div class="split"><button id="openRoomBtn" class="btn soft" type="button">Открыть</button><button id="closeRoomBtn" class="btn soft" type="button">Закрыть</button></div>
                   <div class="split"><button id="publicRoomBtn" class="btn soft" type="button">Публичная</button><button id="inviteRoomBtn" class="btn soft" type="button">По ссылке</button></div>
-                  <p id="roomStatus" class="status">Сначала создай комнату или войди по invite-коду.</p>
+                  <p id="roomStatus" class="status">Создай комнату или войди по invite-коду.</p>
                 </div>
               </div>
 
@@ -245,6 +246,6 @@
 
 
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script type="module" src="./app.js?v=roomfirst-20260501-13"></script>
+  <script type="module" src="./app.js?v=roomclean-20260501-14"></script>
 </body>
 </html>
