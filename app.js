@@ -636,3 +636,76 @@ function jcStage6LayoutPolish(){
   console.log('JustClover Stage 6 layout polish active: stage6-layout-polish-20260501-1');
 }
 setTimeout(jcStage6LayoutPolish, 240);
+
+
+/* =========================================================
+   JustClover Stage 7 player/chat polish JS
+   Version: stage7-player-chat-polish-20260501-1
+   ========================================================= */
+function jcStage7SetEmptyPlayerText(){
+  const empty = document.querySelector('#emptyPlayer');
+  if(!empty || empty.dataset.stage7 === '1') return;
+  empty.dataset.stage7 = '1';
+  empty.innerHTML = `
+    <span class="jc-empty-title">Выбери источник</span>
+    <span class="jc-empty-subtitle">Нажми «Каталог» или выбери YouTube / VK / Local, вставь ссылку и запускай просмотр вместе с друзьями.</span>
+  `;
+}
+
+function jcStage7AddChatSizeButtons(){
+  const row = document.querySelector('.watch-chip-row');
+  if(!row || row.dataset.stage7 === '1') return;
+  row.dataset.stage7 = '1';
+
+  const minus = document.createElement('button');
+  minus.type = 'button';
+  minus.className = 'toolbar-chip jc-chat-size-btn';
+  minus.dataset.sizeAction = 'minus';
+  minus.title = 'Сделать чат уже';
+
+  const plus = document.createElement('button');
+  plus.type = 'button';
+  plus.className = 'toolbar-chip jc-chat-size-btn';
+  plus.dataset.sizeAction = 'plus';
+  plus.title = 'Сделать чат шире';
+
+  const hideChat = [...row.querySelectorAll('.toolbar-chip')].find(b => (b.textContent||'').toLowerCase().includes('чат'));
+  if(hideChat){
+    row.insertBefore(minus, hideChat);
+    row.insertBefore(plus, hideChat);
+  } else {
+    row.appendChild(minus);
+    row.appendChild(plus);
+  }
+
+  const apply = (delta) => {
+    const cur = Number(localStorage.getItem('jc-chat-width') || 372);
+    const next = Math.max(300, Math.min(500, cur + delta));
+    localStorage.setItem('jc-chat-width', String(next));
+    document.documentElement.style.setProperty('--chat-w', next + 'px');
+    const dot = document.querySelector('.slider-dot');
+    if(dot){
+      const pct = ((next - 280) / (470 - 280)) * 100;
+      dot.style.left = Math.max(0, Math.min(100, pct)) + '%';
+    }
+    jcStage5Toast?.('Ширина чата: ' + next + 'px');
+  };
+
+  minus.onclick = () => apply(-28);
+  plus.onclick = () => apply(28);
+}
+
+function jcStage7ChatWelcome(){
+  const box = els?.chatMessages;
+  if(!box || box.dataset.stage7 === '1') return;
+  box.dataset.stage7 = '1';
+  // Не вставляем реальное сообщение в БД, только локальный placeholder уберётся сам при первом сообщении.
+}
+
+function jcStage7Polish(){
+  jcStage7SetEmptyPlayerText();
+  jcStage7AddChatSizeButtons();
+  jcStage7ChatWelcome();
+  console.log('JustClover Stage 7 player/chat polish active: stage7-player-chat-polish-20260501-1');
+}
+setTimeout(jcStage7Polish, 320);

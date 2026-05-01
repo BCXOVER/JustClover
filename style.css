@@ -1279,3 +1279,222 @@ body.cinema-mode .reactions-dock{
     width:calc(100% - 24px);
   }
 }
+
+
+/* =========================================================
+   JustClover Stage 7 — empty player + chat polish + left menu cleanup
+   ========================================================= */
+
+:root{
+  --chat-w:372px;
+}
+
+/* Левое меню легче: быстрые настройки больше не съедают столько места */
+.rail-footer{
+  padding:12px;
+}
+.rail-note-title{
+  font-size:14px;
+}
+.rail-footer .status{
+  display:none;
+}
+.quick-actions{
+  margin-top:0;
+  justify-content:space-between;
+}
+.mini-icon-btn{
+  width:44px;
+  height:42px;
+}
+
+/* Верхний toolbar: добавляем понятные кнопки управления чатом */
+.watch-chip-row{
+  max-width:650px;
+}
+.jc-chat-size-btn{
+  min-width:42px;
+  padding-inline:12px!important;
+}
+.jc-chat-size-btn[data-size-action="minus"]::before{content:'−'}
+.jc-chat-size-btn[data-size-action="plus"]::before{content:'+'}
+
+/* Пустой плеер теперь выглядит как красивая заставка, а не просто пустой блок */
+.player-frame{
+  position:relative;
+  isolation:isolate;
+  background:
+    radial-gradient(circle at 50% 34%, color-mix(in srgb,var(--primary2) 18%, transparent), transparent 28%),
+    radial-gradient(circle at 18% 80%, rgba(34,197,94,.06), transparent 22%),
+    linear-gradient(180deg,#050813,#02040a);
+}
+.empty-player{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  isolation:isolate;
+  padding:28px;
+  text-align:center;
+  overflow:hidden;
+  background:
+    linear-gradient(180deg,rgba(3,5,10,.25),rgba(3,5,10,.74)),
+    radial-gradient(circle at 50% 42%, color-mix(in srgb,var(--primary2) 20%,transparent), transparent 34%);
+}
+.empty-player::before{
+  content:'▶';
+  display:grid;
+  place-items:center;
+  width:92px;
+  height:92px;
+  margin:0;
+  border-radius:999px;
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:white;
+  font-size:34px;
+  box-shadow:
+    0 0 0 12px rgba(255,255,255,.035),
+    0 0 48px color-mix(in srgb,var(--primary2) 38%,transparent),
+    0 18px 48px rgba(0,0,0,.42);
+  animation:jcPulsePlay 2.4s ease-in-out infinite;
+  z-index:2;
+}
+.empty-player::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 80px, rgba(255,255,255,.035) 81px 82px, transparent 83px 125px, rgba(255,255,255,.025) 126px 127px, transparent 128px),
+    linear-gradient(120deg, transparent 0%, color-mix(in srgb,var(--primary) 8%, transparent) 42%, transparent 64%);
+  opacity:.75;
+  animation:jcPlayerAura 11s linear infinite;
+  z-index:-1;
+}
+.empty-player{
+  font-size:0;
+}
+.empty-player .jc-empty-title,
+.empty-player .jc-empty-subtitle{
+  display:block;
+}
+.jc-empty-title{
+  font-size:22px;
+  color:#fff;
+  font-weight:950;
+  letter-spacing:-.03em;
+}
+.jc-empty-subtitle{
+  max-width:520px;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.55;
+  font-weight:600;
+}
+@keyframes jcPulsePlay{
+  0%,100%{transform:scale(1);box-shadow:0 0 0 12px rgba(255,255,255,.035),0 0 48px color-mix(in srgb,var(--primary2) 34%,transparent),0 18px 48px rgba(0,0,0,.42)}
+  50%{transform:scale(1.045);box-shadow:0 0 0 18px rgba(255,255,255,.025),0 0 72px color-mix(in srgb,var(--primary2) 46%,transparent),0 18px 52px rgba(0,0,0,.48)}
+}
+@keyframes jcPlayerAura{
+  from{transform:rotate(0deg) scale(1.05)}
+  to{transform:rotate(360deg) scale(1.05)}
+}
+
+/* Чат: placeholder, пустое состояние, аккуратнее форма */
+.chat-card{
+  overflow:hidden;
+}
+.chat-card .messages{
+  position:relative;
+}
+.chat-card .messages:empty::before{
+  content:'Пока сообщений нет\AНапиши первым или отправь реакцию снизу плеера.';
+  white-space:pre-line;
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  color:rgba(165,168,199,.72);
+  line-height:1.6;
+  font-size:14px;
+  padding:24px;
+}
+.message{
+  animation:jcMessageIn .18s ease both;
+}
+@keyframes jcMessageIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.message-form.jc-enhanced,
+.message-form{
+  padding-top:10px;
+  border-top:1px solid rgba(255,255,255,.065);
+}
+.message-form input{
+  background:rgba(5,7,15,.78);
+}
+.message-form input::placeholder{
+  color:rgba(184,188,215,.68);
+}
+.message-form .btn.primary{
+  box-shadow:0 14px 32px color-mix(in srgb,var(--primary2) 22%, transparent);
+}
+
+/* Участники: если список пустой, не выглядит сломанным */
+.members-card .list:empty::before{
+  content:'Участники появятся здесь после входа в комнату.';
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+}
+
+/* Голосовая карточка: компактнее */
+.voice-card{
+  min-height:178px;
+}
+.voice-wave{
+  border:1px solid rgba(34,197,94,.08);
+}
+
+/* Модалки и pickers не должны быть под скроллом */
+.jc-picker{
+  z-index:200;
+}
+
+/* На широких экранах плеер ближе к центру */
+.watch-stage{
+  max-width:1280px;
+  justify-self:center;
+  width:100%;
+}
+
+/* Когда чат скрыт, сцена занимает центр и выглядит шире */
+body.chat-hidden .watch-stage{
+  max-width:1420px;
+}
+
+/* Мобильный чат */
+@media(max-width:980px){
+  .jc-chat-size-btn{
+    display:none!important;
+  }
+  .chat-card .messages{
+    min-height:320px;
+  }
+}
+@media(max-width:760px){
+  .empty-player::before{
+    width:76px;
+    height:76px;
+    font-size:28px;
+  }
+  .jc-empty-title{
+    font-size:19px;
+  }
+  .jc-empty-subtitle{
+    font-size:13px;
+  }
+}
