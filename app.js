@@ -2,7 +2,7 @@ import { firebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInAnonymously,signInWithPopup,GoogleAuthProvider,signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { getDatabase,ref,get,set,update,push,remove,onValue,onChildAdded,onDisconnect,serverTimestamp,query,orderByChild,equalTo,off } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
-console.log('JustClover player safe app.js loaded: playersafe-20260501-12');
+console.log('JustClover room-first app.js loaded: roomfirst-20260501-13');
 window.addEventListener('error', e => console.error('JustClover runtime error:', e.message, e.error));
 const $=id=>document.getElementById(id);
 const els={setupWarning:$('setupWarning'),authView:$('authView'),appView:$('appView'),topUser:$('topUser'),logoutBtn:$('logoutBtn'),openProfileBtn:$('openProfileBtn'),loginTab:$('loginTab'),registerTab:$('registerTab'),guestTab:$('guestTab'),authForm:$('authForm'),guestSubmit:$('guestSubmit'),googleSubmit:$('googleSubmit'),authSubmit:$('authSubmit'),nickLabel:$('nickLabel'),nickInput:$('nickInput'),emailInput:$('emailInput'),passwordInput:$('passwordInput'),authStatus:$('authStatus'),miniProfile:$('miniProfile'),miniAvatar:$('miniAvatar'),miniName:$('miniName'),miniTag:$('miniTag'),miniStatus:$('miniStatus'),roomNameInput:$('roomNameInput'),createRoomBtn:$('createRoomBtn'),joinRoomInput:$('joinRoomInput'),joinRoomBtn:$('joinRoomBtn'),copyInviteBtn:$('copyInviteBtn'),openRoomBtn:$('openRoomBtn'),closeRoomBtn:$('closeRoomBtn'),publicRoomBtn:$('publicRoomBtn'),inviteRoomBtn:$('inviteRoomBtn'),roomStatus:$('roomStatus'),membersList:$('membersList'),sourceType:$('sourceType'),sourceUrl:$('sourceUrl'),localVideoFile:$('localVideoFile'),sourceTitle:$('sourceTitle'),setSourceBtn:$('setSourceBtn'),sourceOpenBtn:$('sourceOpenBtn'),sourceOpenBtnMirror:$('sourceOpenBtnMirror'),sourceHelp:$('sourceHelp'),sourceNote:$('sourceNote'),videoPlayer:$('videoPlayer'),youtubePlayer:$('youtubePlayer'),youtubeWrap:$('youtubeWrap'),iframePlayer:$('iframePlayer'),externalPlayer:$('externalPlayer'),externalText:$('externalText'),externalLink:$('externalLink'),emptyPlayer:$('emptyPlayer'),publicRoomsList:$('publicRoomsList'),onlineUsersList:$('onlineUsersList'),chatMessages:$('chatMessages'),chatForm:$('chatForm'),chatInput:$('chatInput'),voiceBtn:$('voiceBtn'),voiceStatus:$('voiceStatus'),remoteAudio:$('remoteAudio'),profileNick:$('profileNick'),profileTag:$('profileTag'),profileAvatar:$('profileAvatar'),profileCover:$('profileCover'),profileStatusText:$('profileStatusText'),profileBio:$('profileBio'),profileAccent:$('profileAccent'),saveProfileBtn:$('saveProfileBtn'),profileSaveStatus:$('profileSaveStatus'),profilePreviewCard:$('profilePreviewCard'),profilePreviewAvatar:$('profilePreviewAvatar'),profilePreviewName:$('profilePreviewName'),profilePreviewTag:$('profilePreviewTag'),friendSearchInput:$('friendSearchInput'),friendSearchBtn:$('friendSearchBtn'),friendSearchResults:$('friendSearchResults'),incomingRequestsList:$('incomingRequestsList'),friendsList:$('friendsList'),dmEmptyState:$('dmEmptyState'),dmTitle:$('dmTitle'),dmMessages:$('dmMessages'),dmForm:$('dmForm'),dmText:$('dmText'),dmMediaUrl:$('dmMediaUrl'),sendDmBtn:$('sendDmBtn'),friendRoomJoinBtn:$('friendRoomJoinBtn'),mediaPicker:$('mediaPicker'),mediaPickerBackdrop:$('mediaPickerBackdrop'),mediaPickerCloseBtn:$('mediaPickerCloseBtn'),mediaSearchForm:$('mediaSearchForm'),mediaSearchInput:$('mediaSearchInput'),mediaPickerResults:$('mediaPickerResults'),mediaPickerHint:$('mediaPickerHint'),mediaPasteBtn:$('mediaPasteBtn'),mediaExternalBtn:$('mediaExternalBtn'),youtubeApiBox:$('youtubeApiBox'),ytApiKeyInput:$('ytApiKeyInput'),saveYtApiKeyBtn:$('saveYtApiKeyBtn'),emojiBtn:$('emojiBtn'),gifBtn:$('gifBtn'),emojiPanel:$('emojiPanel'),reactionBurst:$('reactionBurst'),gifPicker:$('gifPicker'),gifPickerBackdrop:$('gifPickerBackdrop'),gifPickerCloseBtn:$('gifPickerCloseBtn'),gifSearchForm:$('gifSearchForm'),gifSearchInput:$('gifSearchInput'),gifPickerResults:$('gifPickerResults'),gifPickerHint:$('gifPickerHint'),giphyApiKeyInput:$('giphyApiKeyInput'),saveGiphyApiKeyBtn:$('saveGiphyApiKeyBtn'),gifPasteBtn:$('gifPasteBtn'),openGiphyFromPickerBtn:$('openGiphyFromPickerBtn')};
@@ -1111,4 +1111,74 @@ function jcPatchButtonsLate(){
 jcPatchButtonsLate();
 setTimeout(jcPatchButtonsLate, 500);
 setTimeout(jcPatchButtonsLate, 1500);
+
+
+/* ===== Room First UX hotfix roomfirst-20260501-13 ===== */
+console.log('JustClover room-first UX hotfix loaded: roomfirst-20260501-13');
+
+els.focusRoomCreateBtn = document.getElementById('focusRoomCreateBtn');
+els.roomFirstStatus = document.getElementById('roomFirstStatus');
+
+function jcRoomFirstSync(){
+  const hasRoom = !!currentRoomId && !!currentRoom;
+  document.body.dataset.hasRoom = hasRoom ? '1' : '0';
+  if(els.roomFirstStatus){
+    els.roomFirstStatus.textContent = hasRoom
+      ? `Комната активна: ${currentRoom?.name || currentRoomId}. Теперь можно запускать видео.`
+      : 'Сначала создай комнату или войди по invite-коду — каталог станет активным автоматически.';
+  }
+  const mediaControls = [
+    els.mediaSearchInput,
+    els.mediaPasteBtn,
+    els.autoPasteRunBtn,
+    els.mediaExternalBtn,
+    els.openGiphyFromPickerBtn,
+    els.sourceUrl,
+    els.sourceTitle,
+    els.setSourceBtn
+  ];
+  mediaControls.forEach(el => {
+    if(!el) return;
+    el.disabled = !hasRoom;
+    el.setAttribute('aria-disabled', hasRoom ? 'false' : 'true');
+  });
+  document.querySelectorAll('[data-picker-source], .service-orb').forEach(btn => {
+    btn.disabled = !hasRoom;
+    btn.setAttribute('aria-disabled', hasRoom ? 'false' : 'true');
+  });
+}
+
+function jcFocusRoomCard(){
+  section('homeSection');
+  const card = document.querySelector('.home-room-card');
+  card?.scrollIntoView({behavior:'smooth', block:'center'});
+  card?.classList.add('room-attention');
+  setTimeout(()=>card?.classList.remove('room-attention'), 1300);
+  setTimeout(()=>els.roomNameInput?.focus(), 350);
+}
+
+if(els.focusRoomCreateBtn) els.focusRoomCreateBtn.onclick = jcFocusRoomCard;
+
+const jcRoomFirstOldSection = section;
+section = function(id){
+  jcRoomFirstOldSection(id);
+  setTimeout(jcRoomFirstSync, 0);
+};
+
+const jcRoomFirstOldRenderRoom = renderRoom;
+renderRoom = function(){
+  jcRoomFirstOldRenderRoom();
+  jcRoomFirstSync();
+};
+
+const jcRoomFirstOldLeaveRoom = leaveRoom;
+leaveRoom = async function(...args){
+  const result = await jcRoomFirstOldLeaveRoom.apply(this, args);
+  jcRoomFirstSync();
+  return result;
+};
+
+setInterval(jcRoomFirstSync, 1200);
+setTimeout(jcRoomFirstSync, 100);
+setTimeout(jcRoomFirstSync, 1000);
 
