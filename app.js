@@ -36,3 +36,91 @@ function openDm(f){currentDmFriend=f;els.dmTitle.textContent=`Чат с ${f.nick
 function section(id){document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===id));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.section===id))}async function google(){try{status(els.authStatus,'Открываю Google-вход...');const p=new GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});const r=await signInWithPopup(auth,p);await ensureProfile(r.user,r.user.displayName||'')}catch(e){status(els.authStatus,e.message)}}
 function bind(){document.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>section(b.dataset.section));document.querySelectorAll('.theme-card').forEach(c=>c.onclick=()=>applyTheme(c.dataset.themeChoice));els.loginTab.onclick=()=>setAuthMode('login');els.registerTab.onclick=()=>setAuthMode('register');els.guestTab.onclick=()=>setAuthMode('guest');els.googleSubmit.onclick=google;els.authForm.onsubmit=async e=>{e.preventDefault();try{status(els.authStatus,'Загрузка...');const email=els.emailInput.value.trim(),pass=els.passwordInput.value;if(authMode==='register'){const c=await createUserWithEmailAndPassword(auth,email,pass);await ensureProfile(c.user,els.nickInput.value.trim())}else await signInWithEmailAndPassword(auth,email,pass)}catch(er){status(els.authStatus,er.message)}};els.guestSubmit.onclick=async()=>{try{const c=await signInAnonymously(auth);await ensureProfile(c.user,els.nickInput.value.trim()||guest())}catch(e){status(els.authStatus,e.message)}};els.logoutBtn.onclick=async()=>{await leaveRoom();cleanGlobal();if(currentDmUnsub)currentDmUnsub();await signOut(auth)};els.openProfileBtn.onclick=()=>section('profileSection');[els.profileNick,els.profileTag,els.profileAvatar,els.profileCover].forEach(i=>i.oninput=renderPreview);els.saveProfileBtn.onclick=saveProfile;els.createRoomBtn.onclick=createRoom;els.joinRoomBtn.onclick=()=>joinRoom(els.joinRoomInput.value);els.copyInviteBtn.onclick=async()=>{if(!currentRoomId)return status(els.roomStatus,'Сначала создай комнату.');const u=new URL(location.href);u.searchParams.set('room',currentRoomId);await navigator.clipboard.writeText(u.toString()).catch(()=>{});status(els.roomStatus,'Invite-ссылка скопирована.')};els.openRoomBtn.onclick=()=>setVis('open');els.closeRoomBtn.onclick=()=>setVis('closed');els.publicRoomBtn.onclick=()=>setMode('public');els.inviteRoomBtn.onclick=()=>setMode('invite');els.sourceType.onchange=toggleSource;els.localVideoFile.onchange=()=>currentSource.type==='local'&&loadSource(currentSource);els.setSourceBtn.onclick=setSource;els.chatForm.onsubmit=async e=>{e.preventDefault();await sendChat(els.chatInput.value);els.chatInput.value=''};els.voiceBtn.onclick=()=>voiceOn?stopVoice():startVoice();els.friendSearchBtn.onclick=searchFriends;els.friendSearchInput.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();searchFriends()}};els.dmForm.onsubmit=sendDm;toggleSource()}
 async function boot(){applyTheme(localStorage.getItem('jc-theme')||'rave');bind();setAuthMode('login');try{init()}catch(e){status(els.authStatus,e.message);return}onAuthStateChanged(auth,async u=>{currentUser=u;cleanGlobal();cleanRoom();if(currentDmUnsub){currentDmUnsub();currentDmUnsub=null}if(!u){profile=null;currentRoomId='';currentRoom=null;shell(false);return}profile=await ensureProfile(u);renderProfile();shell(true);section('homeSection');await presence();startLists();const r=roomFromUrl();if(r)await joinRoom(r)})}boot();
+
+
+/* =========================================================
+   JustClover Stage 3 toolbar hotfix
+   Version: stage3toolbar-20260501-1
+   Верхние кнопки теперь работают:
+   Invite / Каталог / 16:9 / Кино / Скрыть чат
+   ========================================================= */
+function jcStage3ToolbarHotfix(){
+  const chips = [...document.querySelectorAll('.toolbar-chip')];
+  if(!chips.length) return;
+
+  const byText = (part) => chips.find(b => (b.textContent || '').toLowerCase().includes(part.toLowerCase()));
+  const invite = byText('invite');
+  const catalog = byText('каталог');
+  const ratio = byText('16:9');
+  const cinema = byText('кино');
+  const chat = byText('скрыть');
+
+  if(invite){
+    invite.dataset.jcAction = 'invite';
+    invite.onclick = () => {
+      if(els?.copyInviteBtn) els.copyInviteBtn.click();
+      else alert('Сначала создай комнату.');
+    };
+  }
+
+  if(catalog){
+    catalog.dataset.jcAction = 'catalog';
+    catalog.onclick = () => {
+      document.body.classList.toggle('catalog-open');
+      catalog.classList.toggle('active', document.body.classList.contains('catalog-open'));
+      if(document.body.classList.contains('catalog-open')) {
+        els?.sourceUrl?.focus?.();
+      }
+    };
+  }
+
+  if(ratio){
+    ratio.dataset.jcAction = 'ratio';
+    ratio.onclick = () => {
+      document.body.classList.toggle('player-16x9');
+      ratio.classList.toggle('active', document.body.classList.contains('player-16x9'));
+    };
+  }
+
+  if(cinema){
+    cinema.dataset.jcAction = 'cinema';
+    cinema.onclick = () => {
+      document.body.classList.toggle('cinema-mode');
+      cinema.classList.toggle('active', document.body.classList.contains('cinema-mode'));
+      if(document.body.classList.contains('cinema-mode')) section('watchSection');
+    };
+  }
+
+  if(chat){
+    chat.dataset.jcAction = 'chat';
+    chat.onclick = () => {
+      document.body.classList.toggle('chat-hidden');
+      chat.classList.toggle('active', document.body.classList.contains('chat-hidden'));
+      chat.textContent = document.body.classList.contains('chat-hidden') ? 'Показать чат' : 'Скрыть чат';
+    };
+  }
+
+  const sourceMap = {
+    'YouTube':'youtube',
+    'VK Video':'vk',
+    'AniLibria':'anilibrix',
+    'Local':'local'
+  };
+  document.querySelectorAll('.source-pill').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.source-pill').forEach(x => x.classList.remove('active'));
+      btn.classList.add('active');
+      document.body.classList.add('catalog-open');
+      catalog?.classList.add('active');
+      const val = sourceMap[(btn.textContent || '').trim()];
+      if(val && els?.sourceType){
+        els.sourceType.value = val;
+        els.sourceType.dispatchEvent(new Event('change'));
+      }
+      els?.sourceUrl?.focus?.();
+    };
+  });
+
+  console.log('JustClover Stage 3 toolbar hotfix active: stage3toolbar-20260501-1');
+}
+setTimeout(jcStage3ToolbarHotfix, 0);
