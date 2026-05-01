@@ -6686,3 +6686,67 @@ body.jc-site-cinema-clean.mobile-chat-open .watch-sidebar{
     transform:translateY(0)!important;
   }
 }
+
+
+/* =========================================================
+   JustClover Stage 26.7 — CACHE KILLER VISUAL CONFIRM
+   Если видишь новый dock с текстом "Мик Чат Кат Кино" — патч загрузился.
+   ========================================================= */
+
+html::after{
+  content:'26.7';
+  position:fixed;
+  left:8px;
+  bottom:8px;
+  z-index:2147483647;
+  padding:3px 7px;
+  border-radius:999px;
+  background:rgba(34,197,94,.82);
+  color:#020617;
+  font:900 10px/1 system-ui, -apple-system, Segoe UI, sans-serif;
+  pointer-events:none;
+  opacity:.78;
+}
+
+/* Убиваем старые overlay-элементы ещё жёстче */
+.jc-rave-fixed-dock,
+.jc-player-overlay-ui,
+.jc-player-control-dock,
+.jc-site-cinema-btn,
+.jc-native-fullscreen-warning,
+.jc-rave-fullscreen-note,
+body > .jc-rave-fixed-dock,
+body > .jc-site-cinema-btn{
+  display:none!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  width:0!important;
+  height:0!important;
+  overflow:hidden!important;
+}
+
+/* Новый чистый dock должен быть виден всегда на странице просмотра */
+#jcCleanPlayerDock{
+  z-index:2147483646!important;
+  display:flex!important;
+  visibility:visible!important;
+}
+
+body.jc-watch-active #jcCleanPlayerDock,
+body.jc-site-cinema-clean #jcCleanPlayerDock{
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+
+#jcCleanPlayerDock .jc-clean-btn{
+  background:rgba(8,12,24,.82)!important;
+}
+
+#jcCleanPlayerDock .jc-clean-btn.active{
+  background:linear-gradient(135deg,var(--primary),var(--primary2))!important;
+}
+
+#jcCleanCinemaBtn{
+  z-index:2147483645!important;
+}
