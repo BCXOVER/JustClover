@@ -4435,3 +4435,166 @@ body.jc-wallpaper-ultra #jcPremiumBgCanvas{
     grid-template-columns:1fr;
   }
 }
+
+
+/* =========================================================
+   JustClover Stage 25 — Wallpaper Engine polish/tools
+   UI polish + preview card + import/export + pause + randomizer.
+   ========================================================= */
+
+.jc-wallpaper-panel{
+  position:relative;
+  overflow:hidden;
+}
+
+.jc-wallpaper-panel::before{
+  content:'';
+  position:absolute;
+  inset:-30% -20% auto auto;
+  width:360px;
+  height:360px;
+  border-radius:999px;
+  background:radial-gradient(circle, color-mix(in srgb,var(--primary2) 18%, transparent), transparent 68%);
+  pointer-events:none;
+  opacity:.8;
+}
+
+.jc-wallpaper-panel > *{
+  position:relative;
+  z-index:1;
+}
+
+.jc-wallpaper-preview-card{
+  margin:14px 0;
+  min-height:150px;
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,.12);
+  background:
+    radial-gradient(circle at 25% 28%, var(--p1), transparent 32%),
+    radial-gradient(circle at 75% 32%, var(--p2), transparent 34%),
+    radial-gradient(circle at 50% 82%, var(--p3), transparent 38%),
+    linear-gradient(135deg,#020617,rgba(15,23,42,.88));
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:14px;
+  align-items:end;
+  padding:16px;
+  overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 16px 48px rgba(0,0,0,.24);
+}
+
+.jc-wallpaper-preview-card strong{
+  display:block;
+  font-size:20px;
+  letter-spacing:-.04em;
+}
+
+.jc-wallpaper-preview-card span{
+  display:block;
+  margin-top:5px;
+  color:rgba(255,255,255,.72);
+  font-size:12px;
+  line-height:1.45;
+}
+
+.jc-wallpaper-preview-pill{
+  padding:8px 11px;
+  border-radius:999px;
+  background:rgba(0,0,0,.28);
+  border:1px solid rgba(255,255,255,.13);
+  color:#fff;
+  font-weight:850;
+  font-size:12px;
+  backdrop-filter:blur(12px);
+}
+
+.jc-wallpaper-preset{
+  position:relative;
+}
+
+.jc-wallpaper-preset.active::after{
+  content:'активно';
+  position:absolute;
+  right:10px;
+  top:10px;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.16);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.jc-wallpaper-tool-row{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+.jc-wallpaper-tool-row .btn{
+  min-height:42px;
+  border-radius:15px;
+}
+
+.jc-wallpaper-json-box{
+  display:none;
+  margin-top:12px;
+  gap:8px;
+  grid-template-columns:minmax(0,1fr) auto;
+}
+
+.jc-wallpaper-json-box.open{
+  display:grid;
+}
+
+.jc-wallpaper-json-box textarea{
+  min-height:92px;
+  resize:vertical;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:rgba(4,6,14,.62);
+  color:var(--soft);
+  padding:12px;
+  font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size:12px;
+}
+
+.jc-wallpaper-json-box .btn{
+  min-width:110px;
+}
+
+.jc-wallpaper-status{
+  padding:10px 12px;
+  border-radius:16px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.08);
+}
+
+body.jc-wallpaper-paused #jcPremiumBgCanvas{
+  opacity:.08!important;
+}
+
+body.jc-wallpaper-paused #jcWallpaperMediaLayer video,
+body.jc-wallpaper-paused #jcWallpaperMediaLayer img{
+  opacity:.16!important;
+}
+
+@media(max-width:960px){
+  .jc-wallpaper-preview-card{
+    grid-template-columns:1fr;
+  }
+  .jc-wallpaper-tool-row{
+    grid-template-columns:1fr 1fr;
+  }
+  .jc-wallpaper-json-box.open{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:560px){
+  .jc-wallpaper-tool-row{
+    grid-template-columns:1fr;
+  }
+}

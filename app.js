@@ -4641,3 +4641,193 @@ function jc2224Init(){
 }
 
 setTimeout(jc2224Init, 900);
+
+
+/* =========================================================
+   JustClover Stage 25 Wallpaper Engine polish/tools JS
+   Version: stage25-wallpaper-polish-tools-20260501-1
+   ========================================================= */
+
+function jc25Toast(text){
+  if(typeof jc2224Toast === 'function') jc2224Toast(text);
+  else if(typeof jcStage5Toast === 'function') jcStage5Toast(text);
+  else status?.(els?.roomStatus, text);
+}
+
+function jc25PaletteForPreview(){
+  try{
+    const pal = (typeof jc217Palettes !== 'undefined' && (jc217Palettes.customWallpaper || jc217Palettes[jc217Active])) || null;
+    return pal?.colors || ['#8b5cf6','#22d3ee','#22c55e'];
+  }catch{
+    return ['#8b5cf6','#22d3ee','#22c55e'];
+  }
+}
+
+function jc25UpdatePreview(){
+  const card = document.querySelector('.jc-wallpaper-preview-card');
+  if(!card) return;
+
+  const colors = jc25PaletteForPreview();
+  card.style.setProperty('--p1', colors[0] || '#8b5cf6');
+  card.style.setProperty('--p2', colors[1] || '#22d3ee');
+  card.style.setProperty('--p3', colors[2] || '#22c55e');
+
+  const effect = localStorage.getItem('jc-wallpaper-effect') || 'aurora';
+  const q = localStorage.getItem('jc-premium-quality') || 'normal';
+  const media = document.querySelector('#jcWallpaperMediaLayer')?.dataset.active || 'none';
+  const strong = card.querySelector('strong');
+  const span = card.querySelector('span');
+  const pill = card.querySelector('.jc-wallpaper-preview-pill');
+
+  if(strong) strong.textContent = 'Текущий live wallpaper';
+  if(span) span.textContent = `Эффект: ${effect} · качество: ${q} · файл-фон: ${media}`;
+  if(pill) pill.textContent = document.body.classList.contains('jc-wallpaper-paused') ? 'Пауза' : 'Live';
+}
+
+function jc25RandomPreset(){
+  const builtins = (typeof jc2224Builtins !== 'undefined') ? Object.keys(jc2224Builtins) : [];
+  if(!builtins.length) return;
+  const id = builtins[Math.floor(Math.random() * builtins.length)];
+  jc2224ApplyPreset?.(id);
+  jc25UpdatePreview();
+}
+
+function jc25TogglePause(){
+  const paused = !document.body.classList.contains('jc-wallpaper-paused');
+  document.body.classList.toggle('jc-wallpaper-paused', paused);
+  localStorage.setItem('jc-wallpaper-paused', paused ? '1' : '0');
+
+  const video = document.querySelector('#jcWallpaperVideo');
+  if(video){
+    if(paused) video.pause();
+    else video.play().catch(()=>{});
+  }
+
+  jc25Toast(paused ? 'Wallpaper поставлен на паузу' : 'Wallpaper снова live');
+  jc25UpdatePreview();
+}
+
+function jc25ImportJson(text){
+  try{
+    const obj = JSON.parse(String(text || '').trim());
+    if(!obj || typeof obj !== 'object') throw new Error('bad');
+    if(!obj.effect) obj.effect = 'aurora';
+    if(!obj.colors || !Array.isArray(obj.colors)) obj.colors = ['#8b5cf6','#22d3ee','#22c55e','#ffffff'];
+    if(!obj.title) obj.title = 'Imported preset';
+
+    jc2224ApplyPreset?.('imported', obj);
+
+    const list = jc2224SavedPresets?.() || [];
+    list.unshift({...obj, title: obj.title || 'Imported preset', importedAt:Date.now()});
+    jc2224SavePresets?.(list);
+    jc2224RenderSaved?.();
+
+    jc25Toast('JSON-пресет импортирован');
+    jc25UpdatePreview();
+  }catch(e){
+    jc25Toast('Не удалось импортировать JSON');
+  }
+}
+
+function jc25ExportFull(){
+  const p = jc2224CurrentPresetObject?.('Export preset') || {};
+  const full = {
+    ...p,
+    app:'JustClover Wallpaper Engine',
+    version:'stage25-wallpaper-polish-tools-20260501-1',
+    note:'Файл MP4/GIF не экспортируется, только параметры эффекта.'
+  };
+  navigator.clipboard?.writeText(JSON.stringify(full, null, 2)).then(
+    () => jc25Toast('Полный JSON скопирован'),
+    () => jc25Toast('Не удалось скопировать JSON')
+  );
+}
+
+function jc25PatchPanel(){
+  const panel = document.querySelector('.jc-wallpaper-panel');
+  if(!panel || panel.dataset.stage25 === '1') return;
+  panel.dataset.stage25 = '1';
+
+  const grid = panel.querySelector('.jc-wallpaper-grid');
+  if(grid && !panel.querySelector('.jc-wallpaper-preview-card')){
+    const preview = document.createElement('div');
+    preview.className = 'jc-wallpaper-preview-card';
+    preview.innerHTML = `
+      <div>
+        <strong>Текущий live wallpaper</strong>
+        <span>Эффект: aurora · качество: normal · файл-фон: none</span>
+      </div>
+      <div class="jc-wallpaper-preview-pill">Live</div>
+    `;
+    grid.insertAdjacentElement('beforebegin', preview);
+  }
+
+  const actions = panel.querySelector('.jc-wallpaper-actions');
+  if(actions && !panel.querySelector('.jc-wallpaper-tool-row')){
+    const tools = document.createElement('div');
+    tools.className = 'jc-wallpaper-tool-row';
+    tools.innerHTML = `
+      <button class="btn soft" type="button" id="jcWallpaperRandomBtn">Случайный пресет</button>
+      <button class="btn soft" type="button" id="jcWallpaperPauseBtn">Пауза / Live</button>
+      <button class="btn soft" type="button" id="jcWallpaperImportToggle">Импорт JSON</button>
+      <button class="btn primary" type="button" id="jcWallpaperExportFull">Скопировать полный JSON</button>
+    `;
+    actions.insertAdjacentElement('beforebegin', tools);
+
+    const box = document.createElement('div');
+    box.className = 'jc-wallpaper-json-box';
+    box.innerHTML = `
+      <textarea id="jcWallpaperJsonImport" placeholder="Вставь JSON пресета сюда"></textarea>
+      <button class="btn primary" type="button" id="jcWallpaperImportRun">Импорт</button>
+    `;
+    tools.insertAdjacentElement('afterend', box);
+
+    tools.querySelector('#jcWallpaperRandomBtn').onclick = jc25RandomPreset;
+    tools.querySelector('#jcWallpaperPauseBtn').onclick = jc25TogglePause;
+    tools.querySelector('#jcWallpaperImportToggle').onclick = () => box.classList.toggle('open');
+    tools.querySelector('#jcWallpaperExportFull').onclick = jc25ExportFull;
+    box.querySelector('#jcWallpaperImportRun').onclick = () => jc25ImportJson(box.querySelector('#jcWallpaperJsonImport').value);
+  }
+
+  panel.querySelectorAll('.jc-wallpaper-preset').forEach(btn => {
+    if(btn.dataset.stage25 === '1') return;
+    btn.dataset.stage25 = '1';
+    btn.addEventListener('click', () => setTimeout(jc25UpdatePreview, 80));
+  });
+
+  ['#jcWallpaperMediaOpacity','#jcWallpaperMediaBlur','#jcWallpaperDarken','#jcWallpaperEffectOpacity','#jcWallpaperEffectSelect','#jcWallpaperQuality','#jcWallpaperSpeed','#jcWallpaperFit'].forEach(sel => {
+    const el = panel.querySelector(sel);
+    if(el && el.dataset.stage25 !== '1'){
+      el.dataset.stage25 = '1';
+      el.addEventListener('input', () => setTimeout(jc25UpdatePreview, 50));
+      el.addEventListener('change', () => setTimeout(jc25UpdatePreview, 50));
+    }
+  });
+
+  jc25UpdatePreview();
+}
+
+function jc25ApplyPausedState(){
+  const paused = localStorage.getItem('jc-wallpaper-paused') === '1';
+  document.body.classList.toggle('jc-wallpaper-paused', paused);
+  const video = document.querySelector('#jcWallpaperVideo');
+  if(video){
+    if(paused) video.pause();
+  }
+}
+
+function jc25Patch(){
+  jc25PatchPanel();
+  jc25ApplyPausedState();
+  jc25UpdatePreview();
+
+  setInterval(() => {
+    jc25PatchPanel();
+    jc25ApplyPausedState();
+    jc25UpdatePreview();
+  }, 1200);
+
+  console.log('JustClover Stage 25 Wallpaper polish/tools active: stage25-wallpaper-polish-tools-20260501-1');
+}
+
+setTimeout(jc25Patch, 1400);
