@@ -4720,3 +4720,313 @@ body.jc-wallpaper-paused #jcWallpaperMediaLayer img{
     grid-template-columns:1fr;
   }
 }
+
+
+/* =========================================================
+   JustClover Stage 26 — Rave-like player voice/chat overlay
+   - компактный микрофон
+   - микрофон доступен поверх плеера и в кино-режиме
+   - сообщения бегут верхней строкой поверх плеера
+   ========================================================= */
+
+/* Голосовая карточка справа больше не занимает пол-экрана */
+.voice-card{
+  min-height:auto!important;
+  padding:13px!important;
+  display:grid;
+  gap:9px;
+}
+
+.voice-card h3,
+.voice-card .card-title,
+.voice-card .voice-wave{
+  display:none!important;
+}
+
+.voice-card #voiceBtn,
+#voiceBtn{
+  min-height:38px!important;
+  padding:8px 12px!important;
+  border-radius:999px!important;
+  font-size:13px!important;
+}
+
+#voiceStatus{
+  font-size:12px!important;
+  line-height:1.35!important;
+  opacity:.82;
+}
+
+/* Плеер получает Rave-like overlay */
+.player-frame{
+  position:relative!important;
+  overflow:hidden!important;
+}
+
+.jc-player-overlay-ui{
+  position:absolute;
+  inset:0;
+  z-index:35;
+  pointer-events:none;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:12px;
+}
+
+.jc-top-chat-strip{
+  align-self:center;
+  width:min(760px,calc(100% - 24px));
+  min-height:40px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(3,6,14,.58);
+  backdrop-filter:blur(16px) saturate(135%);
+  -webkit-backdrop-filter:blur(16px) saturate(135%);
+  box-shadow:0 14px 42px rgba(0,0,0,.34);
+  color:rgba(255,255,255,.92);
+  opacity:0;
+  transform:translateY(-10px);
+  transition:.24s ease;
+  overflow:hidden;
+}
+
+.jc-top-chat-strip.show{
+  opacity:1;
+  transform:translateY(0);
+}
+
+.jc-top-chat-avatar{
+  width:26px;
+  height:26px;
+  border-radius:10px;
+  object-fit:cover;
+  flex:0 0 auto;
+  border:1px solid rgba(255,255,255,.14);
+}
+
+.jc-top-chat-text{
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  font-size:13px;
+  font-weight:750;
+}
+
+.jc-top-chat-text b{
+  color:var(--primary2);
+  margin-right:6px;
+}
+
+.jc-player-control-dock{
+  align-self:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  pointer-events:auto;
+  padding:8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(3,6,14,.48);
+  backdrop-filter:blur(18px) saturate(140%);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  box-shadow:0 16px 48px rgba(0,0,0,.36);
+  opacity:.92;
+  transform:translateY(6px);
+  transition:.18s ease;
+}
+
+.player-frame:hover .jc-player-control-dock,
+body.cinema-mode .jc-player-control-dock{
+  opacity:1;
+  transform:translateY(0);
+}
+
+.jc-player-mini-btn{
+  width:44px;
+  height:44px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.13);
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+  font-size:18px;
+  font-weight:950;
+  transition:.15s ease;
+  position:relative;
+  overflow:hidden;
+}
+
+.jc-player-mini-btn:hover{
+  transform:translateY(-1px) scale(1.03);
+  border-color:color-mix(in srgb,var(--primary2) 42%, rgba(255,255,255,.14));
+  box-shadow:0 12px 34px rgba(0,0,0,.32), var(--glow);
+}
+
+.jc-player-mini-btn.active{
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:white;
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--primary2) 34%, transparent), 0 0 32px color-mix(in srgb,var(--primary2) 24%, transparent);
+}
+
+.jc-player-mini-btn.muted{
+  background:rgba(248,113,113,.16);
+  border-color:rgba(248,113,113,.25);
+}
+
+.jc-player-mini-btn .jc-live-dot{
+  position:absolute;
+  right:7px;
+  top:7px;
+  width:8px;
+  height:8px;
+  border-radius:999px;
+  background:#22c55e;
+  box-shadow:0 0 12px #22c55e;
+  opacity:0;
+}
+
+.jc-player-mini-btn.active .jc-live-dot{
+  opacity:1;
+}
+
+.jc-mic-toast{
+  position:absolute;
+  left:50%;
+  bottom:76px;
+  transform:translateX(-50%) translateY(8px);
+  z-index:36;
+  pointer-events:none;
+  padding:9px 13px;
+  border-radius:999px;
+  background:rgba(3,6,14,.68);
+  border:1px solid rgba(255,255,255,.12);
+  color:#fff;
+  font-size:12px;
+  font-weight:850;
+  backdrop-filter:blur(14px);
+  opacity:0;
+  transition:.22s ease;
+}
+
+.jc-mic-toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+/* Кино-режим: overlay остаётся доступным поверх всего */
+body.cinema-mode .jc-player-overlay-ui{
+  position:absolute;
+  padding:14px;
+}
+
+body.cinema-mode .jc-top-chat-strip{
+  width:min(900px,calc(100% - 28px));
+  min-height:42px;
+}
+
+body.cinema-mode .jc-player-control-dock{
+  position:absolute;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%);
+}
+
+/* Когда плеер в 16:9 — не съедаем место */
+body.player-16x9 .jc-player-overlay-ui{
+  padding:10px;
+}
+
+/* Тонкая бегущая строка для нескольких сообщений */
+.jc-message-ribbon{
+  position:absolute;
+  top:58px;
+  left:12px;
+  right:12px;
+  z-index:34;
+  height:32px;
+  pointer-events:none;
+  overflow:hidden;
+  border-radius:999px;
+  opacity:.0;
+  transition:.22s ease;
+}
+
+.jc-message-ribbon.show{
+  opacity:1;
+}
+
+.jc-message-ribbon-inner{
+  display:inline-flex;
+  gap:18px;
+  align-items:center;
+  min-width:100%;
+  animation:jcRibbonMove 14s linear forwards;
+  color:rgba(255,255,255,.86);
+  font-size:12px;
+  font-weight:750;
+  text-shadow:0 2px 12px rgba(0,0,0,.72);
+  white-space:nowrap;
+}
+
+.jc-message-ribbon-item{
+  display:inline-flex;
+  gap:5px;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(3,6,14,.34);
+  border:1px solid rgba(255,255,255,.08);
+  backdrop-filter:blur(12px);
+}
+
+@keyframes jcRibbonMove{
+  from{transform:translateX(100%)}
+  to{transform:translateX(-100%)}
+}
+
+/* Кнопка чата на мобиле не конфликтует с overlay */
+@media(max-width:760px){
+  .jc-player-overlay-ui{
+    padding:9px;
+  }
+
+  .jc-top-chat-strip{
+    width:calc(100% - 18px);
+    min-height:36px;
+    padding:7px 10px;
+  }
+
+  .jc-top-chat-avatar{
+    width:24px;
+    height:24px;
+    border-radius:9px;
+  }
+
+  .jc-top-chat-text{
+    font-size:12px;
+  }
+
+  .jc-player-control-dock{
+    gap:7px;
+    padding:7px;
+  }
+
+  .jc-player-mini-btn{
+    width:40px;
+    height:40px;
+    font-size:16px;
+  }
+
+  .voice-card{
+    display:none!important;
+  }
+}

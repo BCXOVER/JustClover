@@ -4945,3 +4945,204 @@ function jc251Patch(){
 }
 
 setTimeout(jc251Patch, 1000);
+
+
+/* =========================================================
+   JustClover Stage 26 — Rave-like player voice/chat overlay JS
+   Version: stage26-player-rave-voice-overlay-20260501-1
+   ========================================================= */
+
+let jc26TopMessages = [];
+let jc26OverlayReady = false;
+
+function jc26Toast(text){
+  if(typeof jcStage5Toast === 'function') jcStage5Toast(text);
+  else status?.(els?.voiceStatus || els?.roomStatus, text);
+}
+
+function jc26EnsurePlayerOverlay(){
+  const frame = document.querySelector('.player-frame');
+  if(!frame || frame.querySelector('.jc-player-overlay-ui')) return;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'jc-player-overlay-ui';
+  overlay.innerHTML = `
+    <div class="jc-top-chat-strip">
+      <img class="jc-top-chat-avatar" src="" alt="">
+      <div class="jc-top-chat-text"></div>
+    </div>
+
+    <div class="jc-message-ribbon">
+      <div class="jc-message-ribbon-inner"></div>
+    </div>
+
+    <div class="jc-player-control-dock">
+      <button class="jc-player-mini-btn muted" type="button" data-player-mic title="Микрофон">
+        🎙<span class="jc-live-dot"></span>
+      </button>
+      <button class="jc-player-mini-btn" type="button" data-player-chat title="Чат">💬</button>
+      <button class="jc-player-mini-btn" type="button" data-player-catalog title="Каталог">＋</button>
+      <button class="jc-player-mini-btn" type="button" data-player-cinema title="Кино">⛶</button>
+    </div>
+
+    <div class="jc-mic-toast"></div>
+  `;
+  frame.appendChild(overlay);
+
+  overlay.querySelector('[data-player-mic]').onclick = () => jc26ToggleMic();
+  overlay.querySelector('[data-player-chat]').onclick = () => jc26ToggleChat();
+  overlay.querySelector('[data-player-catalog]').onclick = () => {
+    if(typeof jcStage8OpenCatalog === 'function') jcStage8OpenCatalog('youtube');
+    else document.querySelector('.toolbar-chip[data-jc-action="catalog-overlay"]')?.click();
+  };
+  overlay.querySelector('[data-player-cinema]').onclick = () => {
+    document.body.classList.toggle('cinema-mode');
+    document.querySelector('[data-player-cinema]')?.classList.toggle('active', document.body.classList.contains('cinema-mode'));
+  };
+
+  jc26OverlayReady = true;
+  jc26SyncMicButton();
+}
+
+function jc26MicToast(text){
+  const box = document.querySelector('.jc-mic-toast');
+  if(!box) return;
+  box.textContent = text;
+  box.classList.add('show');
+  clearTimeout(box._timer);
+  box._timer = setTimeout(() => box.classList.remove('show'), 1600);
+}
+
+async function jc26ToggleMic(){
+  try{
+    if(typeof voiceOn !== 'undefined' && voiceOn){
+      await stopVoice();
+      jc26MicToast('Микрофон выключен');
+    } else {
+      await startVoice();
+      jc26MicToast((typeof voiceOn !== 'undefined' && voiceOn) ? 'Микрофон включён' : 'Микрофон недоступен');
+    }
+  }catch(e){
+    jc26MicToast('Микрофон недоступен');
+  }
+  jc26SyncMicButton();
+}
+
+function jc26ToggleChat(){
+  // На телефоне открываем drawer-чата, на ПК скрываем/показываем колонку.
+  if(window.innerWidth <= 760){
+    document.body.classList.toggle('mobile-chat-open');
+    document.querySelector('[data-player-chat]')?.classList.toggle('active', document.body.classList.contains('mobile-chat-open'));
+    return;
+  }
+
+  document.body.classList.toggle('chat-hidden');
+  document.querySelector('[data-player-chat]')?.classList.toggle('active', !document.body.classList.contains('chat-hidden'));
+}
+
+function jc26SyncMicButton(){
+  const btn = document.querySelector('[data-player-mic]');
+  if(!btn) return;
+  const on = typeof voiceOn !== 'undefined' && !!voiceOn;
+  btn.classList.toggle('active', on);
+  btn.classList.toggle('muted', !on);
+  btn.title = on ? 'Выключить микрофон' : 'Включить микрофон';
+}
+
+function jc26ShowTopMessage(m){
+  jc26EnsurePlayerOverlay();
+
+  if(!m || (!m.text && !m.mediaUrl)) return;
+  if(m.type === 'system') return;
+
+  const strip = document.querySelector('.jc-top-chat-strip');
+  const av = strip?.querySelector('.jc-top-chat-avatar');
+  const text = strip?.querySelector('.jc-top-chat-text');
+  if(!strip || !text) return;
+
+  const name = `${esc(m.nickname || 'User')}#${esc(m.tag || '0000')}`;
+  const msg = m.type === 'gif' ? 'GIF' : String(m.text || '').slice(0, 140);
+  if(av){
+    av.src = m.avatarUrl || avatar(m.nickname || 'JC');
+    av.style.display = '';
+  }
+
+  text.innerHTML = `<b>${name}</b>${esc(msg)}`;
+  strip.classList.add('show');
+
+  clearTimeout(strip._timer);
+  strip._timer = setTimeout(() => strip.classList.remove('show'), 5200);
+
+  jc26PushRibbon(m);
+}
+
+function jc26PushRibbon(m){
+  const ribbon = document.querySelector('.jc-message-ribbon');
+  const inner = document.querySelector('.jc-message-ribbon-inner');
+  if(!ribbon || !inner) return;
+
+  const name = `${m.nickname || 'User'}#${m.tag || '0000'}`;
+  const msg = m.type === 'gif' ? 'GIF' : String(m.text || '').slice(0, 90);
+  jc26TopMessages.push({name, msg, t:Date.now()});
+  jc26TopMessages = jc26TopMessages.filter(x => Date.now() - x.t < 18000).slice(-5);
+
+  inner.innerHTML = jc26TopMessages
+    .map(x => `<span class="jc-message-ribbon-item"><b>${esc(x.name)}</b> ${esc(x.msg)}</span>`)
+    .join('');
+
+  ribbon.classList.remove('show');
+  inner.style.animation = 'none';
+  void inner.offsetWidth;
+  inner.style.animation = '';
+  ribbon.classList.add('show');
+
+  clearTimeout(ribbon._timer);
+  ribbon._timer = setTimeout(() => ribbon.classList.remove('show'), 14000);
+}
+
+// Оборачиваем addChat так, чтобы сообщения появлялись поверх плеера.
+const jc26PrevAddChat = addChat;
+addChat = function(m){
+  jc26PrevAddChat(m);
+  setTimeout(() => jc26ShowTopMessage(m), 40);
+};
+
+// Оборачиваем voice start/stop, чтобы кнопка синхронизировалась.
+const jc26PrevStartVoice = startVoice;
+startVoice = async function(){
+  const r = await jc26PrevStartVoice();
+  setTimeout(jc26SyncMicButton, 80);
+  return r;
+};
+
+const jc26PrevStopVoice = stopVoice;
+stopVoice = async function(){
+  const r = await jc26PrevStopVoice();
+  setTimeout(jc26SyncMicButton, 80);
+  return r;
+};
+
+function jc26Patch(){
+  jc26EnsurePlayerOverlay();
+  jc26SyncMicButton();
+
+  setInterval(() => {
+    jc26EnsurePlayerOverlay();
+    jc26SyncMicButton();
+
+    const cinema = document.querySelector('[data-player-cinema]');
+    if(cinema) cinema.classList.toggle('active', document.body.classList.contains('cinema-mode'));
+
+    const chat = document.querySelector('[data-player-chat]');
+    if(chat){
+      const active = window.innerWidth <= 760
+        ? document.body.classList.contains('mobile-chat-open')
+        : !document.body.classList.contains('chat-hidden');
+      chat.classList.toggle('active', active);
+    }
+  }, 900);
+
+  console.log('JustClover Stage 26 player rave voice/chat overlay active: stage26-player-rave-voice-overlay-20260501-1');
+}
+
+setTimeout(jc26Patch, 1000);
