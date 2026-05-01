@@ -2,7 +2,7 @@ import { firebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInAnonymously,signInWithPopup,GoogleAuthProvider,signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { getDatabase,ref,get,set,update,push,remove,onValue,onChildAdded,onDisconnect,serverTimestamp,query,orderByChild,equalTo,off } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
-console.log('JustClover watch layout app.js loaded: watchlayout-20260501-15');
+console.log('JustClover cinema fix app.js loaded: cinemafix-20260501-16');
 window.addEventListener('error', e => console.error('JustClover runtime error:', e.message, e.error));
 const $=id=>document.getElementById(id);
 const els={setupWarning:$('setupWarning'),authView:$('authView'),appView:$('appView'),topUser:$('topUser'),logoutBtn:$('logoutBtn'),openProfileBtn:$('openProfileBtn'),loginTab:$('loginTab'),registerTab:$('registerTab'),guestTab:$('guestTab'),authForm:$('authForm'),guestSubmit:$('guestSubmit'),googleSubmit:$('googleSubmit'),authSubmit:$('authSubmit'),nickLabel:$('nickLabel'),nickInput:$('nickInput'),emailInput:$('emailInput'),passwordInput:$('passwordInput'),authStatus:$('authStatus'),miniProfile:$('miniProfile'),miniAvatar:$('miniAvatar'),miniName:$('miniName'),miniTag:$('miniTag'),miniStatus:$('miniStatus'),roomNameInput:$('roomNameInput'),createRoomBtn:$('createRoomBtn'),joinRoomInput:$('joinRoomInput'),joinRoomBtn:$('joinRoomBtn'),copyInviteBtn:$('copyInviteBtn'),openRoomBtn:$('openRoomBtn'),closeRoomBtn:$('closeRoomBtn'),publicRoomBtn:$('publicRoomBtn'),inviteRoomBtn:$('inviteRoomBtn'),roomStatus:$('roomStatus'),membersList:$('membersList'),sourceType:$('sourceType'),sourceUrl:$('sourceUrl'),localVideoFile:$('localVideoFile'),sourceTitle:$('sourceTitle'),setSourceBtn:$('setSourceBtn'),sourceOpenBtn:$('sourceOpenBtn'),sourceOpenBtnMirror:$('sourceOpenBtnMirror'),sourceHelp:$('sourceHelp'),sourceNote:$('sourceNote'),videoPlayer:$('videoPlayer'),youtubePlayer:$('youtubePlayer'),youtubeWrap:$('youtubeWrap'),iframePlayer:$('iframePlayer'),externalPlayer:$('externalPlayer'),externalText:$('externalText'),externalLink:$('externalLink'),emptyPlayer:$('emptyPlayer'),publicRoomsList:$('publicRoomsList'),onlineUsersList:$('onlineUsersList'),chatMessages:$('chatMessages'),chatForm:$('chatForm'),chatInput:$('chatInput'),voiceBtn:$('voiceBtn'),voiceStatus:$('voiceStatus'),remoteAudio:$('remoteAudio'),profileNick:$('profileNick'),profileTag:$('profileTag'),profileAvatar:$('profileAvatar'),profileCover:$('profileCover'),profileStatusText:$('profileStatusText'),profileBio:$('profileBio'),profileAccent:$('profileAccent'),saveProfileBtn:$('saveProfileBtn'),profileSaveStatus:$('profileSaveStatus'),profilePreviewCard:$('profilePreviewCard'),profilePreviewAvatar:$('profilePreviewAvatar'),profilePreviewName:$('profilePreviewName'),profilePreviewTag:$('profilePreviewTag'),friendSearchInput:$('friendSearchInput'),friendSearchBtn:$('friendSearchBtn'),friendSearchResults:$('friendSearchResults'),incomingRequestsList:$('incomingRequestsList'),friendsList:$('friendsList'),dmEmptyState:$('dmEmptyState'),dmTitle:$('dmTitle'),dmMessages:$('dmMessages'),dmForm:$('dmForm'),dmText:$('dmText'),dmMediaUrl:$('dmMediaUrl'),sendDmBtn:$('sendDmBtn'),friendRoomJoinBtn:$('friendRoomJoinBtn'),mediaPicker:$('mediaPicker'),mediaPickerBackdrop:$('mediaPickerBackdrop'),mediaPickerCloseBtn:$('mediaPickerCloseBtn'),mediaSearchForm:$('mediaSearchForm'),mediaSearchInput:$('mediaSearchInput'),mediaPickerResults:$('mediaPickerResults'),mediaPickerHint:$('mediaPickerHint'),mediaPasteBtn:$('mediaPasteBtn'),mediaExternalBtn:$('mediaExternalBtn'),youtubeApiBox:$('youtubeApiBox'),ytApiKeyInput:$('ytApiKeyInput'),saveYtApiKeyBtn:$('saveYtApiKeyBtn'),emojiBtn:$('emojiBtn'),gifBtn:$('gifBtn'),emojiPanel:$('emojiPanel'),reactionBurst:$('reactionBurst'),gifPicker:$('gifPicker'),gifPickerBackdrop:$('gifPickerBackdrop'),gifPickerCloseBtn:$('gifPickerCloseBtn'),gifSearchForm:$('gifSearchForm'),gifSearchInput:$('gifSearchInput'),gifPickerResults:$('gifPickerResults'),gifPickerHint:$('gifPickerHint'),giphyApiKeyInput:$('giphyApiKeyInput'),saveGiphyApiKeyBtn:$('saveGiphyApiKeyBtn'),gifPasteBtn:$('gifPasteBtn'),openGiphyFromPickerBtn:$('openGiphyFromPickerBtn')};
@@ -1344,4 +1344,88 @@ section = function(id){
 jcWatchLayoutSync();
 setTimeout(jcWatchLayoutSync, 400);
 setTimeout(jcWatchLayoutSync, 1200);
+
+
+/* ===== Cinema Exit + Menu Rename Fix cinemafix-20260501-16 ===== */
+console.log('JustClover cinema/menu fix loaded: cinemafix-20260501-16');
+
+els.cinemaExitBtn = document.getElementById('cinemaExitBtn');
+
+function jcCinemaCfg(){
+  try { return JSON.parse(localStorage.getItem('jc-watch-layout-v1') || '{}'); }
+  catch { return {}; }
+}
+
+function jcCinemaSave(next){
+  const cfg = jcCinemaCfg();
+  const merged = {...cfg, ...next};
+  localStorage.setItem('jc-watch-layout-v1', JSON.stringify(merged));
+  return merged;
+}
+
+function jcExitCinema(){
+  jcCinemaSave({cinema:false, chatHidden:false});
+  document.body.dataset.watchCinema = '0';
+  document.body.dataset.chatHidden = '0';
+  document.body.classList.remove('cinema-locked');
+  if(typeof jcApplyWatchLayout === 'function') jcApplyWatchLayout();
+  if(els.cinemaExitBtn) els.cinemaExitBtn.classList.add('hidden');
+  section('watchSection');
+}
+
+function jcCinemaHardSync(){
+  const cfg = jcCinemaCfg();
+  const cinema = !!cfg.cinema || document.body.dataset.watchCinema === '1';
+  document.body.dataset.watchCinema = cinema ? '1' : '0';
+  document.body.classList.toggle('cinema-locked', cinema);
+  if(els.cinemaExitBtn) els.cinemaExitBtn.classList.toggle('hidden', !cinema);
+
+  // В режиме кино чат виден справа, но его можно скрыть отдельной кнопкой.
+  if(cinema && document.body.dataset.chatHidden !== '1') {
+    document.body.dataset.chatHidden = '0';
+  }
+
+  // Меню слева переименовываем на случай, если DOM уже создан старой версией.
+  document.querySelectorAll('.nav-btn[data-section="homeSection"]').forEach(btn => {
+    if(btn.textContent.includes('Каталог')) {
+      btn.innerHTML = '<span>＋</span> Создать комнату';
+    }
+  });
+}
+
+if(els.cinemaExitBtn) els.cinemaExitBtn.onclick = jcExitCinema;
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && document.body.dataset.watchCinema === '1') {
+    e.preventDefault();
+    jcExitCinema();
+  }
+});
+
+const jcCinemaOldToggle = typeof jcToggleCinema === 'function' ? jcToggleCinema : null;
+if(jcCinemaOldToggle){
+  jcToggleCinema = function(){
+    jcCinemaOldToggle();
+    jcCinemaHardSync();
+  };
+}
+
+const jcCinemaOldApply = typeof jcApplyWatchLayout === 'function' ? jcApplyWatchLayout : null;
+if(jcCinemaOldApply){
+  jcApplyWatchLayout = function(){
+    jcCinemaOldApply();
+    jcCinemaHardSync();
+  };
+}
+
+const jcCinemaOldSection = section;
+section = function(id){
+  jcCinemaOldSection(id);
+  requestAnimationFrame(jcCinemaHardSync);
+};
+
+setInterval(jcCinemaHardSync, 800);
+setTimeout(jcCinemaHardSync, 60);
+setTimeout(jcCinemaHardSync, 500);
+setTimeout(jcCinemaHardSync, 1500);
 

@@ -1368,3 +1368,238 @@ body[data-watch-cinema="1"][data-watch-fit="cover"] .anime-player-frame {
   }
 }
 
+
+/* ===== Cinema Exit + Menu Rename Fix cinemafix-20260501-16 ===== */
+.cinema-exit-btn {
+  position:fixed;
+  top:14px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:9999;
+  min-height:42px;
+  padding:10px 16px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.18);
+  background:linear-gradient(135deg,rgba(20,20,30,.92),rgba(50,34,70,.92));
+  color:#fff;
+  font-weight:900;
+  box-shadow:0 18px 44px rgba(0,0,0,.42), 0 0 28px color-mix(in srgb,var(--primary2) 24%,transparent);
+  cursor:pointer;
+  backdrop-filter:blur(16px);
+}
+.cinema-exit-btn:hover {
+  transform:translateX(-50%) translateY(-2px);
+  box-shadow:0 22px 54px rgba(0,0,0,.48), 0 0 34px color-mix(in srgb,var(--primary2) 36%,transparent);
+}
+body[data-watch-cinema="1"] .cinema-exit-btn {
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+}
+body[data-watch-cinema="0"] .cinema-exit-btn,
+.cinema-exit-btn.hidden {
+  display:none!important;
+}
+
+body[data-watch-cinema="1"] {
+  overflow:hidden!important;
+}
+
+body[data-watch-cinema="1"] .topbar,
+body[data-watch-cinema="1"] .rail {
+  display:none!important;
+}
+
+body[data-watch-cinema="1"] .shell {
+  width:100vw!important;
+  max-width:100vw!important;
+  height:100vh!important;
+  margin:0!important;
+  padding:0!important;
+}
+
+body[data-watch-cinema="1"] #appView.app {
+  display:block!important;
+  width:100vw!important;
+  height:100vh!important;
+  padding:0!important;
+  margin:0!important;
+}
+
+body[data-watch-cinema="1"] .content {
+  width:100vw!important;
+  height:100vh!important;
+  padding:0!important;
+  margin:0!important;
+}
+
+body[data-watch-cinema="1"] #watchSection.section.active {
+  display:block!important;
+  width:100vw!important;
+  height:100vh!important;
+  padding:0!important;
+  margin:0!important;
+}
+
+body[data-watch-cinema="1"] #watchSection .anime-watch-shell {
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) var(--jc-watch-chat-width)!important;
+  width:100vw!important;
+  height:100vh!important;
+  gap:0!important;
+  padding:0!important;
+  margin:0!important;
+}
+
+body[data-watch-cinema="1"][data-chat-hidden="1"] #watchSection .anime-watch-shell {
+  grid-template-columns:1fr!important;
+}
+
+body[data-watch-cinema="1"] .anime-stage {
+  width:100%!important;
+  height:100vh!important;
+  min-width:0!important;
+  border-radius:0!important;
+  border:0!important;
+  display:grid!important;
+  grid-template-rows:auto auto auto minmax(0,1fr)!important;
+}
+
+body[data-watch-cinema="1"] .anime-stage-top {
+  min-height:58px!important;
+  grid-template-rows:auto!important;
+  padding-top:52px!important;
+  border-radius:0!important;
+}
+
+body[data-watch-cinema="1"] .watch-layout-tools {
+  position:fixed!important;
+  top:10px!important;
+  left:12px!important;
+  right:12px!important;
+  z-index:9998!important;
+  padding:0!important;
+  justify-content:flex-start!important;
+  background:rgba(8,8,14,.42);
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:18px;
+  backdrop-filter:blur(14px);
+}
+
+body[data-watch-cinema="1"] .anime-nowbar {
+  padding:10px 16px!important;
+}
+
+body[data-watch-cinema="1"] .anime-source-tabs {
+  padding:8px 16px!important;
+}
+
+body[data-watch-cinema="1"] .anime-player-card {
+  min-height:0!important;
+  height:100%!important;
+  border-radius:0!important;
+}
+
+body[data-watch-cinema="1"] .anime-player-frame {
+  height:100%!important;
+  min-height:0!important;
+  max-height:none!important;
+  aspect-ratio:auto!important;
+  border-radius:0!important;
+}
+
+body[data-watch-cinema="1"] .anime-player-frame iframe,
+body[data-watch-cinema="1"] .anime-player-frame video,
+body[data-watch-cinema="1"] #youtubeWrap,
+body[data-watch-cinema="1"] #youtubeWrap iframe {
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+}
+
+body[data-watch-cinema="1"] .anime-reaction-dock {
+  position:absolute;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%);
+  z-index:5;
+  border-radius:999px;
+  background:rgba(0,0,0,.38)!important;
+  backdrop-filter:blur(14px);
+}
+
+body[data-watch-cinema="1"] .anime-side {
+  display:grid!important;
+  width:var(--jc-watch-chat-width)!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  position:relative!important;
+  top:auto!important;
+  border-radius:0!important;
+  border-top:0!important;
+  border-bottom:0!important;
+  border-right:0!important;
+  padding:12px!important;
+  overflow:hidden!important;
+}
+
+body[data-watch-cinema="1"][data-chat-hidden="1"] .anime-side {
+  display:none!important;
+}
+
+body[data-watch-cinema="1"] .anime-chat-card {
+  height:100%!important;
+  min-height:0!important;
+}
+
+body[data-watch-cinema="1"] .anime-side-card {
+  min-height:0!important;
+}
+
+body[data-watch-cinema="1"] .anime-side-card:nth-child(1),
+body[data-watch-cinema="1"] .anime-side-card:nth-child(2) {
+  flex:0 0 auto;
+}
+
+body[data-watch-cinema="1"] .anime-side {
+  grid-template-rows:auto auto minmax(0,1fr)!important;
+}
+
+@media(max-width:900px) {
+  body[data-watch-cinema="1"] #watchSection .anime-watch-shell {
+    grid-template-columns:1fr!important;
+    grid-template-rows:minmax(0,1fr) minmax(240px,36vh)!important;
+  }
+  body[data-watch-cinema="1"] .anime-side {
+    width:100vw!important;
+    height:36vh!important;
+    max-height:36vh!important;
+  }
+  body[data-watch-cinema="1"][data-chat-hidden="1"] #watchSection .anime-watch-shell {
+    grid-template-rows:1fr!important;
+  }
+  .cinema-exit-btn {
+    top:8px;
+    left:auto;
+    right:8px;
+    transform:none;
+    min-height:38px;
+    padding:8px 12px;
+    font-size:13px;
+  }
+  .cinema-exit-btn:hover {
+    transform:translateY(-2px);
+  }
+  body[data-watch-cinema="1"] .watch-layout-tools {
+    top:52px!important;
+    left:8px!important;
+    right:8px!important;
+  }
+}
+
+@media(max-width:520px) {
+  body[data-watch-cinema="1"] .anime-stage-top {
+    padding-top:94px!important;
+  }
+}
+

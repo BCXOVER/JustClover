@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#080912" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icons/icon.svg" />
-  <link rel="stylesheet" href="./style.css?v=watchlayout-20260501-15" />
+  <link rel="stylesheet" href="./style.css?v=cinemafix-20260501-16" />
 </head>
 <body>
   <div class="bg"><div class="orb orb-a"></div><div class="orb orb-b"></div><div class="grid-bg"></div></div>
@@ -63,6 +63,8 @@
       </div>
     </section>
 
+    <button id="cinemaExitBtn" class="cinema-exit-btn hidden" type="button">⟵ Выйти из кино</button>
+
     <section id="appView" class="app hidden">
       <aside class="rail panel">
         <div id="miniProfile" class="mini-card">
@@ -76,7 +78,7 @@
         </div>
 
         <nav class="nav">
-          <button class="nav-btn active" data-section="homeSection" type="button"><span>⌕</span> Каталог</button>
+          <button class="nav-btn active" data-section="homeSection" type="button"><span>＋</span> Создать комнату</button>
           <button class="nav-btn" data-section="watchSection" type="button"><span>▶</span> Просмотр</button>
           <button class="nav-btn" data-section="friendsSection" type="button"><span>◉</span> Друзья</button>
           <button class="nav-btn" data-section="profileSection" type="button"><span>◇</span> Профиль</button>
@@ -254,6 +256,6 @@
 
 
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script type="module" src="./app.js?v=watchlayout-20260501-15"></script>
+  <script type="module" src="./app.js?v=cinemafix-20260501-16"></script>
 </body>
 </html>
