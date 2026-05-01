@@ -1,4 +1,4 @@
-/* JustClover cache killer stage27-5-cinema-cover-audit-20260502-1 */
+/* JustClover cache killer stage28-clean-cinema-player-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));

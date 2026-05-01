@@ -4948,162 +4948,189 @@ setTimeout(jc251Patch, 1000);
 
 
 /* =========================================================
-   JustClover Stage 27 — Player mic/chat panel JS
-   Version: stage27-player-mic-chat-panel-20260502-1
+   JustClover Stage 28 CLEAN — player/cinema JS
+   Version: stage28-clean-cinema-player-20260502-1
    ========================================================= */
-console.log("JustClover Stage 27 loaded:", "stage27-player-mic-chat-panel-20260502-1");
-window.JUSTCLOVER_BUILD = "stage27-player-mic-chat-panel-20260502-1";
+console.log("JustClover Stage 28 CLEAN loaded:", "stage28-clean-cinema-player-20260502-1");
+window.JUSTCLOVER_BUILD = "stage28-clean-cinema-player-20260502-1";
 
 (function(){
+  const BUILD = "stage28-clean-cinema-player-20260502-1";
+  let zoom = Number(localStorage.getItem('jc28CinemaZoom') || '1.035') || 1.035;
+
   function svg(name){
     const icons = {
       mic:'<svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/><path d="M8 21h8"/></svg><i class="slash"></i>',
       chat:'<svg viewBox="0 0 24 24"><path d="M4 6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-5l-5 4v-4a3 3 0 0 1-3-3V6Z"/><path d="M8 8h8"/><path d="M8 11h5"/></svg>',
-      plus:'<svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
       cinema:'<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>'
     };
     return icons[name] || '';
   }
 
-  function ensurePanel(){
-    const frame = document.querySelector('.player-frame');
-    if(!frame) return;
+  function frame(){
+    return document.querySelector('.player-frame');
+  }
 
-    if(!document.getElementById('jcPlayerPanel')){
+  function ensure(){
+    const f = frame();
+    if(!f) return;
+
+    if(!document.getElementById('jc28Panel')){
       const panel = document.createElement('div');
-      panel.id = 'jcPlayerPanel';
+      panel.id = 'jc28Panel';
       panel.innerHTML =
-        '<button class="jc-player-btn muted" type="button" data-player-act="mic">'+svg('mic')+'<span class="label">Мик</span></button>'+
-        '<button class="jc-player-btn" type="button" data-player-act="chat">'+svg('chat')+'<span class="label">Чат</span></button>'+
-        '<button class="jc-player-btn" type="button" data-player-act="catalog">'+svg('plus')+'<span class="label">Кат</span></button>'+
-        '<button class="jc-player-btn" type="button" data-player-act="cinema">'+svg('cinema')+'<span class="label">Кино</span></button>';
-      frame.appendChild(panel);
+        '<button class="jc28-btn muted" type="button" data-jc28-act="mic">'+svg('mic')+'<span class="label">Мик</span></button>'+
+        '<button class="jc28-btn" type="button" data-jc28-act="chat">'+svg('chat')+'<span class="label">Чат</span></button>'+
+        '<button class="jc28-btn" type="button" data-jc28-act="cinema">'+svg('cinema')+'<span class="label">Кино</span></button>';
+      f.appendChild(panel);
     }
 
-    if(!document.getElementById('jcPlayerTopMessage')){
-      const msg = document.createElement('div');
-      msg.id = 'jcPlayerTopMessage';
-      msg.innerHTML = '<img src="" alt=""><div></div>';
-      frame.appendChild(msg);
+    if(!document.getElementById('jc28Toast')){
+      const t = document.createElement('div');
+      t.id = 'jc28Toast';
+      f.appendChild(t);
     }
 
-    if(!document.getElementById('jcPlayerToast')){
-      const toast = document.createElement('div');
-      toast.id = 'jcPlayerToast';
-      frame.appendChild(toast);
+    if(!document.getElementById('jc28TopMsg')){
+      const m = document.createElement('div');
+      m.id = 'jc28TopMsg';
+      m.innerHTML = '<img src="" alt=""><div></div>';
+      f.appendChild(m);
     }
 
-    bindPanel();
+    if(!document.getElementById('jc28Exit')){
+      const b = document.createElement('button');
+      b.id = 'jc28Exit';
+      b.type = 'button';
+      b.textContent = '×';
+      b.title = 'Выйти из кино';
+      b.onclick = exitCinema;
+      document.body.appendChild(b);
+    }
+
+    if(!document.getElementById('jc28ZoomBox')){
+      const box = document.createElement('div');
+      box.id = 'jc28ZoomBox';
+      box.innerHTML = '<button type="button" data-z="-">−</button><button type="button" data-z="+">+</button>';
+      box.querySelector('[data-z="-"]').onclick = () => setZoom(zoom - 0.035);
+      box.querySelector('[data-z="+"]').onclick = () => setZoom(zoom + 0.035);
+      document.body.appendChild(box);
+    }
+
+    bind();
+    applyZoom();
   }
 
-  function bindPanel(){
-    const panel = document.getElementById('jcPlayerPanel');
-    if(!panel || panel.dataset.stage27Bound === '1') return;
-    panel.dataset.stage27Bound = '1';
+  function bind(){
+    const panel = document.getElementById('jc28Panel');
+    if(!panel || panel.dataset.bound === '1') return;
+    panel.dataset.bound = '1';
 
-    const mic = panel.querySelector('[data-player-act="mic"]');
-    const chat = panel.querySelector('[data-player-act="chat"]');
-    const catalog = panel.querySelector('[data-player-act="catalog"]');
-    const cinema = panel.querySelector('[data-player-act="cinema"]');
-
-    if(mic) mic.onclick = toggleMic;
-    if(chat) chat.onclick = toggleChat;
-    if(catalog) catalog.onclick = function(){
-      if(typeof jcStage8OpenCatalog === 'function') jcStage8OpenCatalog('youtube');
-      else document.querySelector('.toolbar-chip[data-jc-action="catalog-overlay"]')?.click();
-    };
-    if(cinema) cinema.onclick = toggleSiteFullscreen;
+    panel.querySelector('[data-jc28-act="mic"]').onclick = toggleMic;
+    panel.querySelector('[data-jc28-act="chat"]').onclick = toggleChat;
+    panel.querySelector('[data-jc28-act="cinema"]').onclick = toggleCinema;
   }
 
-  function syncPanel(){
-    const panel = document.getElementById('jcPlayerPanel');
-    if(!panel) return;
+  function killOpen(){
+    ['externalPlayer','externalLink','externalText'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el){
+        el.style.display = 'none';
+        el.style.visibility = 'hidden';
+        el.style.opacity = '0';
+        el.style.pointerEvents = 'none';
+      }
+    });
+    document.querySelectorAll('.external-player').forEach(el => {
+      el.style.display = 'none';
+      el.style.visibility = 'hidden';
+      el.style.opacity = '0';
+      el.style.pointerEvents = 'none';
+    });
+  }
 
-    const micOn = typeof voiceOn !== 'undefined' && !!voiceOn;
-    const mic = panel.querySelector('[data-player-act="mic"]');
-    if(mic){
-      mic.classList.toggle('active', micOn);
-      mic.classList.toggle('muted', !micOn);
-      const label = mic.querySelector('.label');
-      if(label) label.textContent = micOn ? 'Вкл' : 'Мик';
-      mic.title = micOn ? 'Выключить микрофон' : 'Включить микрофон';
-    }
+  function activeMedia(){
+    return document.querySelector('.player-frame iframe:not(.hidden), .player-frame video:not(.hidden), .player-frame #youtubePlayer:not(.hidden), .player-frame #iframePlayer:not(.hidden), .player-frame #videoPlayer:not(.hidden)');
+  }
 
-    const chat = panel.querySelector('[data-player-act="chat"]');
-    if(chat){
-      const active = innerWidth <= 760 ? document.body.classList.contains('mobile-chat-open') : !document.body.classList.contains('chat-hidden');
-      chat.classList.toggle('active', active);
-      chat.title = active ? 'Скрыть чат' : 'Показать чат';
-    }
+  function applyZoom(){
+    document.documentElement.style.setProperty('--jc28-cinema-zoom', String(Math.max(1, Math.min(1.35, zoom))));
+  }
 
-    const cinema = panel.querySelector('[data-player-act="cinema"]');
-    if(cinema){
-      cinema.classList.toggle('active', document.body.classList.contains('jc-site-fullscreen'));
-      cinema.title = document.body.classList.contains('jc-site-fullscreen') ? 'Выйти из кино' : 'Кино сайта';
-    }
+  function setZoom(v){
+    zoom = Math.max(1, Math.min(1.35, Number(v) || 1.035));
+    localStorage.setItem('jc28CinemaZoom', String(zoom));
+    applyZoom();
+    toast('Zoom кино: ' + Math.round(zoom * 100) + '%');
+  }
 
-    if(typeof els !== 'undefined' && els.externalLink) els.externalLink.textContent = 'Открыть';
+  async function enterCinema(){
+    try{ if(typeof section === 'function') section('watchSection'); }catch(e){}
+
+    killOpen();
+
+    // Сбрасываем все старые конфликтующие режимы.
+    document.body.classList.remove('jc-cinema-open','jc-real-cinema','jc-css-cinema','jc-site-fullscreen','jc-player-frame-fullscreen');
+    document.body.classList.add('jc28-cinema','chat-hidden');
+
+    // Fullscreen всей страницы, НЕ iframe VK.
+    try{
+      if(!document.fullscreenElement && document.documentElement.requestFullscreen){
+        await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
+      }
+    }catch(e){}
+
+    sync();
+    toast('Кино включено. × или Esc — выйти.');
+  }
+
+  async function exitCinema(){
+    document.body.classList.remove('jc28-cinema','jc-cinema-open','jc-real-cinema','jc-css-cinema','jc-site-fullscreen','jc-player-frame-fullscreen');
+    try{
+      if(document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
+    }catch(e){}
+    sync();
+  }
+
+  function toggleCinema(){
+    if(document.body.classList.contains('jc28-cinema')) exitCinema();
+    else enterCinema();
   }
 
   async function toggleMic(){
     try{
       if(typeof voiceOn !== 'undefined' && voiceOn){
         await stopVoice();
-        showToast('Микрофон выключен');
+        toast('Микрофон выключен');
       }else{
         await startVoice();
-        showToast((typeof voiceOn !== 'undefined' && voiceOn) ? 'Микрофон включён' : 'Микрофон недоступен');
+        toast((typeof voiceOn !== 'undefined' && voiceOn) ? 'Микрофон включён' : 'Микрофон недоступен');
       }
     }catch(e){
-      showToast('Микрофон недоступен');
+      toast('Микрофон недоступен');
     }
-    syncPanel();
+    sync();
   }
 
   function toggleChat(){
     if(innerWidth <= 760) document.body.classList.toggle('mobile-chat-open');
     else document.body.classList.toggle('chat-hidden');
-    syncPanel();
+    sync();
   }
 
-  async function enterSiteFullscreen(){
-    try{ if(typeof section === 'function') section('watchSection'); }catch(e){}
-    document.body.classList.add('jc-site-fullscreen','chat-hidden');
-    try{
-      if(!document.fullscreenElement && document.documentElement.requestFullscreen){
-        await document.documentElement.requestFullscreen();
-      }
-    }catch(e){}
-    syncPanel();
-    showToast('Кино сайта включено');
-  }
-
-  async function exitSiteFullscreen(){
-    document.body.classList.remove('jc-site-fullscreen');
-    try{
-      if(document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
-    }catch(e){}
-    syncPanel();
-  }
-
-  async function toggleSiteFullscreen(){
-    if(document.body.classList.contains('jc-site-fullscreen')) await exitSiteFullscreen();
-    else await enterSiteFullscreen();
-  }
-
-  function showToast(text){
-    const toast = document.getElementById('jcPlayerToast');
-    if(!toast) return;
-    toast.textContent = text;
-    toast.classList.add('show');
-    clearTimeout(toast._timer);
-    toast._timer = setTimeout(function(){ toast.classList.remove('show'); }, 1600);
+  function toast(text){
+    const t = document.getElementById('jc28Toast');
+    if(!t) return;
+    t.textContent = text;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 1700);
   }
 
   function showTopMessage(m){
-    ensurePanel();
+    ensure();
     if(!m || (!m.text && !m.mediaUrl)) return;
-    const box = document.getElementById('jcPlayerTopMessage');
+    const box = document.getElementById('jc28TopMsg');
     if(!box) return;
 
     const img = box.querySelector('img');
@@ -5116,716 +5143,121 @@ window.JUSTCLOVER_BUILD = "stage27-player-mic-chat-panel-20260502-1";
 
     box.classList.add('show');
     clearTimeout(box._timer);
-    box._timer = setTimeout(function(){ box.classList.remove('show'); }, 5200);
+    box._timer = setTimeout(() => box.classList.remove('show'), 5200);
   }
 
   function patchAddChat(){
-    if(window.__jcStage27AddChatPatched) return;
+    if(window.__jc28AddChatPatched) return;
     if(typeof addChat !== 'function') return;
-    window.__jcStage27AddChatPatched = true;
+    window.__jc28AddChatPatched = true;
     const prev = addChat;
     addChat = function(m){
       prev(m);
-      setTimeout(function(){ showTopMessage(m); }, 60);
+      setTimeout(() => showTopMessage(m), 60);
     };
-  }
-
-  document.addEventListener('fullscreenchange', function(){
-    if(!document.fullscreenElement && document.body.classList.contains('jc-site-fullscreen')){
-      document.body.classList.remove('jc-site-fullscreen');
-    }
-    setTimeout(syncPanel, 80);
-  });
-
-  function tick(){
-    ensurePanel();
-    patchAddChat();
-    syncPanel();
-
-    // Страховка: правую панель Голос удаляем из DOM, если она появилась позже.
-    document.querySelectorAll('.voice-card, #voiceCard, [class*="voice-card"]').forEach(function(el){
-      el.style.display = 'none';
-    });
-  }
-
-  setInterval(tick, 500);
-  setTimeout(tick, 700);
-})();
-
-
-/* =========================================================
-   JustClover Stage 27.1 — Player polish JS
-   Version: stage27-1-player-polish-20260502-1
-   ========================================================= */
-console.log("JustClover Stage 27.1 loaded:", "stage27-1-player-polish-20260502-1");
-window.JUSTCLOVER_BUILD = "stage27-1-player-polish-20260502-1";
-
-(function(){
-  function polishPanel(){
-    const panel = document.getElementById('jcPlayerPanel');
-    if(panel){
-      const catalog = panel.querySelector('[data-player-act="catalog"]');
-      if(catalog) catalog.style.display = 'none';
-
-      const mic = panel.querySelector('[data-player-act="mic"] .label');
-      if(mic && typeof voiceOn !== 'undefined') mic.textContent = voiceOn ? 'Вкл' : 'Мик';
-
-      const cinema = panel.querySelector('[data-player-act="cinema"] .label');
-      if(cinema) cinema.textContent = document.body.classList.contains('jc-site-fullscreen') ? 'Выйти' : 'Кино';
-    }
-
-    const ext = document.getElementById('externalPlayer') || document.querySelector('.external-player');
-    if(ext){
-      ext.style.left = 'auto';
-      ext.style.right = '12px';
-      ext.style.top = 'auto';
-      ext.style.bottom = document.body.classList.contains('jc-site-fullscreen') ? '14px' : '52px';
-      ext.style.transform = 'none';
-      ext.style.zIndex = document.body.classList.contains('jc-site-fullscreen') ? '2147482500' : '64';
-    }
-
-    const link = document.getElementById('externalLink');
-    if(link){
-      link.textContent = 'Открыть';
-      link.title = 'Открыть источник в новой вкладке';
-    }
-  }
-
-  const oldEnter = window.jcStage27EnterFullscreen;
-  const oldExit = window.jcStage27ExitFullscreen;
-
-  setInterval(polishPanel, 500);
-  setTimeout(polishPanel, 800);
-})();
-
-
-/* =========================================================
-   JustClover Stage 27.2 — Player fullscreen mic JS
-   Version: stage27-2-player-fullscreen-mic-20260502-1
-   ========================================================= */
-console.log("JustClover Stage 27.2 loaded:", "stage27-2-player-fullscreen-mic-20260502-1");
-window.JUSTCLOVER_BUILD = "stage27-2-player-fullscreen-mic-20260502-1";
-
-(function(){
-  function frame(){
-    return document.querySelector('.player-frame');
-  }
-
-  async function enterPlayerFullscreen(){
-    const f = frame();
-    if(!f) return;
-
-    try {
-      if(typeof section === 'function') section('watchSection');
-    } catch(e) {}
-
-    document.body.classList.add('jc-player-frame-fullscreen');
-
-    try {
-      if(!document.fullscreenElement && f.requestFullscreen) {
-        await f.requestFullscreen();
-      } else if(!document.fullscreenElement && f.webkitRequestFullscreen) {
-        await f.webkitRequestFullscreen();
-      }
-    } catch(e) {
-      // fallback на старый site fullscreen, если браузер не дал fullscreen элемента
-      document.body.classList.add('jc-site-fullscreen');
-    }
-
-    sync();
-    toast('Fullscreen плеера: микрофон поверх видео');
-  }
-
-  async function exitPlayerFullscreen(){
-    document.body.classList.remove('jc-player-frame-fullscreen', 'jc-site-fullscreen');
-    try {
-      if(document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
-      else if(document.webkitFullscreenElement && document.webkitExitFullscreen) document.webkitExitFullscreen();
-    } catch(e) {}
-    sync();
-  }
-
-  async function togglePlayerFullscreen(){
-    const f = frame();
-    const isFrameFs = document.fullscreenElement === f || document.webkitFullscreenElement === f || document.body.classList.contains('jc-site-fullscreen');
-    if(isFrameFs) await exitPlayerFullscreen();
-    else await enterPlayerFullscreen();
-  }
-
-  function toast(text){
-    const t = document.getElementById('jcPlayerToast');
-    if(!t) return;
-    t.textContent = text;
-    t.classList.add('show');
-    clearTimeout(t._timer);
-    t._timer = setTimeout(function(){ t.classList.remove('show'); }, 1700);
-  }
-
-  function ensureHint(){
-    const f = frame();
-    if(!f || document.getElementById('jcFullscreenHint')) return;
-    const h = document.createElement('div');
-    h.id = 'jcFullscreenHint';
-    h.textContent = 'Для микрофона поверх видео жми кнопку «Кино» в панели, а не fullscreen внутри VK/YouTube.';
-    f.appendChild(h);
-  }
-
-  function showHint(){
-    ensureHint();
-    const h = document.getElementById('jcFullscreenHint');
-    if(!h) return;
-    h.classList.add('show');
-    clearTimeout(h._timer);
-    h._timer = setTimeout(function(){ h.classList.remove('show'); }, 4500);
-  }
-
-  function sync(){
-    const panel = document.getElementById('jcPlayerPanel');
-    if(!panel) return;
-
-    const f = frame();
-    const isFrameFs = document.fullscreenElement === f || document.webkitFullscreenElement === f || document.body.classList.contains('jc-site-fullscreen');
-
-    const cinema = panel.querySelector('[data-player-act="cinema"]');
-    if(cinema){
-      cinema.classList.toggle('active', isFrameFs);
-      const label = cinema.querySelector('.label');
-      if(label) label.textContent = isFrameFs ? 'Выйти' : 'Кино';
-      cinema.title = isFrameFs ? 'Выйти из fullscreen плеера' : 'Fullscreen плеера';
-    }
-
-    const mic = panel.querySelector('[data-player-act="mic"]');
-    if(mic){
-      const micOn = typeof voiceOn !== 'undefined' && !!voiceOn;
-      mic.classList.toggle('active', micOn);
-      mic.classList.toggle('muted', !micOn);
-      const label = mic.querySelector('.label');
-      if(label) label.textContent = micOn ? 'Вкл' : 'Мик';
-    }
-  }
-
-  function patchCinemaButton(){
-    const panel = document.getElementById('jcPlayerPanel');
-    if(!panel) return;
-
-    const btn = panel.querySelector('[data-player-act="cinema"]');
-    if(btn && btn.dataset.stage272 !== '1'){
-      btn.dataset.stage272 = '1';
-      btn.onclick = function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        togglePlayerFullscreen();
-      };
-    }
-  }
-
-  document.addEventListener('fullscreenchange', function(){
-    const f = frame();
-    if(document.fullscreenElement !== f){
-      document.body.classList.remove('jc-player-frame-fullscreen');
-      if(!document.fullscreenElement) document.body.classList.remove('jc-site-fullscreen');
-    } else {
-      document.body.classList.add('jc-player-frame-fullscreen');
-    }
-    setTimeout(sync, 80);
-  });
-
-  document.addEventListener('webkitfullscreenchange', function(){
-    const f = frame();
-    if(document.webkitFullscreenElement !== f){
-      document.body.classList.remove('jc-player-frame-fullscreen');
-    } else {
-      document.body.classList.add('jc-player-frame-fullscreen');
-    }
-    setTimeout(sync, 80);
-  });
-
-  setInterval(function(){
-    ensureHint();
-    patchCinemaButton();
-    sync();
-
-    // периодически показываем подсказку только в watch, чтобы было понятно почему native fullscreen не подходит
-    if(document.querySelector('.section.active')?.id === 'watchSection' && !sessionStorage.getItem('jc272HintShown')){
-      sessionStorage.setItem('jc272HintShown', '1');
-      setTimeout(showHint, 1200);
-    }
-  }, 500);
-
-  setTimeout(function(){
-    ensureHint();
-    patchCinemaButton();
-    sync();
-  }, 800);
-})();
-
-
-/* =========================================================
-   JustClover Stage 27.3 — CSS cinema + remove Open JS
-   Version: stage27-3-css-cinema-remove-open-20260502-1
-   ========================================================= */
-console.log("JustClover Stage 27.3 loaded:", "stage27-3-css-cinema-remove-open-20260502-1");
-window.JUSTCLOVER_BUILD = "stage27-3-css-cinema-remove-open-20260502-1";
-
-(function(){
-  function ensureExit(){
-    if(document.getElementById('jcCinemaExitBtn')) return;
-    const b = document.createElement('button');
-    b.id = 'jcCinemaExitBtn';
-    b.type = 'button';
-    b.textContent = '×';
-    b.title = 'Выйти из кино';
-    b.onclick = exitCssCinema;
-    document.body.appendChild(b);
-  }
-
-  function killOpenButton(){
-    const ext = document.getElementById('externalPlayer') || document.querySelector('.external-player');
-    if(ext){
-      ext.style.display = 'none';
-      ext.style.visibility = 'hidden';
-      ext.style.pointerEvents = 'none';
-    }
-    const link = document.getElementById('externalLink');
-    if(link){
-      link.style.display = 'none';
-      link.style.visibility = 'hidden';
-      link.style.pointerEvents = 'none';
-    }
-  }
-
-  function enterCssCinema(){
-    try{ if(typeof section === 'function') section('watchSection'); }catch(e){}
-    // Важно: НЕ вызываем requestFullscreen. Так кнопки сайта остаются поверх iframe.
-    document.body.classList.remove('jc-site-fullscreen','jc-player-frame-fullscreen');
-    document.body.classList.add('jc-css-cinema');
-    sync();
-    toast('Кино включено. Esc или × — выйти.');
-  }
-
-  function exitCssCinema(){
-    document.body.classList.remove('jc-css-cinema','jc-site-fullscreen','jc-player-frame-fullscreen');
-    try{
-      if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
-    }catch(e){}
-    sync();
-  }
-
-  function toggleCssCinema(){
-    if(document.body.classList.contains('jc-css-cinema')) exitCssCinema();
-    else enterCssCinema();
-  }
-
-  function toast(text){
-    const t = document.getElementById('jcPlayerToast');
-    if(!t) return;
-    t.textContent = text;
-    t.classList.add('show');
-    clearTimeout(t._timer);
-    t._timer = setTimeout(function(){ t.classList.remove('show'); }, 1700);
-  }
-
-  function sync(){
-    const panel = document.getElementById('jcPlayerPanel');
-    if(!panel) return;
-
-    const cinema = panel.querySelector('[data-player-act="cinema"]');
-    if(cinema){
-      cinema.classList.toggle('active', document.body.classList.contains('jc-css-cinema'));
-      const label = cinema.querySelector('.label');
-      if(label) label.textContent = document.body.classList.contains('jc-css-cinema') ? 'Выйти' : 'Кино';
-      cinema.title = document.body.classList.contains('jc-css-cinema') ? 'Выйти из кино' : 'Кино без рамок';
-    }
-
-    const mic = panel.querySelector('[data-player-act="mic"]');
-    if(mic){
-      const micOn = typeof voiceOn !== 'undefined' && !!voiceOn;
-      mic.classList.toggle('active', micOn);
-      mic.classList.toggle('muted', !micOn);
-      const label = mic.querySelector('.label');
-      if(label) label.textContent = micOn ? 'Вкл' : 'Мик';
-    }
-  }
-
-  function patchCinemaButton(){
-    const btn = document.querySelector('#jcPlayerPanel [data-player-act="cinema"]');
-    if(!btn) return;
-    // Перепривязываем каждый раз, потому что старые патчи могли уже назначить native fullscreen.
-    btn.onclick = function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      toggleCssCinema();
-    };
-    btn.dataset.stage273 = '1';
-  }
-
-  document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape' && document.body.classList.contains('jc-css-cinema')){
-      e.preventDefault();
-      exitCssCinema();
-    }
-  });
-
-  document.addEventListener('fullscreenchange', function(){
-    // Если пользователь всё же нажал native fullscreen VK/браузера, после выхода чистим классы.
-    if(!document.fullscreenElement){
-      document.body.classList.remove('jc-site-fullscreen','jc-player-frame-fullscreen');
-    }
-    setTimeout(sync, 80);
-  });
-
-  setInterval(function(){
-    ensureExit();
-    killOpenButton();
-    patchCinemaButton();
-    sync();
-  }, 350);
-
-  setTimeout(function(){
-    ensureExit();
-    killOpenButton();
-    patchCinemaButton();
-    sync();
-  }, 700);
-})();
-
-
-/* =========================================================
-   JustClover Stage 27.4 — Real fullscreen cinema JS
-   Version: stage27-4-real-fullscreen-cinema-20260502-1
-   ========================================================= */
-console.log("JustClover Stage 27.4 loaded:", "stage27-4-real-fullscreen-cinema-20260502-1");
-window.JUSTCLOVER_BUILD = "stage27-4-real-fullscreen-cinema-20260502-1";
-
-(function(){
-  function ensureExit(){
-    if(document.getElementById('jcCinemaExitBtn')) return;
-    const b = document.createElement('button');
-    b.id = 'jcCinemaExitBtn';
-    b.type = 'button';
-    b.textContent = '×';
-    b.title = 'Выйти из кино';
-    b.onclick = exitCinema;
-    document.body.appendChild(b);
-  }
-
-  function killOpen(){
-    ['externalPlayer','externalLink','externalText'].forEach(function(id){
-      const el = document.getElementById(id);
-      if(el){
-        el.style.display = 'none';
-        el.style.visibility = 'hidden';
-        el.style.pointerEvents = 'none';
-      }
-    });
-    document.querySelectorAll('.external-player').forEach(function(el){
-      el.style.display = 'none';
-      el.style.visibility = 'hidden';
-      el.style.pointerEvents = 'none';
-    });
-  }
-
-  async function enterCinema(){
-    try{ if(typeof section === 'function') section('watchSection'); }catch(e){}
-
-    // Убираем старые режимы, которые ломали пропорции.
-    document.body.classList.remove('jc-css-cinema','jc-site-fullscreen','jc-player-frame-fullscreen');
-    document.body.classList.add('jc-real-cinema','chat-hidden');
-
-    // ВАЖНО: fullscreen всей страницы, НЕ VK iframe. Так overlay остаётся поверх.
-    try{
-      if(!document.fullscreenElement && document.documentElement.requestFullscreen){
-        await document.documentElement.requestFullscreen();
-      }
-    }catch(e){
-      // Если браузер запретил fullscreen, останется CSS-режим внутри вкладки.
-    }
-
-    sync();
-    toast('Кино включено. × или Esc — выйти.');
-  }
-
-  async function exitCinema(){
-    document.body.classList.remove('jc-real-cinema','jc-css-cinema','jc-site-fullscreen','jc-player-frame-fullscreen');
-
-    try{
-      if(document.fullscreenElement && document.exitFullscreen){
-        await document.exitFullscreen();
-      }
-    }catch(e){}
-
-    sync();
-  }
-
-  function toggleCinema(){
-    if(document.body.classList.contains('jc-real-cinema')) exitCinema();
-    else enterCinema();
-  }
-
-  function toast(text){
-    const t = document.getElementById('jcPlayerToast');
-    if(!t) return;
-    t.textContent = text;
-    t.classList.add('show');
-    clearTimeout(t._timer);
-    t._timer = setTimeout(function(){ t.classList.remove('show'); }, 1700);
-  }
-
-  function sync(){
-    const panel = document.getElementById('jcPlayerPanel');
-    if(panel){
-      const cinema = panel.querySelector('[data-player-act="cinema"]');
-      if(cinema){
-        cinema.classList.toggle('active', document.body.classList.contains('jc-real-cinema'));
-        const label = cinema.querySelector('.label');
-        if(label) label.textContent = document.body.classList.contains('jc-real-cinema') ? 'Выйти' : 'Кино';
-        cinema.title = document.body.classList.contains('jc-real-cinema') ? 'Выйти из кино' : 'Кино fullscreen сайта';
-      }
-
-      const mic = panel.querySelector('[data-player-act="mic"]');
-      if(mic){
-        const micOn = typeof voiceOn !== 'undefined' && !!voiceOn;
-        mic.classList.toggle('active', micOn);
-        mic.classList.toggle('muted', !micOn);
-        const label = mic.querySelector('.label');
-        if(label) label.textContent = micOn ? 'Вкл' : 'Мик';
-      }
-    }
-  }
-
-  function patchCinemaButton(){
-    const btn = document.querySelector('#jcPlayerPanel [data-player-act="cinema"]');
-    if(!btn) return;
-    btn.onclick = function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      toggleCinema();
-    };
-    btn.dataset.stage274 = '1';
-  }
-
-  document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape' && document.body.classList.contains('jc-real-cinema')){
-      e.preventDefault();
-      exitCinema();
-    }
-  });
-
-  document.addEventListener('fullscreenchange', function(){
-    // Если вышли из browser fullscreen через Esc/F11 — чистим кино-режим.
-    if(!document.fullscreenElement && document.body.classList.contains('jc-real-cinema')){
-      document.body.classList.remove('jc-real-cinema','jc-css-cinema','jc-site-fullscreen','jc-player-frame-fullscreen');
-    }
-    setTimeout(sync, 80);
-  });
-
-  setInterval(function(){
-    ensureExit();
-    killOpen();
-    patchCinemaButton();
-    sync();
-  }, 300);
-
-  setTimeout(function(){
-    ensureExit();
-    killOpen();
-    patchCinemaButton();
-    sync();
-  }, 700);
-})();
-
-
-/* =========================================================
-   JustClover Stage 27.5 — Unified cinema cover + audit JS
-   Version: stage27-5-cinema-cover-audit-20260502-1
-   ========================================================= */
-console.log("JustClover Stage 27.5 loaded:", "stage27-5-cinema-cover-audit-20260502-1");
-window.JUSTCLOVER_BUILD = "stage27-5-cinema-cover-audit-20260502-1";
-
-(function(){
-  function ensureExit(){
-    if(document.getElementById('jcCinemaExitBtn')) return;
-    const b = document.createElement('button');
-    b.id = 'jcCinemaExitBtn';
-    b.type = 'button';
-    b.textContent = '×';
-    b.title = 'Выйти из кино';
-    b.onclick = exitCinema;
-    document.body.appendChild(b);
-  }
-
-  function killOpen(){
-    ['externalPlayer','externalLink','externalText'].forEach(function(id){
-      const el = document.getElementById(id);
-      if(el){
-        el.style.display = 'none';
-        el.style.visibility = 'hidden';
-        el.style.opacity = '0';
-        el.style.pointerEvents = 'none';
-      }
-    });
-    document.querySelectorAll('.external-player').forEach(function(el){
-      el.style.display = 'none';
-      el.style.visibility = 'hidden';
-      el.style.opacity = '0';
-      el.style.pointerEvents = 'none';
-    });
-  }
-
-  function activeMedia(){
-    return document.querySelector('.player-frame iframe:not(.hidden), .player-frame video:not(.hidden), .player-frame #youtubePlayer:not(.hidden), .player-frame #iframePlayer:not(.hidden), .player-frame #videoPlayer:not(.hidden)');
-  }
-
-  async function enterCinema(){
-    try{ if(typeof section === 'function') section('watchSection'); }catch(e){}
-
-    killOpen();
-
-    // Один единый режим. Старые классы убираем, чтобы не конфликтовали.
-    document.body.classList.remove('jc-real-cinema','jc-css-cinema','jc-site-fullscreen','jc-player-frame-fullscreen');
-    document.body.classList.add('jc-cinema-open','chat-hidden');
-
-    // Fullscreen всей страницы, НЕ iframe VK/YouTube.
-    try{
-      if(!document.fullscreenElement && document.documentElement.requestFullscreen){
-        await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
-      }
-    }catch(e){}
-
-    sync();
-    toast('Кино включено. × или Esc — выйти.');
-  }
-
-  async function exitCinema(){
-    document.body.classList.remove('jc-cinema-open','jc-real-cinema','jc-css-cinema','jc-site-fullscreen','jc-player-frame-fullscreen');
-
-    try{
-      if(document.fullscreenElement && document.exitFullscreen){
-        await document.exitFullscreen();
-      }
-    }catch(e){}
-
-    sync();
-  }
-
-  function toggleCinema(){
-    if(document.body.classList.contains('jc-cinema-open')) exitCinema();
-    else enterCinema();
-  }
-
-  function toast(text){
-    const t = document.getElementById('jcPlayerToast');
-    if(!t) return;
-    t.textContent = text;
-    t.classList.add('show');
-    clearTimeout(t._timer);
-    t._timer = setTimeout(function(){ t.classList.remove('show'); }, 1700);
-  }
-
-  function sync(){
-    const panel = document.getElementById('jcPlayerPanel');
-    if(panel){
-      const cinema = panel.querySelector('[data-player-act="cinema"]');
-      if(cinema){
-        cinema.classList.toggle('active', document.body.classList.contains('jc-cinema-open'));
-        const label = cinema.querySelector('.label');
-        if(label) label.textContent = document.body.classList.contains('jc-cinema-open') ? 'Выйти' : 'Кино';
-        cinema.title = document.body.classList.contains('jc-cinema-open') ? 'Выйти из кино' : 'Кино fullscreen';
-      }
-
-      const mic = panel.querySelector('[data-player-act="mic"]');
-      if(mic){
-        const micOn = typeof voiceOn !== 'undefined' && !!voiceOn;
-        mic.classList.toggle('active', micOn);
-        mic.classList.toggle('muted', !micOn);
-        const label = mic.querySelector('.label');
-        if(label) label.textContent = micOn ? 'Вкл' : 'Мик';
-      }
-    }
-
-    killOpen();
   }
 
   function patchCinemaButtons(){
-    const selectors = [
-      '#jcPlayerPanel [data-player-act="cinema"]',
-      '.toolbar-chip[data-jc-action="cinema"]',
-      '.toolbar-chip'
-    ];
-
-    document.querySelectorAll(selectors.join(',')).forEach(function(btn){
+    document.querySelectorAll('.toolbar-chip, #jc28Panel [data-jc28-act="cinema"]').forEach(btn => {
       const txt = (btn.textContent || '').trim().toLowerCase();
-      const isCinema = btn.matches('#jcPlayerPanel [data-player-act="cinema"]') || btn.dataset.jcAction === 'cinema' || txt === 'кино' || txt.includes('кино');
+      const isCinema = btn.matches('#jc28Panel [data-jc28-act="cinema"]') || btn.dataset.jcAction === 'cinema' || txt === 'кино' || txt.includes('кино');
       if(!isCinema) return;
-
       btn.onclick = function(e){
         e.preventDefault();
         e.stopPropagation();
         toggleCinema();
       };
-      btn.dataset.stage275Cinema = '1';
+      btn.dataset.stage28Cinema = '1';
     });
   }
 
-  // Capture click защита: даже если старый патч повесил onclick после нас, этот обработчик перехватит "Кино" первым.
+  // Перехват в capture-фазе: старые обработчики не успеют включить неправильный режим.
   document.addEventListener('click', function(e){
-    const btn = e.target.closest?.('#jcPlayerPanel [data-player-act="cinema"], .toolbar-chip');
+    const btn = e.target.closest?.('.toolbar-chip, #jc28Panel [data-jc28-act="cinema"]');
     if(!btn) return;
-
     const txt = (btn.textContent || '').trim().toLowerCase();
-    const isCinema = btn.matches('#jcPlayerPanel [data-player-act="cinema"]') || btn.dataset.jcAction === 'cinema' || txt === 'кино' || txt.includes('кино');
+    const isCinema = btn.matches('#jc28Panel [data-jc28-act="cinema"]') || btn.dataset.jcAction === 'cinema' || txt === 'кино' || txt.includes('кино');
     if(!isCinema) return;
-
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
     toggleCinema();
   }, true);
 
-  document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape' && document.body.classList.contains('jc-cinema-open')){
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && document.body.classList.contains('jc28-cinema')){
       e.preventDefault();
       exitCinema();
     }
   });
 
-  document.addEventListener('fullscreenchange', function(){
-    // Если пользователь вышел из fullscreen через Esc — чистим кино.
-    if(!document.fullscreenElement && document.body.classList.contains('jc-cinema-open')){
-      document.body.classList.remove('jc-cinema-open','jc-real-cinema','jc-css-cinema','jc-site-fullscreen','jc-player-frame-fullscreen');
+  document.addEventListener('fullscreenchange', () => {
+    if(!document.fullscreenElement && document.body.classList.contains('jc28-cinema')){
+      document.body.classList.remove('jc28-cinema');
     }
     setTimeout(sync, 80);
   });
 
-  // Мини-аудит DOM/CSS в консоль, чтобы легче ловить такие баги.
+  function sync(){
+    const panel = document.getElementById('jc28Panel');
+    if(panel){
+      const mic = panel.querySelector('[data-jc28-act="mic"]');
+      if(mic){
+        const micOn = typeof voiceOn !== 'undefined' && !!voiceOn;
+        mic.classList.toggle('active', micOn);
+        mic.classList.toggle('muted', !micOn);
+        const label = mic.querySelector('.label');
+        if(label) label.textContent = micOn ? 'Вкл' : 'Мик';
+      }
+
+      const chat = panel.querySelector('[data-jc28-act="chat"]');
+      if(chat){
+        const active = innerWidth <= 760 ? document.body.classList.contains('mobile-chat-open') : !document.body.classList.contains('chat-hidden');
+        chat.classList.toggle('active', active);
+      }
+
+      const cinema = panel.querySelector('[data-jc28-act="cinema"]');
+      if(cinema){
+        cinema.classList.toggle('active', document.body.classList.contains('jc28-cinema'));
+        const label = cinema.querySelector('.label');
+        if(label) label.textContent = document.body.classList.contains('jc28-cinema') ? 'Выйти' : 'Кино';
+      }
+    }
+
+    killOpen();
+  }
+
+  // Лёгкий self-test в консоли
   function audit(){
     const external = document.getElementById('externalPlayer');
     const voice = document.querySelector('.voice-card');
     const reactions = document.querySelector('.reaction-bar,.reactions-dock');
     const report = {
-      build: "stage27-5-cinema-cover-audit-20260502-1",
+      build: BUILD,
       hasPlayerFrame: !!document.querySelector('.player-frame'),
-      hasPanel: !!document.getElementById('jcPlayerPanel'),
+      hasPanel: !!document.getElementById('jc28Panel'),
       externalHidden: !external || getComputedStyle(external).display === 'none',
-      voiceCardHidden: !voice || getComputedStyle(voice).display === 'none',
-      reactionHidden: !reactions || getComputedStyle(reactions).display === 'none',
-      activeMediaTag: activeMedia()?.tagName || ''
+      voiceHidden: !voice || getComputedStyle(voice).display === 'none',
+      reactionsHidden: !reactions || getComputedStyle(reactions).display === 'none',
+      activeMediaTag: activeMedia()?.tagName || '',
+      cinema: document.body.classList.contains('jc28-cinema'),
+      zoom
     };
-    console.log('JustClover 27.5 audit', report);
+    console.log('JustClover Stage28 audit', report);
     return report;
   }
   window.jcAudit = audit;
 
-  setInterval(function(){
-    ensureExit();
-    killOpen();
+  setInterval(() => {
+    ensure();
+    patchAddChat();
     patchCinemaButtons();
     sync();
   }, 250);
 
-  setTimeout(function(){
-    ensureExit();
-    killOpen();
+  setTimeout(() => {
+    ensure();
+    patchAddChat();
     patchCinemaButtons();
     sync();
     audit();
