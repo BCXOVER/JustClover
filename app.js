@@ -709,3 +709,384 @@ function jcStage7Polish(){
   console.log('JustClover Stage 7 player/chat polish active: stage7-player-chat-polish-20260501-1');
 }
 setTimeout(jcStage7Polish, 320);
+
+
+/* =========================================================
+   JustClover Stage 8 Catalog Overlay
+   Version: stage8-catalog-overlay-20260501-1
+   ========================================================= */
+const JC_STAGE8_SOURCES = [
+  {id:'youtube', icon:'▶', title:'YouTube', hint:'ссылка или поиск'},
+  {id:'vk', icon:'VK', title:'VK Video', hint:'ссылка VK / буфер'},
+  {id:'anilibrix', icon:'AX', title:'AniLibria', hint:'iframe / ссылка'},
+  {id:'local', icon:'▣', title:'Local', hint:'файл с устройства'},
+  {id:'mp4', icon:'MP4', title:'Direct MP4', hint:'mp4 / webm ссылка'},
+  {id:'drive', icon:'G', title:'Google Drive', hint:'public preview'},
+  {id:'yandex', icon:'Я', title:'Яндекс Диск', hint:'публичная ссылка'},
+  {id:'paste', icon:'⌘', title:'Из буфера', hint:'вставить и запустить'}
+];
+
+let jcStage8Selected = 'youtube';
+
+function jcStage8Toast(text){
+  if(typeof jcStage5Toast === 'function') jcStage5Toast(text);
+  else {
+    console.log(text);
+    status?.(els?.roomStatus, text);
+  }
+}
+
+function jcStage8EnsureOptions(){
+  if(!els?.sourceType) return;
+  const need = {
+    mp4:'Direct MP4',
+    drive:'Google Drive',
+    yandex:'Yandex Disk'
+  };
+  Object.entries(need).forEach(([value,label]) => {
+    if(![...els.sourceType.options].some(o => o.value === value)){
+      const opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = label;
+      els.sourceType.appendChild(opt);
+    }
+  });
+}
+
+function jcStage8DrivePreview(url){
+  try{
+    const u = new URL(url);
+    const m = u.href.match(/\/file\/d\/([^/]+)/);
+    if(m) return `https://drive.google.com/file/d/${m[1]}/preview`;
+    return url;
+  }catch{ return url; }
+}
+
+const jcStage8OldLoadSource = loadSource;
+loadSource = async function(s={type:'none'}){
+  currentSource = s;
+  if(!s || s.type === 'none') return jcStage8OldLoadSource(s);
+
+  if(['mp4','direct'].includes(s.type)){
+    hidePlayers();
+    show(els.videoPlayer);
+    els.videoPlayer.src = s.url || '';
+    els.videoPlayer.load();
+    status(els.sourceNote, 'Direct MP4 открыт во встроенном плеере.');
+    return;
+  }
+
+  if(s.type === 'drive'){
+    hidePlayers();
+    show(els.iframePlayer);
+    els.iframePlayer.src = jcStage8DrivePreview(s.url || s.embedUrl || '');
+    show(els.externalPlayer);
+    els.externalText.textContent = 'Google Drive: если preview не загрузился, открой ссылку отдельно.';
+    els.externalLink.href = s.url || s.embedUrl || '';
+    status(els.sourceNote, 'Google Drive preview открыт.');
+    return;
+  }
+
+  if(s.type === 'yandex'){
+    hidePlayers();
+    show(els.externalPlayer);
+    els.externalText.textContent = 'Яндекс Диск обычно не даёт стабильное iframe-встраивание. Открой ссылку отдельно или используй Direct MP4.';
+    els.externalLink.href = s.url || '';
+    status(els.sourceNote, 'Яндекс Диск: публичная ссылка сохранена.');
+    return;
+  }
+
+  return jcStage8OldLoadSource(s);
+};
+
+async function jcStage8SetSourceFromFields(){
+  if(!currentRoomId){
+    jcStage8Toast('Сначала создай комнату');
+    status(els.roomStatus, 'Сначала создай комнату.');
+    return;
+  }
+  if(currentRoom?.ownerUid && currentRoom.ownerUid !== currentUser.uid){
+    status(els.roomStatus, 'Источник может менять только хост.');
+    return;
+  }
+
+  const type = jcStage8Selected === 'paste' ? 'youtube' : jcStage8Selected;
+  if(type === 'local'){
+    els.sourceType.value = 'local';
+    els.localVideoFile?.click();
+    return;
+  }
+
+  const urlInput = document.querySelector('#jcCatalogUrl');
+  const titleInput = document.querySelector('#jcCatalogTitle');
+  const url = safeUrl(urlInput?.value?.trim() || '');
+  const title = titleInput?.value?.trim() || document.querySelector('.jc-source-card.active b')?.textContent || 'Источник';
+
+  if(!url){
+    jcStage8Toast('Вставь корректную ссылку');
+    return;
+  }
+
+  let source;
+  if(type === 'youtube'){
+    const id = ytId(url);
+    if(!id){
+      jcStage8Toast('Не удалось распознать YouTube ссылку');
+      return;
+    }
+    source = {type:'youtube', url, videoId:id, title};
+  } else if(type === 'vk'){
+    source = {type:'vk', url, embedUrl:vkEmbed(url), title};
+  } else if(type === 'mp4'){
+    source = {type:'mp4', url, title};
+  } else if(type === 'drive'){
+    source = {type:'drive', url, embedUrl:jcStage8DrivePreview(url), title};
+  } else if(type === 'yandex'){
+    source = {type:'yandex', url, title};
+  } else {
+    source = {type:'anilibrix', url, embedUrl:url, title};
+  }
+
+  await update(ref(db,`rooms/${currentRoomId}`),{
+    source,
+    playback:{time:0,playing:false,updatedAt:Date.now(),byUid:currentUser.uid},
+    updatedAt:Date.now()
+  });
+
+  jcStage8Toast('Источник запущен');
+  document.querySelector('.jc-catalog-layer')?.classList.remove('open');
+  section('watchSection');
+}
+
+function jcStage8BuildCatalog(){
+  if(document.querySelector('.jc-catalog-layer')) return;
+
+  const layer = document.createElement('div');
+  layer.className = 'jc-catalog-layer';
+  layer.innerHTML = `
+    <div class="jc-catalog" role="dialog" aria-modal="true">
+      <div class="jc-catalog-head">
+        <div class="jc-catalog-title">
+          <div class="jc-catalog-mark">☘</div>
+          <div>
+            <h3>Каталог источников</h3>
+            <p>Выбери источник, вставь ссылку или запусти файл с устройства.</p>
+          </div>
+        </div>
+        <button class="jc-catalog-close" type="button">×</button>
+      </div>
+      <div class="jc-catalog-body">
+        <div class="jc-catalog-grid">
+          ${JC_STAGE8_SOURCES.map(s => `
+            <button class="jc-source-card" type="button" data-source="${s.id}">
+              <div class="jc-source-icon">${s.icon}</div>
+              <b>${s.title}</b>
+              <span>${s.hint}</span>
+            </button>
+          `).join('')}
+        </div>
+
+        <div class="jc-catalog-panel">
+          <div class="jc-catalog-row">
+            <input id="jcCatalogUrl" placeholder="Вставь ссылку YouTube / VK / Drive / MP4" />
+            <input id="jcCatalogTitle" placeholder="Название" />
+            <button id="jcCatalogRunBtn" class="btn primary" type="button">Запустить</button>
+          </div>
+          <div class="jc-catalog-actions">
+            <button id="jcCatalogPasteBtn" class="btn soft" type="button">Вставить из буфера</button>
+            <button id="jcCatalogPasteRunBtn" class="btn soft" type="button">Вставить и запустить</button>
+            <button id="jcCatalogOpenExternalBtn" class="btn soft" type="button">Открыть сайт</button>
+            <button id="jcCatalogLocalBtn" class="btn soft" type="button">Выбрать файл</button>
+          </div>
+          <div class="jc-catalog-help">
+            <strong>Подсказка:</strong> YouTube и VK запускаются через встроенный плеер/iframe. Google Drive работает через public preview. Для Яндекс Диска лучше использовать direct MP4, если есть прямая ссылка.
+          </div>
+        </div>
+
+        <div class="jc-catalog-panel">
+          <div class="jc-catalog-search">
+            <input id="jcCatalogSearchInput" placeholder="Поиск YouTube/VK: например название ролика" />
+            <button id="jcCatalogSearchYtBtn" class="btn soft" type="button">Искать YouTube</button>
+            <button id="jcCatalogSearchVkBtn" class="btn soft" type="button">Искать VK</button>
+          </div>
+          <div class="jc-catalog-mini">
+            <button class="jc-mini-chip" data-demo="youtube">YouTube → скопируй ссылку → вставить</button>
+            <button class="jc-mini-chip" data-demo="vk">VK Video → скопируй ссылку → вставить</button>
+            <button class="jc-mini-chip" data-demo="mp4">Direct MP4 → вставь прямую ссылку</button>
+            <button class="jc-mini-chip" data-demo="local">Local → файл с устройства</button>
+          </div>
+          <div class="jc-catalog-results">
+            <button class="jc-result-card" type="button" data-help="youtube">
+              <b>YouTube без выхода из комнаты</b>
+              <span>Открой поиск, скопируй ссылку ролика и нажми «Вставить и запустить».</span>
+            </button>
+            <button class="jc-result-card" type="button" data-help="vk">
+              <b>VK Video</b>
+              <span>Вставь ссылку вида vk.com/video... — JustClover сам попробует собрать embed.</span>
+            </button>
+            <button class="jc-result-card" type="button" data-help="local">
+              <b>Local video</b>
+              <span>Выбирается с устройства. Другим участникам нужен тот же файл.</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(layer);
+
+  const close = () => layer.classList.remove('open');
+  layer.querySelector('.jc-catalog-close').onclick = close;
+  layer.onclick = e => { if(e.target === layer) close(); };
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') close(); });
+
+  layer.querySelectorAll('.jc-source-card').forEach(card => {
+    card.onclick = () => jcStage8SelectSource(card.dataset.source);
+  });
+
+  layer.querySelector('#jcCatalogRunBtn').onclick = jcStage8SetSourceFromFields;
+  layer.querySelector('#jcCatalogLocalBtn').onclick = () => {
+    jcStage8SelectSource('local');
+    els.localVideoFile?.click();
+  };
+
+  layer.querySelector('#jcCatalogPasteBtn').onclick = async () => {
+    try{
+      const text = await navigator.clipboard.readText();
+      layer.querySelector('#jcCatalogUrl').value = text || '';
+      jcStage8GuessSource(text);
+      jcStage8Toast('Ссылка вставлена');
+    }catch{
+      jcStage8Toast('Браузер не дал доступ к буферу');
+    }
+  };
+
+  layer.querySelector('#jcCatalogPasteRunBtn').onclick = async () => {
+    try{
+      const text = await navigator.clipboard.readText();
+      layer.querySelector('#jcCatalogUrl').value = text || '';
+      jcStage8GuessSource(text);
+      await jcStage8SetSourceFromFields();
+    }catch{
+      jcStage8Toast('Браузер не дал доступ к буферу');
+    }
+  };
+
+  layer.querySelector('#jcCatalogOpenExternalBtn').onclick = () => {
+    const target = jcStage8Selected === 'vk' ? 'https://vkvideo.ru/' :
+      jcStage8Selected === 'drive' ? 'https://drive.google.com/' :
+      jcStage8Selected === 'yandex' ? 'https://disk.yandex.ru/' :
+      jcStage8Selected === 'anilibrix' ? 'https://www.anilibria.tv/' :
+      'https://www.youtube.com/';
+    window.open(target, '_blank', 'noopener,noreferrer');
+  };
+
+  layer.querySelector('#jcCatalogSearchYtBtn').onclick = () => {
+    const q = layer.querySelector('#jcCatalogSearchInput').value.trim();
+    window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(q || 'anime'), '_blank', 'noopener,noreferrer');
+  };
+  layer.querySelector('#jcCatalogSearchVkBtn').onclick = () => {
+    const q = layer.querySelector('#jcCatalogSearchInput').value.trim();
+    window.open('https://vkvideo.ru/?q=' + encodeURIComponent(q || 'anime'), '_blank', 'noopener,noreferrer');
+  };
+
+  layer.querySelectorAll('.jc-mini-chip').forEach(btn => btn.onclick = () => jcStage8SelectSource(btn.dataset.demo));
+  layer.querySelectorAll('.jc-result-card').forEach(btn => btn.onclick = () => jcStage8SelectSource(btn.dataset.help));
+
+  jcStage8SelectSource('youtube');
+}
+
+function jcStage8SelectSource(id){
+  jcStage8Selected = id || 'youtube';
+  document.querySelectorAll('.jc-source-card').forEach(c => c.classList.toggle('active', c.dataset.source === jcStage8Selected));
+
+  const input = document.querySelector('#jcCatalogUrl');
+  const title = document.querySelector('#jcCatalogTitle');
+  if(title){
+    const cardTitle = document.querySelector(`.jc-source-card[data-source="${jcStage8Selected}"] b`)?.textContent || '';
+    title.placeholder = cardTitle ? `Название: ${cardTitle}` : 'Название';
+  }
+
+  if(els?.sourceType){
+    const map = {paste:'youtube'};
+    const value = map[jcStage8Selected] || jcStage8Selected;
+    if([...els.sourceType.options].some(o => o.value === value)){
+      els.sourceType.value = value;
+      els.sourceType.dispatchEvent(new Event('change'));
+    }
+  }
+
+  if(jcStage8Selected === 'local') {
+    input.placeholder = 'Local video выбирается кнопкой «Выбрать файл»';
+  } else if(jcStage8Selected === 'mp4') {
+    input.placeholder = 'Прямая ссылка на .mp4 или .webm';
+  } else if(jcStage8Selected === 'drive') {
+    input.placeholder = 'Публичная ссылка Google Drive';
+  } else if(jcStage8Selected === 'yandex') {
+    input.placeholder = 'Публичная ссылка Яндекс Диска';
+  } else {
+    input.placeholder = 'Вставь ссылку ' + (document.querySelector(`.jc-source-card[data-source="${jcStage8Selected}"] b`)?.textContent || '');
+  }
+}
+
+function jcStage8GuessSource(url){
+  const s = String(url || '').toLowerCase();
+  if(s.includes('youtu')) return jcStage8SelectSource('youtube');
+  if(s.includes('vk.com') || s.includes('vkvideo')) return jcStage8SelectSource('vk');
+  if(s.includes('drive.google')) return jcStage8SelectSource('drive');
+  if(s.includes('disk.yandex')) return jcStage8SelectSource('yandex');
+  if(/\.(mp4|webm|mov)(\?|$)/.test(s)) return jcStage8SelectSource('mp4');
+}
+
+function jcStage8OpenCatalog(preselect='youtube'){
+  jcStage8EnsureOptions();
+  jcStage8BuildCatalog();
+  jcStage8SelectSource(preselect);
+  document.querySelector('.jc-catalog-layer')?.classList.add('open');
+  setTimeout(() => document.querySelector('#jcCatalogUrl')?.focus(), 60);
+}
+
+function jcStage8WireCatalog(){
+  jcStage8EnsureOptions();
+
+  const catalog = [...document.querySelectorAll('.toolbar-chip')].find(b => (b.textContent||'').toLowerCase().includes('каталог'));
+  if(catalog){
+    catalog.onclick = () => jcStage8OpenCatalog(jcStage8Selected || 'youtube');
+    catalog.dataset.jcAction = 'catalog-overlay';
+  }
+
+  const sourceMap = {
+    'YouTube':'youtube',
+    'VK Video':'vk',
+    'AniLibria':'anilibrix',
+    'Local':'local',
+    'Google Drive':'drive',
+    'Яндекс Диск':'yandex',
+    'MP4 Direct':'mp4'
+  };
+  document.querySelectorAll('.source-pill').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.source-pill').forEach(x => x.classList.remove('active'));
+      btn.classList.add('active');
+      const v = sourceMap[(btn.textContent || '').trim()] || 'youtube';
+      jcStage8OpenCatalog(v);
+    };
+  });
+
+  if(els?.localVideoFile && els.localVideoFile.dataset.stage8 !== '1'){
+    els.localVideoFile.dataset.stage8 = '1';
+    els.localVideoFile.addEventListener('change', () => {
+      if(els.localVideoFile.files?.[0]){
+        jcStage8Selected = 'local';
+        els.sourceType.value = 'local';
+        setTimeout(() => els.setSourceBtn?.click(), 50);
+        document.querySelector('.jc-catalog-layer')?.classList.remove('open');
+      }
+    });
+  }
+
+  console.log('JustClover Stage 8 catalog overlay active: stage8-catalog-overlay-20260501-1');
+}
+
+setTimeout(jcStage8WireCatalog, 420);
