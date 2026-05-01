@@ -1,4 +1,4 @@
-/* JustClover cache killer stage27-3-css-cinema-remove-open-20260502-1 */
+/* JustClover cache killer stage27-4-real-fullscreen-cinema-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));

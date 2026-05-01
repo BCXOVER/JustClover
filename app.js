@@ -5488,3 +5488,148 @@ window.JUSTCLOVER_BUILD = "stage27-3-css-cinema-remove-open-20260502-1";
     sync();
   }, 700);
 })();
+
+
+/* =========================================================
+   JustClover Stage 27.4 — Real fullscreen cinema JS
+   Version: stage27-4-real-fullscreen-cinema-20260502-1
+   ========================================================= */
+console.log("JustClover Stage 27.4 loaded:", "stage27-4-real-fullscreen-cinema-20260502-1");
+window.JUSTCLOVER_BUILD = "stage27-4-real-fullscreen-cinema-20260502-1";
+
+(function(){
+  function ensureExit(){
+    if(document.getElementById('jcCinemaExitBtn')) return;
+    const b = document.createElement('button');
+    b.id = 'jcCinemaExitBtn';
+    b.type = 'button';
+    b.textContent = '×';
+    b.title = 'Выйти из кино';
+    b.onclick = exitCinema;
+    document.body.appendChild(b);
+  }
+
+  function killOpen(){
+    ['externalPlayer','externalLink','externalText'].forEach(function(id){
+      const el = document.getElementById(id);
+      if(el){
+        el.style.display = 'none';
+        el.style.visibility = 'hidden';
+        el.style.pointerEvents = 'none';
+      }
+    });
+    document.querySelectorAll('.external-player').forEach(function(el){
+      el.style.display = 'none';
+      el.style.visibility = 'hidden';
+      el.style.pointerEvents = 'none';
+    });
+  }
+
+  async function enterCinema(){
+    try{ if(typeof section === 'function') section('watchSection'); }catch(e){}
+
+    // Убираем старые режимы, которые ломали пропорции.
+    document.body.classList.remove('jc-css-cinema','jc-site-fullscreen','jc-player-frame-fullscreen');
+    document.body.classList.add('jc-real-cinema','chat-hidden');
+
+    // ВАЖНО: fullscreen всей страницы, НЕ VK iframe. Так overlay остаётся поверх.
+    try{
+      if(!document.fullscreenElement && document.documentElement.requestFullscreen){
+        await document.documentElement.requestFullscreen();
+      }
+    }catch(e){
+      // Если браузер запретил fullscreen, останется CSS-режим внутри вкладки.
+    }
+
+    sync();
+    toast('Кино включено. × или Esc — выйти.');
+  }
+
+  async function exitCinema(){
+    document.body.classList.remove('jc-real-cinema','jc-css-cinema','jc-site-fullscreen','jc-player-frame-fullscreen');
+
+    try{
+      if(document.fullscreenElement && document.exitFullscreen){
+        await document.exitFullscreen();
+      }
+    }catch(e){}
+
+    sync();
+  }
+
+  function toggleCinema(){
+    if(document.body.classList.contains('jc-real-cinema')) exitCinema();
+    else enterCinema();
+  }
+
+  function toast(text){
+    const t = document.getElementById('jcPlayerToast');
+    if(!t) return;
+    t.textContent = text;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function(){ t.classList.remove('show'); }, 1700);
+  }
+
+  function sync(){
+    const panel = document.getElementById('jcPlayerPanel');
+    if(panel){
+      const cinema = panel.querySelector('[data-player-act="cinema"]');
+      if(cinema){
+        cinema.classList.toggle('active', document.body.classList.contains('jc-real-cinema'));
+        const label = cinema.querySelector('.label');
+        if(label) label.textContent = document.body.classList.contains('jc-real-cinema') ? 'Выйти' : 'Кино';
+        cinema.title = document.body.classList.contains('jc-real-cinema') ? 'Выйти из кино' : 'Кино fullscreen сайта';
+      }
+
+      const mic = panel.querySelector('[data-player-act="mic"]');
+      if(mic){
+        const micOn = typeof voiceOn !== 'undefined' && !!voiceOn;
+        mic.classList.toggle('active', micOn);
+        mic.classList.toggle('muted', !micOn);
+        const label = mic.querySelector('.label');
+        if(label) label.textContent = micOn ? 'Вкл' : 'Мик';
+      }
+    }
+  }
+
+  function patchCinemaButton(){
+    const btn = document.querySelector('#jcPlayerPanel [data-player-act="cinema"]');
+    if(!btn) return;
+    btn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      toggleCinema();
+    };
+    btn.dataset.stage274 = '1';
+  }
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && document.body.classList.contains('jc-real-cinema')){
+      e.preventDefault();
+      exitCinema();
+    }
+  });
+
+  document.addEventListener('fullscreenchange', function(){
+    // Если вышли из browser fullscreen через Esc/F11 — чистим кино-режим.
+    if(!document.fullscreenElement && document.body.classList.contains('jc-real-cinema')){
+      document.body.classList.remove('jc-real-cinema','jc-css-cinema','jc-site-fullscreen','jc-player-frame-fullscreen');
+    }
+    setTimeout(sync, 80);
+  });
+
+  setInterval(function(){
+    ensureExit();
+    killOpen();
+    patchCinemaButton();
+    sync();
+  }, 300);
+
+  setTimeout(function(){
+    ensureExit();
+    killOpen();
+    patchCinemaButton();
+    sync();
+  }, 700);
+})();
