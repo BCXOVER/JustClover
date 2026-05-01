@@ -588,3 +588,51 @@ function jcStage5Hotfix(){
   console.log('JustClover Stage 5 invite/slider hotfix active: stage5invite-slider-20260501-1');
 }
 setTimeout(jcStage5Hotfix, 160);
+
+
+/* =========================================================
+   JustClover Stage 6 layout polish JS
+   Version: stage6-layout-polish-20260501-1
+   ========================================================= */
+function jcStage6LayoutPolish(){
+  // Если чат был слишком узким в прошлой версии — поднимаем дефолт.
+  const saved = Number(localStorage.getItem('jc-chat-width') || 0);
+  if(!saved || saved < 340){
+    localStorage.setItem('jc-chat-width', '360');
+    document.documentElement.style.setProperty('--chat-w', '360px');
+    const dot = document.querySelector('.slider-dot');
+    if(dot) dot.style.left = '42%';
+  }
+
+  // Двойной клик по плееру — кино-режим.
+  const frame = document.querySelector('.player-frame');
+  if(frame && frame.dataset.stage6 !== '1'){
+    frame.dataset.stage6 = '1';
+    frame.addEventListener('dblclick', () => {
+      document.body.classList.toggle('cinema-mode');
+      const cinema = [...document.querySelectorAll('.toolbar-chip')].find(b => (b.textContent||'').toLowerCase().includes('кино'));
+      cinema?.classList.toggle('active', document.body.classList.contains('cinema-mode'));
+    });
+  }
+
+  // Кнопка "Каталог" дополнительно подсвечивает источник, чтобы было понятно куда вставлять ссылку.
+  const catalog = [...document.querySelectorAll('.toolbar-chip')].find(b => (b.textContent||'').toLowerCase().includes('каталог'));
+  if(catalog && catalog.dataset.stage6 !== '1'){
+    catalog.dataset.stage6 = '1';
+    const old = catalog.onclick;
+    catalog.onclick = (e) => {
+      old?.call(catalog, e);
+      const panel = document.querySelector('.source-panel-embedded');
+      if(panel && document.body.classList.contains('catalog-open')){
+        panel.animate([
+          {boxShadow:'0 0 0 0 rgba(192,132,252,0)'},
+          {boxShadow:'0 0 0 4px rgba(192,132,252,.16)'},
+          {boxShadow:'0 0 0 0 rgba(192,132,252,0)'}
+        ], {duration:650, easing:'ease-out'});
+      }
+    };
+  }
+
+  console.log('JustClover Stage 6 layout polish active: stage6-layout-polish-20260501-1');
+}
+setTimeout(jcStage6LayoutPolish, 240);
