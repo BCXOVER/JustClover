@@ -2,7 +2,7 @@ import { firebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInAnonymously,signInWithPopup,GoogleAuthProvider,signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { getDatabase,ref,get,set,update,push,remove,onValue,onChildAdded,onDisconnect,serverTimestamp,query,orderByChild,equalTo,off } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
-console.log('JustClover cinema fix app.js loaded: cinemafix-20260501-16');
+console.log('JustClover room persist app.js loaded: roompersist-20260501-17');
 window.addEventListener('error', e => console.error('JustClover runtime error:', e.message, e.error));
 const $=id=>document.getElementById(id);
 const els={setupWarning:$('setupWarning'),authView:$('authView'),appView:$('appView'),topUser:$('topUser'),logoutBtn:$('logoutBtn'),openProfileBtn:$('openProfileBtn'),loginTab:$('loginTab'),registerTab:$('registerTab'),guestTab:$('guestTab'),authForm:$('authForm'),guestSubmit:$('guestSubmit'),googleSubmit:$('googleSubmit'),authSubmit:$('authSubmit'),nickLabel:$('nickLabel'),nickInput:$('nickInput'),emailInput:$('emailInput'),passwordInput:$('passwordInput'),authStatus:$('authStatus'),miniProfile:$('miniProfile'),miniAvatar:$('miniAvatar'),miniName:$('miniName'),miniTag:$('miniTag'),miniStatus:$('miniStatus'),roomNameInput:$('roomNameInput'),createRoomBtn:$('createRoomBtn'),joinRoomInput:$('joinRoomInput'),joinRoomBtn:$('joinRoomBtn'),copyInviteBtn:$('copyInviteBtn'),openRoomBtn:$('openRoomBtn'),closeRoomBtn:$('closeRoomBtn'),publicRoomBtn:$('publicRoomBtn'),inviteRoomBtn:$('inviteRoomBtn'),roomStatus:$('roomStatus'),membersList:$('membersList'),sourceType:$('sourceType'),sourceUrl:$('sourceUrl'),localVideoFile:$('localVideoFile'),sourceTitle:$('sourceTitle'),setSourceBtn:$('setSourceBtn'),sourceOpenBtn:$('sourceOpenBtn'),sourceOpenBtnMirror:$('sourceOpenBtnMirror'),sourceHelp:$('sourceHelp'),sourceNote:$('sourceNote'),videoPlayer:$('videoPlayer'),youtubePlayer:$('youtubePlayer'),youtubeWrap:$('youtubeWrap'),iframePlayer:$('iframePlayer'),externalPlayer:$('externalPlayer'),externalText:$('externalText'),externalLink:$('externalLink'),emptyPlayer:$('emptyPlayer'),publicRoomsList:$('publicRoomsList'),onlineUsersList:$('onlineUsersList'),chatMessages:$('chatMessages'),chatForm:$('chatForm'),chatInput:$('chatInput'),voiceBtn:$('voiceBtn'),voiceStatus:$('voiceStatus'),remoteAudio:$('remoteAudio'),profileNick:$('profileNick'),profileTag:$('profileTag'),profileAvatar:$('profileAvatar'),profileCover:$('profileCover'),profileStatusText:$('profileStatusText'),profileBio:$('profileBio'),profileAccent:$('profileAccent'),saveProfileBtn:$('saveProfileBtn'),profileSaveStatus:$('profileSaveStatus'),profilePreviewCard:$('profilePreviewCard'),profilePreviewAvatar:$('profilePreviewAvatar'),profilePreviewName:$('profilePreviewName'),profilePreviewTag:$('profilePreviewTag'),friendSearchInput:$('friendSearchInput'),friendSearchBtn:$('friendSearchBtn'),friendSearchResults:$('friendSearchResults'),incomingRequestsList:$('incomingRequestsList'),friendsList:$('friendsList'),dmEmptyState:$('dmEmptyState'),dmTitle:$('dmTitle'),dmMessages:$('dmMessages'),dmForm:$('dmForm'),dmText:$('dmText'),dmMediaUrl:$('dmMediaUrl'),sendDmBtn:$('sendDmBtn'),friendRoomJoinBtn:$('friendRoomJoinBtn'),mediaPicker:$('mediaPicker'),mediaPickerBackdrop:$('mediaPickerBackdrop'),mediaPickerCloseBtn:$('mediaPickerCloseBtn'),mediaSearchForm:$('mediaSearchForm'),mediaSearchInput:$('mediaSearchInput'),mediaPickerResults:$('mediaPickerResults'),mediaPickerHint:$('mediaPickerHint'),mediaPasteBtn:$('mediaPasteBtn'),mediaExternalBtn:$('mediaExternalBtn'),youtubeApiBox:$('youtubeApiBox'),ytApiKeyInput:$('ytApiKeyInput'),saveYtApiKeyBtn:$('saveYtApiKeyBtn'),emojiBtn:$('emojiBtn'),gifBtn:$('gifBtn'),emojiPanel:$('emojiPanel'),reactionBurst:$('reactionBurst'),gifPicker:$('gifPicker'),gifPickerBackdrop:$('gifPickerBackdrop'),gifPickerCloseBtn:$('gifPickerCloseBtn'),gifSearchForm:$('gifSearchForm'),gifSearchInput:$('gifSearchInput'),gifPickerResults:$('gifPickerResults'),gifPickerHint:$('gifPickerHint'),giphyApiKeyInput:$('giphyApiKeyInput'),saveGiphyApiKeyBtn:$('saveGiphyApiKeyBtn'),gifPasteBtn:$('gifPasteBtn'),openGiphyFromPickerBtn:$('openGiphyFromPickerBtn')};
@@ -1428,4 +1428,196 @@ setInterval(jcCinemaHardSync, 800);
 setTimeout(jcCinemaHardSync, 60);
 setTimeout(jcCinemaHardSync, 500);
 setTimeout(jcCinemaHardSync, 1500);
+
+
+/* ===== Room Persist / Auto-Rejoin Fix roompersist-20260501-17 ===== */
+console.log('JustClover room persist fix loaded: roompersist-20260501-17');
+
+const JC_LAST_ROOM_KEY = 'jc-last-room-v2';
+let jcAutoRejoinTimer = null;
+let jcAutoRejoinRunning = false;
+
+function jcRoomParam(){
+  try {
+    const u = new URL(location.href);
+    return u.searchParams.get('room') || '';
+  } catch {
+    return '';
+  }
+}
+
+function jcPassParam(){
+  try {
+    const u = new URL(location.href);
+    return u.searchParams.get('pass') || '';
+  } catch {
+    return '';
+  }
+}
+
+function jcSaveLastRoom(roomLike){
+  try {
+    const room = roomLike || currentRoom;
+    const id = room?.id || currentRoomId || '';
+    const code = room?.roomCode || '';
+    const pass = room?.roomPassword || els.roomJoinPasswordInput?.value || '';
+    if(!id && !code) return;
+    localStorage.setItem(JC_LAST_ROOM_KEY, JSON.stringify({
+      id,
+      code,
+      pass,
+      name: room?.name || '',
+      savedAt: Date.now()
+    }));
+  } catch(e) {
+    console.warn('save last room failed', e);
+  }
+}
+
+function jcReadLastRoom(){
+  try {
+    const raw = localStorage.getItem(JC_LAST_ROOM_KEY);
+    if(!raw) return null;
+    const data = JSON.parse(raw);
+    if(!data || (!data.id && !data.code)) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function jcClearLastRoom(){
+  localStorage.removeItem(JC_LAST_ROOM_KEY);
+}
+
+function jcSetUrlRoom(roomLike){
+  try {
+    const room = roomLike || currentRoom;
+    const key = room?.roomCode || room?.id || currentRoomId;
+    if(!key) return;
+    const u = new URL(location.href);
+    u.searchParams.set('room', key);
+    if(room?.roomPassword) u.searchParams.set('pass', room.roomPassword);
+    history.replaceState({}, '', u);
+  } catch(e) {
+    console.warn('set url room failed', e);
+  }
+}
+
+function jcPersistActiveRoom(){
+  if(currentRoomId && currentRoom){
+    jcSaveLastRoom(currentRoom);
+    jcSetUrlRoom(currentRoom);
+  }
+}
+
+async function jcAutoRejoin(reason='auto'){
+  if(jcAutoRejoinRunning) return;
+  if(!currentUser || !profile) return;
+  if(currentRoomId && currentRoom) {
+    jcPersistActiveRoom();
+    return;
+  }
+
+  const fromUrl = jcRoomParam();
+  const last = jcReadLastRoom();
+  const key = fromUrl || last?.code || last?.id || '';
+  if(!key) return;
+
+  jcAutoRejoinRunning = true;
+  try {
+    if(els.roomJoinPasswordInput && !els.roomJoinPasswordInput.value){
+      const pass = jcPassParam() || last?.pass || '';
+      if(pass) els.roomJoinPasswordInput.value = pass;
+    }
+
+    status(els.roomStatus, reason === 'reload'
+      ? 'Возвращаю тебя в комнату после обновления...'
+      : 'Возвращаю тебя в последнюю комнату...');
+
+    await joinRoom(key);
+
+    if(currentRoomId && currentRoom){
+      jcPersistActiveRoom();
+      status(els.roomStatus, `Ты вернулся в комнату: ${currentRoom.name || currentRoom.roomCode || currentRoom.id}`);
+    }
+  } catch(e) {
+    console.error('auto rejoin failed', e);
+    status(els.roomStatus, 'Не удалось автоматически вернуться в комнату. Можно войти по invite-коду.');
+  } finally {
+    jcAutoRejoinRunning = false;
+  }
+}
+
+function jcScheduleAutoRejoin(reason='auto'){
+  clearTimeout(jcAutoRejoinTimer);
+  jcAutoRejoinTimer = setTimeout(()=>jcAutoRejoin(reason), 350);
+}
+
+const jcPersistOldJoinRoom = joinRoom;
+joinRoom = async function(...args){
+  const result = await jcPersistOldJoinRoom.apply(this, args);
+  if(currentRoomId && currentRoom){
+    jcPersistActiveRoom();
+  }
+  return result;
+};
+
+const jcPersistOldCreateRoom = createRoom;
+createRoom = async function(...args){
+  const result = await jcPersistOldCreateRoom.apply(this, args);
+  if(currentRoomId && currentRoom){
+    jcPersistActiveRoom();
+  } else {
+    setTimeout(jcPersistActiveRoom, 500);
+  }
+  return result;
+};
+
+const jcPersistOldRenderRoom = renderRoom;
+renderRoom = function(){
+  jcPersistOldRenderRoom();
+  jcPersistActiveRoom();
+};
+
+const jcPersistOldLeaveRoom = leaveRoom;
+leaveRoom = async function(clear=true, ...rest){
+  const manualLeave = clear === true;
+  const result = await jcPersistOldLeaveRoom.call(this, clear, ...rest);
+  if(manualLeave){
+    jcClearLastRoom();
+  }
+  return result;
+};
+
+// Важно: при обычной перезагрузке НЕ чистим последнюю комнату.
+// Наоборот, быстро сохраняем её перед unload.
+window.addEventListener('beforeunload', () => {
+  jcPersistActiveRoom();
+});
+
+// Если Firebase/auth вернули пользователя позже — пробуем rejoin несколько раз.
+setTimeout(()=>jcAutoRejoin('reload'), 800);
+setTimeout(()=>jcAutoRejoin('reload'), 1800);
+setTimeout(()=>jcAutoRejoin('reload'), 3600);
+
+// Если пользователь вернулся на вкладку, а currentRoom потерялся — восстановить.
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden) jcScheduleAutoRejoin('visibility');
+});
+
+// Если URL уже содержит room, держим его при смене версии v=...
+if(jcRoomParam()){
+  localStorage.setItem('jc-room-param-seen', jcRoomParam());
+}
+
+// Кнопка копирования invite тоже должна сохранять текущую комнату.
+if(els.copyInviteBtn){
+  const oldCopy = els.copyInviteBtn.onclick;
+  els.copyInviteBtn.onclick = async (...args) => {
+    jcPersistActiveRoom();
+    if(typeof jcCopyInvite === 'function') return jcCopyInvite();
+    if(oldCopy) return oldCopy.apply(els.copyInviteBtn, args);
+  };
+}
 

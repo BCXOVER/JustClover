@@ -1603,3 +1603,13 @@ body[data-watch-cinema="1"] .anime-side {
   }
 }
 
+
+/* ===== Room Persist / Auto-Rejoin Fix roompersist-20260501-17 ===== */
+.room-rejoin-note {
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.045);
+  color:var(--muted);
+}
+
