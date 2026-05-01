@@ -5418,3 +5418,68 @@ function jc261Patch(){
 }
 
 setTimeout(jc261Patch, 800);
+
+
+/* =========================================================
+   JustClover Stage 26.2 — Rave overlay polish JS
+   Version: stage26-2-rave-overlay-polish-20260501-1
+   ========================================================= */
+
+function jc262PolishDock(){
+  const dock = document.querySelector('.jc-rave-fixed-dock');
+  if(!dock) return;
+
+  const mic = dock.querySelector('[data-rave-mic]');
+  const chat = dock.querySelector('[data-rave-chat]');
+  const catalog = dock.querySelector('[data-rave-catalog]');
+  const cinema = dock.querySelector('[data-rave-cinema]');
+
+  if(mic){
+    mic.innerHTML = '<span class="jc-live-dot"></span>';
+    mic.dataset.tip = (typeof voiceOn !== 'undefined' && voiceOn) ? 'Выключить микрофон' : 'Включить микрофон';
+    mic.title = mic.dataset.tip;
+  }
+  if(chat){
+    chat.textContent = '';
+    chat.dataset.tip = 'Чат';
+    chat.title = 'Чат';
+  }
+  if(catalog){
+    catalog.textContent = '';
+    catalog.dataset.tip = 'Каталог';
+    catalog.title = 'Каталог';
+  }
+  if(cinema){
+    cinema.textContent = '';
+    cinema.dataset.tip = document.body.classList.contains('cinema-mode') ? 'Выйти из кино' : 'Кино-режим';
+    cinema.title = cinema.dataset.tip;
+  }
+}
+
+function jc262CompactVoiceCard(){
+  if(!els?.voiceBtn) return;
+  els.voiceBtn.title = (typeof voiceOn !== 'undefined' && voiceOn) ? 'Выключить микрофон' : 'Включить микрофон';
+}
+
+const jc262PrevSync = typeof jc261SyncButtons === 'function' ? jc261SyncButtons : null;
+if(jc262PrevSync){
+  jc261SyncButtons = function(){
+    jc262PrevSync();
+    jc262PolishDock();
+    jc262CompactVoiceCard();
+  };
+}
+
+function jc262Patch(){
+  jc262PolishDock();
+  jc262CompactVoiceCard();
+
+  setInterval(() => {
+    jc262PolishDock();
+    jc262CompactVoiceCard();
+  }, 600);
+
+  console.log('JustClover Stage 26.2 rave overlay polish active: stage26-2-rave-overlay-polish-20260501-1');
+}
+
+setTimeout(jc262Patch, 900);
