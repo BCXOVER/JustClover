@@ -5,3 +5,15 @@
 .topbar,.shell,.auth-screen,.app,.rail,.content,.section,.panel,.card,.btn,button,input,select,textarea,a{pointer-events:auto!important;}
 .topbar,.shell{position:relative;z-index:2;}
 button,.btn,.nav-btn,[role="button"]{cursor:pointer!important;user-select:none;}
+
+/* rave-sources patch ravesources-20260501-2 */
+.source-tabs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.source-tab{min-height:42px;border-radius:15px;padding:10px 12px;color:var(--soft);background:rgba(255,255,255,.045);border:1px solid var(--line);cursor:pointer;transition:.18s ease;font-weight:800;white-space:nowrap}
+.source-tab:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--primary2) 45%,var(--line));background:rgba(255,255,255,.07)}
+.source-tab.active{color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary2));border-color:transparent;box-shadow:0 12px 30px color-mix(in srgb,var(--primary2) 20%,transparent)}
+.source-help{padding:10px 12px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.04);margin:0 0 12px}
+#youtubeWrap,#youtubeWrap iframe,#youtubePlayer{width:100%;height:100%;border:0;background:#000}
+.source-grid{grid-template-columns:1fr 1fr auto auto}
+.source-grid select.hidden{display:none!important}
+@media(max-width:1180px){.source-tabs{grid-template-columns:repeat(3,1fr)}.source-grid{grid-template-columns:1fr}}
+@media(max-width:700px){.source-tabs{grid-template-columns:1fr 1fr}.source-tab{white-space:normal}}

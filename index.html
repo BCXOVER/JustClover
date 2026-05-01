@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#080912" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icons/icon.svg" />
-  <link rel="stylesheet" href="./style.css?v=clickfix-20260501-1" />
+  <link rel="stylesheet" href="./style.css?v=ravesources-20260501-2" />
 </head>
 <body>
   <div class="bg"><div class="orb orb-a"></div><div class="orb orb-b"></div><div class="grid-bg"></div></div>
@@ -37,7 +37,7 @@
       <div class="hero panel">
         <div class="hero-kicker">Rave-like private watch party</div>
         <h1>Смотри вместе с друзьями в своём пространстве</h1>
-        <p>JustClover — тёмный watch-party сайт с профилями, комнатами, друзьями, чатом и источниками YouTube / VK Video / Anilibrix / Local video.</p>
+        <p>JustClover — тёмный watch-party сайт с профилями, комнатами, друзьями, чатом и источниками YouTube / VK Video / Anilibrix / Local video / Google Drive / Yandex Disk.</p>
         <div class="hero-row">
           <span>Rooms</span><span>Friends</span><span>Voice</span><span>Media</span>
         </div>
@@ -112,19 +112,38 @@
             <div class="watch-main">
               <div class="card panel">
                 <h3>Источник</h3>
+                <div class="source-tabs" role="tablist" aria-label="Источники видео">
+                  <button class="source-tab active" data-source-tab="youtube" type="button">▶ YouTube</button>
+                  <button class="source-tab" data-source-tab="vk" type="button">VK Video</button>
+                  <button class="source-tab" data-source-tab="anilibrix" type="button">Anilibrix</button>
+                  <button class="source-tab" data-source-tab="local" type="button">Local</button>
+                  <button class="source-tab" data-source-tab="gdrive" type="button">Google Drive</button>
+                  <button class="source-tab" data-source-tab="yadisk" type="button">Yandex Disk</button>
+                  <button class="source-tab" data-source-tab="direct" type="button">Direct MP4</button>
+                </div>
+                <p id="sourceHelp" class="source-help status">YouTube: открой каталог, выбери видео, вставь ссылку и запусти в комнате.</p>
                 <div class="source-grid">
-                  <select id="sourceType"><option value="youtube">YouTube</option><option value="vk">VK Video</option><option value="anilibrix">Anilibrix</option><option value="local">Local video</option></select>
-                  <input id="sourceUrl" placeholder="Ссылка на видео" />
+                  <select id="sourceType" class="hidden">
+                    <option value="youtube">YouTube</option>
+                    <option value="vk">VK Video</option>
+                    <option value="anilibrix">Anilibrix</option>
+                    <option value="local">Local video</option>
+                    <option value="gdrive">Google Drive</option>
+                    <option value="yadisk">Yandex Disk</option>
+                    <option value="direct">Direct MP4/WebM</option>
+                  </select>
+                  <input id="sourceUrl" placeholder="Ссылка на видео YouTube" />
                   <input id="localVideoFile" class="hidden" type="file" accept="video/*,.mkv,.avi,.mov,.mp4,.webm" />
                   <input id="sourceTitle" placeholder="Название источника" />
-                  <button id="setSourceBtn" class="btn primary" type="button">Применить</button>
+                  <button id="sourceOpenBtn" class="btn soft" type="button">Открыть каталог</button>
+                  <button id="setSourceBtn" class="btn primary" type="button">Запустить</button>
                 </div>
-                <p id="sourceNote" class="status">YouTube работает через встроенный плеер. VK/Anilibrix — iframe или внешняя ссылка. Local video выбирается с устройства.</p>
+                <p id="sourceNote" class="status">Выбери вкладку источника, вставь ссылку или выбери локальный файл. YouTube и Local синхронизируются лучше всего.</p>
               </div>
               <div class="player-card panel">
                 <div class="player-frame">
                   <video id="videoPlayer" class="hidden" controls playsinline></video>
-                  <div id="youtubePlayer" class="hidden embed-box"></div>
+                  <div id="youtubeWrap" class="hidden embed-box"><div id="youtubePlayer"></div></div>
                   <iframe id="iframePlayer" class="hidden embed-box" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
                   <div id="externalPlayer" class="external-player hidden"><h3>Внешний источник</h3><p id="externalText"></p><a id="externalLink" class="btn primary" target="_blank" rel="noreferrer">Открыть</a></div>
                   <div id="emptyPlayer" class="empty-player">Выбери источник, чтобы начать просмотр.</div>
@@ -173,6 +192,6 @@
   </main>
 
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script type="module" src="./app.js?v=clickfix-20260501-1"></script>
+  <script type="module" src="./app.js?v=ravesources-20260501-2"></script>
 </body>
 </html>
