@@ -3802,3 +3802,166 @@ body.jc-reduced-motion .jc-live-bg{
     --jc-live-opacity:.50;
   }
 }
+
+
+/* =========================================================
+   JustClover Stage 21.6 — LIVE BG FORCE FIX
+   Фон теперь не зависит от ::before/::after и точно виден.
+   ========================================================= */
+
+:root{
+  --jc-live-opacity:.58;
+  --jc-live-speed:1;
+  --jc-live-blur:0px;
+  --jc-live-c1:#8b5cf6;
+  --jc-live-c2:#22d3ee;
+  --jc-live-c3:#ef4444;
+}
+
+/* базовый фон страницы делаем прозрачнее */
+html,
+body{
+  background:
+    radial-gradient(circle at 18% 18%, color-mix(in srgb,var(--jc-live-c1) 15%, transparent), transparent 34%),
+    radial-gradient(circle at 82% 72%, color-mix(in srgb,var(--jc-live-c2) 12%, transparent), transparent 36%),
+    #02040a!important;
+}
+
+/* Новый живой фон: обычные DOM-слои, а не pseudo-elements */
+#jcLiveBgForce,
+.jc-live-bg{
+  position:fixed!important;
+  inset:0!important;
+  z-index:1!important;
+  pointer-events:none!important;
+  overflow:hidden!important;
+  opacity:var(--jc-live-opacity)!important;
+  filter:blur(var(--jc-live-blur)) saturate(128%)!important;
+  transform:translateZ(0)!important;
+  mix-blend-mode:screen;
+}
+
+#jcLiveBgForce .jc-live-layer{
+  position:absolute;
+  inset:-18%;
+  will-change:transform, opacity, background-position;
+}
+
+#jcLiveBgForce .jc-live-layer.one{
+  background:
+    radial-gradient(circle at 18% 28%, color-mix(in srgb,var(--jc-live-c1) 76%, transparent), transparent 27%),
+    radial-gradient(circle at 82% 20%, color-mix(in srgb,var(--jc-live-c2) 62%, transparent), transparent 30%),
+    radial-gradient(circle at 50% 85%, color-mix(in srgb,var(--jc-live-c3) 38%, transparent), transparent 32%);
+  animation:jcForceAurora calc(14s / var(--jc-live-speed)) ease-in-out infinite alternate;
+}
+
+#jcLiveBgForce .jc-live-layer.two{
+  background:
+    linear-gradient(115deg, transparent 0 34%, color-mix(in srgb,var(--jc-live-c2) 22%, transparent) 43%, transparent 54%),
+    linear-gradient(22deg, transparent 0 42%, color-mix(in srgb,var(--jc-live-c1) 16%, transparent) 48%, transparent 60%);
+  animation:jcForceDrift calc(19s / var(--jc-live-speed)) linear infinite;
+}
+
+#jcLiveBgForce .jc-live-layer.three{
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,.32) 0 1.6px, transparent 2.8px),
+    radial-gradient(circle, color-mix(in srgb,var(--jc-live-c2) 38%, transparent) 0 2px, transparent 3.4px);
+  background-size:82px 82px, 136px 136px;
+  animation:jcForceParticles calc(29s / var(--jc-live-speed)) linear infinite;
+  opacity:.62;
+}
+
+@keyframes jcForceAurora{
+  0%{transform:translate3d(-4%,2%,0) rotate(-4deg) scale(1.02)}
+  100%{transform:translate3d(4%,-3%,0) rotate(4deg) scale(1.14)}
+}
+@keyframes jcForceDrift{
+  0%{transform:translate3d(-10%,0,0) rotate(0)}
+  100%{transform:translate3d(10%,0,0) rotate(8deg)}
+}
+@keyframes jcForceParticles{
+  0%{background-position:0 0, 0 0; transform:translateY(8%)}
+  100%{background-position:180px -900px, -220px -1200px; transform:translateY(-6%)}
+}
+
+/* Старый #bg/оверлеи не должны закрывать живой фон */
+#bg,
+.bg,
+.app-bg,
+.background,
+body > .bg{
+  opacity:.18!important;
+  z-index:0!important;
+}
+
+/* Весь интерфейс выше живого фона */
+.topbar,
+.main-shell,
+.shell,
+.app,
+#appView,
+#authView,
+.section,
+.rail,
+.watch-layout,
+.watch-stage,
+.watch-sidebar,
+.jc-mobile-nav,
+.jc-mobile-chat-toggle,
+.jc-catalog-layer{
+  position:relative!important;
+  z-index:5!important;
+}
+
+/* Панели ещё прозрачнее, чтобы было видно движение */
+.card,
+.side-card,
+.mini-card,
+.watch-stage,
+.watch-sidebar .side-card,
+.chat-card,
+.members-card,
+.voice-card,
+.rail,
+.rail-card,
+.jc-room-advanced,
+.jc-current-room-strip,
+.jc-source-panel,
+.jc-theme-pack,
+.jc-live-theme-panel,
+.jc-device-upload-panel,
+.jc-profile-file-panel,
+.room-card,
+.user-card,
+.profile-preview-card{
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb,var(--primary2) 9%, transparent), transparent 34%),
+    linear-gradient(180deg,rgba(16,18,28,.62),rgba(5,7,13,.48))!important;
+  backdrop-filter:blur(18px) saturate(132%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(132%)!important;
+}
+
+/* Плеер оставляем читаемым */
+.player-frame{
+  background:
+    radial-gradient(circle at 50% 40%, color-mix(in srgb,var(--jc-live-c1) 14%, transparent), transparent 32%),
+    linear-gradient(180deg,rgba(2,4,10,.80),rgba(2,4,10,.72))!important;
+}
+
+/* Активная кнопка live фона */
+.jc-live-bg-btn.active{
+  outline:2px solid color-mix(in srgb,var(--jc-live-c2) 60%, white 12%);
+  outline-offset:2px;
+}
+
+/* Тестовая кнопка */
+#jcLiveTestBtn{
+  background:linear-gradient(135deg,#22c55e,#22d3ee)!important;
+  color:#020617!important;
+  font-weight:950!important;
+}
+
+/* Live indicator */
+.jc-live-indicator{
+  z-index:20000!important;
+}

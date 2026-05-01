@@ -3265,3 +3265,121 @@ function jc215Patch(){
 }
 
 setTimeout(jc215Patch, 1200);
+
+
+/* =========================================================
+   JustClover Stage 21.6 Live Background FORCE FIX JS
+   Version: stage21-6-live-bg-forcefix-20260501-1
+   ========================================================= */
+
+const jc216Palettes = {
+  calm:   ['#8b5cf6','#22d3ee','#22c55e'],
+  aurora: ['#8b5cf6','#22d3ee','#22c55e'],
+  clover: ['#22c55e','#10b981','#8b5cf6'],
+  demon:  ['#ef4444','#7f1d1d','#a855f7'],
+  winter: ['#60a5fa','#67e8f9','#bae6fd'],
+  spring: ['#22c55e','#f0abfc','#86efac'],
+  summer: ['#f97316','#facc15','#22d3ee'],
+  autumn: ['#b45309','#fb7185','#fdba74'],
+  red:    ['#ef4444','#fb7185','#7f1d1d'],
+  green:  ['#22c55e','#10b981','#064e3b']
+};
+
+function jc216Indicator(text){
+  const old = document.querySelector('.jc-live-indicator');
+  if(old) old.remove();
+  const el = document.createElement('div');
+  el.className = 'jc-live-indicator';
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2600);
+}
+
+function jc216EnsureForceLayer(){
+  let old = document.querySelector('#jcLiveBgForce');
+  if(old) return old;
+
+  old = document.createElement('div');
+  old.id = 'jcLiveBgForce';
+  old.innerHTML = `
+    <div class="jc-live-layer one"></div>
+    <div class="jc-live-layer two"></div>
+    <div class="jc-live-layer three"></div>
+  `;
+  document.body.prepend(old);
+  return old;
+}
+
+function jc216ApplyPalette(id){
+  id = id || localStorage.getItem('jc-live-bg') || document.body.dataset.liveBg || 'aurora';
+  if(id === 'none') id = 'calm';
+  const p = jc216Palettes[id] || jc216Palettes.aurora;
+
+  document.body.dataset.liveBg = id;
+  document.documentElement.style.setProperty('--jc-live-c1', p[0]);
+  document.documentElement.style.setProperty('--jc-live-c2', p[1]);
+  document.documentElement.style.setProperty('--jc-live-c3', p[2]);
+
+  // если яркость была слишком маленькой из старых настроек — поднимаем
+  const op = parseFloat(localStorage.getItem('jc-live-opacity') || '.58');
+  if(!op || op < .32) localStorage.setItem('jc-live-opacity', '.58');
+
+  if(typeof jcApplyLiveSettings === 'function') jcApplyLiveSettings();
+  else {
+    document.documentElement.style.setProperty('--jc-live-opacity', localStorage.getItem('jc-live-opacity') || '.58');
+    document.documentElement.style.setProperty('--jc-live-speed', localStorage.getItem('jc-live-speed') || '1');
+    document.documentElement.style.setProperty('--jc-live-blur', (localStorage.getItem('jc-live-blur') || '0') + 'px');
+  }
+
+  document.querySelectorAll('.jc-live-bg-btn').forEach(b => b.classList.toggle('active', b.dataset.liveBg === id));
+}
+
+function jc216PatchLiveButtons(){
+  document.querySelectorAll('.jc-live-bg-btn').forEach(btn => {
+    if(btn.dataset.force216 === '1') return;
+    btn.dataset.force216 = '1';
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.liveBg || 'aurora';
+      localStorage.setItem('jc-live-bg', id);
+      jc216EnsureForceLayer();
+      jc216ApplyPalette(id);
+      jc216Indicator('Живой фон включён: ' + (btn.textContent || id).trim());
+    });
+  });
+
+  const panel = document.querySelector('.jc-live-theme-panel');
+  const row = panel?.querySelector('.jc-motion-row');
+  if(row && !document.querySelector('#jcLiveTestBtn')){
+    const test = document.createElement('button');
+    test.className = 'btn primary';
+    test.type = 'button';
+    test.id = 'jcLiveTestBtn';
+    test.textContent = 'Проверить фон';
+    test.onclick = () => {
+      jc216EnsureForceLayer();
+      localStorage.setItem('jc-live-bg', 'aurora');
+      localStorage.setItem('jc-live-opacity', '.72');
+      localStorage.setItem('jc-live-speed', '1.25');
+      localStorage.setItem('jc-live-blur', '0');
+      jc216ApplyPalette('aurora');
+      jc216Indicator('Тест: фон должен двигаться');
+    };
+    row.appendChild(test);
+  }
+}
+
+function jc216ForcePatch(){
+  jc216EnsureForceLayer();
+  jc216ApplyPalette(localStorage.getItem('jc-live-bg') || document.body.dataset.liveBg || 'aurora');
+  jc216PatchLiveButtons();
+
+  setInterval(() => {
+    jc216EnsureForceLayer();
+    jc216ApplyPalette(localStorage.getItem('jc-live-bg') || document.body.dataset.liveBg || 'aurora');
+    jc216PatchLiveButtons();
+  }, 1200);
+
+  console.log('JustClover Stage 21.6 live bg FORCE active: stage21-6-live-bg-forcefix-20260501-1');
+}
+
+setTimeout(jc216ForcePatch, 600);
