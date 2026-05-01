@@ -1090,3 +1090,44 @@ function jcStage8WireCatalog(){
 }
 
 setTimeout(jcStage8WireCatalog, 420);
+
+
+/* =========================================================
+   JustClover Stage 9 chat/catalog polish JS
+   Version: stage9-chat-catalog-polish-20260501-1
+   ========================================================= */
+function jcStage9Polish(){
+  // Дефолт ширины чата чуть больше, чтобы поле и кнопка не резались.
+  const cur = Number(localStorage.getItem('jc-chat-width') || 0);
+  if(!cur || cur < 360){
+    localStorage.setItem('jc-chat-width', '382');
+    document.documentElement.style.setProperty('--chat-w', '382px');
+    const dot = document.querySelector('.slider-dot');
+    if(dot) dot.style.left = '54%';
+  }
+
+  // Укорачиваем текст кнопки только когда места мало.
+  const sendBtn = document.querySelector('.message-form .btn.primary');
+  function tuneSendText(){
+    if(!sendBtn) return;
+    sendBtn.textContent = window.innerWidth < 1450 ? 'Отпр.' : 'Отправить';
+  }
+  tuneSendText();
+  window.addEventListener('resize', tuneSendText);
+
+  // Каталог должен быть очевиден: при первом входе слегка подсветим кнопку.
+  const catalog = [...document.querySelectorAll('.toolbar-chip')].find(b => (b.textContent||'').toLowerCase().includes('каталог'));
+  if(catalog && catalog.dataset.stage9 !== '1'){
+    catalog.dataset.stage9 = '1';
+    setTimeout(() => {
+      catalog.animate([
+        { transform:'scale(1)', boxShadow:'0 0 0 rgba(192,132,252,0)' },
+        { transform:'scale(1.045)', boxShadow:'0 0 32px rgba(192,132,252,.35)' },
+        { transform:'scale(1)', boxShadow:'0 0 0 rgba(192,132,252,0)' }
+      ], { duration:900, easing:'ease-out' });
+    }, 800);
+  }
+
+  console.log('JustClover Stage 9 chat/catalog polish active: stage9-chat-catalog-polish-20260501-1');
+}
+setTimeout(jcStage9Polish, 520);

@@ -1760,3 +1760,162 @@ body.catalog-open .source-panel-embedded{
   }
   .jc-catalog-grid{grid-template-columns:1fr}
 }
+
+
+/* =========================================================
+   JustClover Stage 9 — chat send fix + catalog visibility polish
+   ========================================================= */
+
+:root{
+  --chat-w:382px;
+}
+
+/* Правый чат: кнопка отправки больше не режется */
+.watch-layout{
+  grid-template-columns:minmax(0,1fr) minmax(350px,var(--chat-w));
+}
+.watch-sidebar{
+  min-width:350px;
+}
+.chat-card{
+  padding:16px;
+  overflow:hidden;
+}
+.message-form.jc-enhanced,
+.message-form{
+  grid-template-columns:42px 46px minmax(0,1fr) minmax(96px,102px);
+  gap:7px;
+  align-items:center;
+}
+.message-form input{
+  min-width:0;
+  width:100%;
+  height:44px;
+  padding-inline:12px;
+}
+.message-form .btn.primary{
+  min-width:0!important;
+  width:100%;
+  height:44px;
+  padding:0 10px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.jc-chat-icon{
+  width:42px!important;
+  min-width:42px!important;
+  height:44px!important;
+  min-height:44px!important;
+  border-radius:15px!important;
+}
+
+/* Каталог теперь визуально главный способ запуска видео */
+.toolbar-chip[data-jc-action="catalog-overlay"],
+.toolbar-chip:nth-child(2){
+  border-color:color-mix(in srgb,var(--primary2) 42%,rgba(255,255,255,.12));
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--primary2) 14%,transparent), 0 10px 28px rgba(0,0,0,.22);
+}
+.toolbar-chip[data-jc-action="catalog-overlay"]::after,
+.toolbar-chip:nth-child(2)::after{
+  content:'';
+  position:absolute;
+  right:9px;
+  top:8px;
+  width:6px;
+  height:6px;
+  border-radius:999px;
+  background:var(--primary2);
+  box-shadow:0 0 14px var(--primary2);
+}
+
+/* Источники смотрятся как часть каталога, а не отдельная форма */
+.source-strip{
+  padding-bottom:12px;
+}
+.source-pill{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045);
+}
+.source-pill:hover{
+  transform:translateY(-1px);
+}
+
+/* Слайдер чата яснее */
+.watch-slider::after{
+  content:'ширина чата';
+  top:24px;
+  right:0;
+  min-width:86px;
+  text-align:right;
+}
+body.chat-hidden .watch-slider::after{
+  content:'чат скрыт';
+}
+
+/* Пустой чат выглядит аккуратнее и не давит вниз */
+.chat-card .messages:empty::before{
+  content:'Пока сообщений нет\AОтправь эмодзи, GIF или первое сообщение.';
+  font-size:13.5px;
+  opacity:.82;
+}
+
+/* Каталог-оверлей: кнопка запуска и поля чуть крупнее */
+.jc-catalog-row{
+  grid-template-columns:minmax(0,1fr) minmax(150px,.52fr) 132px;
+}
+.jc-catalog-row input,
+.jc-catalog-row .btn{
+  height:46px;
+}
+.jc-catalog-actions .btn{
+  font-weight:800;
+}
+.jc-source-card{
+  min-height:112px;
+}
+.jc-source-card b{
+  font-size:16px;
+}
+
+/* Плеер и реакции: реакций не обрезает снизу */
+.reactions-dock{
+  margin-bottom:14px;
+}
+.watch-footer-meta{
+  padding-bottom:14px;
+}
+
+@media(max-width:1450px){
+  .message-form.jc-enhanced,
+  .message-form{
+    grid-template-columns:40px 44px minmax(0,1fr) 88px;
+  }
+  .message-form .btn.primary{
+    font-size:13px;
+  }
+}
+@media(max-width:1280px){
+  .watch-layout{
+    grid-template-columns:1fr;
+  }
+  .watch-sidebar{
+    min-width:0;
+  }
+  .message-form.jc-enhanced,
+  .message-form{
+    grid-template-columns:42px 46px minmax(0,1fr) 104px;
+  }
+}
+@media(max-width:980px){
+  .message-form.jc-enhanced,
+  .message-form{
+    grid-template-columns:42px 46px minmax(0,1fr);
+  }
+  .message-form .btn.primary{
+    grid-column:1/-1;
+    width:100%;
+  }
+  .jc-catalog-row{
+    grid-template-columns:1fr;
+  }
+}
