@@ -4951,22 +4951,22 @@ setTimeout(jc251Patch, 1000);
    JustClover Stage 28 CLEAN — player/cinema JS
    Version: stage28-clean-cinema-player-20260502-1
    ========================================================= */
-console.log("JustClover Stage 28.3 CLEAN loaded:", "stage28-3-force-vk-zoom-20260502-1");
-window.JUSTCLOVER_BUILD = "stage28-3-force-vk-zoom-20260502-1";
+console.log("JustClover Stage 28.4 CLEAN loaded:", "stage28-4-vk-fill-everywhere-20260502-1");
+window.JUSTCLOVER_BUILD = "stage28-4-vk-fill-everywhere-20260502-1";
 
 try{
   if(localStorage.getItem('jc28LastBuild') !== window.JUSTCLOVER_BUILD){
     localStorage.removeItem('jc28CinemaZoom');
     localStorage.removeItem('jc28CinemaZoomV2');
-    localStorage.removeItem('jc28CinemaZoomV3');
+    localStorage.removeItem('jc28CinemaZoomV4');
     localStorage.setItem('jc28LastBuild', window.JUSTCLOVER_BUILD);
   }
 }catch(e){}
 
 
 (function(){
-  const BUILD = "stage28-3-force-vk-zoom-20260502-1";
-  let zoom = Number(localStorage.getItem('jc28CinemaZoomV3') || '0') || 0;
+  const BUILD = "stage28-4-vk-fill-everywhere-20260502-1";
+  let zoom = Number(localStorage.getItem('jc28CinemaZoomV4') || '0') || 0;
 
   function svg(name){
     const icons = {
@@ -5124,23 +5124,27 @@ try{
   function applyZoom(){
     const z = Math.max(1, Math.min(1.8, currentZoom()));
     document.documentElement.style.setProperty('--jc28-cinema-zoom', String(z));
+    document.documentElement.style.setProperty('--jc28-vk-embed-zoom', String(z));
     const t = sourceType();
-    document.body.classList.toggle('jc28-vk-source', t === 'vk');
+    const iframe = document.querySelector('#iframePlayer');
+    const iframeVisible = !!(iframe && !iframe.classList.contains('hidden') && (iframe.getAttribute('src') || '') !== 'about:blank');
+    document.body.classList.toggle('jc28-vk-source', t === 'vk' || ((iframe?.getAttribute('src') || '').includes('vk.com')));
     document.body.classList.toggle('jc28-youtube-source', t === 'youtube');
     document.body.classList.toggle('jc28-local-source', t === 'local' || t === 'mp4');
+    document.body.classList.toggle('jc28-iframe-visible', iframeVisible);
     const reset = document.querySelector('#jc28ZoomBox [data-z="reset"]');
-    if(reset) reset.textContent = Math.round(z * 100) + '%';
+    if(reset) reset.textContent = (sourceType() === 'vk' ? 'VK ' : '') + Math.round(z * 100) + '%';
   }
 
   function setZoom(v, manual=false){
     zoom = Math.max(1, Math.min(1.8, Number(v) || defaultZoomForSource()));
-    if(manual) localStorage.setItem('jc28CinemaZoomV3', String(zoom));
+    if(manual) localStorage.setItem('jc28CinemaZoomV4', String(zoom));
     applyZoom();
     toast('Zoom кино: ' + Math.round(zoom * 100) + '%');
   }
 
   function resetAutoZoom(){
-    if(!localStorage.getItem('jc28CinemaZoomV3')){
+    if(!localStorage.getItem('jc28CinemaZoomV4')){
       zoom = defaultZoomForSource();
     }
     applyZoom();

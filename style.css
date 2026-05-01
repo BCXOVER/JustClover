@@ -4728,7 +4728,7 @@ body.jc-wallpaper-paused #jcWallpaperMediaLayer img{
    ========================================================= */
 
 html::after{
-  content:'28.3 CLEAN';
+  content:'28.4 CLEAN';
   position:fixed;
   left:8px;
   bottom:8px;
@@ -5220,7 +5220,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'28.3 CLEAN'!important;
+  content:'28.4 CLEAN'!important;
 }
 
 /* В CSS-кино держим плеер внутри вкладки, без системного fullscreen overlay */
@@ -5281,7 +5281,7 @@ body.jc28-cinema .player-frame{
    ========================================================= */
 
 html::after{
-  content:'28.3 CLEAN'!important;
+  content:'28.4 CLEAN'!important;
 }
 
 /* В кино iframe не просто 16:9, а заполняет экран с умным zoom.
@@ -5380,7 +5380,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'28.3 CLEAN'!important;
+  content:'28.4 CLEAN'!important;
 }
 
 body.jc28-cinema .player-frame #iframePlayer,
@@ -5443,4 +5443,125 @@ body.jc28-cinema #jc28Panel{
 
 body::before{
   --jc28-3-ready: 1;
+}
+
+
+/* =========================================================
+   JustClover Stage 28.4 — VK FILL EVERYWHERE
+   Реальная проблема: огромные рамки видны не только в "Кино",
+   а в обычном встроенном VK-плеере. Теперь VK iframe кропается
+   и в обычном плеере, и в режиме кино.
+   ========================================================= */
+
+html::after{
+  content:'28.4 CLEAN'!important;
+}
+
+/* Всегда делаем player-frame настоящим viewport для iframe */
+.player-frame{
+  position:relative!important;
+  overflow:hidden!important;
+  background:#000!important;
+}
+
+/* Когда источник VK — iframe заполняет обычный плеер с crop/zoom */
+body.jc28-vk-source:not(.jc28-cinema) .player-frame #iframePlayer,
+body.jc28-vk-source:not(.jc28-cinema) .player-frame iframe#iframePlayer{
+  position:absolute!important;
+  left:50%!important;
+  top:50%!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:100%!important;
+  min-height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  transform:translate(-50%, -50%) scale(var(--jc28-vk-embed-zoom, 1.62))!important;
+  transform-origin:center center!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+}
+
+/* В кино VK ещё жёстче закрепляем на экран */
+body.jc28-cinema.jc28-vk-source .player-frame #iframePlayer,
+body.jc28-cinema.jc28-vk-source .player-frame iframe#iframePlayer{
+  position:fixed!important;
+  left:50%!important;
+  top:50%!important;
+  width:100vw!important;
+  height:100vh!important;
+  min-width:100vw!important;
+  min-height:100vh!important;
+  max-width:none!important;
+  max-height:none!important;
+  transform:translate(-50%, -50%) scale(var(--jc28-cinema-zoom, 1.62))!important;
+  transform-origin:center center!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+}
+
+/* Не даём старым .embed-box width/height и grid layout вернуть рамки */
+body.jc28-vk-source .embed-box#iframePlayer{
+  display:block!important;
+  object-fit:cover!important;
+}
+
+/* Чтобы было понятно, что активен именно fill-режим */
+body.jc28-vk-source .player-frame::after{
+  content:'VK FILL';
+  position:absolute;
+  left:10px;
+  top:10px;
+  z-index:82;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(3,6,14,.48);
+  color:rgba(255,255,255,.72);
+  font:900 10px/1 system-ui,-apple-system,Segoe UI,sans-serif;
+  pointer-events:none;
+  opacity:.75;
+}
+
+body.jc28-cinema.jc28-vk-source .player-frame::after{
+  display:none!important;
+}
+
+/* Zoom-контролы теперь видны и в обычном VK-режиме, не только в кино */
+body.jc28-vk-source:not(.jc28-cinema) #jc28ZoomBox{
+  display:flex!important;
+  position:fixed!important;
+  left:18px!important;
+  top:auto!important;
+  bottom:58px!important;
+  z-index:2147483004!important;
+}
+
+body.jc28-vk-source:not(.jc28-cinema) #jc28ZoomBox button[data-z="reset"]{
+  background:rgba(255,255,255,.10)!important;
+}
+
+/* В кино оставляем controls сверху */
+body.jc28-cinema #jc28ZoomBox{
+  display:flex!important;
+  position:fixed!important;
+  left:14px!important;
+  top:14px!important;
+  bottom:auto!important;
+  z-index:2147483004!important;
+}
+
+/* Если вдруг currentSource не распознался, но iframe виден — всё равно применяем fill через класс, который ставит JS */
+body.jc28-iframe-visible:not(.jc28-cinema) .player-frame #iframePlayer{
+  position:absolute!important;
+  left:50%!important;
+  top:50%!important;
+  transform:translate(-50%, -50%) scale(var(--jc28-vk-embed-zoom, 1.62))!important;
+}
+
+/* Маркер автотеста */
+body::before{
+  --jc28-4-ready: 1;
 }
