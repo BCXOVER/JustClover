@@ -1131,3 +1131,67 @@ function jcStage9Polish(){
   console.log('JustClover Stage 9 chat/catalog polish active: stage9-chat-catalog-polish-20260501-1');
 }
 setTimeout(jcStage9Polish, 520);
+
+
+/* =========================================================
+   JustClover Stage 10 chat form + catalog CTA JS
+   Version: stage10-chat-catalog-cta-20260501-1
+   ========================================================= */
+function jcStage10AddCatalogCTA(){
+  const empty = document.querySelector('#emptyPlayer');
+  if(!empty || empty.dataset.stage10 === '1') return;
+  empty.dataset.stage10 = '1';
+
+  const row = document.createElement('div');
+  row.className = 'jc-empty-cta-row';
+  row.innerHTML = `
+    <button class="jc-empty-cta" type="button">Открыть каталог</button>
+    <button class="jc-empty-cta secondary" type="button">Вставить ссылку</button>
+  `;
+  empty.appendChild(row);
+
+  const [catalogBtn, pasteBtn] = row.querySelectorAll('button');
+
+  catalogBtn.onclick = () => {
+    if(typeof jcStage8OpenCatalog === 'function') jcStage8OpenCatalog('youtube');
+    else document.querySelector('.toolbar-chip[data-jc-action="catalog-overlay"]')?.click();
+  };
+
+  pasteBtn.onclick = async () => {
+    if(typeof jcStage8OpenCatalog === 'function') {
+      jcStage8OpenCatalog('youtube');
+      setTimeout(async () => {
+        try {
+          const text = await navigator.clipboard.readText();
+          const input = document.querySelector('#jcCatalogUrl');
+          if(input) input.value = text || '';
+          if(typeof jcStage8GuessSource === 'function') jcStage8GuessSource(text);
+          jcStage5Toast?.('Ссылка вставлена');
+        } catch {
+          jcStage5Toast?.('Браузер не дал доступ к буферу');
+        }
+      }, 80);
+    }
+  };
+}
+
+function jcStage10ChatFormFix(){
+  const sendBtn = document.querySelector('.message-form .btn.primary');
+  if(sendBtn){
+    sendBtn.textContent = 'Отправить';
+  }
+
+  // Если старый resize-обработчик Stage 9 укоротит кнопку, возвращаем текст обратно.
+  const keepText = () => {
+    const b = document.querySelector('.message-form .btn.primary');
+    if(b && b.textContent.trim() !== 'Отправить') b.textContent = 'Отправить';
+  };
+  setInterval(keepText, 1200);
+}
+
+function jcStage10Hotfix(){
+  jcStage10AddCatalogCTA();
+  jcStage10ChatFormFix();
+  console.log('JustClover Stage 10 chat/catalog CTA active: stage10-chat-catalog-cta-20260501-1');
+}
+setTimeout(jcStage10Hotfix, 720);
