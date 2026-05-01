@@ -2343,3 +2343,59 @@ body[data-theme="demon"]{
   font-size:14px!important;
   line-height:1!important;
 }
+
+
+/* =========================================================
+   JustClover Profile media/color fix
+   ========================================================= */
+
+:root{
+  --profile-accent: var(--primary2);
+}
+
+body{
+  accent-color: var(--profile-accent);
+}
+
+/* цвет профиля теперь реально подсвечивает основные элементы */
+.nav-btn.active,
+.toolbar-chip.active,
+.source-pill.active,
+.btn.primary,
+.jc-empty-cta,
+.message-form .btn.primary{
+  background:linear-gradient(135deg,var(--profile-accent),color-mix(in srgb,var(--profile-accent) 70%,#ffffff 10%));
+}
+
+.mini-card,
+.profile-preview-card{
+  box-shadow:
+    0 0 0 1px color-mix(in srgb,var(--profile-accent) 18%, transparent),
+    0 20px 55px rgba(0,0,0,.26);
+}
+
+.mini-avatar,
+.profile-preview-avatar{
+  border-color:color-mix(in srgb,var(--profile-accent) 44%, rgba(255,255,255,.18))!important;
+  box-shadow:0 0 28px color-mix(in srgb,var(--profile-accent) 22%, transparent);
+}
+
+.profile-upload-ok{
+  margin-top:8px;
+  color:#86efac;
+  font-size:12px;
+}
+
+/* если фон профиля/обложка GIF — не режем слишком жёстко */
+.cover,
+.profile-preview-cover{
+  background-size:cover!important;
+  background-position:center!important;
+}
+
+/* input color чуть заметнее */
+input[type="color"]{
+  min-height:44px;
+  padding:4px!important;
+  cursor:pointer;
+}

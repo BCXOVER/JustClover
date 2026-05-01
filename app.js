@@ -1460,3 +1460,150 @@ function jcMegaPatch(){
   console.log('JustClover MEGA Stage 11-15 active: mega-stage11-15-20260501-1');
 }
 setTimeout(jcMegaPatch, 900);
+
+
+/* =========================================================
+   JustClover profile avatar/cover/color fix
+   Version: profile-media-color-fix-20260501-1
+   Fix:
+   - data:image avatar/cover from device files now saves and applies;
+   - GIF avatars/backgrounds work as data-url or https URL;
+   - accent color applies live to UI, profile card, mini profile.
+   ========================================================= */
+
+function jcProfileIsImageUrl(v){
+  const s = String(v || '').trim();
+  if(!s) return '';
+  if(/^data:image\/(png|jpe?g|gif|webp|bmp|svg\+xml);base64,/i.test(s)) return s;
+  if(/^https?:\/\//i.test(s)) return safeUrl(s);
+  return '';
+}
+
+function jcColorMix(hex, amount=0.18){
+  hex = String(hex || '').trim();
+  if(!/^#[0-9a-f]{6}$/i.test(hex)) return '#8b5cf6';
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  const mix = (x) => Math.round(x + (255 - x) * amount);
+  return '#' + [mix(r), mix(g), mix(b)].map(x => x.toString(16).padStart(2,'0')).join('');
+}
+
+function jcApplyProfileAccent(color){
+  const c = /^#[0-9a-f]{6}$/i.test(String(color || '')) ? color : '#8b5cf6';
+  const c2 = jcColorMix(c, .22);
+  document.documentElement.style.setProperty('--profile-accent', c);
+  document.documentElement.style.setProperty('--primary', c);
+  document.documentElement.style.setProperty('--primary2', c2);
+  document.body.style.setProperty('--profile-accent', c);
+  document.body.style.setProperty('--primary', c);
+  document.body.style.setProperty('--primary2', c2);
+}
+
+const jcProfileOldRenderProfile = renderProfile;
+renderProfile = function(){
+  if(!profile) return jcProfileOldRenderProfile?.();
+
+  const accent = profile.accentColor || '#8b5cf6';
+  jcApplyProfileAccent(accent);
+
+  const nick = profile.nickname || 'User';
+  const av = jcProfileIsImageUrl(profile.avatarUrl) || avatar(nick);
+  const coverUrl = jcProfileIsImageUrl(profile.coverUrl);
+
+  const cover = els.miniProfile?.querySelector('.cover');
+  if(cover){
+    cover.style.backgroundImage = coverUrl
+      ? `linear-gradient(135deg,rgba(0,0,0,.08),rgba(0,0,0,.52)),url("${coverUrl}")`
+      : '';
+  }
+
+  if(els.miniAvatar) els.miniAvatar.src = av;
+  if(els.miniName) els.miniName.textContent = nick;
+  if(els.miniTag) els.miniTag.textContent = `#${profile.tag || '0000'}`;
+  if(els.miniStatus) els.miniStatus.textContent = profile.statusText || 'online';
+  if(els.topUser) els.topUser.textContent = handle(profile);
+
+  if(els.profileNick) els.profileNick.value = nick;
+  if(els.profileTag) els.profileTag.value = profile.tag || '';
+  if(els.profileAvatar) els.profileAvatar.value = profile.avatarUrl || '';
+  if(els.profileCover) els.profileCover.value = profile.coverUrl || '';
+  if(els.profileStatusText) els.profileStatusText.value = profile.statusText || '';
+  if(els.profileBio) els.profileBio.value = profile.bio || '';
+  if(els.profileAccent) els.profileAccent.value = accent;
+
+  renderPreview();
+};
+
+renderPreview = function(){
+  const n = els.profileNick?.value?.trim() || profile?.nickname || 'User';
+  const a = jcProfileIsImageUrl(els.profileAvatar?.value) || profile?.avatarUrl || avatar(n);
+  const c = jcProfileIsImageUrl(els.profileCover?.value) || profile?.coverUrl || '';
+  const accent = els.profileAccent?.value || profile?.accentColor || '#8b5cf6';
+
+  jcApplyProfileAccent(accent);
+
+  if(els.profilePreviewAvatar) els.profilePreviewAvatar.src = jcProfileIsImageUrl(a) || avatar(n);
+  if(els.profilePreviewName) els.profilePreviewName.textContent = n;
+  if(els.profilePreviewTag) els.profilePreviewTag.textContent = `#${els.profileTag?.value?.trim() || profile?.tag || '0000'}`;
+
+  const pc = els.profilePreviewCard?.querySelector('.profile-preview-cover');
+  if(pc){
+    pc.style.backgroundImage = c
+      ? `linear-gradient(135deg,rgba(0,0,0,.08),rgba(0,0,0,.52)),url("${c}")`
+      : '';
+  }
+};
+
+saveProfile = async function(e){
+  e?.preventDefault?.();
+
+  const nickname = els.profileNick.value.trim().slice(0,24) || 'User';
+  const t = els.profileTag.value.trim().replace(/[^a-zA-Z0-9_а-яА-ЯёЁ-]/g,'').slice(0,12) || tag();
+
+  const data = {
+    nickname,
+    tag: t,
+    avatarUrl: jcProfileIsImageUrl(els.profileAvatar.value) || avatar(nickname),
+    coverUrl: jcProfileIsImageUrl(els.profileCover.value),
+    statusText: els.profileStatusText.value.trim().slice(0,80),
+    bio: els.profileBio.value.trim().slice(0,280),
+    accentColor: /^#[0-9a-f]{6}$/i.test(els.profileAccent.value) ? els.profileAccent.value : '#8b5cf6',
+    updatedAt: Date.now()
+  };
+
+  await update(ref(db,`users/${currentUser.uid}`),data);
+  profile = {...profile,...data};
+  renderProfile();
+  status(els.profileSaveStatus,'Сохранено. Аватар/фон/цвет применены.');
+  jcStage5Toast?.('Профиль сохранён');
+};
+
+function jcProfileWireLiveInputs(){
+  if(els.profileAccent && els.profileAccent.dataset.profileFix !== '1'){
+    els.profileAccent.dataset.profileFix = '1';
+    els.profileAccent.addEventListener('input', renderPreview);
+    els.profileAccent.addEventListener('change', renderPreview);
+  }
+
+  [els.profileAvatar, els.profileCover, els.profileNick, els.profileTag].forEach(i => {
+    if(i && i.dataset.profileFix !== '1'){
+      i.dataset.profileFix = '1';
+      i.addEventListener('input', renderPreview);
+      i.addEventListener('change', renderPreview);
+    }
+  });
+
+  // Улучшаем старые кнопки загрузки: после выбора сразу видно результат.
+  document.querySelectorAll('.jc-upload-row input[type="file"]').forEach(file => {
+    if(file.dataset.profileFix === '1') return;
+    file.dataset.profileFix = '1';
+    file.addEventListener('change', () => setTimeout(renderPreview, 120));
+  });
+
+  console.log('JustClover profile media/color fix active: profile-media-color-fix-20260501-1');
+}
+
+setTimeout(() => {
+  jcProfileWireLiveInputs();
+  if(profile) renderProfile();
+}, 1200);
