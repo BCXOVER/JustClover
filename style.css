@@ -2586,3 +2586,194 @@ body::after{
     grid-template-columns:1fr;
   }
 }
+
+
+/* =========================================================
+   JustClover MEGA Stage 16-18
+   Rooms: custom code/password + invite improvements + source history/queue
+   ========================================================= */
+
+.jc-room-advanced{
+  margin-top:10px;
+  padding:12px;
+  border-radius:20px;
+  border:1px solid var(--line);
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb,var(--primary2) 10%,transparent), transparent 34%),
+    rgba(255,255,255,.028);
+  display:grid;
+  gap:10px;
+}
+.jc-room-advanced-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  font-size:13px;
+  font-weight:950;
+  color:var(--soft);
+}
+.jc-room-advanced-title span{
+  color:var(--muted);
+  font-weight:700;
+  font-size:11px;
+}
+.jc-room-advanced .split{
+  gap:8px;
+}
+.jc-room-toggle-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.jc-room-toggle{
+  min-height:42px;
+  padding:10px;
+  border-radius:15px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.045);
+  color:var(--soft);
+  cursor:pointer;
+  font-weight:850;
+}
+.jc-room-toggle.active{
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:#fff;
+  box-shadow:var(--glow);
+}
+.jc-room-code-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 9px;
+  border-radius:999px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line);
+  color:var(--soft);
+  font-size:12px;
+  font-weight:850;
+}
+.jc-room-lock{
+  color:#fbbf24;
+}
+
+.jc-source-tools{
+  margin:12px 22px 18px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.jc-source-panel{
+  border-radius:24px;
+  border:1px solid var(--line);
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb,var(--primary2) 11%,transparent), transparent 34%),
+    linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
+  padding:14px;
+  min-width:0;
+}
+.jc-source-panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+.jc-source-panel-head h3{
+  margin:0;
+  font-size:16px;
+}
+.jc-source-panel-head .btn{
+  min-height:34px;
+  padding:7px 10px;
+  border-radius:13px;
+  font-size:12px;
+}
+.jc-source-list{
+  display:grid;
+  gap:8px;
+  max-height:185px;
+  overflow:auto;
+  padding-right:4px;
+}
+.jc-source-item{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;
+  align-items:center;
+  padding:9px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.075);
+  background:rgba(255,255,255,.035);
+}
+.jc-source-item strong{
+  display:block;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  font-size:13px;
+}
+.jc-source-item span{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  margin-top:2px;
+}
+.jc-source-item .btn{
+  min-height:34px;
+  padding:7px 10px;
+  border-radius:12px;
+  font-size:12px;
+}
+.jc-source-empty{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+  padding:10px;
+  border-radius:14px;
+  background:rgba(255,255,255,.025);
+}
+
+.jc-invite-extra{
+  display:grid;
+  gap:10px;
+  padding:12px;
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.035);
+}
+.jc-invite-extra-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+}
+.jc-invite-extra code{
+  display:block;
+  padding:11px 12px;
+  border-radius:14px;
+  background:rgba(0,0,0,.26);
+  color:var(--soft);
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.jc-invite-extra .btn{
+  min-height:40px;
+  border-radius:14px;
+}
+
+.room-card.locked::after,
+.user-card.locked::after{
+  content:'🔒';
+  font-size:18px;
+  opacity:.88;
+}
+
+@media(max-width:980px){
+  .jc-source-tools{
+    grid-template-columns:1fr;
+    margin-inline:12px;
+  }
+  .jc-room-toggle-row{
+    grid-template-columns:1fr;
+  }
+}

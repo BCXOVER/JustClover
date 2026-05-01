@@ -1924,3 +1924,467 @@ function jcStrongAddProfileFilePanel(){
 
 setTimeout(jcStrongAddProfileFilePanel, 1400);
 setInterval(jcStrongAddProfileFilePanel, 2000);
+
+
+/* =========================================================
+   JustClover MEGA Stage 16-18 JS
+   Version: mega-stage16-18-rooms-queue-20260501-1
+   - Custom room code/password
+   - Improved invite modal
+   - Source history + queue
+   ========================================================= */
+
+let jcRoomMode = localStorage.getItem('jc-room-mode') || 'public';
+let jcRoomOpen = localStorage.getItem('jc-room-open') || 'open';
+let jcLastSourceKey = '';
+let jcSourceRoomId = '';
+let jcSourceUnsubs = [];
+let jcSourceHistoryCache = [];
+let jcSourceQueueCache = [];
+
+function jc1618Toast(text){
+  if(typeof jcStage5Toast === 'function') jcStage5Toast(text);
+  else status?.(els?.roomStatus, text);
+}
+
+function jc1618RoomCode(v){
+  return String(v || '')
+    .trim()
+    .replace(/[^a-zA-Z0-9_а-яА-ЯёЁ-]/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 32);
+}
+
+function jc1618InputRoomId(v){
+  const raw = String(v || '').trim();
+  if(!raw) return '';
+  try {
+    const u = new URL(raw);
+    return jc1618RoomCode(u.searchParams.get('room') || raw);
+  } catch {
+    return jc1618RoomCode(raw);
+  }
+}
+
+function jc1618BuildAdvancedRoomControls(){
+  if(!els?.roomNameInput || document.querySelector('.jc-room-advanced')) return;
+
+  const box = document.createElement('div');
+  box.className = 'jc-room-advanced';
+  box.innerHTML = `
+    <div class="jc-room-advanced-title">
+      <strong>Расширенные настройки комнаты</strong>
+      <span>код / пароль / доступ</span>
+    </div>
+    <div class="split">
+      <input id="jcCustomRoomCode" maxlength="32" placeholder="Свой код: anime123" />
+      <input id="jcCreateRoomPassword" maxlength="32" placeholder="Пароль, если нужен" />
+    </div>
+    <div class="split">
+      <input id="jcJoinRoomPassword" maxlength="32" placeholder="Пароль для входа" />
+      <button id="jcQuickInviteBtn" class="btn soft" type="button">Invite окно</button>
+    </div>
+    <div class="jc-room-toggle-row">
+      <button class="jc-room-toggle" data-room-open="open" type="button">Открытая</button>
+      <button class="jc-room-toggle" data-room-open="closed" type="button">Закрытая</button>
+      <button class="jc-room-toggle" data-room-mode="public" type="button">В списке публичных</button>
+      <button class="jc-room-toggle" data-room-mode="invite" type="button">Только по ссылке</button>
+    </div>
+  `;
+
+  els.roomNameInput.insertAdjacentElement('afterend', box);
+
+  const sync = () => {
+    box.querySelectorAll('[data-room-open]').forEach(b => b.classList.toggle('active', b.dataset.roomOpen === jcRoomOpen));
+    box.querySelectorAll('[data-room-mode]').forEach(b => b.classList.toggle('active', b.dataset.roomMode === jcRoomMode));
+  };
+
+  box.querySelectorAll('[data-room-open]').forEach(btn => {
+    btn.onclick = async () => {
+      jcRoomOpen = btn.dataset.roomOpen;
+      localStorage.setItem('jc-room-open', jcRoomOpen);
+      sync();
+      if(currentRoomId && currentRoom?.ownerUid === currentUser?.uid) {
+        await setVis(jcRoomOpen);
+      }
+    };
+  });
+
+  box.querySelectorAll('[data-room-mode]').forEach(btn => {
+    btn.onclick = async () => {
+      jcRoomMode = btn.dataset.roomMode;
+      localStorage.setItem('jc-room-mode', jcRoomMode);
+      sync();
+      if(currentRoomId && currentRoom?.ownerUid === currentUser?.uid) {
+        await setMode(jcRoomMode);
+      }
+    };
+  });
+
+  box.querySelector('#jcQuickInviteBtn').onclick = () => {
+    if(typeof jcStage5OpenInviteModal === 'function') jcStage5OpenInviteModal();
+    else els.copyInviteBtn?.click();
+  };
+
+  sync();
+}
+
+const jc1618OldCreateRoom = createRoom;
+createRoom = async function(){
+  if(!currentUser || !profile) return;
+
+  const custom = jc1618RoomCode(document.querySelector('#jcCustomRoomCode')?.value || '');
+  let rr, id;
+
+  if(custom) {
+    id = custom;
+    const exists = await get(ref(db,`rooms/${id}`));
+    if(exists.exists()) {
+      status(els.roomStatus, 'Такой код комнаты уже занят.');
+      jc1618Toast('Код комнаты занят');
+      return;
+    }
+    rr = ref(db,`rooms/${id}`);
+  } else {
+    rr = push(ref(db,'rooms'));
+    id = rr.key;
+  }
+
+  const name = els.roomNameInput.value.trim() || `${profile.nickname}'s room`;
+  const password = String(document.querySelector('#jcCreateRoomPassword')?.value || '').trim();
+  const visibility = jcRoomOpen === 'closed' ? 'closed' : 'open';
+  const joinMode = jcRoomMode === 'invite' ? 'invite' : 'public';
+  const publicOpen = visibility === 'open' && joinMode === 'public';
+
+  const room = {
+    id,
+    name,
+    ownerUid: currentUser.uid,
+    ownerName: handle(profile),
+    ownerAvatar: profile.avatarUrl || avatar(profile.nickname),
+    visibility,
+    joinMode,
+    publicOpen,
+    passwordEnabled: !!password,
+    password: password,
+    source:{type:'none'},
+    playback:{time:0,playing:false,updatedAt:Date.now(),byUid:''},
+    createdAt:Date.now(),
+    updatedAt:Date.now()
+  };
+
+  await set(rr, room);
+  await joinRoom(id);
+  section('watchSection');
+  jc1618Toast(custom ? 'Комната создана со своим кодом' : 'Комната создана');
+};
+
+const jc1618OldJoinRoom = joinRoom;
+joinRoom = async function(id){
+  if(!currentUser || !profile) return;
+  id = jc1618InputRoomId(id);
+  if(!id) {
+    status(els.roomStatus, 'Введи код комнаты.');
+    return;
+  }
+
+  const s = await get(ref(db,`rooms/${id}`));
+  if(!s.exists()) {
+    status(els.roomStatus, 'Комната не найдена.');
+    jc1618Toast('Комната не найдена');
+    return;
+  }
+
+  const r = s.val();
+  const owner = r.ownerUid === currentUser.uid;
+
+  if(r.visibility !== 'open' && !owner) {
+    status(els.roomStatus, 'Комната закрыта.');
+    jc1618Toast('Комната закрыта');
+    return;
+  }
+
+  if(r.passwordEnabled && !owner) {
+    let pass = String(document.querySelector('#jcJoinRoomPassword')?.value || '').trim();
+    if(!pass) pass = prompt('Введите пароль комнаты') || '';
+    if(pass !== String(r.password || '')) {
+      status(els.roomStatus, 'Неверный пароль комнаты.');
+      jc1618Toast('Неверный пароль');
+      return;
+    }
+  }
+
+  await leaveRoom(false);
+  currentRoomId = id;
+  currentRoom = r;
+  els.joinRoomInput.value = id;
+  setRoomUrl(id);
+
+  await set(ref(db,`rooms/${id}/members/${currentUser.uid}`), {
+    uid: currentUser.uid,
+    nickname: profile.nickname,
+    tag: profile.tag,
+    avatarUrl: profile.avatarUrl || avatar(profile.nickname),
+    joinedAt: Date.now()
+  });
+
+  await update(ref(db,`users/${currentUser.uid}`), {
+    activeRoomId:id,
+    activeRoomName:r.name || 'Комната',
+    activeRoomOpen:r.visibility === 'open',
+    activeRoomPublic:r.joinMode === 'public',
+    updatedAt:Date.now()
+  });
+
+  await update(ref(db,`presence/${currentUser.uid}`), {activeRoomId:id});
+  subRoom(id);
+  status(els.roomStatus, `Ты в комнате: ${r.name || id}`);
+  section('watchSection');
+};
+
+const jc1618OldRenderRooms = renderRooms;
+renderRooms = function(rooms){
+  els.publicRoomsList.innerHTML = '';
+  if(!rooms.length) {
+    els.publicRoomsList.innerHTML = '<p class="status">Открытых комнат пока нет.</p>';
+    return;
+  }
+
+  rooms.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'room-card' + (r.passwordEnabled ? ' locked' : '');
+    card.innerHTML = `
+      <img src="${esc(r.ownerAvatar || avatar(r.ownerName))}">
+      <div class="card-main">
+        <strong>${esc(r.name || 'Комната')}</strong>
+        <span>Код: <span class="jc-room-code-badge">${esc(r.id || '')}</span> ${r.passwordEnabled ? '<span class="jc-room-lock">пароль</span>' : ''}</span>
+        <span>Хост: ${esc(r.ownerName || 'User')}</span>
+        <span>${esc(r.source?.title || 'Источник не выбран')}</span>
+      </div>
+      <button class="btn primary">Войти</button>
+    `;
+    card.querySelector('button').onclick = () => joinRoom(r.id);
+    els.publicRoomsList.appendChild(card);
+  });
+};
+
+function jc1618ImproveInviteModal(){
+  const old = typeof jcStage5OpenInviteModal === 'function' ? jcStage5OpenInviteModal : null;
+  if(!old || window.__jc1618InviteWrapped) return;
+  window.__jc1618InviteWrapped = true;
+
+  jcStage5OpenInviteModal = function(){
+    old();
+    setTimeout(() => {
+      const body = document.querySelector('.jc-modal-body');
+      if(!body || body.querySelector('.jc-invite-extra')) return;
+
+      const extra = document.createElement('div');
+      extra.className = 'jc-invite-extra';
+      extra.innerHTML = `
+        <div class="jc-invite-extra-row">
+          <code>Код: ${esc(currentRoomId || 'нет комнаты')}</code>
+          <button class="btn soft" type="button" data-copy-code>Копировать код</button>
+        </div>
+        <div class="jc-invite-extra-row">
+          <code>${currentRoom?.passwordEnabled ? 'Пароль: ' + esc(currentRoom.password || '') : 'Пароль не установлен'}</code>
+          <button class="btn soft" type="button" data-copy-pass ${currentRoom?.passwordEnabled ? '' : 'disabled'}>Копировать пароль</button>
+        </div>
+      `;
+      body.appendChild(extra);
+
+      extra.querySelector('[data-copy-code]').onclick = async () => {
+        await navigator.clipboard?.writeText(currentRoomId || '').catch(()=>{});
+        jc1618Toast('Код комнаты скопирован');
+      };
+
+      extra.querySelector('[data-copy-pass]').onclick = async () => {
+        await navigator.clipboard?.writeText(currentRoom?.password || '').catch(()=>{});
+        jc1618Toast('Пароль скопирован');
+      };
+    }, 80);
+  };
+}
+
+function jcSourceKey(s){
+  if(!s || s.type === 'none') return '';
+  return [s.type, s.videoId || s.url || s.embedUrl || '', s.title || ''].join('|');
+}
+
+async function jcRememberSource(s){
+  if(!currentRoomId || !currentUser || !currentRoom || currentRoom.ownerUid !== currentUser.uid) return;
+  if(!s || s.type === 'none') return;
+
+  const key = currentRoomId + '|' + jcSourceKey(s);
+  if(!jcSourceKey(s) || key === jcLastSourceKey) return;
+  jcLastSourceKey = key;
+
+  await push(ref(db,`sourceHistory/${currentRoomId}`), {
+    source:s,
+    title:s.title || s.videoId || s.url || s.type,
+    type:s.type,
+    byUid:currentUser.uid,
+    byName:handle(profile),
+    createdAt:Date.now()
+  }).catch(()=>{});
+}
+
+const jcOldLoadSource1618 = loadSource;
+loadSource = async function(s={type:'none'}){
+  const r = await jcOldLoadSource1618(s);
+  setTimeout(() => jcRememberSource(s), 120);
+  return r;
+};
+
+async function jcPlaySource(source){
+  if(!currentRoomId || !source) return;
+  if(currentRoom?.ownerUid !== currentUser?.uid) {
+    jc1618Toast('Запускать источник может только хост');
+    return;
+  }
+  await update(ref(db,`rooms/${currentRoomId}`), {
+    source,
+    playback:{time:0,playing:false,updatedAt:Date.now(),byUid:currentUser.uid},
+    updatedAt:Date.now()
+  });
+  jc1618Toast('Источник запущен');
+}
+
+async function jcAddCurrentToQueue(){
+  if(!currentRoomId || !currentSource || currentSource.type === 'none') {
+    jc1618Toast('Сначала выбери источник');
+    return;
+  }
+  await push(ref(db,`sourceQueue/${currentRoomId}`), {
+    source:currentSource,
+    title:currentSource.title || currentSource.videoId || currentSource.url || currentSource.type,
+    type:currentSource.type,
+    byUid:currentUser.uid,
+    byName:handle(profile),
+    createdAt:Date.now()
+  });
+  jc1618Toast('Добавлено в очередь');
+}
+
+async function jcQueueNext(){
+  if(!currentRoomId) return;
+  if(currentRoom?.ownerUid !== currentUser?.uid) {
+    jc1618Toast('Очередью управляет хост');
+    return;
+  }
+  const s = await get(ref(db,`sourceQueue/${currentRoomId}`));
+  const items = [];
+  s.forEach(x => items.push({key:x.key,...x.val()}));
+  items.sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+  const next = items[0];
+  if(!next) {
+    jc1618Toast('Очередь пустая');
+    return;
+  }
+  await jcPlaySource(next.source);
+  await remove(ref(db,`sourceQueue/${currentRoomId}/${next.key}`));
+}
+
+function jcBuildSourceTools(){
+  const stage = document.querySelector('.watch-stage');
+  if(!stage || document.querySelector('.jc-source-tools')) return;
+
+  const tools = document.createElement('div');
+  tools.className = 'jc-source-tools';
+  tools.innerHTML = `
+    <div class="jc-source-panel">
+      <div class="jc-source-panel-head">
+        <h3>История источников</h3>
+        <button class="btn soft" type="button" data-refresh-history>Обновить</button>
+      </div>
+      <div class="jc-source-list" id="jcSourceHistoryList"><div class="jc-source-empty">История появится после запуска видео.</div></div>
+    </div>
+    <div class="jc-source-panel">
+      <div class="jc-source-panel-head">
+        <h3>Очередь видео</h3>
+        <div>
+          <button class="btn soft" type="button" data-add-current>+ текущее</button>
+          <button class="btn primary" type="button" data-next>Следующее</button>
+        </div>
+      </div>
+      <div class="jc-source-list" id="jcSourceQueueList"><div class="jc-source-empty">Очередь пустая.</div></div>
+    </div>
+  `;
+
+  const meta = stage.querySelector('.watch-footer-meta');
+  if(meta) meta.insertAdjacentElement('beforebegin', tools);
+  else stage.appendChild(tools);
+
+  tools.querySelector('[data-add-current]').onclick = jcAddCurrentToQueue;
+  tools.querySelector('[data-next]').onclick = jcQueueNext;
+  tools.querySelector('[data-refresh-history]').onclick = () => jcSubscribeSourceTools(true);
+}
+
+function jcRenderSourceList(container, items, mode){
+  const el = document.querySelector(container);
+  if(!el) return;
+  el.innerHTML = '';
+
+  if(!items.length) {
+    el.innerHTML = `<div class="jc-source-empty">${mode === 'history' ? 'История появится после запуска видео.' : 'Очередь пустая.'}</div>`;
+    return;
+  }
+
+  items.slice(0, mode === 'history' ? 8 : 12).forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'jc-source-item';
+    const title = item.title || item.source?.title || item.source?.videoId || item.source?.url || item.type || 'Источник';
+    const type = item.type || item.source?.type || 'source';
+    div.innerHTML = `
+      <div>
+        <strong>${esc(title)}</strong>
+        <span>${esc(type)} · ${new Date(item.createdAt || Date.now()).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>
+      </div>
+      <button class="btn soft" type="button">${mode === 'history' ? 'Запуск' : 'Play'}</button>
+    `;
+    div.querySelector('button').onclick = () => jcPlaySource(item.source);
+    el.appendChild(div);
+  });
+}
+
+function jcSubscribeSourceTools(force=false){
+  if(!currentRoomId) return;
+  jcBuildSourceTools();
+
+  if(!force && jcSourceRoomId === currentRoomId) return;
+
+  jcSourceUnsubs.forEach(u => u && u());
+  jcSourceUnsubs = [];
+  jcSourceRoomId = currentRoomId;
+
+  jcSourceUnsubs.push(onValue(ref(db,`sourceHistory/${currentRoomId}`), s => {
+    const a = [];
+    s.forEach(x => a.push({key:x.key,...x.val()}));
+    a.sort((x,y)=>(y.createdAt||0)-(x.createdAt||0));
+    jcSourceHistoryCache = a;
+    jcRenderSourceList('#jcSourceHistoryList', a, 'history');
+  }));
+
+  jcSourceUnsubs.push(onValue(ref(db,`sourceQueue/${currentRoomId}`), s => {
+    const a = [];
+    s.forEach(x => a.push({key:x.key,...x.val()}));
+    a.sort((x,y)=>(x.createdAt||0)-(y.createdAt||0));
+    jcSourceQueueCache = a;
+    jcRenderSourceList('#jcSourceQueueList', a, 'queue');
+  }));
+}
+
+function jc1618Patch(){
+  jc1618BuildAdvancedRoomControls();
+  jc1618ImproveInviteModal();
+  jcBuildSourceTools();
+
+  setInterval(() => {
+    jc1618BuildAdvancedRoomControls();
+    if(currentRoomId) jcSubscribeSourceTools();
+  }, 1200);
+
+  console.log('JustClover MEGA Stage 16-18 active: mega-stage16-18-rooms-queue-20260501-1');
+}
+
+setTimeout(jc1618Patch, 1200);
