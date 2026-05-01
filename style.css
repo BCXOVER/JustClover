@@ -1739,3 +1739,69 @@ body[data-watch-cinema="1"] .anime-source-tabs{display:none !important}
   .anime-player-frame{min-height:240px !important; aspect-ratio:16/10 !important}
 }
 
+
+/* ===== Chat panel hotfix chatfix-20260501-19 ===== */
+.anime-watch-shell{align-items:start !important;}
+.anime-side{
+  display:grid !important;
+  grid-template-rows:auto auto minmax(0,1fr) !important;
+  gap:12px !important;
+  height:calc(100vh - 110px) !important;
+  max-height:calc(100vh - 110px) !important;
+  min-height:620px;
+  overflow:hidden !important;
+}
+.anime-side > .anime-side-card{min-height:0 !important;}
+.anime-chat-card{
+  display:grid !important;
+  grid-template-rows:auto minmax(0,1fr) auto auto !important;
+  min-height:0 !important;
+  height:100% !important;
+  max-height:none !important;
+  overflow:hidden !important;
+}
+.anime-chat-card .messages{
+  min-height:120px !important;
+  max-height:none !important;
+  height:100% !important;
+  overflow:auto !important;
+  padding-right:4px !important;
+}
+.anime-chat-card #emojiPanel{flex:0 0 auto;}
+.message-form.enhanced{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto !important;
+  gap:10px !important;
+  margin-top:10px !important;
+  align-items:stretch !important;
+}
+.chat-input-wrap{
+  display:grid !important;
+  grid-template-columns:42px 42px minmax(0,1fr) !important;
+  min-width:0 !important;
+  width:100% !important;
+}
+.chat-input-wrap input{
+  min-width:0 !important;
+  width:100% !important;
+  display:block !important;
+}
+.message-form.enhanced > .btn{
+  min-width:108px !important;
+  min-height:54px !important;
+  white-space:nowrap;
+}
+@media (max-width:1180px){
+  .anime-side{
+    height:auto !important;
+    max-height:none !important;
+    min-height:0 !important;
+  }
+  .anime-chat-card{height:420px !important;}
+}
+@media (max-width:760px){
+  .anime-chat-card{height:360px !important;}
+  .message-form.enhanced{grid-template-columns:1fr !important;}
+  .message-form.enhanced > .btn{width:100% !important;}
+}
+
