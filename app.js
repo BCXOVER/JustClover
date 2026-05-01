@@ -4951,12 +4951,22 @@ setTimeout(jc251Patch, 1000);
    JustClover Stage 28 CLEAN — player/cinema JS
    Version: stage28-clean-cinema-player-20260502-1
    ========================================================= */
-console.log("JustClover Stage 28.2 CLEAN loaded:", "stage28-2-vk-crop-cinema-20260502-1");
-window.JUSTCLOVER_BUILD = "stage28-2-vk-crop-cinema-20260502-1";
+console.log("JustClover Stage 28.3 CLEAN loaded:", "stage28-3-force-vk-zoom-20260502-1");
+window.JUSTCLOVER_BUILD = "stage28-3-force-vk-zoom-20260502-1";
+
+try{
+  if(localStorage.getItem('jc28LastBuild') !== window.JUSTCLOVER_BUILD){
+    localStorage.removeItem('jc28CinemaZoom');
+    localStorage.removeItem('jc28CinemaZoomV2');
+    localStorage.removeItem('jc28CinemaZoomV3');
+    localStorage.setItem('jc28LastBuild', window.JUSTCLOVER_BUILD);
+  }
+}catch(e){}
+
 
 (function(){
-  const BUILD = "stage28-2-vk-crop-cinema-20260502-1";
-  let zoom = Number(localStorage.getItem('jc28CinemaZoom') || '0') || 0;
+  const BUILD = "stage28-3-force-vk-zoom-20260502-1";
+  let zoom = Number(localStorage.getItem('jc28CinemaZoomV3') || '0') || 0;
 
   function svg(name){
     const icons = {
@@ -5101,9 +5111,10 @@ window.JUSTCLOVER_BUILD = "stage28-2-vk-crop-cinema-20260502-1";
 
   function defaultZoomForSource(){
     const t = sourceType();
-    if(t === 'vk') return 1.42;
+    if(t === 'vk') return 1.62;
     if(t === 'local' || t === 'mp4') return 1.0;
-    return 1.04;
+    if(t === 'youtube') return 1.04;
+    return 1.62;
   }
 
   function currentZoom(){
@@ -5113,20 +5124,23 @@ window.JUSTCLOVER_BUILD = "stage28-2-vk-crop-cinema-20260502-1";
   function applyZoom(){
     const z = Math.max(1, Math.min(1.8, currentZoom()));
     document.documentElement.style.setProperty('--jc28-cinema-zoom', String(z));
-    document.body.classList.toggle('jc28-vk-source', sourceType() === 'vk');
+    const t = sourceType();
+    document.body.classList.toggle('jc28-vk-source', t === 'vk');
+    document.body.classList.toggle('jc28-youtube-source', t === 'youtube');
+    document.body.classList.toggle('jc28-local-source', t === 'local' || t === 'mp4');
     const reset = document.querySelector('#jc28ZoomBox [data-z="reset"]');
     if(reset) reset.textContent = Math.round(z * 100) + '%';
   }
 
   function setZoom(v, manual=false){
     zoom = Math.max(1, Math.min(1.8, Number(v) || defaultZoomForSource()));
-    if(manual) localStorage.setItem('jc28CinemaZoom', String(zoom));
+    if(manual) localStorage.setItem('jc28CinemaZoomV3', String(zoom));
     applyZoom();
     toast('Zoom кино: ' + Math.round(zoom * 100) + '%');
   }
 
   function resetAutoZoom(){
-    if(!localStorage.getItem('jc28CinemaZoom')){
+    if(!localStorage.getItem('jc28CinemaZoomV3')){
       zoom = defaultZoomForSource();
     }
     applyZoom();
@@ -5139,12 +5153,15 @@ window.JUSTCLOVER_BUILD = "stage28-2-vk-crop-cinema-20260502-1";
     resetAutoZoom();
 
     if(!hasPlayableSource()){
-      document.body.classList.add('jc28-no-source');
-      toast('Сначала выбери источник');
-      try{
-        if(typeof jcStage8OpenCatalog === 'function') jcStage8OpenCatalog('youtube');
-      }catch(e){}
-      return;
+      const emptyVisible = document.getElementById('emptyPlayer') && !document.getElementById('emptyPlayer').classList.contains('hidden');
+      if(emptyVisible){
+        document.body.classList.add('jc28-no-source');
+        toast('Сначала выбери источник');
+        try{
+          if(typeof jcStage8OpenCatalog === 'function') jcStage8OpenCatalog('youtube');
+        }catch(e){}
+        return;
+      }
     }
     document.body.classList.remove('jc28-no-source');
 

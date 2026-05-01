@@ -4728,7 +4728,7 @@ body.jc-wallpaper-paused #jcWallpaperMediaLayer img{
    ========================================================= */
 
 html::after{
-  content:'28.2 CLEAN';
+  content:'28.3 CLEAN';
   position:fixed;
   left:8px;
   bottom:8px;
@@ -5220,7 +5220,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'28.2 CLEAN'!important;
+  content:'28.3 CLEAN'!important;
 }
 
 /* В CSS-кино держим плеер внутри вкладки, без системного fullscreen overlay */
@@ -5281,7 +5281,7 @@ body.jc28-cinema .player-frame{
    ========================================================= */
 
 html::after{
-  content:'28.2 CLEAN'!important;
+  content:'28.3 CLEAN'!important;
 }
 
 /* В кино iframe не просто 16:9, а заполняет экран с умным zoom.
@@ -5370,4 +5370,77 @@ body:not(.jc28-cinema) .player-frame{
 /* Тестовые CSS переменные */
 body::before{
   --jc28-2-ready: 1;
+}
+
+
+/* =========================================================
+   JustClover Stage 28.3 — force VK zoom
+   GitHub уже отдавал 28.2, но старый localStorage zoom мог оставаться 103%.
+   Тут новый ключ storage и принудительный zoom для iframe в кино.
+   ========================================================= */
+
+html::after{
+  content:'28.3 CLEAN'!important;
+}
+
+body.jc28-cinema .player-frame #iframePlayer,
+body.jc28-cinema .player-frame iframe#iframePlayer{
+  position:absolute!important;
+  left:50%!important;
+  top:50%!important;
+  width:100vw!important;
+  height:100vh!important;
+  min-width:100vw!important;
+  min-height:100vh!important;
+  max-width:none!important;
+  max-height:none!important;
+  transform:translate(-50%, -50%) scale(var(--jc28-cinema-zoom, 1.62))!important;
+  transform-origin:center center!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+}
+
+body.jc28-cinema .player-frame iframe{
+  transform:translate(-50%, -50%) scale(var(--jc28-cinema-zoom, 1.62))!important;
+}
+
+body.jc28-cinema.jc28-youtube-source .player-frame #youtubePlayer,
+body.jc28-cinema.jc28-youtube-source .player-frame iframe{
+  transform:translate(-50%, -50%) scale(var(--jc28-cinema-zoom, 1.04))!important;
+}
+
+body.jc28-cinema.jc28-local-source .player-frame #videoPlayer{
+  width:100vw!important;
+  height:100vh!important;
+  transform:translate(-50%, -50%) scale(var(--jc28-cinema-zoom, 1))!important;
+  object-fit:cover!important;
+}
+
+#jc28ZoomBox{
+  left:14px!important;
+  top:14px!important;
+  min-width:auto!important;
+}
+
+#jc28ZoomBox button[data-z="reset"]{
+  min-width:62px!important;
+  background:linear-gradient(135deg,var(--primary),var(--primary2))!important;
+}
+
+#jc28CinemaHint{
+  display:none!important;
+}
+
+body.jc28-cinema #jc28Panel{
+  bottom:34px!important;
+}
+
+#jc28Exit{
+  top:18px!important;
+  right:18px!important;
+}
+
+body::before{
+  --jc28-3-ready: 1;
 }
