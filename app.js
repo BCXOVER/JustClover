@@ -3185,3 +3185,83 @@ function jc1921Patch(){
 }
 
 setTimeout(jc1921Patch, 1200);
+
+
+/* =========================================================
+   JustClover Stage 21.5 Transparent Live Background Fix JS
+   Version: stage21-5-transparent-live-bg-20260501-1
+   ========================================================= */
+
+function jc215LiveIndicator(text){
+  const old = document.querySelector('.jc-live-indicator');
+  if(old) old.remove();
+  const el = document.createElement('div');
+  el.className = 'jc-live-indicator';
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2600);
+}
+
+function jc215ApplyGlass(){
+  const glass = localStorage.getItem('jc-glass-extra') === '1';
+  document.body.classList.toggle('jc-glass-extra', glass);
+}
+
+function jc215PatchLivePanel(){
+  const panel = document.querySelector('.jc-live-theme-panel');
+  if(!panel || panel.dataset.stage215 === '1') return;
+  panel.dataset.stage215 = '1';
+
+  const row = panel.querySelector('.jc-motion-row');
+  if(row){
+    const glassBtn = document.createElement('button');
+    glassBtn.className = 'btn primary';
+    glassBtn.type = 'button';
+    glassBtn.id = 'jcGlassExtraBtn';
+    glassBtn.textContent = 'Сделать фон видимее';
+    glassBtn.onclick = () => {
+      const next = localStorage.getItem('jc-glass-extra') === '1' ? '0' : '1';
+      localStorage.setItem('jc-glass-extra', next);
+      jc215ApplyGlass();
+      jc215LiveIndicator(next === '1' ? 'Фон стал заметнее' : 'Фон стал спокойнее');
+    };
+    row.appendChild(glassBtn);
+  }
+
+  panel.querySelectorAll('.jc-live-bg-btn').forEach(btn => {
+    if(btn.dataset.stage215 === '1') return;
+    btn.dataset.stage215 = '1';
+    btn.addEventListener('click', () => {
+      setTimeout(() => {
+        const name = (btn.textContent || '').trim();
+        jc215LiveIndicator('Живой фон: ' + name);
+      }, 80);
+    });
+  });
+}
+
+function jc215ForceVisibleDefaults(){
+  // Если пользователь раньше не трогал яркость live-фона — делаем её видимой.
+  if(!localStorage.getItem('jc-live-opacity')){
+    localStorage.setItem('jc-live-opacity', '.48');
+  }
+  if(!localStorage.getItem('jc-live-speed')){
+    localStorage.setItem('jc-live-speed', '1');
+  }
+  if(typeof jcApplyLiveSettings === 'function') jcApplyLiveSettings();
+}
+
+function jc215Patch(){
+  jc215ForceVisibleDefaults();
+  jc215ApplyGlass();
+  jc215PatchLivePanel();
+
+  setInterval(() => {
+    jc215ApplyGlass();
+    jc215PatchLivePanel();
+  }, 1000);
+
+  console.log('JustClover Stage 21.5 transparent live bg active: stage21-5-transparent-live-bg-20260501-1');
+}
+
+setTimeout(jc215Patch, 1200);

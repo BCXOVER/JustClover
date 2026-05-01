@@ -3593,3 +3593,212 @@ body.jc-reduced-motion *::after{
 body.jc-reduced-motion .jc-live-bg{
   opacity:.16;
 }
+
+
+/* =========================================================
+   JustClover Stage 21.5 — Transparent Live Background Fix
+   Фон теперь реально виден: плитки/карточки становятся стеклянными.
+   ========================================================= */
+
+:root{
+  --jc-glass-alpha:.58;
+  --jc-glass-alpha-strong:.72;
+  --jc-live-opacity:.48;
+}
+
+/* Живой фон был слишком глубоко. Поднимаем слой за интерфейс, но не поверх кликов. */
+.jc-live-bg{
+  z-index:0!important;
+  opacity:var(--jc-live-opacity)!important;
+}
+
+body::after{
+  z-index:0!important;
+}
+
+/* Весь UI кладём поверх фона */
+.topbar,
+.app,
+.shell,
+.auth-view,
+#appView,
+#authView,
+.jc-mobile-nav,
+.jc-mobile-chat-toggle,
+.jc-catalog-layer{
+  position:relative;
+  z-index:2;
+}
+
+/* Убираем слишком глухие фоны у основных областей */
+body,
+.main-shell,
+.shell,
+.app,
+.section,
+.section.active{
+  background-color:transparent!important;
+}
+
+/* Главные карточки теперь glass, а не глухой чёрный */
+.card,
+.side-card,
+.mini-card,
+.watch-stage,
+.watch-sidebar .side-card,
+.chat-card,
+.members-card,
+.voice-card,
+.jc-room-advanced,
+.jc-current-room-strip,
+.jc-source-panel,
+.jc-theme-pack,
+.jc-live-theme-panel,
+.jc-device-upload-panel,
+.jc-profile-file-panel,
+.jc-catalog,
+.jc-catalog-panel,
+.room-card,
+.user-card,
+.friend-card,
+.search-card,
+.request-card,
+.profile-preview-card{
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb,var(--primary2) 10%, transparent), transparent 36%),
+    linear-gradient(180deg,
+      rgba(18,20,32,var(--jc-glass-alpha-strong)),
+      rgba(6,8,16,var(--jc-glass-alpha))
+    )!important;
+  backdrop-filter:blur(18px) saturate(130%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(130%)!important;
+}
+
+/* Внутренние элементы тоже чуть прозрачнее */
+input,
+textarea,
+select,
+.message-form input,
+.jc-catalog-row input,
+.jc-catalog-search input{
+  background:rgba(4,6,14,.62)!important;
+}
+
+.btn.soft,
+.toolbar-chip,
+.source-pill,
+.jc-room-toggle,
+.jc-empty-cta.secondary,
+.mini-icon-btn,
+.jc-chat-icon{
+  background:rgba(255,255,255,.065)!important;
+  backdrop-filter:blur(14px)!important;
+}
+
+/* Плеер оставляем тёмным, но фон за ним виден по краям и в пустом состоянии */
+.player-frame{
+  background:
+    radial-gradient(circle at 50% 34%, color-mix(in srgb,var(--primary2) 16%, transparent), transparent 28%),
+    linear-gradient(180deg,rgba(3,5,12,.78),rgba(2,4,10,.70))!important;
+  backdrop-filter:blur(16px)!important;
+}
+
+.empty-player{
+  background:
+    linear-gradient(180deg,rgba(3,5,10,.34),rgba(3,5,10,.62)),
+    radial-gradient(circle at 50% 42%, color-mix(in srgb,var(--primary2) 20%,transparent), transparent 34%)!important;
+}
+
+/* Верхняя шапка стала стеклянной, чтобы фон читался */
+.topbar{
+  background:rgba(5,6,12,.62)!important;
+  backdrop-filter:blur(18px) saturate(120%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(120%)!important;
+}
+
+/* Левая панель и профиль не перекрывают всё намертво */
+.rail,
+.rail-card,
+.rail-footer{
+  background:
+    linear-gradient(180deg,rgba(18,20,32,.70),rgba(6,8,16,.56))!important;
+  backdrop-filter:blur(18px) saturate(130%)!important;
+}
+
+/* Секции оформления: плитки фонов полупрозрачные, виден общий фон */
+.jc-live-bg-btn,
+.jc-theme-btn{
+  background:
+    radial-gradient(circle at 68% 24%, color-mix(in srgb,var(--b) 72%, transparent), transparent 48%),
+    linear-gradient(135deg,
+      color-mix(in srgb,var(--a) 82%, transparent),
+      rgba(5,8,18,.50)
+    )!important;
+  backdrop-filter:blur(12px)!important;
+}
+
+/* Визуальная проверка — маленькая подпись текущего live-фона */
+.jc-live-indicator{
+  position:fixed;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%);
+  z-index:10000;
+  pointer-events:none;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(4,6,14,.58);
+  color:rgba(255,255,255,.78);
+  font-size:12px;
+  font-weight:850;
+  backdrop-filter:blur(14px);
+  opacity:.0;
+  animation:jcLiveIndicator 2.4s ease both;
+}
+@keyframes jcLiveIndicator{
+  0%{opacity:0;transform:translateX(-50%) translateY(8px)}
+  18%,78%{opacity:1;transform:translateX(-50%) translateY(0)}
+  100%{opacity:0;transform:translateX(-50%) translateY(8px)}
+}
+
+/* Контролы glass */
+.jc-live-controls input,
+.jc-bg-controls input{
+  accent-color:var(--primary2);
+}
+
+/* Экстра-прозрачный режим */
+body.jc-glass-extra{
+  --jc-glass-alpha:.40;
+  --jc-glass-alpha-strong:.54;
+  --jc-live-opacity:.62;
+}
+
+body.jc-glass-extra .card,
+body.jc-glass-extra .side-card,
+body.jc-glass-extra .mini-card,
+body.jc-glass-extra .watch-stage,
+body.jc-glass-extra .jc-live-theme-panel,
+body.jc-glass-extra .jc-device-upload-panel{
+  border-color:rgba(255,255,255,.16)!important;
+}
+
+/* Если фон слишком отвлекает, экономный режим оставляет glass, но гасит анимацию */
+body.jc-reduced-motion .jc-live-bg{
+  opacity:.28!important;
+}
+
+/* На телефоне фон должен быть виден, но не мешать читаемости */
+@media(max-width:760px){
+  :root{
+    --jc-glass-alpha:.66;
+    --jc-glass-alpha-strong:.76;
+    --jc-live-opacity:.38;
+  }
+  body.jc-glass-extra{
+    --jc-glass-alpha:.54;
+    --jc-glass-alpha-strong:.66;
+    --jc-live-opacity:.50;
+  }
+}
