@@ -340,3 +340,251 @@ function jcStage4Hotfix(){
   console.log('JustClover Stage 4 reactions/GIF hotfix active: stage4reactions-20260501-1');
 }
 setTimeout(jcStage4Hotfix, 80);
+
+
+/* =========================================================
+   JustClover Stage 5 invite modal + chat width slider
+   Version: stage5invite-slider-20260501-1
+   ========================================================= */
+function jcStage5Toast(text){
+  let t = document.querySelector('.jc-copy-toast');
+  if(!t){
+    t = document.createElement('div');
+    t.className = 'jc-copy-toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = text;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 1700);
+}
+
+function jcStage5InviteUrl(){
+  const u = new URL(location.href);
+  if(currentRoomId) u.searchParams.set('room', currentRoomId);
+  return u.toString();
+}
+
+async function jcStage5CopyInvite(){
+  if(!currentRoomId){
+    jcStage5Toast('Сначала создай комнату');
+    status(els.roomStatus, 'Сначала создай комнату.');
+    return '';
+  }
+  const url = jcStage5InviteUrl();
+  await navigator.clipboard?.writeText(url).catch(() => {});
+  jcStage5Toast('Invite-ссылка скопирована');
+  status(els.roomStatus, 'Invite-ссылка скопирована.');
+  return url;
+}
+
+function jcStage5BuildInviteModal(){
+  if(document.querySelector('.jc-modal-layer')) return;
+  const layer = document.createElement('div');
+  layer.className = 'jc-modal-layer';
+  layer.innerHTML = `
+    <div class="jc-modal" role="dialog" aria-modal="true">
+      <div class="jc-modal-head">
+        <div>
+          <h3>Пригласить в комнату</h3>
+          <p>Скопируй ссылку, код или покажи QR с телефона.</p>
+        </div>
+        <button class="jc-modal-close" type="button">×</button>
+      </div>
+      <div class="jc-modal-body">
+        <label>Invite-ссылка
+          <div class="jc-invite-code">
+            <input id="jcInviteUrlInput" readonly value="">
+            <button id="jcCopyInviteModalBtn" class="btn primary" type="button">Копировать</button>
+          </div>
+        </label>
+        <label>Код комнаты
+          <div class="jc-invite-code">
+            <input id="jcRoomCodeInput" readonly value="">
+            <button id="jcCopyCodeBtn" class="btn soft" type="button">Код</button>
+          </div>
+        </label>
+        <div class="jc-qr-card">
+          <img id="jcInviteQr" alt="QR invite">
+          <div>
+            <strong>QR-код для телефона</strong>
+            <p>Друг может открыть камеру, отсканировать QR и попасть в комнату по ссылке.</p>
+          </div>
+        </div>
+        <div class="jc-share-row">
+          <button id="jcNativeShareBtn" class="btn soft" type="button">Поделиться</button>
+          <button id="jcOpenInviteBtn" class="btn soft" type="button">Открыть ссылку</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(layer);
+
+  const close = () => layer.classList.remove('open');
+  layer.querySelector('.jc-modal-close').onclick = close;
+  layer.onclick = e => { if(e.target === layer) close(); };
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') close(); });
+
+  layer.querySelector('#jcCopyInviteModalBtn').onclick = jcStage5CopyInvite;
+  layer.querySelector('#jcCopyCodeBtn').onclick = async () => {
+    if(!currentRoomId) return jcStage5Toast('Комнаты ещё нет');
+    await navigator.clipboard?.writeText(currentRoomId).catch(()=>{});
+    jcStage5Toast('Код комнаты скопирован');
+  };
+  layer.querySelector('#jcOpenInviteBtn').onclick = () => {
+    const url = jcStage5InviteUrl();
+    if(currentRoomId) window.open(url, '_blank', 'noopener,noreferrer');
+    else jcStage5Toast('Сначала создай комнату');
+  };
+  layer.querySelector('#jcNativeShareBtn').onclick = async () => {
+    if(!currentRoomId) return jcStage5Toast('Сначала создай комнату');
+    const url = jcStage5InviteUrl();
+    if(navigator.share){
+      await navigator.share({title:'JustClover room', text:'Заходи смотреть вместе', url}).catch(()=>{});
+    } else {
+      await navigator.clipboard?.writeText(url).catch(()=>{});
+      jcStage5Toast('Ссылка скопирована');
+    }
+  };
+}
+
+function jcStage5OpenInviteModal(){
+  if(!currentRoomId){
+    jcStage5Toast('Сначала создай комнату');
+    status(els.roomStatus, 'Сначала создай комнату, потом Invite.');
+    return;
+  }
+  jcStage5BuildInviteModal();
+  const layer = document.querySelector('.jc-modal-layer');
+  const url = jcStage5InviteUrl();
+  layer.querySelector('#jcInviteUrlInput').value = url;
+  layer.querySelector('#jcRoomCodeInput').value = currentRoomId || '';
+  layer.querySelector('#jcInviteQr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(url);
+  layer.classList.add('open');
+}
+
+function jcStage5WireInvite(){
+  const invite = [...document.querySelectorAll('.toolbar-chip')].find(b => (b.textContent||'').toLowerCase().includes('invite'));
+  if(invite){
+    invite.onclick = jcStage5OpenInviteModal;
+    invite.dataset.jcAction = 'invite';
+  }
+}
+
+function jcStage5WireChatSlider(){
+  const slider = document.querySelector('.watch-slider');
+  const dot = document.querySelector('.slider-dot');
+  if(!slider || slider.dataset.stage5 === '1') return;
+  slider.dataset.stage5 = '1';
+
+  const min = 280, max = 470;
+  const saved = Number(localStorage.getItem('jc-chat-width') || 330);
+  function apply(px){
+    const v = Math.max(min, Math.min(max, px));
+    const pct = ((v - min) / (max - min)) * 100;
+    document.documentElement.style.setProperty('--chat-w', v + 'px');
+    if(dot) dot.style.left = pct + '%';
+    localStorage.setItem('jc-chat-width', String(v));
+  }
+  apply(saved);
+
+  function setFromEvent(e){
+    const r = slider.getBoundingClientRect();
+    const x = Math.max(0, Math.min(r.width, (e.clientX || e.touches?.[0]?.clientX || 0) - r.left));
+    apply(min + (x / r.width) * (max - min));
+  }
+
+  let dragging = false;
+  slider.addEventListener('pointerdown', e => {
+    dragging = true;
+    slider.setPointerCapture?.(e.pointerId);
+    setFromEvent(e);
+  });
+  slider.addEventListener('pointermove', e => {
+    if(dragging) setFromEvent(e);
+  });
+  slider.addEventListener('pointerup', () => dragging = false);
+  slider.addEventListener('pointercancel', () => dragging = false);
+}
+
+async function jcStage5GiphySearch(q){
+  q = String(q || '').trim();
+  if(!q) return [];
+  const key = localStorage.getItem('jc-giphy-key') || '';
+  if(!key) return [];
+  const url = `https://api.giphy.com/v1/gifs/search?api_key=${encodeURIComponent(key)}&q=${encodeURIComponent(q)}&limit=12&rating=pg-13&lang=ru`;
+  const r = await fetch(url);
+  const j = await r.json();
+  return (j.data || []).map(x => x.images?.fixed_height?.url || x.images?.downsized_medium?.url).filter(Boolean);
+}
+
+function jcStage5UpgradeGifPicker(){
+  const gifPicker = [...document.querySelectorAll('.jc-picker')].find(p => p.textContent.includes('GIF'));
+  if(!gifPicker || gifPicker.dataset.stage5 === '1') return;
+  gifPicker.dataset.stage5 = '1';
+
+  const searchBlock = gifPicker.querySelector('.jc-gif-search');
+  if(searchBlock){
+    searchBlock.insertAdjacentHTML('afterend', `
+      <div class="jc-giphy-key">
+        <input id="jcGiphyKeyInput" placeholder="GIPHY API key, если хочешь настоящий поиск" value="${localStorage.getItem('jc-giphy-key') || ''}">
+        <button id="jcSaveGiphyKeyBtn" class="btn soft" type="button">Сохранить</button>
+      </div>
+      <div class="jc-picker-note">Без ключа работают быстрые GIF-карточки. С ключом GIPHY поиск грузит GIF прямо в панель.</div>
+    `);
+  }
+
+  const keyInput = gifPicker.querySelector('#jcGiphyKeyInput');
+  const saveKey = gifPicker.querySelector('#jcSaveGiphyKeyBtn');
+  if(saveKey){
+    saveKey.onclick = () => {
+      localStorage.setItem('jc-giphy-key', keyInput.value.trim());
+      jcStage5Toast('GIPHY key сохранён');
+    };
+  }
+
+  const input = gifPicker.querySelector('.jc-gif-search input');
+  const btn = gifPicker.querySelector('.jc-gif-search button');
+  const grid = gifPicker.querySelector('.jc-gif-grid');
+  if(btn && input && grid){
+    btn.onclick = async () => {
+      const q = input.value.trim();
+      if(!q) return;
+      const key = localStorage.getItem('jc-giphy-key') || '';
+      if(!key){
+        window.open('https://giphy.com/search/' + encodeURIComponent(q), '_blank', 'noopener,noreferrer');
+        jcStage5Toast('Открыл GIPHY. Для поиска внутри сайта нужен API key.');
+        return;
+      }
+      btn.textContent = '...';
+      try{
+        const urls = await jcStage5GiphySearch(q);
+        if(!urls.length){
+          jcStage5Toast('GIF не найдены');
+          return;
+        }
+        grid.innerHTML = urls.map(u => `<button class="jc-gif-item" type="button" data-gif="${u}"><img src="${u}" alt="GIF"></button>`).join('');
+        grid.querySelectorAll('.jc-gif-item').forEach(b => {
+          b.onclick = () => {
+            jcStage4SendGif(b.dataset.gif);
+            gifPicker.classList.remove('open');
+          };
+        });
+      }catch(e){
+        console.error('GIPHY ERROR:', e);
+        jcStage5Toast('Ошибка GIPHY');
+      }finally{
+        btn.textContent = 'Найти';
+      }
+    };
+  }
+}
+
+function jcStage5Hotfix(){
+  jcStage5BuildInviteModal();
+  jcStage5WireInvite();
+  jcStage5WireChatSlider();
+  jcStage5UpgradeGifPicker();
+  console.log('JustClover Stage 5 invite/slider hotfix active: stage5invite-slider-20260501-1');
+}
+setTimeout(jcStage5Hotfix, 160);
