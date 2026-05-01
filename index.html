@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#080912" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icons/icon.svg" />
-  <link rel="stylesheet" href="./style.css?v=fullrave-20260501-3" />
+  <link rel="stylesheet" href="./style.css?v=anirave-20260501-5" />
 </head>
 <body>
   <div class="bg"><div class="orb orb-a"></div><div class="orb orb-b"></div><div class="grid-bg"></div></div>
@@ -107,74 +107,28 @@
         </section>
 
         <section id="watchSection" class="section">
-          <div class="section-head"><div><span class="kicker">Watch</span><h2>Комната просмотра</h2></div><p>Плеер, участники, голос и чат в одном месте.</p></div>
-          <div class="watch-grid">
-            <div class="watch-main">
-              <div class="card panel">
-                <h3>Источник</h3>
-                <div class="source-tabs" role="tablist" aria-label="Источники видео">
-                  <button class="source-tab active" data-source-tab="youtube" type="button">▶ YouTube</button>
-                  <button class="source-tab" data-source-tab="vk" type="button">VK Video</button>
-                  <button class="source-tab" data-source-tab="anilibrix" type="button">Anilibrix</button>
-                  <button class="source-tab" data-source-tab="local" type="button">Local</button>
-                  <button class="source-tab" data-source-tab="gdrive" type="button">Google Drive</button>
-                  <button class="source-tab" data-source-tab="yadisk" type="button">Yandex Disk</button>
-                  <button class="source-tab" data-source-tab="direct" type="button">Direct MP4</button>
-                </div>
-                <p id="sourceHelp" class="source-help status">YouTube: открой каталог, выбери видео, вставь ссылку и запусти в комнате.</p>
-                <div class="source-grid">
-                  <select id="sourceType" class="hidden">
-                    <option value="youtube">YouTube</option>
-                    <option value="vk">VK Video</option>
-                    <option value="anilibrix">Anilibrix</option>
-                    <option value="local">Local video</option>
-                    <option value="gdrive">Google Drive</option>
-                    <option value="yadisk">Yandex Disk</option>
-                    <option value="direct">Direct MP4/WebM</option>
-                  </select>
-                  <input id="sourceUrl" placeholder="Ссылка на видео YouTube" />
-                  <input id="localVideoFile" class="hidden" type="file" accept="video/*,.mkv,.avi,.mov,.mp4,.webm" />
-                  <input id="sourceTitle" placeholder="Название источника" />
-                  <button id="sourceOpenBtn" class="btn soft" type="button">Открыть каталог</button>
-                  <button id="setSourceBtn" class="btn primary" type="button">Запустить</button>
-                </div>
-                <p id="sourceNote" class="status">Выбери вкладку источника, вставь ссылку или выбери локальный файл. YouTube и Local синхронизируются лучше всего.</p>
+          <div class="anime-watch-shell">
+            <div class="anime-stage panel">
+              <div class="anime-stage-top">
+                <button class="anime-icon ghost" type="button" aria-hidden="true">×</button>
+                <button class="anime-icon ghost" type="button" aria-hidden="true">☰</button>
+                <button id="sourceOpenBtn" class="anime-icon search-main" type="button" title="Открыть каталог">⌕</button>
+                <div class="anime-logo-text">justclover</div>
+                <button class="anime-icon ghost" type="button" aria-hidden="true">⚙</button>
+                <button class="anime-icon ghost" type="button" aria-hidden="true">👥</button>
               </div>
-              <div class="player-card panel">
-                <div class="player-frame">
-                  <video id="videoPlayer" class="hidden" controls playsinline></video>
-                  <div id="youtubeWrap" class="hidden embed-box"><div id="youtubePlayer"></div></div>
-                  <iframe id="iframePlayer" class="hidden embed-box" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
-                  <div id="externalPlayer" class="external-player hidden"><h3>Внешний источник</h3><p id="externalText"></p><a id="externalLink" class="btn primary" target="_blank" rel="noreferrer">Открыть</a></div>
-                  <div id="emptyPlayer" class="empty-player">Выбери источник, чтобы начать просмотр.</div>
-                  <div id="reactionBurst" class="reaction-burst hidden"></div>
-                </div>
-                <div class="reaction-dock" aria-label="Быстрые реакции">
-                  <button class="reaction-btn" data-room-reaction="🔥" type="button">🔥</button>
-                  <button class="reaction-btn" data-room-reaction="😂" type="button">😂</button>
-                  <button class="reaction-btn" data-room-reaction="❤️" type="button">❤️</button>
-                  <button class="reaction-btn" data-room-reaction="😮" type="button">😮</button>
-                  <button class="reaction-btn" data-room-reaction="🍀" type="button">🍀</button>
-                </div>
+              <div class="anime-nowbar"><div><span class="kicker">Anime Rave Room</span><h2>Комната просмотра</h2><p id="sourceHelp" class="status">Нажми на поиск сверху: откроется каталог YouTube/VK/Drive/GIPHY в стиле Rave. Карточка сразу запускает видео в комнате.</p></div><button id="sourceOpenBtnMirror" class="btn primary big-pick" type="button">Открыть каталог</button></div>
+              <div class="source-tabs anime-source-tabs" role="tablist" aria-label="Источники видео">
+                <button class="source-tab active" data-source-tab="youtube" type="button"><b>▶</b><span>YouTube</span></button><button class="source-tab" data-source-tab="vk" type="button"><b>VK</b><span>Video</span></button><button class="source-tab" data-source-tab="anilibrix" type="button"><b>AX</b><span>Anilibrix</span></button><button class="source-tab" data-source-tab="local" type="button"><b>▣</b><span>Local</span></button><button class="source-tab" data-source-tab="gdrive" type="button"><b>G</b><span>Drive</span></button><button class="source-tab" data-source-tab="yadisk" type="button"><b>Я</b><span>Disk</span></button><button class="source-tab" data-source-tab="direct" type="button"><b>MP4</b><span>Direct</span></button>
               </div>
+              <div class="source-grid compact-source-grid anime-quick-source">
+                <select id="sourceType" class="hidden"><option value="youtube">YouTube</option><option value="vk">VK Video</option><option value="anilibrix">Anilibrix</option><option value="local">Local video</option><option value="gdrive">Google Drive</option><option value="yadisk">Yandex Disk</option><option value="direct">Direct MP4/WebM</option></select>
+                <input id="sourceUrl" placeholder="Ссылка на видео или поиск через каталог" /><input id="localVideoFile" class="hidden" type="file" accept="video/*,.mkv,.avi,.mov,.mp4,.webm" /><input id="sourceTitle" placeholder="Название источника" /><button id="setSourceBtn" class="btn primary" type="button">Запустить</button>
+              </div>
+              <p id="sourceNote" class="status anime-source-note">YouTube ищется внутри каталога; VK запускается по ссылке/буферу; GIF ищутся через GIPHY-панель без ручных ссылок.</p>
+              <div class="player-card anime-player-card"><div class="player-frame anime-player-frame"><video id="videoPlayer" class="hidden" controls playsinline></video><div id="youtubeWrap" class="hidden embed-box"><div id="youtubePlayer"></div></div><iframe id="iframePlayer" class="hidden embed-box" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe><div id="externalPlayer" class="external-player hidden"><h3>Внешний источник</h3><p id="externalText"></p><a id="externalLink" class="btn primary" target="_blank" rel="noreferrer">Открыть</a></div><div id="emptyPlayer" class="empty-player anime-empty-player"><div class="anime-mascot">🍀</div><strong>Выбери источник</strong><span>Открой каталог, найди видео и запусти его в комнате.</span></div><div id="reactionBurst" class="reaction-burst hidden"></div></div><div class="reaction-dock anime-reaction-dock" aria-label="Быстрые реакции"><button class="reaction-btn" data-room-reaction="🔥" type="button">🔥</button><button class="reaction-btn" data-room-reaction="😂" type="button">😂</button><button class="reaction-btn" data-room-reaction="❤️" type="button">❤️</button><button class="reaction-btn" data-room-reaction="😮" type="button">😮</button><button class="reaction-btn" data-room-reaction="🍀" type="button">🍀</button></div></div>
             </div>
-            <div class="watch-side">
-              <div class="card panel"><h3>Участники</h3><div id="membersList" class="list compact"></div></div>
-              <div class="card panel"><h3>Голос</h3><button id="voiceBtn" class="btn soft" type="button">Включить голос</button><p id="voiceStatus" class="status">Голос выключен.</p><div id="remoteAudio"></div></div>
-              <div class="card panel chat-card">
-                <h3>Чат комнаты</h3>
-                <div id="chatMessages" class="messages"></div>
-                <div id="emojiPanel" class="emoji-panel hidden" aria-label="Эмодзи"></div>
-                <form id="chatForm" class="message-form enhanced">
-                  <div class="chat-input-wrap">
-                    <button id="emojiBtn" class="chat-tool" type="button" title="Эмодзи">😊</button>
-                    <button id="gifBtn" class="chat-tool" type="button" title="GIF по ссылке">GIF</button>
-                    <input id="chatInput" maxlength="300" placeholder="Сообщение, реакция или GIF..." />
-                  </div>
-                  <button class="btn primary" type="submit">Отправить</button>
-                </form>
-              </div>
-            </div>
+            <aside class="anime-side panel"><div class="anime-side-card"><h3>Участники</h3><div id="membersList" class="list compact"></div></div><div class="anime-side-card"><h3>Голос</h3><button id="voiceBtn" class="btn soft" type="button">Включить голос</button><p id="voiceStatus" class="status">Голос выключен.</p><div id="remoteAudio"></div></div><div class="anime-side-card chat-card anime-chat-card"><h3>Чат комнаты</h3><div id="chatMessages" class="messages"></div><div id="emojiPanel" class="emoji-panel hidden" aria-label="Эмодзи"></div><form id="chatForm" class="message-form enhanced"><div class="chat-input-wrap"><button id="emojiBtn" class="chat-tool" type="button" title="Эмодзи">😊</button><button id="gifBtn" class="chat-tool" type="button" title="GIPHY">GIF</button><input id="chatInput" maxlength="300" placeholder="Сообщение..." /></div><button class="btn primary" type="submit">Отправить</button></form></div></aside>
           </div>
         </section>
 
@@ -213,50 +167,16 @@
 
   <div id="mediaPicker" class="media-picker hidden" aria-hidden="true">
     <div id="mediaPickerBackdrop" class="media-picker-backdrop"></div>
-    <section class="media-picker-panel panel" role="dialog" aria-modal="true" aria-label="Каталог источников">
-      <div class="media-picker-top">
-        <div>
-          <div class="hero-kicker">Media picker</div>
-          <h2>Выбери видео в комнату</h2>
-          <p id="mediaPickerHint" class="status">Ищи YouTube внутри JustClover или быстро вставляй ссылку VK/Drive/Yandex из буфера.</p>
-        </div>
-        <button id="mediaPickerCloseBtn" class="icon-btn" type="button" aria-label="Закрыть">×</button>
-      </div>
-
-      <div class="media-picker-tabs" role="tablist">
-        <button class="picker-tab active" data-picker-source="youtube" type="button">YouTube</button>
-        <button class="picker-tab" data-picker-source="vk" type="button">VK Video</button>
-        <button class="picker-tab" data-picker-source="gdrive" type="button">Google Drive</button>
-        <button class="picker-tab" data-picker-source="yadisk" type="button">Yandex Disk</button>
-        <button class="picker-tab" data-picker-source="direct" type="button">Direct</button>
-      </div>
-
-      <div id="youtubeApiBox" class="api-box">
-        <div>
-          <strong>YouTube-поиск</strong>
-          <span>Для поиска прямо внутри сайта вставь YouTube Data API key. Ключ хранится только в твоём браузере.</span>
-        </div>
-        <input id="ytApiKeyInput" placeholder="YouTube API key, можно оставить пустым" autocomplete="off" />
-        <button id="saveYtApiKeyBtn" class="btn soft" type="button">Сохранить</button>
-      </div>
-
-      <form id="mediaSearchForm" class="media-search">
-        <input id="mediaSearchInput" placeholder="Искать видео, сериал или вставить ссылку..." autocomplete="off" />
-        <button class="btn primary" type="submit">Искать</button>
-        <button id="mediaPasteBtn" class="btn soft" type="button">Вставить из буфера</button>
-      </form>
-
-      <div class="quick-open-row">
-        <button id="mediaExternalBtn" class="btn soft" type="button">Открыть источник в новой вкладке</button>
-        <span class="status">Для YouTube с API поиск работает внутри сайта; для VK пока лучший быстрый сценарий — копируешь ссылку и жмёшь “Вставить из буфера”.</span>
-      </div>
-
-      <div id="mediaPickerResults" class="media-picker-results"></div>
+    <section class="media-picker-panel panel anime-catalog-panel" role="dialog" aria-modal="true" aria-label="Каталог источников">
+      <div class="catalog-topbar"><button id="mediaPickerCloseBtn" class="catalog-top-icon close" type="button" aria-label="Закрыть">×</button><button class="catalog-top-icon" type="button" aria-hidden="true">☰</button><button class="catalog-top-icon active" type="button" aria-hidden="true">⌕</button><div class="catalog-logo">justclover</div><button class="catalog-top-icon" type="button" aria-hidden="true">⚙</button><button class="catalog-top-icon" type="button" aria-hidden="true">👥</button></div>
+      <div class="catalog-body"><main class="catalog-main"><form id="mediaSearchForm" class="anime-searchbar"><span>⌕</span><input id="mediaSearchInput" placeholder="Поиск YouTube, VK-ссылка, Drive или Direct MP4..." autocomplete="off" /><button class="btn primary" type="submit">Найти</button></form><div class="catalog-services" role="tablist"><button class="service-orb active youtube" data-picker-source="youtube" type="button"><b>YouTube</b><span>поиск</span></button><button class="service-orb vk" data-picker-source="vk" type="button"><b>VK</b><span>video</span></button><button class="service-orb drive" data-picker-source="gdrive" type="button"><b>Drive</b><span>cloud</span></button><button class="service-orb disk" data-picker-source="yadisk" type="button"><b>Yandex</b><span>disk</span></button><button class="service-orb web" data-picker-source="direct" type="button"><b>WEB</b><span>mp4</span></button></div><div class="catalog-actions"><button id="mediaPasteBtn" class="btn soft" type="button">Вставить из буфера</button><button id="mediaExternalBtn" class="btn soft" type="button">Открыть внешний сайт</button><button id="openGiphyFromPickerBtn" class="btn soft" type="button">GIPHY</button></div><div id="youtubeApiBox" class="api-box catalog-api-box hidden"><div><strong>YouTube API key необязателен</strong><span>JustClover сначала пробует no-key поиск. Если он недоступен, вставь YouTube Data API key для стабильного поиска.</span></div><input id="ytApiKeyInput" placeholder="YouTube Data API key, если нужен" autocomplete="off" /><button id="saveYtApiKeyBtn" class="btn soft" type="button">Сохранить</button></div><p id="mediaPickerHint" class="status rave-hint">Найди видео и нажми карточку — оно сразу запустится в текущей комнате.</p><div id="mediaPickerResults" class="media-picker-results anime-results"></div></main>
+        <aside class="catalog-giphy-sidebar"><div class="giphy-sidebar-head"><div><span class="kicker">GIPHY</span><h3>GIF</h3></div><button id="gifPickerCloseBtn" class="icon-btn mini-close" type="button" aria-label="Закрыть каталог">×</button></div><div class="api-box mini-api"><div><strong>GIF работает сразу</strong><span>Можно вставить свой GIPHY key, если демо-ключ упрётся в лимит.</span></div><input id="giphyApiKeyInput" placeholder="GIPHY API key, необязательно" autocomplete="off" /><button id="saveGiphyApiKeyBtn" class="btn soft" type="button">OK</button></div><form id="gifSearchForm" class="giphy-searchbar"><input id="gifSearchInput" placeholder="reaction, anime, laugh..." autocomplete="off" /><button class="btn primary" type="submit">GIF</button></form><p id="gifPickerHint" class="status">Ищи GIPHY и кликай — GIF сразу улетит в чат комнаты.</p><div id="gifPickerResults" class="media-picker-results gif-results anime-gif-grid"></div></aside></div>
     </section>
   </div>
 
+  <div id="gifPicker" class="media-picker gif-picker hidden" aria-hidden="true"><div id="gifPickerBackdrop" class="media-picker-backdrop"></div><section class="media-picker-panel panel gif-panel anime-floating-giphy" role="dialog" aria-modal="true" aria-label="GIPHY GIF"><button id="gifPickerCloseBtnFloating" class="icon-btn" type="button" aria-label="Закрыть">×</button></section></div>
 
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script type="module" src="./app.js?v=fullrave-20260501-3"></script>
+  <script type="module" src="./app.js?v=anirave-20260501-5"></script>
 </body>
 </html>
