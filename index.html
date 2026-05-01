@@ -7,10 +7,10 @@
   <meta name="theme-color" content="#080912" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icons/icon.svg" />
-  <link rel="stylesheet" href="./style.css?v=chatfix-20260501-19" />
+  <link rel="stylesheet" href="./style.css?v=designthemes-20260501-1" />
 </head>
 <body>
-  <div class="bg"><div class="orb orb-a"></div><div class="orb orb-b"></div><div class="grid-bg"></div></div>
+  <div class="bg"><div class="scene-art"></div><div class="orb orb-a"></div><div class="orb orb-b"></div><div class="glow-lines"></div><div class="grid-bg"></div></div>
 
   <header class="topbar">
     <div class="brand-block">
@@ -37,7 +37,7 @@
       <div class="hero panel">
         <div class="hero-kicker">Rave-like private watch party</div>
         <h1>Смотри вместе с друзьями в своём пространстве</h1>
-        <p>JustClover — тёмный watch-party сайт с профилями, комнатами, друзьями, чатом, реакциями, GIF и источниками YouTube / VK Video / Anilibrix / Local video / Google Drive / Yandex Disk.</p>
+        <p>JustClover — тёмный watch-party сайт с профилями, комнатами, друзьями, чатом и источниками YouTube / VK Video / Anilibrix / Local video.</p>
         <div class="hero-row">
           <span>Rooms</span><span>Friends</span><span>Voice</span><span>Media</span>
         </div>
@@ -63,8 +63,6 @@
       </div>
     </section>
 
-    <button id="cinemaExitBtn" class="cinema-exit-btn hidden" type="button">⟵ Выйти из кино</button>
-
     <section id="appView" class="app hidden">
       <aside class="rail panel">
         <div id="miniProfile" class="mini-card">
@@ -88,140 +86,60 @@
       </aside>
 
       <section class="content">
-        <section id="homeSection" class="section active catalog-home-section">
-          <div class="home-catalog-bg"><span></span><span></span><span></span></div>
-          <div class="home-catalog-layout">
-            <main class="home-catalog-main panel">
-              <div class="room-ready-label">Комната активна — теперь можно выбрать видео</div>
-              <div class="catalog-topbar home-catalog-topbar">
-                <button class="catalog-top-icon anime-pulse" type="button" aria-hidden="true">🍀</button>
-                <button class="catalog-top-icon" type="button" aria-hidden="true">☰</button>
-                <button class="catalog-top-icon active" type="button" aria-hidden="true">⌕</button>
-                <div class="catalog-logo anime-logo-glitch">justclover</div>
-                <button class="catalog-top-icon" type="button" aria-hidden="true">⚙</button>
-                <button class="catalog-top-icon" type="button" aria-hidden="true">👥</button>
+        <section id="homeSection" class="section active">
+          <div class="section-head"><div><span class="kicker">Lobby</span><h2>Создать комнату</h2></div><p>Сначала создай комнату или войди по invite-коду, а потом уже запускай просмотр.</p></div>
+          <div class="home-grid">
+            <div class="card panel">
+              <h3>Комната</h3>
+              <div class="form-stack">
+                <input id="roomNameInput" maxlength="40" placeholder="Название комнаты" />
+                <button id="createRoomBtn" class="btn primary" type="button">Создать комнату</button>
+                <div class="split"><input id="joinRoomInput" placeholder="Код комнаты" /><button id="joinRoomBtn" class="btn primary" type="button">Войти</button></div>
+                <button id="copyInviteBtn" class="btn soft" type="button">Скопировать invite-ссылку</button>
+                <div class="split"><button id="openRoomBtn" class="btn soft" type="button">Открыть</button><button id="closeRoomBtn" class="btn soft" type="button">Закрыть</button></div>
+                <div class="split"><button id="publicRoomBtn" class="btn soft" type="button">Публичная</button><button id="inviteRoomBtn" class="btn soft" type="button">По ссылке</button></div>
+                <p id="roomStatus" class="status">Создай комнату или войди по ссылке.</p>
               </div>
-
-              <div class="home-catalog-hero">
-                <div>
-                  <span class="kicker">Room</span>
-                  <h2>Комната</h2>
-                  <p>Создай комнату или войди по invite-коду. После этого появится каталог видео и GIF.</p>
-                </div>
-                <div class="hero-actions">
-                  <button id="focusRoomCreateBtn" class="btn primary hover-spark" type="button">Создать комнату</button>
-                  <button id="mediaPasteBtn" class="btn soft hover-spark" type="button">Вставить ссылку</button>
-                  <button id="autoPasteRunBtn" class="btn primary hover-spark" type="button">Вставить и запустить</button>
-                </div>
-              </div>
-
-              <div id="roomFirstStatus" class="room-first-status">Сначала создай комнату справа/сверху — каталог станет активным автоматически.</div>
-
-              <form id="mediaSearchForm" class="anime-searchbar home-searchbar">
-                <span>⌕</span>
-                <input id="mediaSearchInput" placeholder="Искать YouTube, вставить VK / Drive / Yandex / Direct MP4..." autocomplete="off" />
-                <button class="btn primary hover-spark" type="submit">Найти</button>
-              </form>
-
-              <div class="catalog-services home-services" role="tablist" aria-label="Источники">
-                <button class="service-orb active youtube" data-picker-source="youtube" type="button"><b>YouTube</b><span>поиск видео</span></button>
-                <button class="service-orb vk" data-picker-source="vk" type="button"><b>VK Video</b><span>ссылка / буфер</span></button>
-                <button class="service-orb drive" data-picker-source="gdrive" type="button"><b>Google Drive</b><span>preview</span></button>
-                <button class="service-orb disk" data-picker-source="yadisk" type="button"><b>Yandex Disk</b><span>public video</span></button>
-                <button class="service-orb web" data-picker-source="direct" type="button"><b>Direct MP4</b><span>mp4/webm</span></button>
-              </div>
-
-              <div class="catalog-actions home-catalog-actions">
-                <button id="mediaExternalBtn" class="btn soft hover-spark" type="button">Открыть внешний сайт</button>
-                <button id="bookmarkletBtn" class="btn soft hover-spark" type="button">Кнопка в браузер</button>
-                <button id="openGiphyFromPickerBtn" class="btn soft hover-spark" type="button">Открыть GIPHY</button>
-                <button class="btn soft hover-spark" type="button" onclick="document.querySelector('[data-source-tab=youtube]')?.click();document.querySelector('[data-section=watchSection]')?.click()">Быстрый запуск</button>
-              </div>
-
-              <div id="youtubeApiBox" class="api-box catalog-api-box hidden">
-                <div><strong>YouTube API key необязателен</strong><span>Сначала пробуем no-key поиск. Для стабильности можно сохранить свой YouTube Data API key.</span></div>
-                <input id="ytApiKeyInput" placeholder="YouTube Data API key, если нужен" autocomplete="off" />
-                <button id="saveYtApiKeyBtn" class="btn soft" type="button">Сохранить</button>
-              </div>
-
-              <div class="catalog-lock-card"><strong>Каталог заблокирован</strong><span>Создай комнату или войди в комнату, чтобы запускать видео.</span></div>
-
-              <div class="home-manual-source">
-                <select id="sourceType" class="hidden"><option value="youtube">YouTube</option><option value="vk">VK Video</option><option value="anilibrix">Anilibrix</option><option value="local">Local video</option><option value="gdrive">Google Drive</option><option value="yadisk">Yandex Disk</option><option value="direct">Direct MP4/WebM</option></select>
-                <input id="sourceUrl" placeholder="Ссылка на видео" />
-                <input id="localVideoFile" class="hidden" type="file" accept="video/*,.mkv,.avi,.mov,.mp4,.webm" />
-                <input id="sourceTitle" placeholder="Название источника" />
-                <button id="setSourceBtn" class="btn primary hover-spark" type="button">Запустить</button>
-              </div>
-              <p id="sourceNote" class="status anime-source-note">Каталог — главная страница. Клик по карточке или кнопка “Запустить” отправляет источник в комнату.</p>
-              <p id="mediaPickerHint" class="status rave-hint">Найди видео и нажми карточку — оно сразу запустится в текущей комнате.</p>
-              <p id="playerDebugStatus" class="status player-debug-status"></p>
-              <div id="mediaPickerResults" class="media-picker-results anime-results home-results"></div>
-            </main>
-
-            <aside class="home-catalog-side">
-              <div class="home-room-card panel interactive-card">
-                <span class="kicker">Start here</span>
-                <h3>Создать комнату</h3>
-                <div class="form-stack">
-                  <input id="roomNameInput" maxlength="40" placeholder="Название комнаты" />
-                  <div class="split room-create-advanced"><input id="roomCustomCodeInput" maxlength="24" placeholder="Свой код: anime123" /><input id="roomPasswordCreateInput" maxlength="32" placeholder="Пароль, если нужен" /></div>
-                  <button id="createRoomBtn" class="btn primary hover-spark" type="button">Создать комнату</button>
-                  <div class="split room-join-advanced"><input id="joinRoomInput" placeholder="Invite-код или ссылка" /><input id="roomJoinPasswordInput" maxlength="32" placeholder="Пароль" /></div>
-                  <button id="joinRoomBtn" class="btn primary hover-spark" type="button">Войти</button>
-                  <button id="copyInviteBtn" class="btn soft hover-spark" type="button">Скопировать invite-ссылку</button>
-                  <div class="split"><button id="openRoomBtn" class="btn soft" type="button">Открыть</button><button id="closeRoomBtn" class="btn soft" type="button">Закрыть</button></div>
-                  <div class="split"><button id="publicRoomBtn" class="btn soft" type="button">Публичная</button><button id="inviteRoomBtn" class="btn soft" type="button">По ссылке</button></div>
-                  <p id="roomStatus" class="status">Создай комнату или войди по invite-коду.</p>
-                </div>
-              </div>
-
-              <div class="home-giphy-panel panel interactive-card">
-                <div class="giphy-sidebar-head"><div><span class="kicker">GIPHY</span><h3>GIF-реакции</h3></div><div class="anime-badge">✨</div></div>
-                <div class="api-box mini-api"><div><strong>GIF без ссылок</strong><span>Ищи GIPHY и кликай — GIF сразу улетит в чат комнаты.</span></div><input id="giphyApiKeyInput" placeholder="GIPHY API key, необязательно" autocomplete="off" /><button id="saveGiphyApiKeyBtn" class="btn soft" type="button">OK</button></div>
-                <form id="gifSearchForm" class="giphy-searchbar"><input id="gifSearchInput" placeholder="anime reaction, laugh, sad..." autocomplete="off" /><button class="btn primary hover-spark" type="submit">GIF</button></form>
-                <p id="gifPickerHint" class="status">Клик по GIF отправляет его в чат комнаты.</p>
-                <div id="gifPickerResults" class="media-picker-results gif-results anime-gif-grid home-gif-grid"></div>
-              </div>
-
-              <div class="home-list-grid">
-                <div class="panel home-mini-list interactive-card"><h3>Открытые комнаты</h3><div id="publicRoomsList" class="list"></div></div>
-                <div class="panel home-mini-list interactive-card"><h3>Онлайн</h3><div id="onlineUsersList" class="list"></div></div>
-              </div>
-            </aside>
-          </div>
-        </section>
-
-                <section id="watchSection" class="section">
-          <div class="anime-watch-shell player-only-shell">
-            <div class="anime-stage panel">
-              <div class="anime-stage-top">
-                <div id="watchLayoutTools" class="watch-layout-tools" aria-label="Управление комнатой"><div class="watch-toolbar-brand">Just Clover</div>
-                  <button id="watchInviteTopBtn" class="watch-tool-btn" type="button">🔗 Invite</button>
-                  <button id="watchCatalogTopBtn" class="watch-tool-btn" type="button">⌕ Каталог</button>
-                  <button id="watchFitBtn" class="watch-tool-btn" type="button">16:9</button>
-                  <button id="watchCinemaBtn" class="watch-tool-btn" type="button">Кино</button>
-                  <button id="watchChatToggleBtn" class="watch-tool-btn" type="button">Скрыть чат</button>
-                  <label class="watch-chat-size"><span>Чат</span><input id="watchChatSizeRange" type="range" min="260" max="520" value="340" /></label>
-                </div>
-                <button class="anime-icon ghost" type="button" aria-hidden="true">×</button>
-                <button class="anime-icon ghost" type="button" aria-hidden="true">☰</button>
-                <button id="sourceOpenBtn" class="anime-icon search-main hover-spark" type="button" title="Вернуться в каталог">⌕</button>
-                <div class="anime-logo-text">justclover</div>
-                <button class="anime-icon ghost" type="button" aria-hidden="true">⚙</button>
-                <button class="anime-icon ghost" type="button" aria-hidden="true">👥</button>
-              </div>
-              <div class="anime-nowbar"><div><span class="kicker">Anime Rave Room</span><h2>Комната просмотра</h2><p id="sourceHelp" class="status">Видео, чат и настройки комнаты теперь управляются сверху.</p><p id="roomInviteStatus" class="status mini hidden"></p></div><div class="anime-nowbar-actions"><button id="quickInviteBtn" class="btn soft hover-spark" type="button">Пригласить</button><button id="sourceOpenBtnMirror" class="btn primary big-pick hover-spark" type="button">Открыть каталог</button></div></div>
-              <div class="source-tabs anime-source-tabs" role="tablist" aria-label="Источники видео">
-                <button class="source-tab active" data-source-tab="youtube" type="button"><b>▶</b><span>YouTube</span></button><button class="source-tab" data-source-tab="vk" type="button"><b>VK</b><span>Video</span></button><button class="source-tab" data-source-tab="anilibrix" type="button"><b>AX</b><span>Anilibrix</span></button><button class="source-tab" data-source-tab="local" type="button"><b>▣</b><span>Local</span></button><button class="source-tab" data-source-tab="gdrive" type="button"><b>G</b><span>Drive</span></button><button class="source-tab" data-source-tab="yadisk" type="button"><b>Я</b><span>Disk</span></button><button class="source-tab" data-source-tab="direct" type="button"><b>MP4</b><span>Direct</span></button>
-              </div>
-              <div class="player-card anime-player-card"><div class="player-frame anime-player-frame"><video id="videoPlayer" class="hidden" controls playsinline></video><div id="youtubeWrap" class="hidden embed-box"><div id="youtubePlayer"></div></div><iframe id="iframePlayer" class="hidden embed-box" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe><div id="externalPlayer" class="external-player hidden"><h3>Внешний источник</h3><p id="externalText"></p><a id="externalLink" class="btn primary" target="_blank" rel="noreferrer">Открыть</a></div><div id="emptyPlayer" class="empty-player anime-empty-player"><div class="anime-mascot">🍀</div><strong>Выбери источник</strong><span>Главная страница теперь каталог. Найди видео и запусти его в комнате.</span></div><div id="reactionBurst" class="reaction-burst hidden"></div></div><div class="reaction-dock anime-reaction-dock" aria-label="Быстрые реакции"><button class="reaction-btn" data-room-reaction="🔥" type="button">🔥</button><button class="reaction-btn" data-room-reaction="😂" type="button">😂</button><button class="reaction-btn" data-room-reaction="❤️" type="button">❤️</button><button class="reaction-btn" data-room-reaction="😮" type="button">😮</button><button class="reaction-btn" data-room-reaction="🍀" type="button">🍀</button></div></div>
             </div>
-            <aside class="anime-side panel"><div class="anime-side-card"><h3>Участники</h3><div id="membersList" class="list compact"></div></div><div class="anime-side-card"><h3>Голос</h3><button id="voiceBtn" class="btn soft" type="button">Включить голос</button><p id="voiceStatus" class="status">Голос выключен.</p><div id="remoteAudio"></div></div><div class="anime-side-card chat-card anime-chat-card"><h3>Чат комнаты</h3><div id="chatMessages" class="messages"></div><div id="emojiPanel" class="emoji-panel hidden" aria-label="Эмодзи"></div><form id="chatForm" class="message-form enhanced"><div class="chat-input-wrap"><button id="emojiBtn" class="chat-tool" type="button" title="Эмодзи">😊</button><button id="gifBtn" class="chat-tool" type="button" title="GIPHY">GIF</button><input id="chatInput" maxlength="300" placeholder="Сообщение..." /></div><button class="btn primary hover-spark" type="submit">Отправить</button></form></div></aside>
+            <div class="card panel"><h3>Открытые комнаты</h3><div id="publicRoomsList" class="list"></div></div>
+            <div class="card panel"><h3>Пользователи онлайн</h3><div id="onlineUsersList" class="list"></div></div>
           </div>
         </section>
 
-                <section id="friendsSection" class="section">
+        <section id="watchSection" class="section">
+          <div class="section-head"><div><span class="kicker">Watch</span><h2>Комната просмотра</h2></div><p>Плеер, участники, голос и чат в одном месте.</p></div>
+          <div class="watch-grid">
+            <div class="watch-main">
+              <div class="card panel">
+                <h3>Источник</h3>
+                <div class="source-grid">
+                  <select id="sourceType"><option value="youtube">YouTube</option><option value="vk">VK Video</option><option value="anilibrix">Anilibrix</option><option value="local">Local video</option></select>
+                  <input id="sourceUrl" placeholder="Ссылка на видео" />
+                  <input id="localVideoFile" class="hidden" type="file" accept="video/*,.mkv,.avi,.mov,.mp4,.webm" />
+                  <input id="sourceTitle" placeholder="Название источника" />
+                  <button id="setSourceBtn" class="btn primary" type="button">Применить</button>
+                </div>
+                <p id="sourceNote" class="status">YouTube работает через встроенный плеер. VK/Anilibrix — iframe или внешняя ссылка. Local video выбирается с устройства.</p>
+              </div>
+              <div class="player-card panel">
+                <div class="player-frame">
+                  <video id="videoPlayer" class="hidden" controls playsinline></video>
+                  <div id="youtubePlayer" class="hidden embed-box"></div>
+                  <iframe id="iframePlayer" class="hidden embed-box" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+                  <div id="externalPlayer" class="external-player hidden"><h3>Внешний источник</h3><p id="externalText"></p><a id="externalLink" class="btn primary" target="_blank" rel="noreferrer">Открыть</a></div>
+                  <div id="emptyPlayer" class="empty-player">Выбери источник, чтобы начать просмотр.</div>
+                </div>
+              </div>
+            </div>
+            <div class="watch-side">
+              <div class="card panel"><h3>Участники</h3><div id="membersList" class="list compact"></div></div>
+              <div class="card panel"><h3>Голос</h3><button id="voiceBtn" class="btn soft" type="button">Включить голос</button><p id="voiceStatus" class="status">Голос выключен.</p><div id="remoteAudio"></div></div>
+              <div class="card panel chat-card"><h3>Чат комнаты</h3><div id="chatMessages" class="messages"></div><form id="chatForm" class="message-form"><input id="chatInput" maxlength="300" placeholder="Сообщение" /><button class="btn primary" type="submit">Отправить</button></form></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="friendsSection" class="section">
           <div class="section-head"><div><span class="kicker">Social</span><h2>Друзья</h2></div><p>Поиск, заявки, список друзей и личные сообщения с фото/GIF по ссылке.</p></div>
           <div class="friends-grid">
             <div class="card panel"><h3>Найти пользователя</h3><div class="split wide"><input id="friendSearchInput" placeholder="Ник или тег" /><button id="friendSearchBtn" class="btn primary" type="button">Найти</button></div><div id="friendSearchResults" class="list"></div></div>
@@ -242,8 +160,53 @@
         </section>
 
         <section id="appearanceSection" class="section">
-          <div class="section-head"><div><span class="kicker">Style</span><h2>Оформление</h2></div><p>Без лишнего колхоза: тёмно, чисто, с мягким glow.</p></div>
-          <div class="themes-grid"><button class="theme-card active" data-theme-choice="rave" type="button"><b>Rave Dark</b><span>Основной стиль</span></button><button class="theme-card" data-theme-choice="violet" type="button"><b>Violet</b><span>Фиолетовый glow</span></button><button class="theme-card" data-theme-choice="green" type="button"><b>Clover</b><span>Зелёный акцент</span></button><button class="theme-card" data-theme-choice="red" type="button"><b>Crimson</b><span>Красный акцент</span></button></div>
+          <div class="section-head"><div><span class="kicker">Style</span><h2>Оформление</h2></div><p>Выбери стиль интерфейса. У каждой темы свой цвет, мягкая анимация фона и glow-эффекты.</p></div>
+          <div class="theme-helper panel card">
+            <h3>Темы JustClover</h3>
+            <p class="status">Тут собраны прошлый понравившийся вариант и основные стили, которые мы до этого генерировали. Выбор сохраняется в браузере.</p>
+          </div>
+          <div class="themes-grid themes-grid-rich">
+            <button class="theme-card active" data-theme-choice="previous" type="button">
+              <span class="theme-thumb" style="background-image:url('./themes/previous.png')"></span>
+              <b>Прошлый вариант</b>
+              <span>Основной мягкий неоновый стиль в фиолетово-синих тонах.</span>
+            </button>
+            <button class="theme-card" data-theme-choice="violetSky" type="button">
+              <span class="theme-thumb" style="background-image:url('./themes/violet_sky.png')"></span>
+              <b>Фиолетовое небо</b>
+              <span>Спокойный вечерний glow, как у уютного аниме-заката.</span>
+            </button>
+            <button class="theme-card" data-theme-choice="cinema" type="button">
+              <span class="theme-thumb" style="background-image:url('./themes/cinema.png')"></span>
+              <b>Кино-режим</b>
+              <span>Более тёмная сцена с мягкой подсветкой для долгого просмотра.</span>
+            </button>
+            <button class="theme-card" data-theme-choice="crimson" type="button">
+              <span class="theme-thumb" style="background-image:url('./themes/crimson.png')"></span>
+              <b>Crimson</b>
+              <span>Тёмно-красный стиль с атмосферой магической битвы.</span>
+            </button>
+            <button class="theme-card" data-theme-choice="clover" type="button">
+              <span class="theme-thumb" style="background-image:url('./themes/clover.png')"></span>
+              <b>Clover</b>
+              <span>Зелёный акцент и более свежий магический оттенок интерфейса.</span>
+            </button>
+            <button class="theme-card" data-theme-choice="battle" type="button">
+              <span class="theme-thumb" style="background-image:url('./themes/battle.png')"></span>
+              <b>Битва</b>
+              <span>Контрастный тёмный стиль с красно-фиолетовым свечением.</span>
+            </button>
+            <button class="theme-card" data-theme-choice="gothic" type="button">
+              <span class="theme-thumb" style="background-image:url('./themes/gothic.png')"></span>
+              <b>Gothic</b>
+              <span>Мрачный драматичный интерфейс с глубоким тоном.</span>
+            </button>
+            <button class="theme-card" data-theme-choice="magical" type="button">
+              <span class="theme-thumb" style="background-image:url('./themes/magical.png')"></span>
+              <b>Magical</b>
+              <span>Более фантазийный вариант с розово-фиолетовым светом.</span>
+            </button>
+          </div>
         </section>
 
         <section id="aboutSection" class="section">
@@ -254,8 +217,7 @@
     </section>
   </main>
 
-
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script type="module" src="./app.js?v=chatfix-20260501-19"></script>
+  <script type="module" src="./app.js?v=designthemes-20260501-1"></script>
 </body>
 </html>
