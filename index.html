@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#080912" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icons/icon.svg" />
-  <link rel="stylesheet" href="./style.css?v=socialinvitebg-20260501-10" />
+  <link rel="stylesheet" href="./style.css?v=playerautolink-20260501-11" />
 </head>
 <body>
   <div class="bg"><div class="orb orb-a"></div><div class="orb orb-b"></div><div class="grid-bg"></div></div>
@@ -108,6 +108,7 @@
                 <div class="hero-actions">
                   <button class="btn primary hover-spark" type="button" onclick="document.querySelector('[data-section=watchSection]')?.click()">К плееру</button>
                   <button id="mediaPasteBtn" class="btn soft hover-spark" type="button">Вставить ссылку</button>
+                  <button id="autoPasteRunBtn" class="btn primary hover-spark" type="button">Вставить и запустить</button>
                 </div>
               </div>
 
@@ -127,6 +128,7 @@
 
               <div class="catalog-actions home-catalog-actions">
                 <button id="mediaExternalBtn" class="btn soft hover-spark" type="button">Открыть внешний сайт</button>
+                <button id="bookmarkletBtn" class="btn soft hover-spark" type="button">Кнопка в браузер</button>
                 <button id="openGiphyFromPickerBtn" class="btn soft hover-spark" type="button">Открыть GIPHY</button>
                 <button class="btn soft hover-spark" type="button" onclick="document.querySelector('[data-source-tab=youtube]')?.click();document.querySelector('[data-section=watchSection]')?.click()">Быстрый запуск</button>
               </div>
@@ -238,6 +240,6 @@
 
 
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script type="module" src="./app.js?v=socialinvitebg-20260501-10"></script>
+  <script type="module" src="./app.js?v=playerautolink-20260501-11"></script>
 </body>
 </html>

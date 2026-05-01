@@ -822,3 +822,32 @@ body[data-theme="sakura"] .jc-live-bg .spark {
     width:100%;
   }
 }
+
+
+/* ===== Player / YouTube-VK autolink hotfix playerautolink-20260501-11 ===== */
+#bookmarkletBtn,#autoPasteRunBtn{
+  position:relative;
+}
+#bookmarkletBtn::after{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius:inherit;
+  pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,.16),transparent 55%);
+  opacity:0;
+  transition:.18s;
+}
+#bookmarkletBtn:hover::after{
+  opacity:1;
+}
+.home-catalog-actions{
+  align-items:center;
+}
+@media(max-width:700px){
+  .home-catalog-actions{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+  }
+}
+

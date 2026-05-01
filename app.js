@@ -2,7 +2,7 @@ import { firebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInAnonymously,signInWithPopup,GoogleAuthProvider,signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { getDatabase,ref,get,set,update,push,remove,onValue,onChildAdded,onDisconnect,serverTimestamp,query,orderByChild,equalTo,off } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
-console.log('JustClover social invite bg app.js loaded: socialinvitebg-20260501-10');
+console.log('JustClover player autolink app.js loaded: playerautolink-20260501-11');
 window.addEventListener('error', e => console.error('JustClover runtime error:', e.message, e.error));
 const $=id=>document.getElementById(id);
 const els={setupWarning:$('setupWarning'),authView:$('authView'),appView:$('appView'),topUser:$('topUser'),logoutBtn:$('logoutBtn'),openProfileBtn:$('openProfileBtn'),loginTab:$('loginTab'),registerTab:$('registerTab'),guestTab:$('guestTab'),authForm:$('authForm'),guestSubmit:$('guestSubmit'),googleSubmit:$('googleSubmit'),authSubmit:$('authSubmit'),nickLabel:$('nickLabel'),nickInput:$('nickInput'),emailInput:$('emailInput'),passwordInput:$('passwordInput'),authStatus:$('authStatus'),miniProfile:$('miniProfile'),miniAvatar:$('miniAvatar'),miniName:$('miniName'),miniTag:$('miniTag'),miniStatus:$('miniStatus'),roomNameInput:$('roomNameInput'),createRoomBtn:$('createRoomBtn'),joinRoomInput:$('joinRoomInput'),joinRoomBtn:$('joinRoomBtn'),copyInviteBtn:$('copyInviteBtn'),openRoomBtn:$('openRoomBtn'),closeRoomBtn:$('closeRoomBtn'),publicRoomBtn:$('publicRoomBtn'),inviteRoomBtn:$('inviteRoomBtn'),roomStatus:$('roomStatus'),membersList:$('membersList'),sourceType:$('sourceType'),sourceUrl:$('sourceUrl'),localVideoFile:$('localVideoFile'),sourceTitle:$('sourceTitle'),setSourceBtn:$('setSourceBtn'),sourceOpenBtn:$('sourceOpenBtn'),sourceOpenBtnMirror:$('sourceOpenBtnMirror'),sourceHelp:$('sourceHelp'),sourceNote:$('sourceNote'),videoPlayer:$('videoPlayer'),youtubePlayer:$('youtubePlayer'),youtubeWrap:$('youtubeWrap'),iframePlayer:$('iframePlayer'),externalPlayer:$('externalPlayer'),externalText:$('externalText'),externalLink:$('externalLink'),emptyPlayer:$('emptyPlayer'),publicRoomsList:$('publicRoomsList'),onlineUsersList:$('onlineUsersList'),chatMessages:$('chatMessages'),chatForm:$('chatForm'),chatInput:$('chatInput'),voiceBtn:$('voiceBtn'),voiceStatus:$('voiceStatus'),remoteAudio:$('remoteAudio'),profileNick:$('profileNick'),profileTag:$('profileTag'),profileAvatar:$('profileAvatar'),profileCover:$('profileCover'),profileStatusText:$('profileStatusText'),profileBio:$('profileBio'),profileAccent:$('profileAccent'),saveProfileBtn:$('saveProfileBtn'),profileSaveStatus:$('profileSaveStatus'),profilePreviewCard:$('profilePreviewCard'),profilePreviewAvatar:$('profilePreviewAvatar'),profilePreviewName:$('profilePreviewName'),profilePreviewTag:$('profilePreviewTag'),friendSearchInput:$('friendSearchInput'),friendSearchBtn:$('friendSearchBtn'),friendSearchResults:$('friendSearchResults'),incomingRequestsList:$('incomingRequestsList'),friendsList:$('friendsList'),dmEmptyState:$('dmEmptyState'),dmTitle:$('dmTitle'),dmMessages:$('dmMessages'),dmForm:$('dmForm'),dmText:$('dmText'),dmMediaUrl:$('dmMediaUrl'),sendDmBtn:$('sendDmBtn'),friendRoomJoinBtn:$('friendRoomJoinBtn'),mediaPicker:$('mediaPicker'),mediaPickerBackdrop:$('mediaPickerBackdrop'),mediaPickerCloseBtn:$('mediaPickerCloseBtn'),mediaSearchForm:$('mediaSearchForm'),mediaSearchInput:$('mediaSearchInput'),mediaPickerResults:$('mediaPickerResults'),mediaPickerHint:$('mediaPickerHint'),mediaPasteBtn:$('mediaPasteBtn'),mediaExternalBtn:$('mediaExternalBtn'),youtubeApiBox:$('youtubeApiBox'),ytApiKeyInput:$('ytApiKeyInput'),saveYtApiKeyBtn:$('saveYtApiKeyBtn'),emojiBtn:$('emojiBtn'),gifBtn:$('gifBtn'),emojiPanel:$('emojiPanel'),reactionBurst:$('reactionBurst'),gifPicker:$('gifPicker'),gifPickerBackdrop:$('gifPickerBackdrop'),gifPickerCloseBtn:$('gifPickerCloseBtn'),gifSearchForm:$('gifSearchForm'),gifSearchInput:$('gifSearchInput'),gifPickerResults:$('gifPickerResults'),gifPickerHint:$('gifPickerHint'),giphyApiKeyInput:$('giphyApiKeyInput'),saveGiphyApiKeyBtn:$('saveGiphyApiKeyBtn'),gifPasteBtn:$('gifPasteBtn'),openGiphyFromPickerBtn:$('openGiphyFromPickerBtn')};
@@ -643,3 +643,191 @@ function patchBindingsAfterHotfix(){
 ensureLiveThemeBackdrop();
 patchBindingsAfterHotfix();
 setTimeout(patchBindingsAfterHotfix, 600);
+
+
+/* ===== Player / YouTube-VK autolink hotfix playerautolink-20260501-11 ===== */
+console.log('JustClover player/autolink hotfix loaded: playerautolink-20260501-11');
+
+els.bookmarkletBtn = document.getElementById('bookmarkletBtn');
+els.autoPasteRunBtn = document.getElementById('autoPasteRunBtn');
+
+function jcUrlProtocolSafe(v){
+  try {
+    const u = new URL(String(v||'').trim());
+    return ['http:','https:'].includes(u.protocol) ? u.toString() : '';
+  } catch { return ''; }
+}
+
+ytId = function(u){
+  const raw = String(u||'').trim();
+  if(/^[a-zA-Z0-9_-]{11}$/.test(raw)) return raw;
+  try {
+    const p = new URL(raw);
+    const host = p.hostname.replace(/^www\./,'').replace(/^m\./,'');
+    if(host === 'youtu.be') return p.pathname.split('/').filter(Boolean)[0] || '';
+    if(host.endsWith('youtube.com') || host.endsWith('youtube-nocookie.com')) {
+      if(p.searchParams.get('v')) return p.searchParams.get('v');
+      const parts = p.pathname.split('/').filter(Boolean);
+      for(const key of ['shorts','embed','live','v']) {
+        const i = parts.indexOf(key);
+        if(i >= 0 && parts[i+1]) return parts[i+1];
+      }
+    }
+  } catch {}
+  return '';
+};
+
+vkEmbed = function(u){
+  try {
+    const p = new URL(String(u||'').trim());
+    if(p.pathname.includes('video_ext.php')) return p.toString();
+
+    const joined = decodeURIComponent(p.pathname + p.search + p.hash);
+    let m = joined.match(/video(-?\d+)_(\d+)/);
+    if(m) return `https://vk.com/video_ext.php?oid=${m[1]}&id=${m[2]}&hd=2&autoplay=0`;
+
+    const z = p.searchParams.get('z');
+    if(z) {
+      m = decodeURIComponent(z).match(/video(-?\d+)_(\d+)/);
+      if(m) return `https://vk.com/video_ext.php?oid=${m[1]}&id=${m[2]}&hd=2&autoplay=0`;
+    }
+
+    const oid = p.searchParams.get('oid') || p.searchParams.get('owner_id');
+    const id = p.searchParams.get('id') || p.searchParams.get('video_id');
+    if(oid && id) return `https://vk.com/video_ext.php?oid=${oid}&id=${id}&hd=2&autoplay=0`;
+
+    return p.toString();
+  } catch {
+    return '';
+  }
+};
+
+function jcDetectSourceFromUrl(url){
+  const clean = jcUrlProtocolSafe(url);
+  if(!clean) return null;
+  let host = '';
+  try { host = new URL(clean).hostname.replace(/^www\./,'').replace(/^m\./,'').toLowerCase(); } catch {}
+  if(host.includes('youtube.com') || host.includes('youtu.be')) {
+    const id = ytId(clean);
+    if(id) return {type:'youtube', url:clean, videoId:id, title:'YouTube'};
+  }
+  if(host.includes('vk.com') || host.includes('vkvideo.ru')) {
+    return {type:'vk', url:clean, embedUrl:vkEmbed(clean), title:'VK Video'};
+  }
+  if(host.includes('drive.google.com')) {
+    const fileId = googleDriveId(clean);
+    if(fileId) return {type:'gdrive', url:clean, fileId, embedUrl:googleDrivePreviewUrl(fileId), title:'Google Drive'};
+  }
+  if(host.includes('yandex') || host.includes('disk.yandex')) {
+    return {type:'yadisk', url:clean, title:'Yandex Disk'};
+  }
+  if(/\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(clean)) {
+    return {type:'direct', url:clean, title:'Direct video'};
+  }
+  return {type:'direct', url:clean, title:'Video'};
+}
+
+const jcOldSetSource2 = setSource;
+setSource = async function(){
+  if(!currentRoomId) {
+    status(els.roomStatus,'Сначала создай комнату.');
+    status(els.sourceNote,'Сначала создай комнату, потом запускай видео.');
+    return;
+  }
+  const rawUrl = (els.sourceUrl?.value || '').trim();
+  const detected = rawUrl ? jcDetectSourceFromUrl(rawUrl) : null;
+  if(detected && els.sourceType) {
+    els.sourceType.value = detected.type;
+    if(typeof activateSource === 'function') activateSource(detected.type);
+    els.sourceUrl.value = detected.url;
+    if(!els.sourceTitle.value) els.sourceTitle.value = detected.title || 'Источник';
+  }
+  return jcOldSetSource2.apply(this, arguments);
+};
+if(els.setSourceBtn) els.setSourceBtn.onclick = setSource;
+
+async function jcApplySourceObject(source){
+  if(!currentRoomId) {
+    status(els.roomStatus,'Сначала создай комнату.');
+    section('homeSection');
+    return false;
+  }
+  if(!currentRoom || currentRoom.ownerUid !== currentUser?.uid) {
+    status(els.roomStatus,'Источник может менять только хост комнаты.');
+    return false;
+  }
+  if(!source) return false;
+  if(els.sourceType) els.sourceType.value = source.type;
+  if(typeof activateSource === 'function') activateSource(source.type);
+  if(els.sourceUrl) els.sourceUrl.value = source.url || '';
+  if(els.sourceTitle) els.sourceTitle.value = source.title || 'Источник';
+
+  await update(ref(db,`rooms/${currentRoomId}`), {
+    source,
+    playback: {time:0,playing:false,updatedAt:Date.now(),byUid:currentUser.uid},
+    updatedAt: Date.now()
+  });
+  status(els.sourceNote, `${source.title || source.type} запущен в комнате.`);
+  section('watchSection');
+  return true;
+}
+
+async function jcPasteAndRun(){
+  try {
+    const text = await navigator.clipboard.readText();
+    const src = jcDetectSourceFromUrl(text);
+    if(!src) return status(els.sourceNote,'В буфере нет подходящей ссылки.');
+    await jcApplySourceObject(src);
+  } catch(e) {
+    status(els.sourceNote,'Браузер не дал прочитать буфер. Вставь ссылку в поле и нажми “Запустить”.');
+  }
+}
+
+function jcSetFromQueryOnce(){
+  const u = new URL(location.href);
+  const media = u.searchParams.get('media');
+  if(!media) return;
+  const src = jcDetectSourceFromUrl(media);
+  if(!src) return;
+  if(els.sourceUrl) els.sourceUrl.value = src.url;
+  if(els.sourceType) els.sourceType.value = src.type;
+  if(typeof activateSource === 'function') activateSource(src.type);
+  if(els.sourceTitle) els.sourceTitle.value = src.title || 'Источник';
+  status(els.sourceNote,'Ссылка получена из внешней страницы. Создай/открой комнату и нажми “Запустить”.');
+}
+
+function jcBookmarkletText(){
+  const target = `${location.origin}${location.pathname}`;
+  return `javascript:(()=>{const u=encodeURIComponent(location.href);open('${target}?media='+u+'&v=playerautolink-20260501-11','_blank');})()`;
+}
+
+function jcShowBookmarklet(){
+  const code = jcBookmarkletText();
+  navigator.clipboard.writeText(code).catch(()=>{});
+  alert('Кнопка-букмарклет скопирована. Создай закладку в браузере и вставь этот код в поле URL. Потом на странице YouTube/VK нажимай эту закладку — ссылка откроется в JustClover.');
+}
+
+if(els.autoPasteRunBtn) els.autoPasteRunBtn.onclick = jcPasteAndRun;
+if(els.mediaPasteBtn) els.mediaPasteBtn.onclick = async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    const src = jcDetectSourceFromUrl(text);
+    if(src) {
+      if(els.sourceUrl) els.sourceUrl.value = src.url;
+      if(els.sourceType) els.sourceType.value = src.type;
+      if(typeof activateSource === 'function') activateSource(src.type);
+      if(els.sourceTitle) els.sourceTitle.value = src.title || 'Источник';
+      status(els.sourceNote,'Ссылка вставлена. Нажми “Запустить” или “Вставить и запустить”.');
+    }
+  } catch { status(els.sourceNote,'Буфер недоступен. Вставь ссылку вручную.'); }
+};
+if(els.bookmarkletBtn) els.bookmarkletBtn.onclick = jcShowBookmarklet;
+
+document.addEventListener('visibilitychange', async ()=>{
+  if(!document.hidden && currentRoomId && document.body.dataset.autopaste === '1') {
+    await jcPasteAndRun();
+  }
+});
+
+jcSetFromQueryOnce();
+
