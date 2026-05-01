@@ -124,3 +124,219 @@ function jcStage3ToolbarHotfix(){
   console.log('JustClover Stage 3 toolbar hotfix active: stage3toolbar-20260501-1');
 }
 setTimeout(jcStage3ToolbarHotfix, 0);
+
+
+/* =========================================================
+   JustClover Stage 4 reactions / emoji / GIF picker
+   Version: stage4reactions-20260501-1
+   ========================================================= */
+const JC_STAGE4_EMOJIS = ['🔥','😂','❤️','😮','☘️','😭','👍','😍','😎','👏','✨','💚','💜','🤝','💀','🍿','⚡','🎬','🌙','❄️','🌸','🍁','☀️','🖤'];
+const JC_STAGE4_GIFS = [
+  'https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif',
+  'https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif',
+  'https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif',
+  'https://media.giphy.com/media/11sBLVxNs7v6WA/giphy.gif',
+  'https://media.giphy.com/media/GeimqsH0TLDt4tScGw/giphy.gif',
+  'https://media.giphy.com/media/5GoVLqeAOo6PK/giphy.gif',
+  'https://media.giphy.com/media/OkJat1YNdoD3W/giphy.gif',
+  'https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif'
+];
+
+function jcStage4EnsureFloatLayer(){
+  const frame = document.querySelector('.player-frame');
+  if(!frame) return null;
+  let layer = frame.querySelector('.jc-float-layer');
+  if(!layer){
+    layer = document.createElement('div');
+    layer.className = 'jc-float-layer';
+    frame.appendChild(layer);
+  }
+  return layer;
+}
+
+function jcStage4FloatReaction(content, isGif=false){
+  const layer = jcStage4EnsureFloatLayer();
+  if(!layer) return;
+  const item = document.createElement('div');
+  item.className = 'jc-float-reaction';
+  item.style.left = (28 + Math.random()*44) + '%';
+  if(isGif){
+    const img = document.createElement('img');
+    img.src = content;
+    img.alt = 'GIF';
+    item.appendChild(img);
+  } else {
+    item.textContent = content || '✨';
+  }
+  layer.appendChild(item);
+  setTimeout(() => item.remove(), 1350);
+}
+
+function jcStage4IsGifUrl(u){
+  return /^https?:\/\//i.test(String(u||'')) && /\.(gif|webp|png|jpe?g)(\?|$)/i.test(String(u||''));
+}
+
+const jcStage4OldAddChat = addChat;
+addChat = function(m){
+  if(!m) return;
+  if(m.type === 'reaction'){
+    jcStage4FloatReaction(m.text || '✨', false);
+  }
+  if(m.type === 'gif' && m.mediaUrl){
+    jcStage4FloatReaction(m.mediaUrl, true);
+  }
+
+  const d = document.createElement('div');
+  d.className = 'message';
+  if(m.type === 'reaction') d.classList.add('jc-reaction-message');
+  if(m.type === 'system') d.classList.add('jc-system-message');
+
+  const who = `${esc(m.nickname||'User')}#${esc(m.tag||'0000')}`;
+  const time = new Date(m.createdAt||Date.now()).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const text = esc(m.text || '');
+
+  if(m.type === 'gif' && m.mediaUrl){
+    d.innerHTML = `<strong>${who}</strong><div>${text || 'GIF'}</div><img class="jc-message-gif" src="${esc(m.mediaUrl)}" alt="GIF"><time>${time}</time>`;
+  } else if(jcStage4IsGifUrl(m.text)){
+    d.innerHTML = `<strong>${who}</strong><img class="jc-message-gif" src="${esc(m.text)}" alt="GIF"><time>${time}</time>`;
+  } else {
+    d.innerHTML = `<strong>${who}</strong><div>${text}</div><time>${time}</time>`;
+  }
+
+  els.chatMessages.appendChild(d);
+  els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+};
+
+const jcStage4OldSendChat = sendChat;
+sendChat = async function(t, extra={}){
+  const text = String(t || '').trim();
+  if(!text && !extra.mediaUrl && extra.type !== 'reaction') return;
+  if(!currentRoomId){
+    status(els.roomStatus, 'Сначала создай комнату или войди в комнату.');
+    if(extra.type === 'reaction') jcStage4FloatReaction(text || '✨', false);
+    if(extra.type === 'gif' && extra.mediaUrl) jcStage4FloatReaction(extra.mediaUrl, true);
+    return;
+  }
+  await push(ref(db,`roomChats/${currentRoomId}`),{
+    uid: currentUser.uid,
+    nickname: profile.nickname,
+    tag: profile.tag,
+    text,
+    type: extra.type || 'text',
+    mediaUrl: extra.mediaUrl || '',
+    createdAt: Date.now()
+  });
+};
+
+function jcStage4SendEmoji(emoji){
+  sendChat(emoji, {type:'reaction'});
+}
+
+function jcStage4SendGif(url){
+  sendChat('GIF', {type:'gif', mediaUrl:url});
+}
+
+function jcStage4BuildChatPickers(){
+  const form = els.chatForm;
+  if(!form || form.dataset.stage4 === '1') return;
+  form.dataset.stage4 = '1';
+  form.classList.add('jc-enhanced');
+
+  const emojiBtn = document.createElement('button');
+  emojiBtn.type = 'button';
+  emojiBtn.className = 'btn soft jc-chat-icon';
+  emojiBtn.textContent = '😊';
+
+  const gifBtn = document.createElement('button');
+  gifBtn.type = 'button';
+  gifBtn.className = 'btn soft jc-chat-icon';
+  gifBtn.textContent = 'GIF';
+
+  form.insertBefore(gifBtn, els.chatInput);
+  form.insertBefore(emojiBtn, gifBtn);
+
+  const picker = document.createElement('div');
+  picker.className = 'jc-picker';
+  picker.innerHTML = `
+    <div class="jc-picker-head"><div><strong>Эмодзи</strong><br><span>Клик — сразу отправить в чат</span></div><button class="btn soft" type="button" data-close>×</button></div>
+    <div class="jc-emoji-grid">${JC_STAGE4_EMOJIS.map(e=>`<button class="jc-emoji-item" type="button">${e}</button>`).join('')}</div>
+  `;
+
+  const gifPicker = document.createElement('div');
+  gifPicker.className = 'jc-picker';
+  gifPicker.innerHTML = `
+    <div class="jc-picker-head"><div><strong>GIF</strong><br><span>Без ссылок: выбирай карточку</span></div><button class="btn soft" type="button" data-close>×</button></div>
+    <div class="jc-gif-search">
+      <input placeholder="поиск пока локальный: laugh, cat, anime..." />
+      <button class="btn soft" type="button">Найти</button>
+    </div>
+    <div class="jc-gif-grid">${JC_STAGE4_GIFS.map(u=>`<button class="jc-gif-item" type="button" data-gif="${u}"><img src="${u}" alt="GIF"></button>`).join('')}</div>
+  `;
+
+  form.parentElement.appendChild(picker);
+  form.parentElement.appendChild(gifPicker);
+
+  const closeAll = () => {
+    picker.classList.remove('open');
+    gifPicker.classList.remove('open');
+  };
+  emojiBtn.onclick = () => {
+    gifPicker.classList.remove('open');
+    picker.classList.toggle('open');
+  };
+  gifBtn.onclick = () => {
+    picker.classList.remove('open');
+    gifPicker.classList.toggle('open');
+  };
+  picker.querySelector('[data-close]').onclick = closeAll;
+  gifPicker.querySelector('[data-close]').onclick = closeAll;
+
+  picker.querySelectorAll('.jc-emoji-item').forEach(b => {
+    b.onclick = () => {
+      jcStage4SendEmoji(b.textContent);
+      closeAll();
+    };
+  });
+  gifPicker.querySelectorAll('.jc-gif-item').forEach(b => {
+    b.onclick = () => {
+      jcStage4SendGif(b.dataset.gif);
+      closeAll();
+    };
+  });
+
+  const searchInput = gifPicker.querySelector('.jc-gif-search input');
+  const searchBtn = gifPicker.querySelector('.jc-gif-search button');
+  searchBtn.onclick = () => {
+    const q = (searchInput.value || '').trim();
+    if(!q) return;
+    const giphySearchUrl = 'https://giphy.com/search/' + encodeURIComponent(q);
+    sendChat('Открыл поиск GIF: ' + q, {type:'system'});
+    window.open(giphySearchUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape') closeAll();
+  });
+}
+
+function jcStage4WirePlayerReactions(){
+  document.querySelectorAll('.reaction-btn').forEach(btn => {
+    if(btn.dataset.stage4 === '1') return;
+    btn.dataset.stage4 = '1';
+    btn.onclick = () => {
+      const emoji = (btn.textContent || '✨').trim();
+      btn.classList.remove('jc-pop');
+      void btn.offsetWidth;
+      btn.classList.add('jc-pop');
+      jcStage4SendEmoji(emoji);
+    };
+  });
+}
+
+function jcStage4Hotfix(){
+  jcStage4EnsureFloatLayer();
+  jcStage4BuildChatPickers();
+  jcStage4WirePlayerReactions();
+  console.log('JustClover Stage 4 reactions/GIF hotfix active: stage4reactions-20260501-1');
+}
+setTimeout(jcStage4Hotfix, 80);

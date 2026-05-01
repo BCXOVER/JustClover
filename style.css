@@ -531,3 +531,194 @@ body::before{
   pointer-events:none;
   opacity:.65;
 }
+
+
+/* =========================================================
+   JustClover Stage 4 — reactions / emoji / GIF picker
+   ========================================================= */
+
+.player-frame{position:relative}
+.jc-float-layer{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:8;
+}
+.jc-float-reaction{
+  position:absolute;
+  left:50%;
+  bottom:18%;
+  transform:translateX(-50%) scale(.9);
+  font-size:58px;
+  filter:drop-shadow(0 14px 28px rgba(0,0,0,.55));
+  animation:jcFloatEmoji 1.25s ease-out forwards;
+}
+.jc-float-reaction img{
+  max-width:160px;
+  max-height:120px;
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 22px 50px rgba(0,0,0,.45);
+}
+@keyframes jcFloatEmoji{
+  0%{opacity:0;transform:translate(-50%,22px) scale(.72)}
+  16%{opacity:1;transform:translate(-50%,0) scale(1.06)}
+  72%{opacity:1;transform:translate(-50%,-58px) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-96px) scale(.86)}
+}
+
+.reaction-btn{
+  position:relative;
+  overflow:hidden;
+}
+.reaction-btn::after{
+  content:'';
+  position:absolute;
+  inset:50% auto auto 50%;
+  width:8px;
+  height:8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.38);
+  transform:translate(-50%,-50%) scale(0);
+  opacity:0;
+}
+.reaction-btn.jc-pop::after{
+  animation:jcTapRing .42s ease-out;
+}
+@keyframes jcTapRing{
+  0%{opacity:.6;transform:translate(-50%,-50%) scale(0)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(18)}
+}
+
+.message-form.jc-enhanced{
+  grid-template-columns:44px 44px minmax(0,1fr) 112px;
+  align-items:end;
+}
+.jc-chat-icon{
+  min-width:44px;
+  min-height:44px;
+  padding:0!important;
+  border-radius:16px!important;
+  font-size:18px;
+}
+.jc-picker{
+  position:absolute;
+  left:14px;
+  right:14px;
+  bottom:76px;
+  z-index:15;
+  display:none;
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:rgba(10,12,24,.96);
+  box-shadow:0 24px 70px rgba(0,0,0,.52), var(--glow);
+  backdrop-filter:blur(22px);
+}
+.jc-picker.open{display:block;animation:jcPickerIn .15s ease both}
+@keyframes jcPickerIn{
+  from{opacity:0;transform:translateY(8px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.jc-picker-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:10px;
+}
+.jc-picker-head strong{font-size:15px}
+.jc-picker-head span{color:var(--muted);font-size:12px}
+.jc-emoji-grid{
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:8px;
+}
+.jc-emoji-item{
+  min-height:38px;
+  border-radius:14px;
+  background:rgba(255,255,255,.055);
+  border:1px solid var(--line);
+  color:#fff;
+  font-size:20px;
+  cursor:pointer;
+  transition:.15s ease;
+}
+.jc-emoji-item:hover{
+  transform:translateY(-1px) scale(1.03);
+  border-color:color-mix(in srgb,var(--primary2) 34%,var(--line));
+  box-shadow:var(--glow);
+}
+.jc-gif-search{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  margin-bottom:10px;
+}
+.jc-gif-search input{height:42px}
+.jc-gif-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:9px;
+  max-height:320px;
+  overflow:auto;
+  padding-right:4px;
+}
+.jc-gif-item{
+  border:1px solid var(--line);
+  border-radius:16px;
+  overflow:hidden;
+  background:rgba(255,255,255,.045);
+  cursor:pointer;
+  min-height:92px;
+  transition:.15s ease;
+}
+.jc-gif-item:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--glow);
+  border-color:color-mix(in srgb,var(--primary2) 34%,var(--line));
+}
+.jc-gif-item img{
+  display:block;
+  width:100%;
+  height:96px;
+  object-fit:cover;
+}
+.jc-message-gif{
+  display:block;
+  width:min(260px,100%);
+  max-height:220px;
+  object-fit:cover;
+  border-radius:16px;
+  margin-top:8px;
+  border:1px solid rgba(255,255,255,.12);
+}
+.message.jc-reaction-message{
+  font-size:24px;
+  line-height:1.25;
+}
+.message.jc-reaction-message strong{
+  font-size:14px;
+  margin-bottom:8px;
+}
+.message.jc-system-message{
+  border-style:dashed;
+  opacity:.82;
+}
+
+@media(max-width:760px){
+  .message-form.jc-enhanced{
+    grid-template-columns:42px 42px minmax(0,1fr);
+  }
+  .message-form.jc-enhanced .btn.primary{
+    grid-column:1/-1;
+  }
+  .jc-picker{
+    left:10px;
+    right:10px;
+    bottom:112px;
+  }
+  .jc-emoji-grid{grid-template-columns:repeat(6,1fr)}
+  .jc-gif-grid{grid-template-columns:1fr}
+}
