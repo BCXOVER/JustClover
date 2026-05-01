@@ -5358,3 +5358,133 @@ window.JUSTCLOVER_BUILD = "stage27-2-player-fullscreen-mic-20260502-1";
     sync();
   }, 800);
 })();
+
+
+/* =========================================================
+   JustClover Stage 27.3 — CSS cinema + remove Open JS
+   Version: stage27-3-css-cinema-remove-open-20260502-1
+   ========================================================= */
+console.log("JustClover Stage 27.3 loaded:", "stage27-3-css-cinema-remove-open-20260502-1");
+window.JUSTCLOVER_BUILD = "stage27-3-css-cinema-remove-open-20260502-1";
+
+(function(){
+  function ensureExit(){
+    if(document.getElementById('jcCinemaExitBtn')) return;
+    const b = document.createElement('button');
+    b.id = 'jcCinemaExitBtn';
+    b.type = 'button';
+    b.textContent = '×';
+    b.title = 'Выйти из кино';
+    b.onclick = exitCssCinema;
+    document.body.appendChild(b);
+  }
+
+  function killOpenButton(){
+    const ext = document.getElementById('externalPlayer') || document.querySelector('.external-player');
+    if(ext){
+      ext.style.display = 'none';
+      ext.style.visibility = 'hidden';
+      ext.style.pointerEvents = 'none';
+    }
+    const link = document.getElementById('externalLink');
+    if(link){
+      link.style.display = 'none';
+      link.style.visibility = 'hidden';
+      link.style.pointerEvents = 'none';
+    }
+  }
+
+  function enterCssCinema(){
+    try{ if(typeof section === 'function') section('watchSection'); }catch(e){}
+    // Важно: НЕ вызываем requestFullscreen. Так кнопки сайта остаются поверх iframe.
+    document.body.classList.remove('jc-site-fullscreen','jc-player-frame-fullscreen');
+    document.body.classList.add('jc-css-cinema');
+    sync();
+    toast('Кино включено. Esc или × — выйти.');
+  }
+
+  function exitCssCinema(){
+    document.body.classList.remove('jc-css-cinema','jc-site-fullscreen','jc-player-frame-fullscreen');
+    try{
+      if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+    }catch(e){}
+    sync();
+  }
+
+  function toggleCssCinema(){
+    if(document.body.classList.contains('jc-css-cinema')) exitCssCinema();
+    else enterCssCinema();
+  }
+
+  function toast(text){
+    const t = document.getElementById('jcPlayerToast');
+    if(!t) return;
+    t.textContent = text;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function(){ t.classList.remove('show'); }, 1700);
+  }
+
+  function sync(){
+    const panel = document.getElementById('jcPlayerPanel');
+    if(!panel) return;
+
+    const cinema = panel.querySelector('[data-player-act="cinema"]');
+    if(cinema){
+      cinema.classList.toggle('active', document.body.classList.contains('jc-css-cinema'));
+      const label = cinema.querySelector('.label');
+      if(label) label.textContent = document.body.classList.contains('jc-css-cinema') ? 'Выйти' : 'Кино';
+      cinema.title = document.body.classList.contains('jc-css-cinema') ? 'Выйти из кино' : 'Кино без рамок';
+    }
+
+    const mic = panel.querySelector('[data-player-act="mic"]');
+    if(mic){
+      const micOn = typeof voiceOn !== 'undefined' && !!voiceOn;
+      mic.classList.toggle('active', micOn);
+      mic.classList.toggle('muted', !micOn);
+      const label = mic.querySelector('.label');
+      if(label) label.textContent = micOn ? 'Вкл' : 'Мик';
+    }
+  }
+
+  function patchCinemaButton(){
+    const btn = document.querySelector('#jcPlayerPanel [data-player-act="cinema"]');
+    if(!btn) return;
+    // Перепривязываем каждый раз, потому что старые патчи могли уже назначить native fullscreen.
+    btn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      toggleCssCinema();
+    };
+    btn.dataset.stage273 = '1';
+  }
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && document.body.classList.contains('jc-css-cinema')){
+      e.preventDefault();
+      exitCssCinema();
+    }
+  });
+
+  document.addEventListener('fullscreenchange', function(){
+    // Если пользователь всё же нажал native fullscreen VK/браузера, после выхода чистим классы.
+    if(!document.fullscreenElement){
+      document.body.classList.remove('jc-site-fullscreen','jc-player-frame-fullscreen');
+    }
+    setTimeout(sync, 80);
+  });
+
+  setInterval(function(){
+    ensureExit();
+    killOpenButton();
+    patchCinemaButton();
+    sync();
+  }, 350);
+
+  setTimeout(function(){
+    ensureExit();
+    killOpenButton();
+    patchCinemaButton();
+    sync();
+  }, 700);
+})();
