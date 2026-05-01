@@ -2388,3 +2388,173 @@ function jc1618Patch(){
 }
 
 setTimeout(jc1618Patch, 1200);
+
+
+/* =========================================================
+   JustClover Stage 18.5 Lobby Cleanup JS
+   Version: stage18-5-lobby-cleanup-20260501-1
+   ========================================================= */
+
+function jc185Toast(text){
+  if(typeof jcStage5Toast === 'function') jcStage5Toast(text);
+  else status?.(els?.roomStatus, text);
+}
+
+function jc185RoomActiveSync(){
+  document.body.classList.toggle('room-active', !!currentRoomId);
+
+  const strip = document.querySelector('.jc-current-room-strip');
+  if(strip){
+    const name = currentRoom?.name || currentRoomId || 'Комната';
+    const code = currentRoomId || 'нет';
+    const lock = currentRoom?.passwordEnabled ? ' · пароль' : '';
+    const mode = currentRoom
+      ? `${currentRoom.visibility === 'open' ? 'открыта' : 'закрыта'} · ${currentRoom.joinMode === 'public' ? 'публичная' : 'по ссылке'}${lock}`
+      : 'комната не создана';
+
+    strip.querySelector('[data-current-room-title]').textContent = name;
+    strip.querySelector('[data-current-room-meta]').textContent = `Код: ${code} · ${mode}`;
+  }
+}
+
+function jc185RebuildLobby(){
+  if(!els?.roomNameInput || document.querySelector('.jc-current-room-strip')) return;
+
+  const advanced = document.querySelector('.jc-room-advanced');
+  if(advanced){
+    const custom = advanced.querySelector('#jcCustomRoomCode');
+    const createPass = advanced.querySelector('#jcCreateRoomPassword');
+    const joinPass = advanced.querySelector('#jcJoinRoomPassword');
+    const quickInvite = advanced.querySelector('#jcQuickInviteBtn');
+
+    if(custom && createPass && !advanced.querySelector('.jc-room-create-row')){
+      const row = document.createElement('div');
+      row.className = 'jc-room-create-row';
+      custom.parentElement.insertBefore(row, custom);
+      row.appendChild(custom);
+      row.appendChild(createPass);
+    }
+
+    if(quickInvite){
+      quickInvite.classList.add('jc-room-invite-quick');
+      quickInvite.textContent = 'Invite';
+    }
+
+    const createBtn = els.createRoomBtn;
+    if(createBtn && advanced.nextElementSibling !== createBtn){
+      advanced.insertAdjacentElement('afterend', createBtn);
+    }
+
+    if(joinPass && els.joinRoomInput && els.joinRoomBtn){
+      const joinRow = els.joinRoomInput.parentElement;
+      joinRow.classList.add('jc-join-clean-row');
+      if(joinPass.parentElement !== joinRow){
+        joinRow.insertBefore(joinPass, els.joinRoomBtn);
+      }
+      els.joinRoomInput.placeholder = 'Код комнаты или invite-ссылка';
+      joinPass.placeholder = 'Пароль, если есть';
+    }
+  }
+
+  const strip = document.createElement('div');
+  strip.className = 'jc-current-room-strip';
+  strip.innerHTML = `
+    <div class="jc-current-room-main">
+      <strong data-current-room-title>Комната</strong>
+      <span data-current-room-meta>Код: —</span>
+    </div>
+    <button class="btn soft" type="button" data-lobby-invite>Invite</button>
+    <button class="btn primary" type="button" data-lobby-watch>К плееру</button>
+  `;
+
+  const roomStatus = els.roomStatus;
+  if(roomStatus){
+    roomStatus.insertAdjacentElement('beforebegin', strip);
+  } else {
+    els.createRoomBtn.insertAdjacentElement('afterend', strip);
+  }
+
+  strip.querySelector('[data-lobby-invite]').onclick = () => {
+    if(!currentRoomId){
+      jc185Toast('Сначала создай комнату');
+      return;
+    }
+    if(typeof jcStage5OpenInviteModal === 'function') jcStage5OpenInviteModal();
+    else els.copyInviteBtn?.click();
+  };
+
+  strip.querySelector('[data-lobby-watch]').onclick = () => section('watchSection');
+
+  jc185RoomActiveSync();
+}
+
+const jc185OldRenderRooms = renderRooms;
+renderRooms = function(rooms){
+  els.publicRoomsList.innerHTML = '';
+  if(!rooms.length){
+    els.publicRoomsList.innerHTML = '<p class="status">Открытых комнат пока нет.</p>';
+    return;
+  }
+
+  rooms.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'room-card' + (r.passwordEnabled ? ' locked' : '');
+    card.innerHTML = `
+      <img src="${esc(r.ownerAvatar || avatar(r.ownerName))}">
+      <div class="card-main">
+        <strong>${esc(r.name || 'Комната')}</strong>
+        <span>Код: <span class="jc-room-code-badge">${esc(r.id || '')}</span> ${r.passwordEnabled ? '<span class="jc-room-lock">🔒 пароль</span>' : ''}</span>
+        <span>Хост: ${esc(r.ownerName || 'User')}</span>
+        <span>${esc(r.source?.title || 'Источник не выбран')}</span>
+      </div>
+      <div class="jc-room-card-actions">
+        <button class="btn soft" data-copy type="button">Код</button>
+        <button class="btn primary" data-join type="button">Войти</button>
+      </div>
+    `;
+
+    card.querySelector('[data-copy]').onclick = async (e) => {
+      e.stopPropagation();
+      await navigator.clipboard?.writeText(r.id || '').catch(()=>{});
+      jc185Toast('Код комнаты скопирован');
+    };
+
+    card.querySelector('[data-join]').onclick = () => joinRoom(r.id);
+    els.publicRoomsList.appendChild(card);
+  });
+};
+
+const jc185OldJoinRoom = joinRoom;
+joinRoom = async function(id){
+  const r = await jc185OldJoinRoom(id);
+  setTimeout(jc185RoomActiveSync, 120);
+  return r;
+};
+
+const jc185OldCreateRoom = createRoom;
+createRoom = async function(){
+  const r = await jc185OldCreateRoom();
+  setTimeout(jc185RoomActiveSync, 160);
+  return r;
+};
+
+const jc185OldLeaveRoom = leaveRoom;
+leaveRoom = async function(clear=true){
+  const r = await jc185OldLeaveRoom(clear);
+  setTimeout(jc185RoomActiveSync, 120);
+  return r;
+};
+
+function jc185Patch(){
+  jc185RebuildLobby();
+  jc185RoomActiveSync();
+
+  setInterval(() => {
+    jc185RebuildLobby();
+    jc185RoomActiveSync();
+  }, 1200);
+
+  console.log('JustClover Stage 18.5 lobby cleanup active: stage18-5-lobby-cleanup-20260501-1');
+}
+
+setTimeout(jc185Patch, 1600);

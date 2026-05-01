@@ -2777,3 +2777,148 @@ body::after{
     grid-template-columns:1fr;
   }
 }
+
+
+/* =========================================================
+   JustClover Stage 18.5 — Lobby cleanup
+   Чище лобби: без дублей, пароль входа рядом с кодом, invite только после создания комнаты.
+   ========================================================= */
+
+#homeSection .room-stack{
+  gap:12px;
+}
+
+/* Старые дубли скрыты: вместо них новые переключатели из блока "Расширенные настройки" */
+#homeSection #openRoomBtn,
+#homeSection #closeRoomBtn,
+#homeSection #publicRoomBtn,
+#homeSection #inviteRoomBtn,
+#homeSection #copyInviteBtn{
+  display:none!important;
+}
+
+/* Блок расширенных настроек стал легче */
+.jc-room-advanced{
+  margin-top:0;
+  padding:14px;
+  gap:12px;
+}
+
+.jc-room-advanced-title{
+  padding-bottom:4px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+
+.jc-room-advanced .split{
+  grid-template-columns:1fr 1fr;
+}
+
+.jc-room-create-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+
+.jc-join-clean-row{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,.72fr) 94px;
+  gap:9px;
+  align-items:center;
+}
+
+.jc-join-clean-row input,
+.jc-room-create-row input{
+  min-width:0;
+}
+
+.jc-room-invite-quick{
+  display:none!important;
+}
+
+body.room-active .jc-room-invite-quick{
+  display:inline-flex!important;
+}
+
+/* Текущая комната — компактная строка вместо старых 4 кнопок */
+.jc-current-room-strip{
+  display:none;
+  padding:12px;
+  border-radius:19px;
+  border:1px solid var(--line);
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb,var(--primary2) 12%, transparent), transparent 34%),
+    rgba(255,255,255,.03);
+  grid-template-columns:minmax(0,1fr) auto auto;
+  gap:9px;
+  align-items:center;
+}
+
+body.room-active .jc-current-room-strip{
+  display:grid;
+}
+
+.jc-current-room-main{
+  min-width:0;
+}
+
+.jc-current-room-main strong{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.jc-current-room-main span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  margin-top:3px;
+}
+
+.jc-current-room-strip .btn{
+  min-height:38px;
+  padding:8px 11px;
+  border-radius:14px;
+  white-space:nowrap;
+}
+
+/* Карточки комнат — копировать код без лишнего шума */
+.jc-room-card-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:flex-end;
+}
+
+.jc-room-card-actions .btn{
+  min-height:36px;
+  padding:8px 11px;
+  border-radius:13px;
+  font-size:12px;
+}
+
+/* "Пароль для входа" теперь относится именно к входу */
+#jcJoinRoomPassword{
+  border-color:rgba(255,255,255,.11);
+}
+
+#jcJoinRoomPassword::placeholder{
+  color:rgba(178,182,214,.72);
+}
+
+/* На мобильных вся форма аккуратно в столбик */
+@media(max-width:760px){
+  .jc-room-create-row,
+  .jc-join-clean-row,
+  .jc-current-room-strip{
+    grid-template-columns:1fr;
+  }
+
+  .jc-room-toggle-row{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .jc-current-room-strip .btn{
+    width:100%;
+  }
+}
