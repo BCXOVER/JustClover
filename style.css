@@ -4598,3 +4598,125 @@ body.jc-wallpaper-paused #jcWallpaperMediaLayer img{
     grid-template-columns:1fr;
   }
 }
+
+
+/* =========================================================
+   JustClover Stage 25.1 — Wallpaper download button
+   ========================================================= */
+
+.jc-wallpaper-download-modal{
+  position:fixed;
+  inset:0;
+  z-index:100000;
+  display:none;
+  place-items:center;
+  padding:18px;
+  background:rgba(2,4,10,.64);
+  backdrop-filter:blur(18px);
+}
+
+.jc-wallpaper-download-modal.open{
+  display:grid;
+  animation:jcFadeIn .16s ease both;
+}
+
+.jc-wallpaper-download-card{
+  width:min(620px,96vw);
+  border-radius:30px;
+  border:1px solid rgba(255,255,255,.13);
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb,var(--primary2) 18%, transparent), transparent 34%),
+    linear-gradient(180deg,rgba(18,20,34,.96),rgba(6,8,16,.98));
+  box-shadow:0 34px 100px rgba(0,0,0,.62), var(--glow);
+  overflow:hidden;
+}
+
+.jc-wallpaper-download-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  padding:20px 22px 14px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.jc-wallpaper-download-head h3{
+  margin:0;
+  font-size:24px;
+  letter-spacing:-.04em;
+}
+
+.jc-wallpaper-download-head p{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+}
+
+.jc-wallpaper-download-close{
+  width:42px;
+  height:42px;
+  border-radius:15px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.06);
+  color:#fff;
+  font-size:22px;
+  cursor:pointer;
+}
+
+.jc-wallpaper-download-body{
+  padding:18px 22px 22px;
+  display:grid;
+  gap:10px;
+}
+
+.jc-wallpaper-site-btn{
+  min-height:58px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:12px;
+  padding:13px 15px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.045);
+  color:#fff;
+  cursor:pointer;
+  text-align:left;
+  transition:.16s ease;
+}
+
+.jc-wallpaper-site-btn:hover{
+  transform:translateY(-2px);
+  border-color:color-mix(in srgb,var(--primary2) 38%,rgba(255,255,255,.13));
+  box-shadow:var(--glow);
+}
+
+.jc-wallpaper-site-btn strong{
+  display:block;
+  font-size:15px;
+  margin-bottom:3px;
+}
+
+.jc-wallpaper-site-btn span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.35;
+}
+
+.jc-wallpaper-site-btn em{
+  font-style:normal;
+  color:var(--primary2);
+  font-weight:950;
+}
+
+@media(max-width:560px){
+  .jc-wallpaper-download-card{
+    border-radius:24px;
+  }
+
+  .jc-wallpaper-site-btn{
+    grid-template-columns:1fr;
+  }
+}

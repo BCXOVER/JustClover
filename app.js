@@ -4831,3 +4831,117 @@ function jc25Patch(){
 }
 
 setTimeout(jc25Patch, 1400);
+
+
+/* =========================================================
+   JustClover Stage 25.1 Wallpaper download button JS
+   Version: stage25-1-wallpaper-download-button-20260501-1
+   ========================================================= */
+
+const jc251WallpaperSites = [
+  {
+    title:'Pexels Video',
+    hint:'Бесплатные MP4/WebM видео-фоны. Хорошо подходит для загрузки видео-фона.',
+    url:'https://www.pexels.com/search/videos/anime%20background/'
+  },
+  {
+    title:'Pixabay Video',
+    hint:'Ещё один источник бесплатных видео и фонов.',
+    url:'https://pixabay.com/videos/search/anime%20background/'
+  },
+  {
+    title:'MoeWalls',
+    hint:'Анимированные anime/live wallpapers. Обычно удобно для красивых loop-фонов.',
+    url:'https://moewalls.com/'
+  },
+  {
+    title:'Steam Workshop — Wallpaper Engine',
+    hint:'Обои для Wallpaper Engine. Сам сайт не может импортировать их напрямую, но можно найти идеи/видео.',
+    url:'https://steamcommunity.com/app/431960/workshop/'
+  }
+];
+
+function jc251Toast(text){
+  if(typeof jc2224Toast === 'function') jc2224Toast(text);
+  else if(typeof jcStage5Toast === 'function') jcStage5Toast(text);
+  else status?.(els?.roomStatus, text);
+}
+
+function jc251BuildDownloadModal(){
+  if(document.querySelector('.jc-wallpaper-download-modal')) return;
+
+  const modal = document.createElement('div');
+  modal.className = 'jc-wallpaper-download-modal';
+  modal.innerHTML = `
+    <div class="jc-wallpaper-download-card" role="dialog" aria-modal="true">
+      <div class="jc-wallpaper-download-head">
+        <div>
+          <h3>Скачать обои</h3>
+          <p>Выбери сайт, скачай MP4/WebM/GIF/картинку, затем загрузи файл в JustClover Wallpaper Engine.</p>
+        </div>
+        <button class="jc-wallpaper-download-close" type="button">×</button>
+      </div>
+      <div class="jc-wallpaper-download-body">
+        ${jc251WallpaperSites.map((s, i) => `
+          <button class="jc-wallpaper-site-btn" type="button" data-site="${i}">
+            <div>
+              <strong>${s.title}</strong>
+              <span>${s.hint}</span>
+            </div>
+            <em>Открыть</em>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const close = () => modal.classList.remove('open');
+  modal.querySelector('.jc-wallpaper-download-close').onclick = close;
+  modal.onclick = e => { if(e.target === modal) close(); };
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') close(); });
+
+  modal.querySelectorAll('[data-site]').forEach(btn => {
+    btn.onclick = () => {
+      const site = jc251WallpaperSites[Number(btn.dataset.site)];
+      if(!site) return;
+      window.open(site.url, '_blank', 'noopener,noreferrer');
+      jc251Toast('Открыл: ' + site.title);
+    };
+  });
+}
+
+function jc251OpenDownloadModal(){
+  jc251BuildDownloadModal();
+  document.querySelector('.jc-wallpaper-download-modal')?.classList.add('open');
+}
+
+function jc251AddDownloadButton(){
+  const panel = document.querySelector('.jc-wallpaper-panel');
+  if(!panel || panel.dataset.downloadBtn === '1') return;
+  panel.dataset.downloadBtn = '1';
+
+  const upload = panel.querySelector('.jc-wallpaper-upload');
+  if(!upload) return;
+
+  const btn = document.createElement('button');
+  btn.className = 'btn primary';
+  btn.type = 'button';
+  btn.id = 'jcWallpaperDownloadBtn';
+  btn.textContent = 'Скачать обои';
+  btn.onclick = jc251OpenDownloadModal;
+
+  upload.insertBefore(btn, upload.firstChild);
+}
+
+function jc251Patch(){
+  jc251BuildDownloadModal();
+  jc251AddDownloadButton();
+
+  setInterval(jc251AddDownloadButton, 1200);
+
+  console.log('JustClover Stage 25.1 wallpaper download button active: stage25-1-wallpaper-download-button-20260501-1');
+}
+
+setTimeout(jc251Patch, 1000);
