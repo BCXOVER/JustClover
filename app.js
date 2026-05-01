@@ -5197,3 +5197,164 @@ window.JUSTCLOVER_BUILD = "stage27-1-player-polish-20260502-1";
   setInterval(polishPanel, 500);
   setTimeout(polishPanel, 800);
 })();
+
+
+/* =========================================================
+   JustClover Stage 27.2 — Player fullscreen mic JS
+   Version: stage27-2-player-fullscreen-mic-20260502-1
+   ========================================================= */
+console.log("JustClover Stage 27.2 loaded:", "stage27-2-player-fullscreen-mic-20260502-1");
+window.JUSTCLOVER_BUILD = "stage27-2-player-fullscreen-mic-20260502-1";
+
+(function(){
+  function frame(){
+    return document.querySelector('.player-frame');
+  }
+
+  async function enterPlayerFullscreen(){
+    const f = frame();
+    if(!f) return;
+
+    try {
+      if(typeof section === 'function') section('watchSection');
+    } catch(e) {}
+
+    document.body.classList.add('jc-player-frame-fullscreen');
+
+    try {
+      if(!document.fullscreenElement && f.requestFullscreen) {
+        await f.requestFullscreen();
+      } else if(!document.fullscreenElement && f.webkitRequestFullscreen) {
+        await f.webkitRequestFullscreen();
+      }
+    } catch(e) {
+      // fallback на старый site fullscreen, если браузер не дал fullscreen элемента
+      document.body.classList.add('jc-site-fullscreen');
+    }
+
+    sync();
+    toast('Fullscreen плеера: микрофон поверх видео');
+  }
+
+  async function exitPlayerFullscreen(){
+    document.body.classList.remove('jc-player-frame-fullscreen', 'jc-site-fullscreen');
+    try {
+      if(document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
+      else if(document.webkitFullscreenElement && document.webkitExitFullscreen) document.webkitExitFullscreen();
+    } catch(e) {}
+    sync();
+  }
+
+  async function togglePlayerFullscreen(){
+    const f = frame();
+    const isFrameFs = document.fullscreenElement === f || document.webkitFullscreenElement === f || document.body.classList.contains('jc-site-fullscreen');
+    if(isFrameFs) await exitPlayerFullscreen();
+    else await enterPlayerFullscreen();
+  }
+
+  function toast(text){
+    const t = document.getElementById('jcPlayerToast');
+    if(!t) return;
+    t.textContent = text;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function(){ t.classList.remove('show'); }, 1700);
+  }
+
+  function ensureHint(){
+    const f = frame();
+    if(!f || document.getElementById('jcFullscreenHint')) return;
+    const h = document.createElement('div');
+    h.id = 'jcFullscreenHint';
+    h.textContent = 'Для микрофона поверх видео жми кнопку «Кино» в панели, а не fullscreen внутри VK/YouTube.';
+    f.appendChild(h);
+  }
+
+  function showHint(){
+    ensureHint();
+    const h = document.getElementById('jcFullscreenHint');
+    if(!h) return;
+    h.classList.add('show');
+    clearTimeout(h._timer);
+    h._timer = setTimeout(function(){ h.classList.remove('show'); }, 4500);
+  }
+
+  function sync(){
+    const panel = document.getElementById('jcPlayerPanel');
+    if(!panel) return;
+
+    const f = frame();
+    const isFrameFs = document.fullscreenElement === f || document.webkitFullscreenElement === f || document.body.classList.contains('jc-site-fullscreen');
+
+    const cinema = panel.querySelector('[data-player-act="cinema"]');
+    if(cinema){
+      cinema.classList.toggle('active', isFrameFs);
+      const label = cinema.querySelector('.label');
+      if(label) label.textContent = isFrameFs ? 'Выйти' : 'Кино';
+      cinema.title = isFrameFs ? 'Выйти из fullscreen плеера' : 'Fullscreen плеера';
+    }
+
+    const mic = panel.querySelector('[data-player-act="mic"]');
+    if(mic){
+      const micOn = typeof voiceOn !== 'undefined' && !!voiceOn;
+      mic.classList.toggle('active', micOn);
+      mic.classList.toggle('muted', !micOn);
+      const label = mic.querySelector('.label');
+      if(label) label.textContent = micOn ? 'Вкл' : 'Мик';
+    }
+  }
+
+  function patchCinemaButton(){
+    const panel = document.getElementById('jcPlayerPanel');
+    if(!panel) return;
+
+    const btn = panel.querySelector('[data-player-act="cinema"]');
+    if(btn && btn.dataset.stage272 !== '1'){
+      btn.dataset.stage272 = '1';
+      btn.onclick = function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        togglePlayerFullscreen();
+      };
+    }
+  }
+
+  document.addEventListener('fullscreenchange', function(){
+    const f = frame();
+    if(document.fullscreenElement !== f){
+      document.body.classList.remove('jc-player-frame-fullscreen');
+      if(!document.fullscreenElement) document.body.classList.remove('jc-site-fullscreen');
+    } else {
+      document.body.classList.add('jc-player-frame-fullscreen');
+    }
+    setTimeout(sync, 80);
+  });
+
+  document.addEventListener('webkitfullscreenchange', function(){
+    const f = frame();
+    if(document.webkitFullscreenElement !== f){
+      document.body.classList.remove('jc-player-frame-fullscreen');
+    } else {
+      document.body.classList.add('jc-player-frame-fullscreen');
+    }
+    setTimeout(sync, 80);
+  });
+
+  setInterval(function(){
+    ensureHint();
+    patchCinemaButton();
+    sync();
+
+    // периодически показываем подсказку только в watch, чтобы было понятно почему native fullscreen не подходит
+    if(document.querySelector('.section.active')?.id === 'watchSection' && !sessionStorage.getItem('jc272HintShown')){
+      sessionStorage.setItem('jc272HintShown', '1');
+      setTimeout(showHint, 1200);
+    }
+  }, 500);
+
+  setTimeout(function(){
+    ensureHint();
+    patchCinemaButton();
+    sync();
+  }, 800);
+})();

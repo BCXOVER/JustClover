@@ -5340,3 +5340,201 @@ body.jc-site-fullscreen .external-player{
     bottom:54px!important;
   }
 }
+
+
+/* =========================================================
+   JustClover Stage 27.2 — Player fullscreen mic
+   - "Кино" теперь fullscreen самого .player-frame
+   - рамок в нашем fullscreen меньше
+   - в player fullscreen видна только одна кнопка микрофона
+   ========================================================= */
+
+html::after{
+  content:'27.2 PLAYER';
+}
+
+/* Fullscreen именно плеера. Это НЕ fullscreen внутри VK iframe, поэтому наши кнопки можно рисовать поверх. */
+.player-frame:fullscreen,
+.player-frame:-webkit-full-screen{
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100vh!important;
+  max-width:none!important;
+  max-height:none!important;
+  min-height:100vh!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  overflow:hidden!important;
+  z-index:2147483000!important;
+}
+
+.player-frame:fullscreen iframe,
+.player-frame:-webkit-full-screen iframe,
+.player-frame:fullscreen video,
+.player-frame:-webkit-full-screen video,
+.player-frame:fullscreen #youtubePlayer,
+.player-frame:-webkit-full-screen #youtubePlayer,
+.player-frame:fullscreen #iframePlayer,
+.player-frame:-webkit-full-screen #iframePlayer,
+.player-frame:fullscreen #videoPlayer,
+.player-frame:-webkit-full-screen #videoPlayer{
+  position:absolute!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100vh!important;
+  min-height:100vh!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+}
+
+/* В fullscreen плеера оставляем только микрофон */
+.player-frame:fullscreen #jcPlayerPanel,
+.player-frame:-webkit-full-screen #jcPlayerPanel{
+  position:fixed!important;
+  left:50%!important;
+  bottom:22px!important;
+  top:auto!important;
+  transform:translateX(-50%)!important;
+  z-index:2147483640!important;
+  padding:7px!important;
+  background:rgba(3,6,14,.72)!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  box-shadow:0 18px 56px rgba(0,0,0,.48), 0 0 34px color-mix(in srgb,var(--primary2) 16%, transparent)!important;
+}
+
+.player-frame:fullscreen #jcPlayerPanel .jc-player-btn:not([data-player-act="mic"]),
+.player-frame:-webkit-full-screen #jcPlayerPanel .jc-player-btn:not([data-player-act="mic"]){
+  display:none!important;
+}
+
+.player-frame:fullscreen #jcPlayerPanel .jc-player-btn[data-player-act="mic"],
+.player-frame:-webkit-full-screen #jcPlayerPanel .jc-player-btn[data-player-act="mic"]{
+  display:flex!important;
+  width:54px!important;
+  min-width:54px!important;
+  height:54px!important;
+  padding:0!important;
+  border-radius:999px!important;
+}
+
+.player-frame:fullscreen #jcPlayerPanel .jc-player-btn[data-player-act="mic"] .label,
+.player-frame:-webkit-full-screen #jcPlayerPanel .jc-player-btn[data-player-act="mic"] .label{
+  display:none!important;
+}
+
+.player-frame:fullscreen #jcPlayerPanel .jc-player-btn[data-player-act="mic"] svg,
+.player-frame:-webkit-full-screen #jcPlayerPanel .jc-player-btn[data-player-act="mic"] svg{
+  width:22px!important;
+  height:22px!important;
+}
+
+.player-frame:fullscreen #jcPlayerToast,
+.player-frame:-webkit-full-screen #jcPlayerToast{
+  position:fixed!important;
+  left:50%!important;
+  bottom:88px!important;
+  top:auto!important;
+  transform:translateX(-50%) translateY(8px)!important;
+  z-index:2147483641!important;
+}
+
+.player-frame:fullscreen #jcPlayerToast.show,
+.player-frame:-webkit-full-screen #jcPlayerToast.show{
+  transform:translateX(-50%) translateY(0)!important;
+}
+
+.player-frame:fullscreen #jcPlayerTopMessage,
+.player-frame:-webkit-full-screen #jcPlayerTopMessage{
+  position:fixed!important;
+  top:18px!important;
+  left:50%!important;
+  width:min(900px,calc(100vw - 44px))!important;
+  transform:translateX(-50%) translateY(-8px)!important;
+  z-index:2147483639!important;
+}
+
+.player-frame:fullscreen #jcPlayerTopMessage.show,
+.player-frame:-webkit-full-screen #jcPlayerTopMessage.show{
+  transform:translateX(-50%) translateY(0)!important;
+}
+
+/* В player fullscreen кнопку "Открыть" уводим в угол */
+.player-frame:fullscreen #externalPlayer,
+.player-frame:-webkit-full-screen #externalPlayer,
+.player-frame:fullscreen .external-player,
+.player-frame:-webkit-full-screen .external-player{
+  position:fixed!important;
+  right:14px!important;
+  bottom:14px!important;
+  left:auto!important;
+  top:auto!important;
+  transform:none!important;
+  z-index:2147483500!important;
+}
+
+/* Fallback старого body fullscreen тоже без больших рамок */
+body.jc-site-fullscreen .player-frame{
+  border:0!important;
+  border-radius:0!important;
+  padding:0!important;
+  margin:0!important;
+}
+
+body.jc-site-fullscreen .player-frame iframe,
+body.jc-site-fullscreen .player-frame video{
+  width:100vw!important;
+  height:100vh!important;
+}
+
+/* В режиме player fullscreen скрыть лишний интерфейс, если браузер не полностью скрывает страницу */
+body.jc-player-frame-fullscreen .topbar,
+body.jc-player-frame-fullscreen .rail,
+body.jc-player-frame-fullscreen .watch-header,
+body.jc-player-frame-fullscreen .source-strip,
+body.jc-player-frame-fullscreen .reaction-bar,
+body.jc-player-frame-fullscreen .history-grid,
+body.jc-player-frame-fullscreen .queue-card,
+body.jc-player-frame-fullscreen .watch-sidebar{
+  display:none!important;
+}
+
+/* Маленькая подсказка, чтобы не путать с fullscreen внутри VK */
+#jcFullscreenHint{
+  position:absolute;
+  right:12px;
+  top:12px;
+  z-index:68;
+  max-width:250px;
+  padding:8px 10px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(3,6,14,.66);
+  color:rgba(255,255,255,.78);
+  font-size:10px;
+  line-height:1.35;
+  font-weight:800;
+  backdrop-filter:blur(12px);
+  opacity:0;
+  pointer-events:none;
+  transition:.18s ease;
+}
+
+#jcFullscreenHint.show{
+  opacity:.9;
+}
+
+@media(max-width:760px){
+  .player-frame:fullscreen #jcPlayerPanel,
+  .player-frame:-webkit-full-screen #jcPlayerPanel{
+    bottom:18px!important;
+  }
+
+  #jcFullscreenHint{
+    display:none!important;
+  }
+}
