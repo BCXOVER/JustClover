@@ -2558,3 +2558,151 @@ function jc185Patch(){
 }
 
 setTimeout(jc185Patch, 1600);
+
+
+/* =========================================================
+   JustClover Stage 18.6 HARD Lobby Cleanup JS
+   Version: stage18-6-lobby-hardcleanup-20260501-1
+   ========================================================= */
+
+function jc186Toast(text){
+  if(typeof jcStage5Toast === 'function') jcStage5Toast(text);
+  else status?.(els?.roomStatus, text);
+}
+
+function jc186HideOldLobbyButtons(){
+  ['copyInviteBtn','openRoomBtn','closeRoomBtn','publicRoomBtn','inviteRoomBtn'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) {
+      el.classList.add('jc-hard-hidden');
+      el.style.display = 'none';
+    }
+  });
+}
+
+function jc186EnsureStrip(){
+  let strip = document.querySelector('.jc-current-room-strip');
+  if(strip) return strip;
+
+  strip = document.createElement('div');
+  strip.className = 'jc-current-room-strip';
+  strip.innerHTML = `
+    <div class="jc-current-room-main">
+      <strong data-current-room-title>Комната</strong>
+      <span data-current-room-meta>Код: —</span>
+    </div>
+    <button class="btn soft" type="button" data-lobby-invite>Invite</button>
+    <button class="btn primary" type="button" data-lobby-watch>К плееру</button>
+  `;
+
+  const anchor =
+    els?.roomStatus ||
+    document.querySelector('#roomStatus') ||
+    document.querySelector('#joinRoomInput')?.parentElement ||
+    document.querySelector('#createRoomBtn');
+
+  if(anchor) anchor.insertAdjacentElement('beforebegin', strip);
+  else document.querySelector('#homeSection')?.appendChild(strip);
+
+  strip.querySelector('[data-lobby-invite]').onclick = () => {
+    if(!currentRoomId){
+      jc186Toast('Сначала создай комнату');
+      return;
+    }
+    if(typeof jcStage5OpenInviteModal === 'function') jcStage5OpenInviteModal();
+    else document.getElementById('copyInviteBtn')?.click();
+  };
+
+  strip.querySelector('[data-lobby-watch]').onclick = () => section('watchSection');
+
+  return strip;
+}
+
+function jc186SyncStrip(){
+  document.body.classList.toggle('room-active', !!currentRoomId);
+  const strip = jc186EnsureStrip();
+  const name = currentRoom?.name || currentRoomId || 'Комната';
+  const code = currentRoomId || 'нет';
+  const lock = currentRoom?.passwordEnabled ? ' · пароль' : '';
+  const mode = currentRoom
+    ? `${currentRoom.visibility === 'open' ? 'открыта' : 'закрыта'} · ${currentRoom.joinMode === 'public' ? 'публичная' : 'по ссылке'}${lock}`
+    : 'комната не создана';
+
+  strip.querySelector('[data-current-room-title]').textContent = name;
+  strip.querySelector('[data-current-room-meta]').textContent = `Код: ${code} · ${mode}`;
+}
+
+function jc186RearrangeLobby(){
+  const adv = document.querySelector('.jc-room-advanced');
+  const joinInput = document.getElementById('joinRoomInput');
+  const joinBtn = document.getElementById('joinRoomBtn');
+  const joinPass = document.getElementById('jcJoinRoomPassword');
+  const createBtn = document.getElementById('createRoomBtn');
+  const inviteQuick = document.getElementById('jcQuickInviteBtn');
+
+  if(inviteQuick){
+    inviteQuick.classList.add('jc-room-invite-quick');
+    inviteQuick.textContent = 'Invite';
+  }
+
+  if(adv && createBtn && adv.nextElementSibling !== createBtn){
+    adv.insertAdjacentElement('afterend', createBtn);
+  }
+
+  if(joinInput && joinBtn && joinPass){
+    const row = joinInput.parentElement;
+    row.classList.add('jc-join-clean-row');
+    if(joinPass.parentElement !== row){
+      row.insertBefore(joinPass, joinBtn);
+    }
+    joinInput.placeholder = 'Код комнаты или invite-ссылка';
+    joinPass.placeholder = 'Пароль, если есть';
+  }
+}
+
+const jc186OldRenderRooms = renderRooms;
+renderRooms = function(rooms){
+  jc186OldRenderRooms(rooms);
+  // Добавляем копирование кода, если карточки ещё старые.
+  document.querySelectorAll('#publicRoomsList .room-card').forEach(card => {
+    if(card.querySelector('[data-copy-room-code]')) return;
+    const badge = card.querySelector('.jc-room-code-badge');
+    const code = badge?.textContent?.trim();
+    const joinButton = card.querySelector('button');
+    if(!code || !joinButton) return;
+
+    const copy = document.createElement('button');
+    copy.type = 'button';
+    copy.className = 'btn soft';
+    copy.dataset.copyRoomCode = '1';
+    copy.textContent = 'Код';
+    copy.onclick = async (e) => {
+      e.stopPropagation();
+      await navigator.clipboard?.writeText(code).catch(()=>{});
+      jc186Toast('Код комнаты скопирован');
+    };
+    joinButton.insertAdjacentElement('beforebegin', copy);
+  });
+};
+
+function jc186Patch(){
+  jc186HideOldLobbyButtons();
+  jc186RearrangeLobby();
+  jc186SyncStrip();
+
+  if(!document.querySelector('.jc-lobby-version-dot')){
+    const d = document.createElement('div');
+    d.className = 'jc-lobby-version-dot';
+    document.body.appendChild(d);
+  }
+
+  setInterval(() => {
+    jc186HideOldLobbyButtons();
+    jc186RearrangeLobby();
+    jc186SyncStrip();
+  }, 700);
+
+  console.log('JustClover Stage 18.6 HARD lobby cleanup active: stage18-6-lobby-hardcleanup-20260501-1');
+}
+
+setTimeout(jc186Patch, 700);

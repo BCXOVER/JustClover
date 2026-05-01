@@ -2922,3 +2922,91 @@ body.room-active .jc-current-room-strip{
     width:100%;
   }
 }
+
+
+/* =========================================================
+   JustClover Stage 18.6 — HARD Lobby Cleanup
+   Жёстко убирает старые дубли-кнопки даже если DOM поменялся.
+   ========================================================= */
+
+#copyInviteBtn,
+#openRoomBtn,
+#closeRoomBtn,
+#publicRoomBtn,
+#inviteRoomBtn{
+  display:none!important;
+}
+
+.jc-hard-hidden{
+  display:none!important;
+}
+
+#homeSection .jc-room-advanced #jcJoinRoomPassword{
+  display:block!important;
+}
+
+.jc-join-clean-row{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,.72fr) 92px!important;
+  gap:9px!important;
+}
+
+.jc-current-room-strip{
+  display:none;
+  margin-top:10px;
+  padding:12px;
+  border-radius:19px;
+  border:1px solid var(--line);
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb,var(--primary2) 12%, transparent), transparent 34%),
+    rgba(255,255,255,.035);
+  grid-template-columns:minmax(0,1fr) auto auto;
+  gap:9px;
+  align-items:center;
+}
+
+body.room-active .jc-current-room-strip{
+  display:grid!important;
+}
+
+.jc-current-room-main strong{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.jc-current-room-main span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  margin-top:3px;
+}
+
+.jc-room-invite-quick{
+  display:none!important;
+}
+
+body.room-active .jc-room-invite-quick{
+  display:inline-flex!important;
+}
+
+.jc-lobby-version-dot{
+  position:fixed;
+  right:24px;
+  bottom:24px;
+  width:9px;
+  height:9px;
+  border-radius:999px;
+  background:#22c55e;
+  box-shadow:0 0 18px #22c55e;
+  z-index:100000;
+  pointer-events:none;
+}
+
+@media(max-width:760px){
+  .jc-join-clean-row,
+  .jc-current-room-strip{
+    grid-template-columns:1fr!important;
+  }
+}
