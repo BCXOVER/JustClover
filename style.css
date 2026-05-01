@@ -4728,7 +4728,7 @@ body.jc-wallpaper-paused #jcWallpaperMediaLayer img{
    ========================================================= */
 
 html::after{
-  content:'28.4 CLEAN';
+  content:'28.5 CLEAN';
   position:fixed;
   left:8px;
   bottom:8px;
@@ -5220,7 +5220,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'28.4 CLEAN'!important;
+  content:'28.5 CLEAN'!important;
 }
 
 /* В CSS-кино держим плеер внутри вкладки, без системного fullscreen overlay */
@@ -5281,7 +5281,7 @@ body.jc28-cinema .player-frame{
    ========================================================= */
 
 html::after{
-  content:'28.4 CLEAN'!important;
+  content:'28.5 CLEAN'!important;
 }
 
 /* В кино iframe не просто 16:9, а заполняет экран с умным zoom.
@@ -5380,7 +5380,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'28.4 CLEAN'!important;
+  content:'28.5 CLEAN'!important;
 }
 
 body.jc28-cinema .player-frame #iframePlayer,
@@ -5454,7 +5454,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'28.4 CLEAN'!important;
+  content:'28.5 CLEAN'!important;
 }
 
 /* Всегда делаем player-frame настоящим viewport для iframe */
@@ -5564,4 +5564,116 @@ body.jc28-iframe-visible:not(.jc28-cinema) .player-frame #iframePlayer{
 /* Маркер автотеста */
 body::before{
   --jc28-4-ready: 1;
+}
+
+
+/* =========================================================
+   JustClover Stage 28.5 — Fullscreen button returned
+   Добавлена отдельная кнопка fullscreen:
+   - в обычном режиме: Мик / Чат / Кино / Full
+   - в кино-режиме: Мик + Full/Exit
+   - отдельная маленькая кнопка ⛶ справа снизу плеера
+   ========================================================= */
+
+html::after{
+  content:'28.5 CLEAN'!important;
+}
+
+/* Чуть шире панель, потому что вернули Full */
+#jc28Panel{
+  gap:6px!important;
+}
+
+.jc28-btn[data-jc28-act="full"]{
+  min-width:54px!important;
+}
+
+/* В кино больше не скрываем fullscreen-кнопку */
+body.jc28-cinema #jc28Panel .jc28-btn[data-jc28-act="full"]{
+  display:flex!important;
+  width:54px!important;
+  min-width:54px!important;
+  height:54px!important;
+  padding:0!important;
+  border-radius:999px!important;
+}
+
+body.jc28-cinema #jc28Panel .jc28-btn[data-jc28-act="full"] .label{
+  display:none!important;
+}
+
+body.jc28-cinema #jc28Panel .jc28-btn[data-jc28-act="full"] svg{
+  width:22px!important;
+  height:22px!important;
+}
+
+/* В кино скрыты все, кроме микрофона и full */
+body.jc28-cinema #jc28Panel .jc28-btn:not([data-jc28-act="mic"]):not([data-jc28-act="full"]){
+  display:none!important;
+}
+
+/* Отдельная кнопка fullscreen в углу плеера */
+#jc28NativeFullBtn{
+  position:absolute;
+  right:12px;
+  bottom:12px;
+  z-index:86;
+  width:40px;
+  height:40px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(3,6,14,.62);
+  color:#fff;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  backdrop-filter:blur(14px);
+  box-shadow:0 14px 36px rgba(0,0,0,.36);
+  transition:.15s ease;
+}
+
+#jc28NativeFullBtn:hover{
+  transform:translateY(-1px);
+  border-color:color-mix(in srgb,var(--primary2) 48%,rgba(255,255,255,.16));
+  box-shadow:0 18px 46px rgba(0,0,0,.42), var(--glow);
+}
+
+#jc28NativeFullBtn svg{
+  width:19px;
+  height:19px;
+  stroke:currentColor;
+  stroke-width:2.4;
+  fill:none;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+body.jc28-cinema #jc28NativeFullBtn{
+  position:fixed!important;
+  right:76px!important;
+  top:18px!important;
+  bottom:auto!important;
+  z-index:2147483005!important;
+}
+
+/* Когда browser fullscreen активен — подсветить кнопку */
+body.jc28-browser-full #jc28NativeFullBtn,
+body.jc28-browser-full #jc28Panel .jc28-btn[data-jc28-act="full"]{
+  background:linear-gradient(135deg,var(--primary),var(--primary2))!important;
+  border-color:rgba(255,255,255,.24)!important;
+}
+
+/* На телефоне оставить компактно */
+@media(max-width:760px){
+  #jc28NativeFullBtn{
+    right:8px;
+    bottom:8px;
+    width:38px;
+    height:38px;
+  }
+
+  body.jc28-cinema #jc28NativeFullBtn{
+    right:60px!important;
+    top:12px!important;
+  }
 }

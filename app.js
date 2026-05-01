@@ -4951,8 +4951,8 @@ setTimeout(jc251Patch, 1000);
    JustClover Stage 28 CLEAN — player/cinema JS
    Version: stage28-clean-cinema-player-20260502-1
    ========================================================= */
-console.log("JustClover Stage 28.4 CLEAN loaded:", "stage28-4-vk-fill-everywhere-20260502-1");
-window.JUSTCLOVER_BUILD = "stage28-4-vk-fill-everywhere-20260502-1";
+console.log("JustClover Stage 28.5 CLEAN loaded:", "stage28-5-fullscreen-button-20260502-1");
+window.JUSTCLOVER_BUILD = "stage28-5-fullscreen-button-20260502-1";
 
 try{
   if(localStorage.getItem('jc28LastBuild') !== window.JUSTCLOVER_BUILD){
@@ -4965,14 +4965,15 @@ try{
 
 
 (function(){
-  const BUILD = "stage28-4-vk-fill-everywhere-20260502-1";
+  const BUILD = "stage28-5-fullscreen-button-20260502-1";
   let zoom = Number(localStorage.getItem('jc28CinemaZoomV4') || '0') || 0;
 
   function svg(name){
     const icons = {
       mic:'<svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/><path d="M8 21h8"/></svg><i class="slash"></i>',
       chat:'<svg viewBox="0 0 24 24"><path d="M4 6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-5l-5 4v-4a3 3 0 0 1-3-3V6Z"/><path d="M8 8h8"/><path d="M8 11h5"/></svg>',
-      cinema:'<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>'
+      cinema:'<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>',
+      full:'<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>'
     };
     return icons[name] || '';
   }
@@ -4991,7 +4992,8 @@ try{
       panel.innerHTML =
         '<button class="jc28-btn muted" type="button" data-jc28-act="mic">'+svg('mic')+'<span class="label">Мик</span></button>'+
         '<button class="jc28-btn" type="button" data-jc28-act="chat">'+svg('chat')+'<span class="label">Чат</span></button>'+
-        '<button class="jc28-btn" type="button" data-jc28-act="cinema">'+svg('cinema')+'<span class="label">Кино</span></button>';
+        '<button class="jc28-btn" type="button" data-jc28-act="cinema">'+svg('cinema')+'<span class="label">Кино</span></button>'+
+        '<button class="jc28-btn" type="button" data-jc28-act="full">'+svg('full')+'<span class="label">Full</span></button>';
       f.appendChild(panel);
     }
 
@@ -5006,6 +5008,16 @@ try{
       m.id = 'jc28TopMsg';
       m.innerHTML = '<img src="" alt=""><div></div>';
       f.appendChild(m);
+    }
+
+    if(!document.getElementById('jc28NativeFullBtn')){
+      const fb = document.createElement('button');
+      fb.id = 'jc28NativeFullBtn';
+      fb.type = 'button';
+      fb.title = 'Во весь экран';
+      fb.innerHTML = svg('full');
+      fb.onclick = toggleBrowserFullscreen;
+      f.appendChild(fb);
     }
 
     if(!document.getElementById('jc28Exit')){
@@ -5040,6 +5052,8 @@ try{
     panel.querySelector('[data-jc28-act="mic"]').onclick = toggleMic;
     panel.querySelector('[data-jc28-act="chat"]').onclick = toggleChat;
     panel.querySelector('[data-jc28-act="cinema"]').onclick = toggleCinema;
+    const fullBtn = panel.querySelector('[data-jc28-act="full"]');
+    if(fullBtn) fullBtn.onclick = toggleBrowserFullscreen;
   }
 
   function killOpen(){
@@ -5148,6 +5162,27 @@ try{
       zoom = defaultZoomForSource();
     }
     applyZoom();
+  }
+
+
+  async function toggleBrowserFullscreen(){
+    try{
+      if(document.fullscreenElement){
+        await document.exitFullscreen();
+        toast('Fullscreen выключен');
+      }else{
+        const target = document.documentElement;
+        if(target.requestFullscreen){
+          await target.requestFullscreen({ navigationUI: 'hide' });
+          toast('Fullscreen включён');
+        }else{
+          toast('Fullscreen не поддерживается');
+        }
+      }
+    }catch(e){
+      toast('Браузер не дал включить fullscreen');
+    }
+    sync();
   }
 
   async function enterCinema(){
@@ -5290,7 +5325,7 @@ try{
   });
 
   document.addEventListener('fullscreenchange', () => {
-    // Stage 28.1: cinema no longer depends on browser fullscreen.
+    document.body.classList.toggle('jc28-browser-full', !!document.fullscreenElement);
     setTimeout(sync, 80);
   });
 
@@ -5310,6 +5345,14 @@ try{
       if(chat){
         const active = innerWidth <= 760 ? document.body.classList.contains('mobile-chat-open') : !document.body.classList.contains('chat-hidden');
         chat.classList.toggle('active', active);
+      }
+
+      const full = panel.querySelector('[data-jc28-act="full"]');
+      if(full){
+        const on = !!document.fullscreenElement;
+        full.classList.toggle('active', on);
+        const label = full.querySelector('.label');
+        if(label) label.textContent = on ? 'Exit' : 'Full';
       }
 
       const cinema = panel.querySelector('[data-jc28-act="cinema"]');
@@ -5340,7 +5383,8 @@ try{
       cinema: document.body.classList.contains('jc28-cinema'),
       zoom: currentZoom(),
       sourceType: sourceType(),
-      vkSourceClass: document.body.classList.contains('jc28-vk-source')
+      vkSourceClass: document.body.classList.contains('jc28-vk-source'),
+      browserFullscreen: !!document.fullscreenElement
     };
     console.log('JustClover Stage28 audit', report);
     return report;
