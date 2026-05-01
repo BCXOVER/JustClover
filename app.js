@@ -4951,8 +4951,8 @@ setTimeout(jc251Patch, 1000);
    JustClover Stage 28 CLEAN — player/cinema JS
    Version: stage28-clean-cinema-player-20260502-1
    ========================================================= */
-console.log("JustClover Stage 28 CLEAN loaded:", "stage28-clean-cinema-player-20260502-1");
-window.JUSTCLOVER_BUILD = "stage28-clean-cinema-player-20260502-1";
+console.log("JustClover Stage 28.1 CLEAN loaded:", "stage28-1-no-browser-fullscreen-20260502-1");
+window.JUSTCLOVER_BUILD = "stage28-1-no-browser-fullscreen-20260502-1";
 
 (function(){
   const BUILD = "stage28-clean-cinema-player-20260502-1";
@@ -5053,6 +5053,39 @@ window.JUSTCLOVER_BUILD = "stage28-clean-cinema-player-20260502-1";
     return document.querySelector('.player-frame iframe:not(.hidden), .player-frame video:not(.hidden), .player-frame #youtubePlayer:not(.hidden), .player-frame #iframePlayer:not(.hidden), .player-frame #videoPlayer:not(.hidden)');
   }
 
+  function hasPlayableSource(){
+    try{
+      if(typeof currentSource !== 'undefined' && currentSource && currentSource.type && currentSource.type !== 'none') return true;
+    }catch(e){}
+    const iframe = document.querySelector('#iframePlayer:not(.hidden), #youtubePlayer:not(.hidden)');
+    const video = document.querySelector('#videoPlayer:not(.hidden)');
+    if(video && (video.currentSrc || video.src)) return true;
+    if(iframe){
+      const src = iframe.getAttribute('src') || '';
+      if(src && src !== 'about:blank') return true;
+      // YouTube div can be non-empty after API creates iframe inside.
+      if(iframe.querySelector && iframe.querySelector('iframe')) return true;
+    }
+    return false;
+  }
+
+  function ensureCinemaHint(){
+    if(document.getElementById('jc28CinemaHint')) return;
+    const h = document.createElement('div');
+    h.id = 'jc28CinemaHint';
+    h.textContent = 'Кино без системного fullscreen. Для полного экрана без плашки браузера можно нажать F11 вручную.';
+    document.body.appendChild(h);
+  }
+
+  function showCinemaHint(){
+    ensureCinemaHint();
+    const h = document.getElementById('jc28CinemaHint');
+    if(!h) return;
+    h.classList.add('show');
+    clearTimeout(h._timer);
+    h._timer = setTimeout(() => h.classList.remove('show'), 4200);
+  }
+
   function applyZoom(){
     document.documentElement.style.setProperty('--jc28-cinema-zoom', String(Math.max(1, Math.min(1.35, zoom))));
   }
@@ -5069,16 +5102,24 @@ window.JUSTCLOVER_BUILD = "stage28-clean-cinema-player-20260502-1";
 
     killOpen();
 
+    if(!hasPlayableSource()){
+      document.body.classList.add('jc28-no-source');
+      toast('Сначала выбери источник');
+      try{
+        if(typeof jcStage8OpenCatalog === 'function') jcStage8OpenCatalog('youtube');
+      }catch(e){}
+      return;
+    }
+    document.body.classList.remove('jc28-no-source');
+
     // Сбрасываем все старые конфликтующие режимы.
     document.body.classList.remove('jc-cinema-open','jc-real-cinema','jc-css-cinema','jc-site-fullscreen','jc-player-frame-fullscreen');
     document.body.classList.add('jc28-cinema','chat-hidden');
 
-    // Fullscreen всей страницы, НЕ iframe VK.
-    try{
-      if(!document.fullscreenElement && document.documentElement.requestFullscreen){
-        await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
-      }
-    }catch(e){}
+    // Stage 28.1: НЕ вызываем requestFullscreen.
+    // Иначе браузер показывает системную плашку "github.io — нажмите Esc",
+    // которую сайт не может скрыть. Кино теперь CSS-only внутри вкладки.
+    showCinemaHint();
 
     sync();
     toast('Кино включено. × или Esc — выйти.');
@@ -5192,9 +5233,7 @@ window.JUSTCLOVER_BUILD = "stage28-clean-cinema-player-20260502-1";
   });
 
   document.addEventListener('fullscreenchange', () => {
-    if(!document.fullscreenElement && document.body.classList.contains('jc28-cinema')){
-      document.body.classList.remove('jc28-cinema');
-    }
+    // Stage 28.1: cinema no longer depends on browser fullscreen.
     setTimeout(sync, 80);
   });
 
@@ -5250,6 +5289,7 @@ window.JUSTCLOVER_BUILD = "stage28-clean-cinema-player-20260502-1";
 
   setInterval(() => {
     ensure();
+    ensureCinemaHint();
     patchAddChat();
     patchCinemaButtons();
     sync();
@@ -5257,6 +5297,7 @@ window.JUSTCLOVER_BUILD = "stage28-clean-cinema-player-20260502-1";
 
   setTimeout(() => {
     ensure();
+    ensureCinemaHint();
     patchAddChat();
     patchCinemaButtons();
     sync();

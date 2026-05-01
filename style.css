@@ -4728,7 +4728,7 @@ body.jc-wallpaper-paused #jcWallpaperMediaLayer img{
    ========================================================= */
 
 html::after{
-  content:'28 CLEAN';
+  content:'28.1 CLEAN';
   position:fixed;
   left:8px;
   bottom:8px;
@@ -5209,5 +5209,66 @@ body::before{
     top:12px!important;
     width:40px!important;
     height:40px!important;
+  }
+}
+
+
+/* =========================================================
+   JustClover Stage 28.1 — No browser fullscreen popup
+   Кино больше НЕ вызывает requestFullscreen, поэтому не появляется
+   системная плашка браузера "github.io — нажмите Esc".
+   ========================================================= */
+
+html::after{
+  content:'28.1 CLEAN'!important;
+}
+
+/* В CSS-кино держим плеер внутри вкладки, без системного fullscreen overlay */
+body.jc28-cinema{
+  background:#000!important;
+}
+
+/* Служебная подсказка в углу вместо системной плашки */
+#jc28CinemaHint{
+  position:fixed;
+  left:50%;
+  top:16px;
+  z-index:2147483003;
+  transform:translateX(-50%) translateY(-8px);
+  max-width:min(760px,calc(100vw - 40px));
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(3,6,14,.64);
+  color:rgba(255,255,255,.82);
+  font-size:11px;
+  font-weight:850;
+  line-height:1.2;
+  backdrop-filter:blur(14px);
+  box-shadow:0 12px 34px rgba(0,0,0,.36);
+  opacity:0;
+  pointer-events:none;
+  transition:.2s ease;
+  text-align:center;
+}
+
+body.jc28-cinema #jc28CinemaHint.show{
+  opacity:.92;
+  transform:translateX(-50%) translateY(0);
+}
+
+/* Если источника нет, кино не должно превращать пустой экран в fullscreen */
+body.jc28-no-source #jc28Panel [data-jc28-act="cinema"]{
+  opacity:.58;
+}
+
+/* В кино можно оставить браузерную верхнюю панель; это плата за отсутствие системного popup */
+body.jc28-cinema .player-frame{
+  height:100vh!important;
+}
+
+@media(max-width:760px){
+  #jc28CinemaHint{
+    display:none!important;
   }
 }
