@@ -5151,3 +5151,49 @@ window.JUSTCLOVER_BUILD = "stage27-player-mic-chat-panel-20260502-1";
   setInterval(tick, 500);
   setTimeout(tick, 700);
 })();
+
+
+/* =========================================================
+   JustClover Stage 27.1 — Player polish JS
+   Version: stage27-1-player-polish-20260502-1
+   ========================================================= */
+console.log("JustClover Stage 27.1 loaded:", "stage27-1-player-polish-20260502-1");
+window.JUSTCLOVER_BUILD = "stage27-1-player-polish-20260502-1";
+
+(function(){
+  function polishPanel(){
+    const panel = document.getElementById('jcPlayerPanel');
+    if(panel){
+      const catalog = panel.querySelector('[data-player-act="catalog"]');
+      if(catalog) catalog.style.display = 'none';
+
+      const mic = panel.querySelector('[data-player-act="mic"] .label');
+      if(mic && typeof voiceOn !== 'undefined') mic.textContent = voiceOn ? 'Вкл' : 'Мик';
+
+      const cinema = panel.querySelector('[data-player-act="cinema"] .label');
+      if(cinema) cinema.textContent = document.body.classList.contains('jc-site-fullscreen') ? 'Выйти' : 'Кино';
+    }
+
+    const ext = document.getElementById('externalPlayer') || document.querySelector('.external-player');
+    if(ext){
+      ext.style.left = 'auto';
+      ext.style.right = '12px';
+      ext.style.top = 'auto';
+      ext.style.bottom = document.body.classList.contains('jc-site-fullscreen') ? '14px' : '52px';
+      ext.style.transform = 'none';
+      ext.style.zIndex = document.body.classList.contains('jc-site-fullscreen') ? '2147482500' : '64';
+    }
+
+    const link = document.getElementById('externalLink');
+    if(link){
+      link.textContent = 'Открыть';
+      link.title = 'Открыть источник в новой вкладке';
+    }
+  }
+
+  const oldEnter = window.jcStage27EnterFullscreen;
+  const oldExit = window.jcStage27ExitFullscreen;
+
+  setInterval(polishPanel, 500);
+  setTimeout(polishPanel, 800);
+})();

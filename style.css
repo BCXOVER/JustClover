@@ -5126,3 +5126,217 @@ body.jc-site-fullscreen #jcPlayerToast{
     top:10px;
   }
 }
+
+
+/* =========================================================
+   JustClover Stage 27.1 — Player polish
+   - кнопка "Открыть" больше не висит по центру
+   - панель плеера ниже, компактнее
+   - в обычном режиме: Мик / Чат / Кино
+   - в кино/fullscreen: только одна кнопка микрофона
+   ========================================================= */
+
+html::after{
+  content:'27.1 PLAYER';
+  background:rgba(34,197,94,.9)!important;
+}
+
+/* Спрятать Каталог из нижней панели плеера — сверху уже есть "Каталог" */
+#jcPlayerPanel .jc-player-btn[data-player-act="catalog"]{
+  display:none!important;
+}
+
+/* Панель ниже и аккуратнее */
+#jcPlayerPanel{
+  bottom:8px!important;
+  gap:6px!important;
+  padding:6px!important;
+  border-radius:999px!important;
+  background:rgba(3,6,14,.74)!important;
+  z-index:85!important;
+}
+
+#jcPlayerPanel .jc-player-btn{
+  height:34px!important;
+  min-width:44px!important;
+  padding:0 10px!important;
+  gap:5px!important;
+  font-size:11px!important;
+}
+
+#jcPlayerPanel .jc-player-btn svg{
+  width:15px!important;
+  height:15px!important;
+}
+
+#jcPlayerPanel .jc-player-btn[data-player-act="mic"]{
+  min-width:50px!important;
+}
+
+#jcPlayerPanel .jc-player-btn[data-player-act="cinema"]{
+  min-width:58px!important;
+}
+
+/* Тост над компактной панелью */
+#jcPlayerToast{
+  bottom:54px!important;
+}
+
+/* Убрать / сжать кнопку "Открыть", чтобы не торчала в центре */
+.player-frame #externalPlayer,
+.player-frame .external-player,
+#externalPlayer.external-player,
+#externalPlayer{
+  position:absolute!important;
+  left:auto!important;
+  right:12px!important;
+  top:auto!important;
+  bottom:52px!important;
+  transform:none!important;
+  z-index:64!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:160px!important;
+  height:auto!important;
+  min-height:0!important;
+  padding:0!important;
+  margin:0!important;
+  display:flex!important;
+  justify-content:flex-end!important;
+  align-items:center!important;
+  pointer-events:none!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+
+.player-frame #externalPlayer #externalText,
+.player-frame #externalPlayer p,
+.player-frame #externalPlayer h3,
+.player-frame #externalPlayer strong,
+#externalText{
+  display:none!important;
+}
+
+.player-frame #externalLink,
+#externalLink{
+  pointer-events:auto!important;
+  min-height:28px!important;
+  height:28px!important;
+  padding:0 10px!important;
+  border-radius:999px!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  background:rgba(3,6,14,.62)!important;
+  color:#fff!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  text-decoration:none!important;
+  backdrop-filter:blur(12px)!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.32)!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  opacity:.82!important;
+}
+
+.player-frame #externalLink:hover,
+#externalLink:hover{
+  opacity:1!important;
+  transform:translateY(-1px);
+}
+
+.player-frame #externalLink::before,
+#externalLink::before{
+  content:'↗ ';
+}
+
+/* Если embedded player загрузился, overlay-кнопка открытия ещё меньше */
+.player-frame iframe:not(.hidden) ~ #externalPlayer #externalLink,
+.player-frame iframe:not(.hidden) ~ .external-player #externalLink{
+  opacity:.65!important;
+}
+
+/* Кино сайта: только одна круглая кнопка микрофона */
+body.jc-site-fullscreen #jcPlayerPanel{
+  position:fixed!important;
+  left:50%!important;
+  bottom:22px!important;
+  top:auto!important;
+  transform:translateX(-50%)!important;
+  z-index:2147483000!important;
+  padding:7px!important;
+  background:rgba(3,6,14,.68)!important;
+}
+
+body.jc-site-fullscreen #jcPlayerPanel .jc-player-btn:not([data-player-act="mic"]){
+  display:none!important;
+}
+
+body.jc-site-fullscreen #jcPlayerPanel .jc-player-btn[data-player-act="mic"]{
+  display:flex!important;
+  width:52px!important;
+  min-width:52px!important;
+  height:52px!important;
+  padding:0!important;
+  border-radius:999px!important;
+}
+
+body.jc-site-fullscreen #jcPlayerPanel .jc-player-btn[data-player-act="mic"] .label{
+  display:none!important;
+}
+
+body.jc-site-fullscreen #jcPlayerPanel .jc-player-btn[data-player-act="mic"] svg{
+  width:22px!important;
+  height:22px!important;
+}
+
+body.jc-site-fullscreen #jcPlayerToast{
+  position:fixed!important;
+  bottom:84px!important;
+  top:auto!important;
+}
+
+/* В кино не показывать кнопку Открыть поверх центра, только малую в углу */
+body.jc-site-fullscreen #externalPlayer,
+body.jc-site-fullscreen .external-player{
+  right:14px!important;
+  bottom:14px!important;
+  z-index:2147482500!important;
+}
+
+/* Верхнее сообщение чуть компактнее */
+#jcPlayerTopMessage{
+  top:10px!important;
+  min-height:32px!important;
+  padding:6px 10px!important;
+}
+
+#jcPlayerTopMessage img{
+  width:22px!important;
+  height:22px!important;
+}
+
+/* Мобилка */
+@media(max-width:760px){
+  #jcPlayerPanel{
+    bottom:8px!important;
+  }
+
+  #jcPlayerPanel .jc-player-btn{
+    width:38px!important;
+    min-width:38px!important;
+    height:38px!important;
+    padding:0!important;
+  }
+
+  #jcPlayerPanel .jc-player-btn .label{
+    display:none!important;
+  }
+
+  .player-frame #externalPlayer,
+  .player-frame .external-player,
+  #externalPlayer{
+    right:8px!important;
+    bottom:54px!important;
+  }
+}
