@@ -5543,3 +5543,144 @@ function jc263Patch(){
 }
 
 setTimeout(jc263Patch, 900);
+
+
+/* =========================================================
+   JustClover Stage 26.4 — Site fullscreen Rave mode JS
+   Version: stage26-4-site-fullscreen-rave-20260501-1
+   ========================================================= */
+
+function jc264Toast(text){
+  if(typeof jcStage5Toast === 'function') jcStage5Toast(text);
+  else status?.(els?.roomStatus, text);
+}
+
+function jc264EnsureHint(){
+  if(document.querySelector('.jc-site-cinema-hint')) return;
+  const h = document.createElement('div');
+  h.className = 'jc-site-cinema-hint';
+  h.textContent = 'Кино-режим сайта: микрофон и чат работают поверх видео. Esc — выйти.';
+  document.body.appendChild(h);
+}
+
+function jc264ShowHint(){
+  jc264EnsureHint();
+  const h = document.querySelector('.jc-site-cinema-hint');
+  h.classList.add('show');
+  clearTimeout(h._t);
+  h._t = setTimeout(() => h.classList.remove('show'), 3600);
+}
+
+async function jc264EnterSiteCinema(){
+  section?.('watchSection');
+  document.body.classList.add('cinema-mode', 'jc-site-cinema', 'jc-watch-active');
+  document.body.classList.add('chat-hidden');
+
+  try{
+    if(!document.fullscreenElement && document.documentElement.requestFullscreen){
+      await document.documentElement.requestFullscreen();
+    }
+  }catch(e){
+    // Если браузер не дал fullscreen, всё равно включаем fullscreen-layout внутри вкладки.
+  }
+
+  jc261PositionOverlay?.();
+  jc261SyncButtons?.();
+  jc263Polish?.();
+  jc264ShowHint();
+}
+
+async function jc264ExitSiteCinema(){
+  document.body.classList.remove('cinema-mode', 'jc-site-cinema');
+  try{
+    if(document.fullscreenElement && document.exitFullscreen){
+      await document.exitFullscreen();
+    }
+  }catch(e){}
+  jc261PositionOverlay?.();
+  jc261SyncButtons?.();
+  jc263Polish?.();
+}
+
+async function jc264ToggleSiteCinema(){
+  if(document.body.classList.contains('jc-site-cinema')) await jc264ExitSiteCinema();
+  else await jc264EnterSiteCinema();
+}
+
+function jc264PatchCinemaButton(){
+  const btn = document.querySelector('[data-rave-cinema]');
+  if(!btn || btn.dataset.stage264 === '1') return;
+  btn.dataset.stage264 = '1';
+
+  btn.onclick = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await jc264ToggleSiteCinema();
+  };
+
+  btn.title = document.body.classList.contains('jc-site-cinema') ? 'Выйти из кино' : 'Кино-режим сайта';
+  btn.dataset.tip = btn.title;
+}
+
+function jc264PatchFullscreenEvents(){
+  if(window.__jc264FsPatched) return;
+  window.__jc264FsPatched = true;
+
+  document.addEventListener('fullscreenchange', () => {
+    if(!document.fullscreenElement && document.body.classList.contains('jc-site-cinema')){
+      document.body.classList.remove('cinema-mode', 'jc-site-cinema');
+      jc261PositionOverlay?.();
+      jc261SyncButtons?.();
+      jc263Polish?.();
+    }
+  });
+
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && document.body.classList.contains('jc-site-cinema')){
+      setTimeout(() => jc264ExitSiteCinema(), 20);
+    }
+  });
+}
+
+const jc264PrevSync = typeof jc261SyncButtons === 'function' ? jc261SyncButtons : null;
+if(jc264PrevSync){
+  jc261SyncButtons = function(){
+    jc264PrevSync();
+    const cinema = document.querySelector('[data-rave-cinema]');
+    if(cinema){
+      cinema.classList.toggle('active', document.body.classList.contains('jc-site-cinema'));
+      cinema.title = document.body.classList.contains('jc-site-cinema') ? 'Выйти из кино' : 'Кино-режим сайта';
+      cinema.dataset.tip = cinema.title;
+    }
+  };
+}
+
+const jc264PrevPosition = typeof jc261PositionOverlay === 'function' ? jc261PositionOverlay : null;
+if(jc264PrevPosition){
+  jc261PositionOverlay = function(){
+    if(document.body.classList.contains('jc-site-cinema')){
+      document.body.classList.add('jc-watch-active');
+      return;
+    }
+    jc264PrevPosition();
+  };
+}
+
+function jc264Patch(){
+  jc264EnsureHint();
+  jc264PatchFullscreenEvents();
+  jc264PatchCinemaButton();
+
+  setInterval(() => {
+    jc264PatchCinemaButton();
+    if(document.body.classList.contains('jc-site-cinema')){
+      document.body.classList.add('jc-watch-active');
+      jc261SyncButtons?.();
+      jc263Polish?.();
+    }
+  }, 700);
+
+  console.log('JustClover Stage 26.4 site fullscreen rave active: stage26-4-site-fullscreen-rave-20260501-1');
+}
+
+setTimeout(jc264Patch, 1000);

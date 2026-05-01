@@ -5850,3 +5850,202 @@ body.cinema-mode .jc-rave-top-strip{
     bottom:10px!important;
   }
 }
+
+
+/* =========================================================
+   JustClover Stage 26.4 — Site fullscreen Rave mode
+   - кнопка "Кино" теперь делает fullscreen всего сайта, а не iframe
+   - dock/микрофон/чат видны поверх видео в fullscreen
+   - нативный fullscreen VK/YouTube не трогаем: браузер не даёт рисовать поверх него
+   ========================================================= */
+
+body.jc-site-cinema{
+  overflow:hidden!important;
+}
+
+/* В site-cinema прячем лишний интерфейс */
+body.jc-site-cinema .topbar,
+body.jc-site-cinema .rail,
+body.jc-site-cinema .watch-header,
+body.jc-site-cinema .source-strip,
+body.jc-site-cinema .reaction-bar,
+body.jc-site-cinema .history-grid,
+body.jc-site-cinema .queue-card,
+body.jc-site-cinema .jc-mobile-nav,
+body.jc-site-cinema .jc-mobile-chat-toggle{
+  display:none!important;
+}
+
+/* Главный плеер занимает весь экран */
+body.jc-site-cinema .app,
+body.jc-site-cinema .main-shell,
+body.jc-site-cinema #appView,
+body.jc-site-cinema .section.active,
+body.jc-site-cinema #watchSection{
+  display:block!important;
+  position:fixed!important;
+  inset:0!important;
+  z-index:50000!important;
+  width:100vw!important;
+  height:100vh!important;
+  margin:0!important;
+  padding:0!important;
+  background:#000!important;
+}
+
+body.jc-site-cinema .watch-layout,
+body.jc-site-cinema .watch-stage{
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100vh!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  z-index:50001!important;
+  display:block!important;
+  overflow:hidden!important;
+}
+
+body.jc-site-cinema .player-frame{
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100vh!important;
+  min-height:100vh!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  z-index:50002!important;
+  overflow:hidden!important;
+}
+
+body.jc-site-cinema .player-frame iframe,
+body.jc-site-cinema .player-frame video,
+body.jc-site-cinema #youtubePlayer,
+body.jc-site-cinema #iframePlayer,
+body.jc-site-cinema #videoPlayer{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:100%!important;
+  border:0!important;
+  border-radius:0!important;
+  object-fit:contain!important;
+  background:#000!important;
+}
+
+/* Правая колонка становится выезжающим чат-оверлеем */
+body.jc-site-cinema .watch-sidebar{
+  position:fixed!important;
+  top:0!important;
+  right:0!important;
+  bottom:0!important;
+  width:min(390px,92vw)!important;
+  z-index:50020!important;
+  display:grid!important;
+  grid-template-rows:auto auto minmax(0,1fr)!important;
+  gap:12px!important;
+  padding:14px!important;
+  background:linear-gradient(90deg,rgba(0,0,0,0),rgba(2,4,10,.70) 12%,rgba(2,4,10,.92))!important;
+  backdrop-filter:blur(16px)!important;
+  transform:translateX(calc(100% - 18px))!important;
+  transition:transform .2s ease!important;
+}
+
+body.jc-site-cinema:not(.chat-hidden) .watch-sidebar,
+body.jc-site-cinema.mobile-chat-open .watch-sidebar{
+  transform:translateX(0)!important;
+}
+
+/* В fullscreen dock точно поверх всего */
+body.jc-site-cinema .jc-rave-fixed-dock{
+  position:fixed!important;
+  left:50%!important;
+  bottom:24px!important;
+  top:auto!important;
+  transform:translateX(-50%)!important;
+  z-index:50100!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+
+body.jc-site-cinema .jc-rave-top-strip{
+  position:fixed!important;
+  top:18px!important;
+  left:50%!important;
+  width:min(900px,calc(100vw - 40px))!important;
+  z-index:50100!important;
+}
+
+body.jc-site-cinema .jc-rave-ribbon{
+  position:fixed!important;
+  top:62px!important;
+  left:50%!important;
+  width:min(980px,calc(100vw - 40px))!important;
+  z-index:50099!important;
+}
+
+body.jc-site-cinema .jc-rave-mic-toast{
+  position:fixed!important;
+  left:50%!important;
+  top:auto!important;
+  bottom:84px!important;
+  z-index:50101!important;
+}
+
+body.jc-site-cinema .external-player{
+  right:18px!important;
+  bottom:86px!important;
+  z-index:50080!important;
+}
+
+/* Небольшая подсказка при входе */
+.jc-site-cinema-hint{
+  position:fixed;
+  left:50%;
+  top:18px;
+  transform:translateX(-50%);
+  z-index:50102;
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(3,6,14,.68);
+  border:1px solid rgba(255,255,255,.13);
+  color:rgba(255,255,255,.86);
+  font-size:12px;
+  font-weight:850;
+  backdrop-filter:blur(14px);
+  opacity:0;
+  pointer-events:none;
+  transition:.2s ease;
+}
+
+.jc-site-cinema-hint.show{
+  opacity:1;
+}
+
+@media(max-width:760px){
+  body.jc-site-cinema .watch-sidebar{
+    width:100vw!important;
+    transform:translateY(100%)!important;
+    top:auto!important;
+    height:min(70vh,620px)!important;
+    border-radius:24px 24px 0 0!important;
+    background:rgba(3,6,14,.92)!important;
+  }
+
+  body.jc-site-cinema.mobile-chat-open .watch-sidebar,
+  body.jc-site-cinema:not(.chat-hidden) .watch-sidebar{
+    transform:translateY(0)!important;
+  }
+
+  body.jc-site-cinema .jc-rave-fixed-dock{
+    bottom:18px!important;
+  }
+}
