@@ -1,11 +1,8 @@
-/* JustClover cache-killer service worker — stage26-7-cache-killer-clean-overlay-20260501-1 */
+/* JustClover cache killer stage26-clean-from-stable-20260501-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
-  event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
-  );
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
 });
-
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
@@ -14,7 +11,6 @@ self.addEventListener('activate', event => {
     try { await self.registration.unregister(); } catch(e) {}
   })());
 });
-
 self.addEventListener('fetch', event => {
   event.respondWith(fetch(event.request, { cache: 'no-store' }));
 });

@@ -4723,1542 +4723,102 @@ body.jc-wallpaper-paused #jcWallpaperMediaLayer img{
 
 
 /* =========================================================
-   JustClover Stage 26 — Rave-like player voice/chat overlay
-   - компактный микрофон
-   - микрофон доступен поверх плеера и в кино-режиме
-   - сообщения бегут верхней строкой поверх плеера
+   JustClover Stage 26 CLEAN FROM STABLE
+   Берётся стабильная версия 25.1 без старых Stage26 конфликтов.
    ========================================================= */
 
-/* Голосовая карточка справа больше не занимает пол-экрана */
-.voice-card{
-  min-height:auto!important;
-  padding:13px!important;
-  display:grid;
-  gap:9px;
-}
-
-.voice-card h3,
-.voice-card .card-title,
-.voice-card .voice-wave{
-  display:none!important;
-}
-
-.voice-card #voiceBtn,
-#voiceBtn{
-  min-height:38px!important;
-  padding:8px 12px!important;
-  border-radius:999px!important;
-  font-size:13px!important;
-}
-
-#voiceStatus{
-  font-size:12px!important;
-  line-height:1.35!important;
+html::after{
+  content:'26 CLEAN';
+  position:fixed;
+  left:8px;
+  bottom:8px;
+  z-index:2147483647;
+  padding:4px 8px;
+  border-radius:999px;
+  background:rgba(34,197,94,.86);
+  color:#020617;
+  font:900 10px/1 system-ui,-apple-system,Segoe UI,sans-serif;
+  pointer-events:none;
   opacity:.82;
 }
 
-/* Плеер получает Rave-like overlay */
-.player-frame{
-  position:relative!important;
-  overflow:hidden!important;
-}
-
-.jc-player-overlay-ui{
-  position:absolute;
-  inset:0;
-  z-index:35;
-  pointer-events:none;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  padding:12px;
-}
-
-.jc-top-chat-strip{
-  align-self:center;
-  width:min(760px,calc(100% - 24px));
-  min-height:40px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(3,6,14,.58);
-  backdrop-filter:blur(16px) saturate(135%);
-  -webkit-backdrop-filter:blur(16px) saturate(135%);
-  box-shadow:0 14px 42px rgba(0,0,0,.34);
-  color:rgba(255,255,255,.92);
-  opacity:0;
-  transform:translateY(-10px);
-  transition:.24s ease;
-  overflow:hidden;
-}
-
-.jc-top-chat-strip.show{
-  opacity:1;
-  transform:translateY(0);
-}
-
-.jc-top-chat-avatar{
-  width:26px;
-  height:26px;
-  border-radius:10px;
-  object-fit:cover;
-  flex:0 0 auto;
-  border:1px solid rgba(255,255,255,.14);
-}
-
-.jc-top-chat-text{
-  min-width:0;
-  overflow:hidden;
-  white-space:nowrap;
-  text-overflow:ellipsis;
-  font-size:13px;
-  font-weight:750;
-}
-
-.jc-top-chat-text b{
-  color:var(--primary2);
-  margin-right:6px;
-}
-
-.jc-player-control-dock{
-  align-self:center;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:9px;
-  pointer-events:auto;
-  padding:8px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(3,6,14,.48);
-  backdrop-filter:blur(18px) saturate(140%);
-  -webkit-backdrop-filter:blur(18px) saturate(140%);
-  box-shadow:0 16px 48px rgba(0,0,0,.36);
-  opacity:.92;
-  transform:translateY(6px);
-  transition:.18s ease;
-}
-
-.player-frame:hover .jc-player-control-dock,
-body.cinema-mode .jc-player-control-dock{
-  opacity:1;
-  transform:translateY(0);
-}
-
-.jc-player-mini-btn{
-  width:44px;
-  height:44px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.13);
-  background:rgba(255,255,255,.08);
-  color:#fff;
-  cursor:pointer;
-  display:grid;
-  place-items:center;
-  font-size:18px;
-  font-weight:950;
-  transition:.15s ease;
-  position:relative;
-  overflow:hidden;
-}
-
-.jc-player-mini-btn:hover{
-  transform:translateY(-1px) scale(1.03);
-  border-color:color-mix(in srgb,var(--primary2) 42%, rgba(255,255,255,.14));
-  box-shadow:0 12px 34px rgba(0,0,0,.32), var(--glow);
-}
-
-.jc-player-mini-btn.active{
-  background:linear-gradient(135deg,var(--primary),var(--primary2));
-  color:white;
-  box-shadow:0 0 0 1px color-mix(in srgb,var(--primary2) 34%, transparent), 0 0 32px color-mix(in srgb,var(--primary2) 24%, transparent);
-}
-
-.jc-player-mini-btn.muted{
-  background:rgba(248,113,113,.16);
-  border-color:rgba(248,113,113,.25);
-}
-
-.jc-player-mini-btn .jc-live-dot{
-  position:absolute;
-  right:7px;
-  top:7px;
-  width:8px;
-  height:8px;
-  border-radius:999px;
-  background:#22c55e;
-  box-shadow:0 0 12px #22c55e;
-  opacity:0;
-}
-
-.jc-player-mini-btn.active .jc-live-dot{
-  opacity:1;
-}
-
-.jc-mic-toast{
-  position:absolute;
-  left:50%;
-  bottom:76px;
-  transform:translateX(-50%) translateY(8px);
-  z-index:36;
-  pointer-events:none;
-  padding:9px 13px;
-  border-radius:999px;
-  background:rgba(3,6,14,.68);
-  border:1px solid rgba(255,255,255,.12);
-  color:#fff;
-  font-size:12px;
-  font-weight:850;
-  backdrop-filter:blur(14px);
-  opacity:0;
-  transition:.22s ease;
-}
-
-.jc-mic-toast.show{
-  opacity:1;
-  transform:translateX(-50%) translateY(0);
-}
-
-/* Кино-режим: overlay остаётся доступным поверх всего */
-body.cinema-mode .jc-player-overlay-ui{
-  position:absolute;
-  padding:14px;
-}
-
-body.cinema-mode .jc-top-chat-strip{
-  width:min(900px,calc(100% - 28px));
-  min-height:42px;
-}
-
-body.cinema-mode .jc-player-control-dock{
-  position:absolute;
-  left:50%;
-  bottom:18px;
-  transform:translateX(-50%);
-}
-
-/* Когда плеер в 16:9 — не съедаем место */
-body.player-16x9 .jc-player-overlay-ui{
-  padding:10px;
-}
-
-/* Тонкая бегущая строка для нескольких сообщений */
-.jc-message-ribbon{
-  position:absolute;
-  top:58px;
-  left:12px;
-  right:12px;
-  z-index:34;
-  height:32px;
-  pointer-events:none;
-  overflow:hidden;
-  border-radius:999px;
-  opacity:.0;
-  transition:.22s ease;
-}
-
-.jc-message-ribbon.show{
-  opacity:1;
-}
-
-.jc-message-ribbon-inner{
-  display:inline-flex;
-  gap:18px;
-  align-items:center;
-  min-width:100%;
-  animation:jcRibbonMove 14s linear forwards;
-  color:rgba(255,255,255,.86);
-  font-size:12px;
-  font-weight:750;
-  text-shadow:0 2px 12px rgba(0,0,0,.72);
-  white-space:nowrap;
-}
-
-.jc-message-ribbon-item{
-  display:inline-flex;
-  gap:5px;
-  align-items:center;
-  padding:6px 10px;
-  border-radius:999px;
-  background:rgba(3,6,14,.34);
-  border:1px solid rgba(255,255,255,.08);
-  backdrop-filter:blur(12px);
-}
-
-@keyframes jcRibbonMove{
-  from{transform:translateX(100%)}
-  to{transform:translateX(-100%)}
-}
-
-/* Кнопка чата на мобиле не конфликтует с overlay */
-@media(max-width:760px){
-  .jc-player-overlay-ui{
-    padding:9px;
-  }
-
-  .jc-top-chat-strip{
-    width:calc(100% - 18px);
-    min-height:36px;
-    padding:7px 10px;
-  }
-
-  .jc-top-chat-avatar{
-    width:24px;
-    height:24px;
-    border-radius:9px;
-  }
-
-  .jc-top-chat-text{
-    font-size:12px;
-  }
-
-  .jc-player-control-dock{
-    gap:7px;
-    padding:7px;
-  }
-
-  .jc-player-mini-btn{
-    width:40px;
-    height:40px;
-    font-size:16px;
-  }
-
-  .voice-card{
-    display:none!important;
-  }
-}
-
-
-/* =========================================================
-   JustClover Stage 26.1 — Player overlay FORCE FIX
-   - overlay теперь fixed-слоем поверх iframe/VK/YouTube
-   - микрофон виден даже когда iframe перекрывает player-frame
-   - voice-card справа максимально компактная
-   ========================================================= */
-
-/* Правая карточка голоса больше не огромная */
+/* Компактный голос справа */
 .voice-card{
-  min-height:88px!important;
-  max-height:112px!important;
+  min-height:56px!important;
+  max-height:72px!important;
+  padding:10px 12px!important;
+  display:grid!important;
+  grid-template-columns:1fr auto!important;
+  grid-template-areas:"title btn" "status btn"!important;
+  gap:4px 10px!important;
+  align-items:center!important;
   overflow:hidden!important;
-  padding:12px!important;
 }
 
 .voice-card h3,
 .voice-card .card-title,
 .voice-card .voice-wave,
-.voice-card [class*="wave"]{
+.voice-card [class*="wave"],
+.voice-card .pill,
+.voice-card .badge,
+.voice-card [class*="pill"],
+.voice-card [class*="badge"]{
   display:none!important;
-}
-
-.voice-card::before{
-  content:'Голос';
-  display:block;
-  color:var(--soft);
-  font-weight:950;
-  font-size:15px;
-  margin-bottom:8px;
-}
-
-.voice-card #voiceBtn,
-#voiceBtn{
-  width:auto!important;
-  min-height:34px!important;
-  padding:7px 11px!important;
-  border-radius:999px!important;
-  font-size:12px!important;
-}
-
-.voice-card #voiceStatus,
-#voiceStatus{
-  margin-top:6px!important;
-  font-size:11px!important;
-}
-
-/* Старый overlay внутри player-frame может прятаться за iframe — выключаем его dock,
-   новый fixed dock ниже работает над iframe */
-.player-frame .jc-player-control-dock{
-  display:none!important;
-}
-
-.jc-rave-fixed-dock{
-  position:fixed;
-  left:50%;
-  top:50%;
-  z-index:99999;
-  transform:translateX(-50%);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:9px;
-  padding:8px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(3,6,14,.62);
-  backdrop-filter:blur(20px) saturate(145%);
-  -webkit-backdrop-filter:blur(20px) saturate(145%);
-  box-shadow:0 18px 58px rgba(0,0,0,.46), var(--glow);
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .16s ease, transform .16s ease;
-}
-
-body.jc-watch-active .jc-rave-fixed-dock{
-  opacity:.96;
-  pointer-events:auto;
-}
-
-body.cinema-mode .jc-rave-fixed-dock{
-  top:auto!important;
-  bottom:22px!important;
-  left:50%!important;
-  transform:translateX(-50%)!important;
-  opacity:1;
-}
-
-.jc-rave-fixed-dock:hover{
-  opacity:1;
-  transform:translateX(-50%) translateY(-2px);
-}
-
-.jc-rave-mini-btn{
-  width:42px;
-  height:42px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(255,255,255,.075);
-  color:#fff;
-  cursor:pointer;
-  display:grid;
-  place-items:center;
-  font-size:17px;
-  font-weight:950;
-  position:relative;
-  transition:.15s ease;
-}
-
-.jc-rave-mini-btn:hover{
-  transform:scale(1.05);
-  border-color:color-mix(in srgb,var(--primary2) 44%, rgba(255,255,255,.16));
-  box-shadow:0 10px 34px rgba(0,0,0,.32), var(--glow);
-}
-
-.jc-rave-mini-btn.active{
-  background:linear-gradient(135deg,var(--primary),var(--primary2));
-  box-shadow:0 0 0 1px color-mix(in srgb,var(--primary2) 28%, transparent), 0 0 34px color-mix(in srgb,var(--primary2) 24%, transparent);
-}
-
-.jc-rave-mini-btn.muted{
-  background:rgba(248,113,113,.16);
-  border-color:rgba(248,113,113,.28);
-}
-
-.jc-rave-mini-btn .jc-live-dot{
-  position:absolute;
-  right:6px;
-  top:6px;
-  width:8px;
-  height:8px;
-  border-radius:999px;
-  background:#22c55e;
-  box-shadow:0 0 12px #22c55e;
-  opacity:0;
-}
-
-.jc-rave-mini-btn.active .jc-live-dot{
-  opacity:1;
-}
-
-/* fixed top message over iframe */
-.jc-rave-top-strip{
-  position:fixed;
-  left:50%;
-  top:100px;
-  transform:translateX(-50%) translateY(-10px);
-  z-index:99998;
-  width:min(760px,calc(100vw - 42px));
-  min-height:40px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(3,6,14,.64);
-  backdrop-filter:blur(18px) saturate(140%);
-  -webkit-backdrop-filter:blur(18px) saturate(140%);
-  color:rgba(255,255,255,.92);
-  box-shadow:0 14px 44px rgba(0,0,0,.42);
-  opacity:0;
-  pointer-events:none;
-  transition:.22s ease;
-  overflow:hidden;
-}
-
-.jc-rave-top-strip.show{
-  opacity:1;
-  transform:translateX(-50%) translateY(0);
-}
-
-body.cinema-mode .jc-rave-top-strip{
-  top:18px!important;
-  width:min(900px,calc(100vw - 42px));
-}
-
-.jc-rave-top-strip img{
-  width:26px;
-  height:26px;
-  border-radius:10px;
-  object-fit:cover;
-  border:1px solid rgba(255,255,255,.14);
-  flex:0 0 auto;
-}
-
-.jc-rave-top-strip div{
-  min-width:0;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  font-size:13px;
-  font-weight:750;
-}
-
-.jc-rave-top-strip b{
-  color:var(--primary2);
-  margin-right:6px;
-}
-
-/* fixed running ribbon */
-.jc-rave-ribbon{
-  position:fixed;
-  left:50%;
-  top:146px;
-  transform:translateX(-50%);
-  z-index:99997;
-  width:min(860px,calc(100vw - 42px));
-  height:32px;
-  overflow:hidden;
-  border-radius:999px;
-  pointer-events:none;
-  opacity:0;
-  transition:.22s ease;
-}
-
-.jc-rave-ribbon.show{
-  opacity:1;
-}
-
-body.cinema-mode .jc-rave-ribbon{
-  top:66px!important;
-  width:min(980px,calc(100vw - 42px));
-}
-
-.jc-rave-ribbon-inner{
-  display:inline-flex;
-  gap:18px;
-  min-width:100%;
-  align-items:center;
-  animation:jcRaveRibbonMove 14s linear forwards;
-  white-space:nowrap;
-  color:rgba(255,255,255,.88);
-  font-size:12px;
-  font-weight:750;
-  text-shadow:0 2px 12px rgba(0,0,0,.72);
-}
-
-.jc-rave-ribbon-item{
-  display:inline-flex;
-  gap:5px;
-  align-items:center;
-  padding:6px 10px;
-  border-radius:999px;
-  background:rgba(3,6,14,.38);
-  border:1px solid rgba(255,255,255,.09);
-  backdrop-filter:blur(12px);
-}
-
-@keyframes jcRaveRibbonMove{
-  from{transform:translateX(100%)}
-  to{transform:translateX(-100%)}
-}
-
-.jc-rave-mic-toast{
-  position:fixed;
-  left:50%;
-  top:50%;
-  transform:translateX(-50%) translateY(42px);
-  z-index:100000;
-  padding:9px 13px;
-  border-radius:999px;
-  background:rgba(3,6,14,.72);
-  border:1px solid rgba(255,255,255,.14);
-  color:#fff;
-  font-size:12px;
-  font-weight:850;
-  backdrop-filter:blur(14px);
-  pointer-events:none;
-  opacity:0;
-  transition:.22s ease;
-}
-
-.jc-rave-mic-toast.show{
-  opacity:1;
-  transform:translateX(-50%) translateY(32px);
-}
-
-body.cinema-mode .jc-rave-mic-toast{
-  top:auto!important;
-  bottom:82px!important;
-  transform:translateX(-50%) translateY(8px);
-}
-
-body.cinema-mode .jc-rave-mic-toast.show{
-  transform:translateX(-50%) translateY(0);
-}
-
-/* Подсказка: нативный fullscreen iframe не даст показать сайт поверх */
-.jc-rave-fullscreen-note{
-  position:fixed;
-  right:16px;
-  bottom:16px;
-  z-index:99996;
-  max-width:310px;
-  padding:10px 12px;
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(3,6,14,.68);
-  color:rgba(255,255,255,.78);
-  font-size:11px;
-  line-height:1.35;
-  backdrop-filter:blur(14px);
-  opacity:0;
-  pointer-events:none;
-  transition:.22s ease;
-}
-
-body.cinema-mode .jc-rave-fullscreen-note{
-  opacity:.86;
-}
-
-@media(max-width:760px){
-  .jc-rave-fixed-dock{
-    gap:7px;
-    padding:7px;
-  }
-
-  .jc-rave-mini-btn{
-    width:40px;
-    height:40px;
-    font-size:16px;
-  }
-
-  .jc-rave-top-strip{
-    width:calc(100vw - 24px);
-    top:82px;
-    min-height:36px;
-    padding:7px 10px;
-  }
-
-  .jc-rave-top-strip img{
-    width:24px;
-    height:24px;
-  }
-
-  .jc-rave-top-strip div{
-    font-size:12px;
-  }
-
-  .jc-rave-ribbon{
-    width:calc(100vw - 24px);
-    top:124px;
-  }
-
-  .voice-card{
-    display:none!important;
-  }
-
-  .jc-rave-fullscreen-note{
-    display:none;
-  }
-}
-
-
-/* =========================================================
-   JustClover Stage 26.2 — Rave overlay polish
-   - более понятные иконки
-   - компактный блок голоса справа
-   - dock не выглядит как чужая панель
-   - подсказки на русском
-   ========================================================= */
-
-/* Правая карточка голоса: компактная, но с нормальным заголовком */
-.voice-card{
-  min-height:78px!important;
-  max-height:96px!important;
-  padding:12px!important;
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto!important;
-  grid-template-areas:
-    "title btn"
-    "status status"!important;
-  gap:7px 10px!important;
-  align-items:center!important;
 }
 
 .voice-card::before{
   content:'Голос';
   grid-area:title;
   display:block;
-  margin:0!important;
   color:var(--text);
+  font-size:15px;
   font-weight:950;
-  font-size:17px;
   line-height:1;
 }
 
-.voice-card #voiceBtn,
 #voiceBtn{
   grid-area:btn;
-  width:auto!important;
-  min-width:42px!important;
-  max-width:126px!important;
-  min-height:34px!important;
-  padding:7px 11px!important;
-  border-radius:999px!important;
-  font-size:0!important;
-  white-space:nowrap!important;
-}
-
-.voice-card #voiceBtn::before,
-#voiceBtn::before{
-  content:'🎤';
-  font-size:15px;
-  line-height:1;
-  margin-right:0;
-}
-
-.voice-card #voiceBtn::after,
-#voiceBtn::after{
-  content:'';
-}
-
-.voice-card #voiceStatus,
-#voiceStatus{
-  grid-area:status;
-  margin:0!important;
-  font-size:11px!important;
-  line-height:1.35!important;
-  opacity:.74;
-}
-
-/* Dock как у watch-party: маленькая стеклянная капсула */
-.jc-rave-fixed-dock{
-  gap:6px!important;
-  padding:7px!important;
-  border-radius:20px!important;
-  background:rgba(5,8,18,.68)!important;
-  border-color:rgba(255,255,255,.13)!important;
-}
-
-.jc-rave-mini-btn{
-  width:38px!important;
-  height:38px!important;
-  border-radius:15px!important;
-  font-size:0!important;
-  background:rgba(255,255,255,.075)!important;
-}
-
-/* Рисуем иконки через CSS, чтобы emoji не превращались в странный значок */
-.jc-rave-mini-btn::before{
-  font-size:17px;
-  line-height:1;
-}
-
-.jc-rave-mini-btn[data-rave-mic]::before{
-  content:'🎤';
-}
-
-.jc-rave-mini-btn[data-rave-chat]::before{
-  content:'💬';
-}
-
-.jc-rave-mini-btn[data-rave-catalog]::before{
-  content:'＋';
-  font-size:20px;
-  font-weight:950;
-}
-
-.jc-rave-mini-btn[data-rave-cinema]::before{
-  content:'⛶';
-  font-size:18px;
-}
-
-.jc-rave-mini-btn.active{
-  background:linear-gradient(135deg,var(--primary),var(--primary2))!important;
-}
-
-.jc-rave-mini-btn.muted{
-  background:rgba(255,255,255,.075)!important;
-  border-color:rgba(255,255,255,.13)!important;
-}
-
-.jc-rave-mini-btn.muted[data-rave-mic]{
-  background:rgba(248,113,113,.18)!important;
-  border-color:rgba(248,113,113,.32)!important;
-}
-
-.jc-rave-mini-btn.muted[data-rave-mic]::after{
-  content:'';
-  position:absolute;
-  width:22px;
-  height:2px;
-  border-radius:999px;
-  background:#fb7185;
-  transform:rotate(-35deg);
-  box-shadow:0 0 8px rgba(251,113,133,.55);
-}
-
-/* Маленькая подпись при наведении */
-.jc-rave-mini-btn[data-tip]{
-  overflow:visible!important;
-}
-
-.jc-rave-mini-btn[data-tip]:hover span.jc-live-dot{
-  display:none;
-}
-
-.jc-rave-mini-btn[data-tip]:hover::marker{
-  display:none;
-}
-
-.jc-rave-mini-btn[data-tip]:hover::after{
-  content:attr(data-tip);
-  position:absolute;
-  left:50%;
-  bottom:calc(100% + 8px);
-  transform:translateX(-50%);
-  width:max-content;
-  max-width:180px;
-  padding:6px 9px;
-  border-radius:10px;
-  background:rgba(3,6,14,.86);
-  border:1px solid rgba(255,255,255,.12);
-  color:#fff;
-  font-size:11px;
-  font-weight:850;
-  white-space:nowrap;
-  box-shadow:0 10px 28px rgba(0,0,0,.35);
-}
-
-/* Для mic muted перечёркивание важнее tooltip-псевдо, поэтому делаем tooltip отдельным режимом только когда hover через data-tooltip-visible */
-.jc-rave-mini-btn[data-rave-mic]:hover::after{
-  width:auto;
-  height:auto;
-  transform:translateX(-50%);
-  background:rgba(3,6,14,.86);
-  box-shadow:0 10px 28px rgba(0,0,0,.35);
-}
-
-/* В кино-режиме dock немного ниже и не мешает центральному контенту */
-body.cinema-mode .jc-rave-fixed-dock{
-  bottom:18px!important;
-  border-radius:999px!important;
-}
-
-/* Top-strip более Rave-like: меньше, выше, без жирного пузыря */
-.jc-rave-top-strip{
-  min-height:34px!important;
-  padding:6px 10px!important;
-  background:rgba(3,6,14,.50)!important;
-  border-color:rgba(255,255,255,.10)!important;
-}
-
-.jc-rave-top-strip img{
-  width:22px!important;
-  height:22px!important;
-  border-radius:8px!important;
-}
-
-.jc-rave-top-strip div{
-  font-size:12px!important;
-}
-
-/* Скрываем старую кнопку/панель Stage26 внутри player-frame окончательно */
-.player-frame .jc-player-overlay-ui,
-.player-frame .jc-player-control-dock,
-.player-frame .jc-top-chat-strip,
-.player-frame .jc-message-ribbon,
-.player-frame .jc-mic-toast{
-  display:none!important;
-}
-
-/* Если iframe/внешний источник имеет маленький preview — не ломаем размер плеера */
-.external-player{
-  position:absolute;
-  left:50%;
-  bottom:54px;
-  transform:translateX(-50%);
-  z-index:4;
-  max-width:86%;
-  text-align:center;
-}
-
-.player-frame iframe,
-.player-frame video,
-#youtubePlayer,
-#iframePlayer{
-  min-height:100%!important;
-}
-
-/* На телефоне dock как маленькая нижняя панель */
-@media(max-width:760px){
-  .jc-rave-fixed-dock{
-    border-radius:999px!important;
-    gap:7px!important;
-  }
-
-  .jc-rave-mini-btn{
-    width:40px!important;
-    height:40px!important;
-    border-radius:999px!important;
-  }
-}
-
-
-/* =========================================================
-   JustClover Stage 26.3 — Player UI clean icons
-   - нормальные SVG-иконки вместо emoji
-   - микрофон понятнее
-   - убран тяжёлый текст "Внешний источник" поверх видео
-   - компактнее правая карточка голоса
-   ========================================================= */
-
-/* Правая голосовая карточка: совсем компактный вид */
-.voice-card{
-  min-height:64px!important;
-  max-height:78px!important;
-  padding:10px 12px!important;
-  grid-template-columns:minmax(0,1fr) 42px!important;
-  grid-template-areas:"title btn" "status btn"!important;
-  gap:3px 10px!important;
-}
-
-.voice-card::before{
-  content:'Голос'!important;
-  font-size:16px!important;
-}
-
-.voice-card #voiceBtn,
-#voiceBtn{
   width:38px!important;
   height:38px!important;
   min-width:38px!important;
-  min-height:38px!important;
   max-width:38px!important;
   padding:0!important;
+  border-radius:999px!important;
   display:grid!important;
   place-items:center!important;
-  overflow:hidden!important;
+  font-size:0!important;
 }
 
-.voice-card #voiceBtn::before,
 #voiceBtn::before{
-  content:'🎤'!important;
-  font-size:15px!important;
+  content:'🎤';
+  font-size:15px;
 }
 
-.voice-card #voiceStatus,
 #voiceStatus{
-  font-size:11px!important;
-  opacity:.68!important;
+  grid-area:status;
+  margin:0!important;
+  font-size:10px!important;
+  line-height:1.1!important;
+  opacity:.68;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
-/* Убираем старый бейдж Voice, если он остался абсолютным бейджем */
-.voice-card .pill,
-.voice-card .badge,
-.voice-card [class*="badge"],
-.voice-card [class*="pill"]{
-  display:none!important;
-}
-
-/* Dock: аккуратные SVG-иконки */
-.jc-rave-fixed-dock{
-  gap:7px!important;
-  padding:7px 8px!important;
-  border-radius:999px!important;
-  background:rgba(5,8,18,.72)!important;
-  box-shadow:0 18px 52px rgba(0,0,0,.46), 0 0 30px color-mix(in srgb,var(--primary2) 12%, transparent)!important;
-}
-
-.jc-rave-mini-btn{
-  width:40px!important;
-  height:40px!important;
-  border-radius:999px!important;
-  font-size:0!important;
-  color:#fff!important;
-  overflow:visible!important;
-}
-
-.jc-rave-mini-btn::before,
-.jc-rave-mini-btn::after{
-  content:none!important;
-  display:none!important;
-}
-
-.jc-rave-mini-btn svg{
-  width:19px;
-  height:19px;
-  stroke:currentColor;
-  stroke-width:2.35;
-  fill:none;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-  pointer-events:none;
-}
-
-.jc-rave-mini-btn[data-rave-catalog] svg{
-  width:20px;
-  height:20px;
-}
-
-.jc-rave-mini-btn .jc-muted-slash{
-  position:absolute;
-  width:24px;
-  height:2px;
-  border-radius:999px;
-  background:#fb7185;
-  transform:rotate(-35deg);
-  box-shadow:0 0 8px rgba(251,113,133,.6);
-  opacity:0;
-  pointer-events:none;
-}
-
-.jc-rave-mini-btn.muted[data-rave-mic] .jc-muted-slash{
-  opacity:1;
-}
-
-.jc-rave-mini-btn.active{
-  background:linear-gradient(135deg,var(--primary),var(--primary2))!important;
-}
-
-.jc-rave-mini-btn[data-rave-mic].muted{
-  background:rgba(248,113,113,.16)!important;
-  border-color:rgba(248,113,113,.30)!important;
-}
-
-.jc-rave-mini-btn[data-tip]:hover .jc-tooltip{
-  opacity:1;
-  transform:translateX(-50%) translateY(-2px);
-}
-
-.jc-tooltip{
-  position:absolute;
-  left:50%;
-  bottom:calc(100% + 8px);
-  transform:translateX(-50%) translateY(2px);
-  width:max-content;
-  max-width:180px;
-  padding:6px 9px;
-  border-radius:10px;
-  background:rgba(3,6,14,.88);
-  border:1px solid rgba(255,255,255,.12);
-  color:#fff;
-  font-size:11px;
-  font-weight:850;
-  white-space:nowrap;
-  box-shadow:0 10px 28px rgba(0,0,0,.35);
-  opacity:0;
-  pointer-events:none;
-  transition:.14s ease;
-}
-
-/* Внешний источник больше не закрывает картинку/iframe крупным текстом */
-.external-player{
-  left:auto!important;
-  right:14px!important;
-  bottom:14px!important;
-  transform:none!important;
-  z-index:6!important;
-  max-width:260px!important;
-  display:flex!important;
-  justify-content:flex-end!important;
-  align-items:center!important;
-  pointer-events:none!important;
-}
-
-.external-player #externalText,
-.external-player p,
-.external-player h3,
-.external-player strong{
-  display:none!important;
-}
-
-.external-player #externalLink,
-#externalLink{
-  pointer-events:auto!important;
-  min-height:34px!important;
-  padding:8px 12px!important;
-  border-radius:999px!important;
-  border:1px solid rgba(255,255,255,.13)!important;
-  background:rgba(3,6,14,.58)!important;
-  color:#fff!important;
-  font-size:12px!important;
-  font-weight:850!important;
-  text-decoration:none!important;
-  backdrop-filter:blur(14px)!important;
-}
-
-.external-player #externalLink::before,
-#externalLink::before{
-  content:'↗ ';
-}
-
-/* Если встроенный iframe виден, картинка не должна быть перекрыта системными надписями */
-.player-frame .status,
-.player-frame .source-note{
-  pointer-events:none;
-}
-
-/* Dock ставим чуть ниже внутри рамки, но не на реакции */
-body.jc-watch-active .jc-rave-fixed-dock{
-  opacity:.98!important;
-}
-
-/* В cinema кнопки снизу, но не слишком высоко */
-body.cinema-mode .jc-rave-fixed-dock{
-  bottom:18px!important;
-}
-
-body.cinema-mode .jc-rave-top-strip{
-  top:16px!important;
-}
-
-/* На мобиле tooltip не нужен */
-@media(max-width:760px){
-  .jc-tooltip{
-    display:none!important;
-  }
-
-  .external-player{
-    right:10px!important;
-    bottom:10px!important;
-  }
-}
-
-
-/* =========================================================
-   JustClover Stage 26.4 — Site fullscreen Rave mode
-   - кнопка "Кино" теперь делает fullscreen всего сайта, а не iframe
-   - dock/микрофон/чат видны поверх видео в fullscreen
-   - нативный fullscreen VK/YouTube не трогаем: браузер не даёт рисовать поверх него
-   ========================================================= */
-
-body.jc-site-cinema{
-  overflow:hidden!important;
-}
-
-/* В site-cinema прячем лишний интерфейс */
-body.jc-site-cinema .topbar,
-body.jc-site-cinema .rail,
-body.jc-site-cinema .watch-header,
-body.jc-site-cinema .source-strip,
-body.jc-site-cinema .reaction-bar,
-body.jc-site-cinema .history-grid,
-body.jc-site-cinema .queue-card,
-body.jc-site-cinema .jc-mobile-nav,
-body.jc-site-cinema .jc-mobile-chat-toggle{
-  display:none!important;
-}
-
-/* Главный плеер занимает весь экран */
-body.jc-site-cinema .app,
-body.jc-site-cinema .main-shell,
-body.jc-site-cinema #appView,
-body.jc-site-cinema .section.active,
-body.jc-site-cinema #watchSection{
-  display:block!important;
-  position:fixed!important;
-  inset:0!important;
-  z-index:50000!important;
-  width:100vw!important;
-  height:100vh!important;
-  margin:0!important;
-  padding:0!important;
-  background:#000!important;
-}
-
-body.jc-site-cinema .watch-layout,
-body.jc-site-cinema .watch-stage{
-  position:fixed!important;
-  inset:0!important;
-  width:100vw!important;
-  height:100vh!important;
-  margin:0!important;
-  padding:0!important;
-  border:0!important;
-  border-radius:0!important;
-  background:#000!important;
-  z-index:50001!important;
-  display:block!important;
-  overflow:hidden!important;
-}
-
-body.jc-site-cinema .player-frame{
-  position:fixed!important;
-  inset:0!important;
-  width:100vw!important;
-  height:100vh!important;
-  min-height:100vh!important;
-  max-height:none!important;
-  margin:0!important;
-  padding:0!important;
-  border:0!important;
-  border-radius:0!important;
-  background:#000!important;
-  z-index:50002!important;
-  overflow:hidden!important;
-}
-
-body.jc-site-cinema .player-frame iframe,
-body.jc-site-cinema .player-frame video,
-body.jc-site-cinema #youtubePlayer,
-body.jc-site-cinema #iframePlayer,
-body.jc-site-cinema #videoPlayer{
-  position:absolute!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  min-height:100%!important;
-  border:0!important;
-  border-radius:0!important;
-  object-fit:contain!important;
-  background:#000!important;
-}
-
-/* Правая колонка становится выезжающим чат-оверлеем */
-body.jc-site-cinema .watch-sidebar{
-  position:fixed!important;
-  top:0!important;
-  right:0!important;
-  bottom:0!important;
-  width:min(390px,92vw)!important;
-  z-index:50020!important;
-  display:grid!important;
-  grid-template-rows:auto auto minmax(0,1fr)!important;
-  gap:12px!important;
-  padding:14px!important;
-  background:linear-gradient(90deg,rgba(0,0,0,0),rgba(2,4,10,.70) 12%,rgba(2,4,10,.92))!important;
-  backdrop-filter:blur(16px)!important;
-  transform:translateX(calc(100% - 18px))!important;
-  transition:transform .2s ease!important;
-}
-
-body.jc-site-cinema:not(.chat-hidden) .watch-sidebar,
-body.jc-site-cinema.mobile-chat-open .watch-sidebar{
-  transform:translateX(0)!important;
-}
-
-/* В fullscreen dock точно поверх всего */
-body.jc-site-cinema .jc-rave-fixed-dock{
-  position:fixed!important;
-  left:50%!important;
-  bottom:24px!important;
-  top:auto!important;
-  transform:translateX(-50%)!important;
-  z-index:50100!important;
-  opacity:1!important;
-  pointer-events:auto!important;
-}
-
-body.jc-site-cinema .jc-rave-top-strip{
-  position:fixed!important;
-  top:18px!important;
-  left:50%!important;
-  width:min(900px,calc(100vw - 40px))!important;
-  z-index:50100!important;
-}
-
-body.jc-site-cinema .jc-rave-ribbon{
-  position:fixed!important;
-  top:62px!important;
-  left:50%!important;
-  width:min(980px,calc(100vw - 40px))!important;
-  z-index:50099!important;
-}
-
-body.jc-site-cinema .jc-rave-mic-toast{
-  position:fixed!important;
-  left:50%!important;
-  top:auto!important;
-  bottom:84px!important;
-  z-index:50101!important;
-}
-
-body.jc-site-cinema .external-player{
-  right:18px!important;
-  bottom:86px!important;
-  z-index:50080!important;
-}
-
-/* Небольшая подсказка при входе */
-.jc-site-cinema-hint{
-  position:fixed;
-  left:50%;
-  top:18px;
-  transform:translateX(-50%);
-  z-index:50102;
-  padding:8px 12px;
-  border-radius:999px;
-  background:rgba(3,6,14,.68);
-  border:1px solid rgba(255,255,255,.13);
-  color:rgba(255,255,255,.86);
-  font-size:12px;
-  font-weight:850;
-  backdrop-filter:blur(14px);
-  opacity:0;
-  pointer-events:none;
-  transition:.2s ease;
-}
-
-.jc-site-cinema-hint.show{
-  opacity:1;
-}
-
-@media(max-width:760px){
-  body.jc-site-cinema .watch-sidebar{
-    width:100vw!important;
-    transform:translateY(100%)!important;
-    top:auto!important;
-    height:min(70vh,620px)!important;
-    border-radius:24px 24px 0 0!important;
-    background:rgba(3,6,14,.92)!important;
-  }
-
-  body.jc-site-cinema.mobile-chat-open .watch-sidebar,
-  body.jc-site-cinema:not(.chat-hidden) .watch-sidebar{
-    transform:translateY(0)!important;
-  }
-
-  body.jc-site-cinema .jc-rave-fixed-dock{
-    bottom:18px!important;
-  }
-}
-
-
-/* =========================================================
-   JustClover Stage 26.5 — Clear Rave Cinema Buttons
-   - кнопки больше не пустые
-   - отдельная явная кнопка "Кино сайта"
-   - встроенный fullscreen VK/YouTube не нужен
-   ========================================================= */
-
-.jc-rave-fixed-dock{
-  gap:8px!important;
-  padding:8px 10px!important;
-  border-radius:999px!important;
-  background:rgba(3,6,14,.74)!important;
-  border:1px solid rgba(255,255,255,.16)!important;
-}
-
-.jc-rave-mini-btn{
-  width:auto!important;
-  min-width:48px!important;
-  height:40px!important;
-  padding:0 12px!important;
-  border-radius:999px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:6px!important;
-  font-size:12px!important;
-  font-weight:950!important;
-  letter-spacing:-.02em!important;
-  color:#fff!important;
-  overflow:visible!important;
-}
-
-.jc-rave-mini-btn svg{
-  width:17px!important;
-  height:17px!important;
-  display:block!important;
-  flex:0 0 auto!important;
-}
-
-.jc-rave-mini-btn .jc-rave-label{
-  display:inline!important;
-  font-size:12px!important;
-  line-height:1!important;
-  color:#fff!important;
-}
-
-.jc-rave-mini-btn[data-rave-mic]{
-  min-width:58px!important;
-}
-
-.jc-rave-mini-btn[data-rave-cinema]{
-  min-width:86px!important;
-}
-
-.jc-rave-mini-btn[data-rave-mic].muted{
-  color:#fecdd3!important;
-}
-
-.jc-rave-mini-btn.active{
-  background:linear-gradient(135deg,var(--primary),var(--primary2))!important;
-  border-color:rgba(255,255,255,.25)!important;
-}
-
-.jc-rave-mini-btn.muted[data-rave-mic] .jc-muted-slash{
-  opacity:1!important;
-}
-
-/* Большая понятная кнопка, чтобы не нажимать fullscreen внутри VK */
-.jc-site-cinema-btn{
-  position:fixed;
-  z-index:99996;
-  right:22px;
-  bottom:92px;
-  min-height:40px;
-  padding:0 14px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.16);
-  background:linear-gradient(135deg,var(--primary),var(--primary2));
-  color:#fff;
-  font-weight:950;
-  font-size:13px;
-  cursor:pointer;
-  box-shadow:0 16px 46px rgba(0,0,0,.42), var(--glow);
-  opacity:0;
-  pointer-events:none;
-  transition:.16s ease;
-}
-
-body.jc-watch-active .jc-site-cinema-btn{
-  opacity:.96;
-  pointer-events:auto;
-}
-
-body.jc-site-cinema .jc-site-cinema-btn{
-  z-index:50110;
-  right:22px;
-  bottom:22px;
-  background:rgba(3,6,14,.70);
-  backdrop-filter:blur(14px);
-}
-
-.jc-site-cinema-btn:hover{
-  transform:translateY(-2px);
-}
-
-/* В site fullscreen кнопки dock остаются текстовыми */
-body.jc-site-cinema .jc-rave-fixed-dock{
-  bottom:24px!important;
-}
-
-body.jc-site-cinema .jc-rave-mini-btn[data-rave-cinema]{
-  display:none!important;
-}
-
-/* Подсказка над нативной кнопкой fullscreen плеера */
-.jc-native-fullscreen-warning{
-  position:fixed;
-  z-index:99995;
-  right:22px;
-  bottom:138px;
-  width:min(320px,calc(100vw - 44px));
-  padding:10px 12px;
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(3,6,14,.68);
-  color:rgba(255,255,255,.82);
-  font-size:11px;
-  line-height:1.35;
-  backdrop-filter:blur(14px);
-  opacity:0;
-  pointer-events:none;
-  transition:.18s ease;
-}
-
-body.jc-watch-active .jc-native-fullscreen-warning.show{
-  opacity:.92;
-}
-
-body.jc-site-cinema .jc-native-fullscreen-warning{
-  display:none!important;
-}
-
-/* На маленьком экране оставляем короткие подписи */
-@media(max-width:760px){
-  .jc-rave-fixed-dock{
-    gap:6px!important;
-    padding:7px!important;
-  }
-
-  .jc-rave-mini-btn{
-    min-width:42px!important;
-    width:42px!important;
-    padding:0!important;
-  }
-
-  .jc-rave-mini-btn .jc-rave-label{
-    display:none!important;
-  }
-
-  .jc-rave-mini-btn[data-rave-cinema]{
-    min-width:42px!important;
-  }
-
-  .jc-site-cinema-btn{
-    right:12px;
-    bottom:82px;
-    font-size:12px;
-    min-height:38px;
-  }
-
-  .jc-native-fullscreen-warning{
-    display:none!important;
-  }
-}
-
-
-/* =========================================================
-   JustClover Stage 26.6 — CLEAN OVERLAY HARD RESET
-   Старые кривые overlay-доки полностью скрыты.
-   Новый док #jcCleanPlayerDock не зависит от старых Stage26 функций.
-   ========================================================= */
-
-/* Скрыть ВСЕ старые доки/кнопки, которые могли перетирать друг друга */
-.jc-rave-fixed-dock,
-.jc-player-overlay-ui,
-.jc-player-control-dock,
-.jc-site-cinema-btn,
-.jc-native-fullscreen-warning,
-.jc-rave-fullscreen-note{
-  display:none!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-}
-
-/* Новый чистый dock */
-#jcCleanPlayerDock{
+/* Новый clean dock */
+#jcCleanDock{
   position:fixed;
   left:50%;
   top:50%;
   z-index:2147483000;
-  transform:translate(-50%, -50%);
+  transform:translate(-50%,-50%);
   display:flex;
   align-items:center;
   gap:8px;
   padding:8px;
   border-radius:999px;
   border:1px solid rgba(255,255,255,.16);
-  background:rgba(3,6,14,.76);
+  background:rgba(3,6,14,.78);
   backdrop-filter:blur(18px) saturate(145%);
   -webkit-backdrop-filter:blur(18px) saturate(145%);
   box-shadow:0 18px 56px rgba(0,0,0,.48), 0 0 36px color-mix(in srgb,var(--primary2) 16%, transparent);
@@ -6267,17 +4827,17 @@ body.jc-site-cinema .jc-native-fullscreen-warning{
   transition:opacity .16s ease, transform .16s ease;
 }
 
-body.jc-watch-active #jcCleanPlayerDock,
-body.jc-site-cinema-clean #jcCleanPlayerDock{
+body.jc-watch-active #jcCleanDock,
+body.jc-site-cinema-clean #jcCleanDock{
   opacity:1;
   pointer-events:auto;
 }
 
-#jcCleanPlayerDock:hover{
-  transform:translate(-50%, calc(-50% - 2px));
+#jcCleanDock:hover{
+  transform:translate(-50%,calc(-50% - 2px));
 }
 
-.jc-clean-btn{
+.jc-clean-dock-btn{
   height:40px;
   min-width:52px;
   padding:0 12px;
@@ -6297,24 +4857,24 @@ body.jc-site-cinema-clean #jcCleanPlayerDock{
   position:relative;
 }
 
-.jc-clean-btn:hover{
+.jc-clean-dock-btn:hover{
   transform:translateY(-1px);
-  border-color:color-mix(in srgb,var(--primary2) 42%, rgba(255,255,255,.16));
+  border-color:color-mix(in srgb,var(--primary2) 42%,rgba(255,255,255,.16));
   box-shadow:0 10px 30px rgba(0,0,0,.36), var(--glow);
 }
 
-.jc-clean-btn.active{
+.jc-clean-dock-btn.active{
   background:linear-gradient(135deg,var(--primary),var(--primary2));
   border-color:rgba(255,255,255,.24);
 }
 
-.jc-clean-btn.muted{
+.jc-clean-dock-btn.muted{
   background:rgba(248,113,113,.16);
   border-color:rgba(248,113,113,.30);
   color:#fecdd3;
 }
 
-.jc-clean-btn svg{
+.jc-clean-dock-btn svg{
   width:17px;
   height:17px;
   stroke:currentColor;
@@ -6325,7 +4885,7 @@ body.jc-site-cinema-clean #jcCleanPlayerDock{
   flex:0 0 auto;
 }
 
-.jc-clean-btn .slash{
+.jc-clean-dock-btn .slash{
   position:absolute;
   left:13px;
   top:19px;
@@ -6338,7 +4898,7 @@ body.jc-site-cinema-clean #jcCleanPlayerDock{
   display:none;
 }
 
-.jc-clean-btn.muted[data-act="mic"] .slash{
+.jc-clean-dock-btn.muted[data-clean-act="mic"] .slash{
   display:block;
 }
 
@@ -6352,7 +4912,7 @@ body.jc-site-cinema-clean #jcCleanPlayerDock{
   border-radius:999px;
   border:1px solid rgba(255,255,255,.18);
   background:linear-gradient(135deg,var(--primary),var(--primary2));
-  color:white;
+  color:#fff;
   font-size:13px;
   font-weight:950;
   cursor:pointer;
@@ -6380,7 +4940,6 @@ body.jc-site-cinema-clean #jcCleanCinemaBtn{
   transform:translateY(-2px);
 }
 
-/* Чистый top-strip сообщений */
 #jcCleanTopStrip{
   position:fixed;
   left:50%;
@@ -6397,7 +4956,7 @@ body.jc-site-cinema-clean #jcCleanCinemaBtn{
   display:flex;
   align-items:center;
   gap:9px;
-  color:white;
+  color:#fff;
   opacity:0;
   pointer-events:none;
   transition:.2s ease;
@@ -6432,8 +4991,7 @@ body.jc-site-cinema-clean #jcCleanCinemaBtn{
   margin-right:6px;
 }
 
-/* Toast микрофона */
-#jcCleanMicToast{
+#jcCleanToast{
   position:fixed;
   left:50%;
   top:50%;
@@ -6443,7 +5001,7 @@ body.jc-site-cinema-clean #jcCleanCinemaBtn{
   border-radius:999px;
   border:1px solid rgba(255,255,255,.14);
   background:rgba(3,6,14,.76);
-  color:white;
+  color:#fff;
   font-size:12px;
   font-weight:850;
   backdrop-filter:blur(14px);
@@ -6452,64 +5010,12 @@ body.jc-site-cinema-clean #jcCleanCinemaBtn{
   transition:.2s ease;
 }
 
-#jcCleanMicToast.show{
+#jcCleanToast.show{
   opacity:1;
   transform:translateX(-50%) translateY(34px);
 }
 
-/* Правая карточка голоса — принудительно маленькая */
-.voice-card{
-  min-height:56px!important;
-  max-height:68px!important;
-  padding:9px 12px!important;
-  display:grid!important;
-  grid-template-columns:1fr auto!important;
-  align-items:center!important;
-  gap:6px!important;
-  overflow:hidden!important;
-}
-
-.voice-card > *:not(#voiceBtn):not(#voiceStatus){
-  display:none!important;
-}
-
-.voice-card::before{
-  content:'Голос';
-  display:block!important;
-  color:var(--text);
-  font-size:15px!important;
-  font-weight:950!important;
-}
-
-#voiceBtn{
-  width:36px!important;
-  height:36px!important;
-  min-width:36px!important;
-  max-width:36px!important;
-  padding:0!important;
-  border-radius:999px!important;
-  font-size:0!important;
-  display:grid!important;
-  place-items:center!important;
-}
-
-#voiceBtn::before{
-  content:'🎤'!important;
-  font-size:15px!important;
-}
-
-#voiceStatus{
-  grid-column:1 / -1;
-  font-size:10px!important;
-  line-height:1!important;
-  opacity:.65!important;
-  margin:0!important;
-  white-space:nowrap!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-}
-
-/* Site cinema — fullscreen всего сайта, чтобы наши кнопки были поверх */
+/* Site cinema mode */
 body.jc-site-cinema-clean{
   overflow:hidden!important;
   background:#000!important;
@@ -6578,7 +5084,7 @@ body.jc-site-cinema-clean #videoPlayer{
   background:#000!important;
 }
 
-body.jc-site-cinema-clean #jcCleanPlayerDock{
+body.jc-site-cinema-clean #jcCleanDock{
   left:50%!important;
   top:auto!important;
   bottom:22px!important;
@@ -6586,7 +5092,7 @@ body.jc-site-cinema-clean #jcCleanPlayerDock{
   opacity:1!important;
 }
 
-body.jc-site-cinema-clean #jcCleanPlayerDock:hover{
+body.jc-site-cinema-clean #jcCleanDock:hover{
   transform:translateX(-50%) translateY(-2px)!important;
 }
 
@@ -6595,13 +5101,13 @@ body.jc-site-cinema-clean #jcCleanTopStrip{
   width:min(900px,calc(100vw - 44px))!important;
 }
 
-body.jc-site-cinema-clean #jcCleanMicToast{
+body.jc-site-cinema-clean #jcCleanToast{
   top:auto!important;
   bottom:84px!important;
   transform:translateX(-50%) translateY(8px)!important;
 }
 
-body.jc-site-cinema-clean #jcCleanMicToast.show{
+body.jc-site-cinema-clean #jcCleanToast.show{
   transform:translateX(-50%) translateY(0)!important;
 }
 
@@ -6626,7 +5132,6 @@ body.jc-site-cinema-clean.mobile-chat-open .watch-sidebar{
   transform:translateX(0)!important;
 }
 
-/* Кнопка external compact */
 .external-player{
   right:14px!important;
   bottom:14px!important;
@@ -6650,18 +5155,18 @@ body.jc-site-cinema-clean.mobile-chat-open .watch-sidebar{
 }
 
 @media(max-width:760px){
-  #jcCleanPlayerDock{
+  #jcCleanDock{
     gap:6px;
     padding:7px;
   }
 
-  .jc-clean-btn{
+  .jc-clean-dock-btn{
     width:42px;
     min-width:42px;
     padding:0;
   }
 
-  .jc-clean-btn span.label{
+  .jc-clean-dock-btn span.label{
     display:none!important;
   }
 
@@ -6685,68 +5190,4 @@ body.jc-site-cinema-clean.mobile-chat-open .watch-sidebar{
   body.jc-site-cinema-clean:not(.chat-hidden) .watch-sidebar{
     transform:translateY(0)!important;
   }
-}
-
-
-/* =========================================================
-   JustClover Stage 26.7 — CACHE KILLER VISUAL CONFIRM
-   Если видишь новый dock с текстом "Мик Чат Кат Кино" — патч загрузился.
-   ========================================================= */
-
-html::after{
-  content:'26.7';
-  position:fixed;
-  left:8px;
-  bottom:8px;
-  z-index:2147483647;
-  padding:3px 7px;
-  border-radius:999px;
-  background:rgba(34,197,94,.82);
-  color:#020617;
-  font:900 10px/1 system-ui, -apple-system, Segoe UI, sans-serif;
-  pointer-events:none;
-  opacity:.78;
-}
-
-/* Убиваем старые overlay-элементы ещё жёстче */
-.jc-rave-fixed-dock,
-.jc-player-overlay-ui,
-.jc-player-control-dock,
-.jc-site-cinema-btn,
-.jc-native-fullscreen-warning,
-.jc-rave-fullscreen-note,
-body > .jc-rave-fixed-dock,
-body > .jc-site-cinema-btn{
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-  width:0!important;
-  height:0!important;
-  overflow:hidden!important;
-}
-
-/* Новый чистый dock должен быть виден всегда на странице просмотра */
-#jcCleanPlayerDock{
-  z-index:2147483646!important;
-  display:flex!important;
-  visibility:visible!important;
-}
-
-body.jc-watch-active #jcCleanPlayerDock,
-body.jc-site-cinema-clean #jcCleanPlayerDock{
-  opacity:1!important;
-  pointer-events:auto!important;
-}
-
-#jcCleanPlayerDock .jc-clean-btn{
-  background:rgba(8,12,24,.82)!important;
-}
-
-#jcCleanPlayerDock .jc-clean-btn.active{
-  background:linear-gradient(135deg,var(--primary),var(--primary2))!important;
-}
-
-#jcCleanCinemaBtn{
-  z-index:2147483645!important;
 }
