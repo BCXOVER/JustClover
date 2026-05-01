@@ -2706,3 +2706,101 @@ function jc186Patch(){
 }
 
 setTimeout(jc186Patch, 700);
+
+
+/* =========================================================
+   JustClover Stage 18.7 Lobby Visual Polish JS
+   Version: stage18-7-lobby-visual-polish-20260501-1
+   ========================================================= */
+
+function jc187MoveCreateFields(){
+  const adv = document.querySelector('.jc-room-advanced');
+  const title = adv?.querySelector('.jc-room-advanced-title');
+  const custom = document.getElementById('jcCustomRoomCode');
+  const createPass = document.getElementById('jcCreateRoomPassword');
+
+  if(!adv || !custom || !createPass) return;
+
+  let row = adv.querySelector('.jc-room-create-row');
+  if(!row){
+    row = document.createElement('div');
+    row.className = 'jc-room-create-row';
+  }
+
+  if(row.parentElement !== adv){
+    if(title) title.insertAdjacentElement('afterend', row);
+    else adv.insertBefore(row, adv.firstChild);
+  }
+
+  if(custom.parentElement !== row) row.appendChild(custom);
+  if(createPass.parentElement !== row) row.appendChild(createPass);
+
+  custom.placeholder = 'Свой код комнаты: anime123';
+  createPass.placeholder = 'Пароль комнаты, если нужен';
+
+  // Старый Invite внутри расширенных настроек лишний: invite есть в текущей комнате.
+  const quickInvite = document.getElementById('jcQuickInviteBtn');
+  if(quickInvite){
+    quickInvite.style.display = 'none';
+    quickInvite.classList.add('jc-hard-hidden');
+  }
+}
+
+function jc187MoveJoinPassword(){
+  const joinInput = document.getElementById('joinRoomInput');
+  const joinBtn = document.getElementById('joinRoomBtn');
+  const joinPass = document.getElementById('jcJoinRoomPassword');
+  if(!joinInput || !joinBtn || !joinPass) return;
+
+  const row = joinInput.parentElement;
+  row.classList.add('jc-join-clean-row');
+
+  if(joinPass.parentElement !== row){
+    row.insertBefore(joinPass, joinBtn);
+  }
+
+  joinInput.placeholder = 'Код комнаты или invite-ссылка';
+  joinPass.placeholder = 'Пароль, если есть';
+}
+
+function jc187CleanEmptySplits(){
+  document.querySelectorAll('.jc-room-advanced .split').forEach(s => {
+    if(!s.children.length || !s.textContent.trim() && !s.querySelector('input,button')){
+      s.style.display = 'none';
+    }
+  });
+}
+
+function jc187SyncCurrentStrip(){
+  const strip = document.querySelector('.jc-current-room-strip');
+  if(!strip) return;
+
+  document.body.classList.toggle('room-active', !!currentRoomId);
+
+  const name = currentRoom?.name || currentRoomId || 'Комната';
+  const code = currentRoomId || 'нет';
+  const mode = currentRoom
+    ? `${currentRoom.visibility === 'open' ? 'открыта' : 'закрыта'} · ${currentRoom.joinMode === 'public' ? 'публичная' : 'по ссылке'}${currentRoom.passwordEnabled ? ' · пароль' : ''}`
+    : 'комната не создана';
+
+  strip.querySelector('[data-current-room-title]').textContent = name;
+  strip.querySelector('[data-current-room-meta]').textContent = `Код: ${code} · ${mode}`;
+}
+
+function jc187Patch(){
+  jc187MoveCreateFields();
+  jc187MoveJoinPassword();
+  jc187CleanEmptySplits();
+  jc187SyncCurrentStrip();
+
+  setInterval(() => {
+    jc187MoveCreateFields();
+    jc187MoveJoinPassword();
+    jc187CleanEmptySplits();
+    jc187SyncCurrentStrip();
+  }, 800);
+
+  console.log('JustClover Stage 18.7 lobby visual polish active: stage18-7-lobby-visual-polish-20260501-1');
+}
+
+setTimeout(jc187Patch, 900);

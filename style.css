@@ -3010,3 +3010,111 @@ body.room-active .jc-room-invite-quick{
     grid-template-columns:1fr!important;
   }
 }
+
+
+/* =========================================================
+   JustClover Stage 18.7 — Lobby visual polish
+   Убирает лишний Invite в настройках и чинит сжатые поля.
+   ========================================================= */
+
+.jc-room-advanced{
+  overflow:hidden;
+}
+
+/* Пустые старые split-контейнеры после переносов не занимают место */
+.jc-room-advanced .split:empty{
+  display:none!important;
+}
+
+.jc-room-create-row{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:10px!important;
+  width:100%!important;
+}
+
+.jc-room-create-row input{
+  width:100%!important;
+  min-width:0!important;
+}
+
+/* Invite теперь только в строке текущей комнаты, а не внутри формы настроек */
+#jcQuickInviteBtn,
+.jc-room-invite-quick{
+  display:none!important;
+}
+
+/* Переключатели доступа компактнее и понятнее */
+.jc-room-toggle-row{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:9px!important;
+}
+
+.jc-room-toggle{
+  min-height:40px!important;
+  padding:9px 10px!important;
+  font-size:13px!important;
+}
+
+/* Вход в комнату: код + пароль + войти */
+.jc-join-clean-row{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr) 92px!important;
+  gap:9px!important;
+  align-items:center!important;
+}
+
+.jc-join-clean-row input{
+  width:100%!important;
+  min-width:0!important;
+}
+
+/* Строка текущей комнаты выглядит как нормальный status-card */
+.jc-current-room-strip{
+  margin-top:10px!important;
+  border-color:color-mix(in srgb,var(--primary2) 20%,var(--line))!important;
+}
+
+.jc-current-room-main strong{
+  font-size:15px!important;
+}
+
+.jc-current-room-main span{
+  font-size:12px!important;
+  opacity:.9;
+}
+
+/* Статус "Ты в комнате..." уже дублируется карточкой — делаем его тише */
+body.room-active #roomStatus{
+  opacity:.58;
+  font-size:12px;
+}
+
+/* Убираем зелёную debug-точку из 18.6 */
+.jc-lobby-version-dot{
+  display:none!important;
+}
+
+/* Карточка публичной комнаты: кнопки не сжимают контент */
+.room-card{
+  grid-template-columns:48px minmax(0,1fr) auto!important;
+}
+
+.jc-room-card-actions{
+  min-width:max-content;
+}
+
+/* Меньше визуального мусора в лобби */
+#homeSection .card p.status,
+#homeSection .status{
+  line-height:1.45;
+}
+
+@media(max-width:760px){
+  .jc-room-create-row,
+  .jc-room-toggle-row,
+  .jc-join-clean-row{
+    grid-template-columns:1fr!important;
+  }
+}
