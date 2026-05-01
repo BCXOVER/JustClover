@@ -2,7 +2,7 @@ import { firebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInAnonymously,signInWithPopup,GoogleAuthProvider,signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { getDatabase,ref,get,set,update,push,remove,onValue,onChildAdded,onDisconnect,serverTimestamp,query,orderByChild,equalTo,off } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
-console.log('JustClover player autolink app.js loaded: playerautolink-20260501-11');
+console.log('JustClover player safe app.js loaded: playersafe-20260501-12');
 window.addEventListener('error', e => console.error('JustClover runtime error:', e.message, e.error));
 const $=id=>document.getElementById(id);
 const els={setupWarning:$('setupWarning'),authView:$('authView'),appView:$('appView'),topUser:$('topUser'),logoutBtn:$('logoutBtn'),openProfileBtn:$('openProfileBtn'),loginTab:$('loginTab'),registerTab:$('registerTab'),guestTab:$('guestTab'),authForm:$('authForm'),guestSubmit:$('guestSubmit'),googleSubmit:$('googleSubmit'),authSubmit:$('authSubmit'),nickLabel:$('nickLabel'),nickInput:$('nickInput'),emailInput:$('emailInput'),passwordInput:$('passwordInput'),authStatus:$('authStatus'),miniProfile:$('miniProfile'),miniAvatar:$('miniAvatar'),miniName:$('miniName'),miniTag:$('miniTag'),miniStatus:$('miniStatus'),roomNameInput:$('roomNameInput'),createRoomBtn:$('createRoomBtn'),joinRoomInput:$('joinRoomInput'),joinRoomBtn:$('joinRoomBtn'),copyInviteBtn:$('copyInviteBtn'),openRoomBtn:$('openRoomBtn'),closeRoomBtn:$('closeRoomBtn'),publicRoomBtn:$('publicRoomBtn'),inviteRoomBtn:$('inviteRoomBtn'),roomStatus:$('roomStatus'),membersList:$('membersList'),sourceType:$('sourceType'),sourceUrl:$('sourceUrl'),localVideoFile:$('localVideoFile'),sourceTitle:$('sourceTitle'),setSourceBtn:$('setSourceBtn'),sourceOpenBtn:$('sourceOpenBtn'),sourceOpenBtnMirror:$('sourceOpenBtnMirror'),sourceHelp:$('sourceHelp'),sourceNote:$('sourceNote'),videoPlayer:$('videoPlayer'),youtubePlayer:$('youtubePlayer'),youtubeWrap:$('youtubeWrap'),iframePlayer:$('iframePlayer'),externalPlayer:$('externalPlayer'),externalText:$('externalText'),externalLink:$('externalLink'),emptyPlayer:$('emptyPlayer'),publicRoomsList:$('publicRoomsList'),onlineUsersList:$('onlineUsersList'),chatMessages:$('chatMessages'),chatForm:$('chatForm'),chatInput:$('chatInput'),voiceBtn:$('voiceBtn'),voiceStatus:$('voiceStatus'),remoteAudio:$('remoteAudio'),profileNick:$('profileNick'),profileTag:$('profileTag'),profileAvatar:$('profileAvatar'),profileCover:$('profileCover'),profileStatusText:$('profileStatusText'),profileBio:$('profileBio'),profileAccent:$('profileAccent'),saveProfileBtn:$('saveProfileBtn'),profileSaveStatus:$('profileSaveStatus'),profilePreviewCard:$('profilePreviewCard'),profilePreviewAvatar:$('profilePreviewAvatar'),profilePreviewName:$('profilePreviewName'),profilePreviewTag:$('profilePreviewTag'),friendSearchInput:$('friendSearchInput'),friendSearchBtn:$('friendSearchBtn'),friendSearchResults:$('friendSearchResults'),incomingRequestsList:$('incomingRequestsList'),friendsList:$('friendsList'),dmEmptyState:$('dmEmptyState'),dmTitle:$('dmTitle'),dmMessages:$('dmMessages'),dmForm:$('dmForm'),dmText:$('dmText'),dmMediaUrl:$('dmMediaUrl'),sendDmBtn:$('sendDmBtn'),friendRoomJoinBtn:$('friendRoomJoinBtn'),mediaPicker:$('mediaPicker'),mediaPickerBackdrop:$('mediaPickerBackdrop'),mediaPickerCloseBtn:$('mediaPickerCloseBtn'),mediaSearchForm:$('mediaSearchForm'),mediaSearchInput:$('mediaSearchInput'),mediaPickerResults:$('mediaPickerResults'),mediaPickerHint:$('mediaPickerHint'),mediaPasteBtn:$('mediaPasteBtn'),mediaExternalBtn:$('mediaExternalBtn'),youtubeApiBox:$('youtubeApiBox'),ytApiKeyInput:$('ytApiKeyInput'),saveYtApiKeyBtn:$('saveYtApiKeyBtn'),emojiBtn:$('emojiBtn'),gifBtn:$('gifBtn'),emojiPanel:$('emojiPanel'),reactionBurst:$('reactionBurst'),gifPicker:$('gifPicker'),gifPickerBackdrop:$('gifPickerBackdrop'),gifPickerCloseBtn:$('gifPickerCloseBtn'),gifSearchForm:$('gifSearchForm'),gifSearchInput:$('gifSearchInput'),gifPickerResults:$('gifPickerResults'),gifPickerHint:$('gifPickerHint'),giphyApiKeyInput:$('giphyApiKeyInput'),saveGiphyApiKeyBtn:$('saveGiphyApiKeyBtn'),gifPasteBtn:$('gifPasteBtn'),openGiphyFromPickerBtn:$('openGiphyFromPickerBtn')};
@@ -830,4 +830,285 @@ document.addEventListener('visibilitychange', async ()=>{
 });
 
 jcSetFromQueryOnce();
+
+
+/* ===== Player Safe Direct Source Fix playersafe-20260501-12 ===== */
+console.log('JustClover player safe direct source fix loaded: playersafe-20260501-12');
+
+els.playerDebugStatus = document.getElementById('playerDebugStatus');
+
+function jcMsg(text){
+  status(els.sourceNote, text);
+  status(els.mediaPickerHint, text);
+  status(els.playerDebugStatus, text);
+  if(els.roomStatus && text) status(els.roomStatus, text);
+}
+
+function jcNormalizeUrlInput(v){
+  let s = String(v||'').trim();
+  if(!s) return '';
+  if(/^www\./i.test(s)) s = 'https://' + s;
+  if(/^(youtube\.com|youtu\.be|m\.youtube\.com|vk\.com|vkvideo\.ru|m\.vk\.com|drive\.google\.com|disk\.yandex\.)/i.test(s)) s = 'https://' + s;
+  try {
+    const u = new URL(s);
+    if(!['http:','https:'].includes(u.protocol)) return '';
+    return u.toString();
+  } catch {
+    return '';
+  }
+}
+
+ytId = function(u){
+  const raw = String(u||'').trim();
+  if(/^[a-zA-Z0-9_-]{11}$/.test(raw)) return raw;
+  const normalized = jcNormalizeUrlInput(raw);
+  try {
+    const p = new URL(normalized || raw);
+    const host = p.hostname.replace(/^www\./,'').replace(/^m\./,'').toLowerCase();
+    if(host === 'youtu.be') return p.pathname.split('/').filter(Boolean)[0] || '';
+    if(host.endsWith('youtube.com') || host.endsWith('youtube-nocookie.com')) {
+      const v = p.searchParams.get('v');
+      if(v) return v;
+      const parts = p.pathname.split('/').filter(Boolean);
+      for(const key of ['shorts','embed','live','v']) {
+        const i = parts.indexOf(key);
+        if(i >= 0 && parts[i+1]) return parts[i+1];
+      }
+    }
+  } catch {}
+  return '';
+};
+
+function jcIsYoutubeUrl(url){
+  try {
+    const u = new URL(jcNormalizeUrlInput(url));
+    const host = u.hostname.replace(/^www\./,'').replace(/^m\./,'').toLowerCase();
+    return host.includes('youtube.com') || host === 'youtu.be' || host.includes('youtube-nocookie.com');
+  } catch { return false; }
+}
+
+function jcIsVkUrl(url){
+  try {
+    const u = new URL(jcNormalizeUrlInput(url));
+    const host = u.hostname.replace(/^www\./,'').replace(/^m\./,'').toLowerCase();
+    return host.includes('vk.com') || host.includes('vkvideo.ru');
+  } catch { return false; }
+}
+
+vkEmbed = function(u){
+  const url = jcNormalizeUrlInput(u);
+  try {
+    const p = new URL(url);
+    if(p.pathname.includes('video_ext.php')) return p.toString();
+
+    const joined = decodeURIComponent(p.pathname + p.search + p.hash);
+    let m = joined.match(/video(-?\d+)_(\d+)/);
+    if(m) return `https://vk.com/video_ext.php?oid=${m[1]}&id=${m[2]}&hd=2&autoplay=0`;
+
+    const z = p.searchParams.get('z');
+    if(z) {
+      m = decodeURIComponent(z).match(/video(-?\d+)_(\d+)/);
+      if(m) return `https://vk.com/video_ext.php?oid=${m[1]}&id=${m[2]}&hd=2&autoplay=0`;
+    }
+
+    const oid = p.searchParams.get('oid') || p.searchParams.get('owner_id');
+    const id = p.searchParams.get('id') || p.searchParams.get('video_id');
+    if(oid && id) return `https://vk.com/video_ext.php?oid=${oid}&id=${id}&hd=2&autoplay=0`;
+
+    return p.toString();
+  } catch {
+    return '';
+  }
+};
+
+function jcSourceFromAnyInput(value, forcedType=''){
+  const url = jcNormalizeUrlInput(value);
+  if(!url) return null;
+
+  const title = (els.sourceTitle?.value || '').trim();
+
+  if(jcIsYoutubeUrl(url) || forcedType === 'youtube') {
+    const id = ytId(url);
+    if(!id) throw new Error('Это YouTube, но не конкретный ролик. Нужна ссылка вида youtube.com/watch?v=... или youtu.be/...');
+    return {type:'youtube', url, videoId:id, title:title || 'YouTube'};
+  }
+
+  if(jcIsVkUrl(url) || forcedType === 'vk') {
+    const embedUrl = vkEmbed(url);
+    if(!embedUrl) throw new Error('Не смог собрать VK embed. Скопируй ссылку именно на видео VK.');
+    return {type:'vk', url, embedUrl, title:title || 'VK Video'};
+  }
+
+  if(url.includes('drive.google.com') || forcedType === 'gdrive') {
+    const fileId = googleDriveId(url);
+    if(!fileId) throw new Error('Не удалось распознать Google Drive file ID.');
+    return {type:'gdrive', url, fileId, embedUrl:googleDrivePreviewUrl(fileId), title:title || 'Google Drive'};
+  }
+
+  if(url.includes('disk.yandex') || url.includes('yadi.sk') || forcedType === 'yadisk') {
+    return {type:'yadisk', url, title:title || 'Yandex Disk'};
+  }
+
+  if(/\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url) || forcedType === 'direct') {
+    return {type:'direct', url, title:title || 'Direct video'};
+  }
+
+  return {type:'direct', url, title:title || 'Video'};
+}
+
+async function jcDirectApplySource(source){
+  if(!source) return false;
+  if(!currentRoomId || !currentRoom) {
+    jcMsg('Сначала создай комнату или войди в комнату, потом запускай видео.');
+    return false;
+  }
+  if(currentRoom.ownerUid !== currentUser?.uid) {
+    jcMsg('Источник может менять только хост комнаты.');
+    return false;
+  }
+
+  if(els.sourceType) els.sourceType.value = source.type;
+  if(typeof activateSource === 'function') activateSource(source.type);
+  if(els.sourceUrl) els.sourceUrl.value = source.url || '';
+  if(els.sourceTitle) els.sourceTitle.value = source.title || '';
+
+  loadedSourceKey = '';
+  await update(ref(db,`rooms/${currentRoomId}`), {
+    source,
+    playback: {time:0, playing:false, updatedAt:Date.now(), byUid:currentUser.uid},
+    updatedAt:Date.now()
+  });
+
+  currentSource = source;
+  jcMsg(`Источник запущен: ${source.title || source.type}`);
+  section('watchSection');
+  return true;
+}
+
+setSource = async function(){
+  try {
+    if(els.sourceType?.value === 'local') {
+      if(!currentRoomId || !currentRoom) return jcMsg('Сначала создай комнату.');
+      if(currentRoom.ownerUid !== currentUser?.uid) return jcMsg('Источник может менять только хост комнаты.');
+      const f = els.localVideoFile?.files?.[0];
+      if(!f) return jcMsg('Выбери local video файл.');
+      loadLocal();
+      const source = {type:'local', title:f.name, filename:f.name, size:f.size};
+      loadedSourceKey='';
+      await update(ref(db,`rooms/${currentRoomId}`), {
+        source,
+        playback: {time:0, playing:false, updatedAt:Date.now(), byUid:currentUser.uid},
+        updatedAt:Date.now()
+      });
+      return jcMsg(`Local video запущен: ${f.name}`);
+    }
+    const raw = els.sourceUrl?.value || els.mediaSearchInput?.value || '';
+    const forced = els.sourceType?.value || '';
+    const source = jcSourceFromAnyInput(raw, forced);
+    if(!source) return jcMsg('Вставь ссылку на конкретное видео.');
+    await jcDirectApplySource(source);
+  } catch(e) {
+    console.error('setSource safe error:', e);
+    jcMsg(e.message || 'Не удалось запустить источник.');
+  }
+};
+if(els.setSourceBtn) els.setSourceBtn.onclick = setSource;
+
+choosePickerSource = async function(src){
+  try {
+    const raw = src?.url || els.mediaSearchInput?.value || els.sourceUrl?.value || '';
+    const forced = src?.type || '';
+    const source = src?.videoId ? src : jcSourceFromAnyInput(raw, forced);
+    if(!source) return jcMsg('Ссылка не распознана.');
+    if(els.sourceType) els.sourceType.value = source.type;
+    if(typeof activateSource === 'function') activateSource(source.type);
+    if(els.sourceUrl) els.sourceUrl.value = source.url || '';
+    if(els.sourceTitle) els.sourceTitle.value = source.title || source.type || '';
+    closeMediaPicker?.();
+    await jcDirectApplySource(source);
+  } catch(e) {
+    console.error('choosePickerSource safe error:', e);
+    jcMsg(e.message || 'Не удалось выбрать видео.');
+  }
+};
+
+handleMediaSearch = async function(e){
+  e?.preventDefault?.();
+  const q = (els.mediaSearchInput?.value || '').trim();
+  if(!q) return renderPickerEmpty?.();
+  const url = jcNormalizeUrlInput(q);
+  if(url) {
+    const src = jcSourceFromAnyInput(url, mediaPickerSource);
+    await choosePickerSource(src);
+    return;
+  }
+  if(mediaPickerSource === 'youtube') {
+    try {
+      await searchYouTubePicker(q);
+    } catch(err) {
+      console.error('youtube search failed:', err);
+      els.mediaPickerResults.innerHTML = `<div class="picker-error"><b>Поиск YouTube сейчас недоступен.</b><br>Открой YouTube, скопируй ссылку на ролик и нажми “Вставить и запустить”.</div>`;
+      jcMsg('YouTube-поиск не ответил. Рабочий путь: скопировать ссылку на ролик и нажать “Вставить и запустить”.');
+    }
+    return;
+  }
+  window.open(sourceExternalUrl(mediaPickerSource, q), '_blank', 'noopener,noreferrer');
+};
+if(els.mediaSearchForm) els.mediaSearchForm.onsubmit = handleMediaSearch;
+
+async function jcPasteRunSafe(){
+  try {
+    const text = await navigator.clipboard.readText();
+    const source = jcSourceFromAnyInput(text, els.sourceType?.value || mediaPickerSource);
+    if(!source) return jcMsg('В буфере нет ссылки на видео.');
+    await jcDirectApplySource(source);
+  } catch(e) {
+    console.error('paste run safe error:', e);
+    jcMsg(e.message || 'Браузер не дал прочитать буфер. Вставь ссылку в поле и нажми “Запустить”.');
+  }
+}
+
+if(els.autoPasteRunBtn) els.autoPasteRunBtn.onclick = jcPasteRunSafe;
+if(els.mediaPasteBtn) els.mediaPasteBtn.onclick = async()=>{
+  try {
+    const text = await navigator.clipboard.readText();
+    const source = jcSourceFromAnyInput(text, els.sourceType?.value || mediaPickerSource);
+    if(els.sourceType) els.sourceType.value = source.type;
+    if(typeof activateSource === 'function') activateSource(source.type);
+    if(els.sourceUrl) els.sourceUrl.value = source.url || '';
+    if(els.sourceTitle && !els.sourceTitle.value) els.sourceTitle.value = source.title || '';
+    jcMsg('Ссылка вставлена. Нажми “Запустить” или “Вставить и запустить”.');
+  } catch(e) {
+    jcMsg(e.message || 'Не смог вставить ссылку из буфера.');
+  }
+};
+
+if(els.sourceUrl){
+  els.sourceUrl.addEventListener('input', ()=>{
+    const raw = els.sourceUrl.value;
+    const url = jcNormalizeUrlInput(raw);
+    if(!url) return;
+    try {
+      const source = jcSourceFromAnyInput(url, '');
+      if(els.sourceType) els.sourceType.value = source.type;
+      if(typeof activateSource === 'function') activateSource(source.type);
+      status(els.playerDebugStatus, `Определил источник: ${source.type}`);
+    } catch {}
+  });
+  els.sourceUrl.addEventListener('keydown', e=>{
+    if(e.key === 'Enter') {
+      e.preventDefault();
+      setSource();
+    }
+  });
+}
+
+function jcPatchButtonsLate(){
+  if(els.setSourceBtn) els.setSourceBtn.onclick = setSource;
+  if(els.mediaSearchForm) els.mediaSearchForm.onsubmit = handleMediaSearch;
+  if(els.autoPasteRunBtn) els.autoPasteRunBtn.onclick = jcPasteRunSafe;
+}
+jcPatchButtonsLate();
+setTimeout(jcPatchButtonsLate, 500);
+setTimeout(jcPatchButtonsLate, 1500);
 

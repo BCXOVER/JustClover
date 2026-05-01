@@ -851,3 +851,20 @@ body[data-theme="sakura"] .jc-live-bg .spark {
   }
 }
 
+
+/* ===== Player Safe Direct Source Fix playersafe-20260501-12 ===== */
+.player-debug-status {
+  padding:8px 12px;
+  border-radius:14px;
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.08);
+}
+.picker-error b {
+  color:#fff;
+}
+body[data-has-room="0"] #setSourceBtn::after {
+  content:" после создания комнаты";
+  opacity:.75;
+  font-weight:600;
+}
+
