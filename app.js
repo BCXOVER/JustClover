@@ -1,12 +1,3 @@
-
-console.log("JustClover build loaded:", "stage26-clean-from-stable-20260501-1");
-window.JUSTCLOVER_BUILD = "stage26-clean-from-stable-20260501-1";
-(function(){
-  try {
-    if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
-    if ('caches' in window) caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-  } catch(e) {}
-})();
 import { firebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInAnonymously,signInWithPopup,GoogleAuthProvider,signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
@@ -4957,9 +4948,12 @@ setTimeout(jc251Patch, 1000);
 
 
 /* =========================================================
-   JustClover Stage 26 CLEAN FROM STABLE JS
-   Version: stage26-clean-from-stable-20260501-1
+   JustClover Stage 27 — Player mic/chat panel JS
+   Version: stage27-player-mic-chat-panel-20260502-1
    ========================================================= */
+console.log("JustClover Stage 27 loaded:", "stage27-player-mic-chat-panel-20260502-1");
+window.JUSTCLOVER_BUILD = "stage27-player-mic-chat-panel-20260502-1";
+
 (function(){
   function svg(name){
     const icons = {
@@ -4971,119 +4965,82 @@ setTimeout(jc251Patch, 1000);
     return icons[name] || '';
   }
 
-  function ensure(){
-    if(!document.getElementById('jcCleanDock')){
-      const dock = document.createElement('div');
-      dock.id = 'jcCleanDock';
-      dock.innerHTML =
-        '<button class="jc-clean-dock-btn muted" type="button" data-clean-act="mic">'+svg('mic')+'<span class="label">Мик</span></button>'+
-        '<button class="jc-clean-dock-btn" type="button" data-clean-act="chat">'+svg('chat')+'<span class="label">Чат</span></button>'+
-        '<button class="jc-clean-dock-btn" type="button" data-clean-act="catalog">'+svg('plus')+'<span class="label">Кат</span></button>'+
-        '<button class="jc-clean-dock-btn" type="button" data-clean-act="cinema">'+svg('cinema')+'<span class="label">Кино</span></button>';
-      document.body.appendChild(dock);
+  function ensurePanel(){
+    const frame = document.querySelector('.player-frame');
+    if(!frame) return;
+
+    if(!document.getElementById('jcPlayerPanel')){
+      const panel = document.createElement('div');
+      panel.id = 'jcPlayerPanel';
+      panel.innerHTML =
+        '<button class="jc-player-btn muted" type="button" data-player-act="mic">'+svg('mic')+'<span class="label">Мик</span></button>'+
+        '<button class="jc-player-btn" type="button" data-player-act="chat">'+svg('chat')+'<span class="label">Чат</span></button>'+
+        '<button class="jc-player-btn" type="button" data-player-act="catalog">'+svg('plus')+'<span class="label">Кат</span></button>'+
+        '<button class="jc-player-btn" type="button" data-player-act="cinema">'+svg('cinema')+'<span class="label">Кино</span></button>';
+      frame.appendChild(panel);
     }
 
-    if(!document.getElementById('jcCleanCinemaBtn')){
-      const b = document.createElement('button');
-      b.id = 'jcCleanCinemaBtn';
-      b.type = 'button';
-      b.textContent = 'Кино сайта';
-      document.body.appendChild(b);
+    if(!document.getElementById('jcPlayerTopMessage')){
+      const msg = document.createElement('div');
+      msg.id = 'jcPlayerTopMessage';
+      msg.innerHTML = '<img src="" alt=""><div></div>';
+      frame.appendChild(msg);
     }
 
-    if(!document.getElementById('jcCleanTopStrip')){
-      const s = document.createElement('div');
-      s.id = 'jcCleanTopStrip';
-      s.innerHTML = '<img src="" alt=""><div></div>';
-      document.body.appendChild(s);
+    if(!document.getElementById('jcPlayerToast')){
+      const toast = document.createElement('div');
+      toast.id = 'jcPlayerToast';
+      frame.appendChild(toast);
     }
 
-    if(!document.getElementById('jcCleanToast')){
-      const t = document.createElement('div');
-      t.id = 'jcCleanToast';
-      document.body.appendChild(t);
-    }
-
-    bind();
+    bindPanel();
   }
 
-  function bind(){
-    const dock = document.getElementById('jcCleanDock');
-    if(!dock || dock.dataset.boundClean === '1') return;
-    dock.dataset.boundClean = '1';
+  function bindPanel(){
+    const panel = document.getElementById('jcPlayerPanel');
+    if(!panel || panel.dataset.stage27Bound === '1') return;
+    panel.dataset.stage27Bound = '1';
 
-    dock.querySelector('[data-clean-act="mic"]').onclick = toggleMic;
-    dock.querySelector('[data-clean-act="chat"]').onclick = toggleChat;
-    dock.querySelector('[data-clean-act="catalog"]').onclick = function(){
+    const mic = panel.querySelector('[data-player-act="mic"]');
+    const chat = panel.querySelector('[data-player-act="chat"]');
+    const catalog = panel.querySelector('[data-player-act="catalog"]');
+    const cinema = panel.querySelector('[data-player-act="cinema"]');
+
+    if(mic) mic.onclick = toggleMic;
+    if(chat) chat.onclick = toggleChat;
+    if(catalog) catalog.onclick = function(){
       if(typeof jcStage8OpenCatalog === 'function') jcStage8OpenCatalog('youtube');
       else document.querySelector('.toolbar-chip[data-jc-action="catalog-overlay"]')?.click();
     };
-    dock.querySelector('[data-clean-act="cinema"]').onclick = toggleCinema;
-    document.getElementById('jcCleanCinemaBtn').onclick = toggleCinema;
+    if(cinema) cinema.onclick = toggleSiteFullscreen;
   }
 
-  function watchActive(){
-    const active = document.querySelector('.section.active')?.id === 'watchSection' || document.body.classList.contains('jc-site-cinema-clean');
-    document.body.classList.toggle('jc-watch-active', !!active);
-    return !!active;
-  }
-
-  function position(){
-    ensure();
-    if(!watchActive()) return;
-    if(document.body.classList.contains('jc-site-cinema-clean')) return;
-
-    const frame = document.querySelector('.player-frame');
-    const dock = document.getElementById('jcCleanDock');
-    const strip = document.getElementById('jcCleanTopStrip');
-    const toast = document.getElementById('jcCleanToast');
-
-    if(!frame || !dock) return;
-    const r = frame.getBoundingClientRect();
-    if(r.width < 80 || r.height < 80 || r.bottom < 0 || r.top > innerHeight) return;
-
-    const cx = Math.max(90, Math.min(innerWidth - 90, r.left + r.width / 2));
-    const top = Math.max(86, Math.min(innerHeight - 74, r.bottom - 54));
-
-    dock.style.left = cx + 'px';
-    dock.style.top = top + 'px';
-
-    if(strip){
-      strip.style.left = cx + 'px';
-      strip.style.top = Math.max(76, r.top + 12) + 'px';
-      strip.style.width = Math.min(760, Math.max(260, r.width - 32)) + 'px';
-    }
-
-    if(toast){
-      toast.style.left = cx + 'px';
-      toast.style.top = top + 'px';
-    }
-  }
-
-  function sync(){
-    const dock = document.getElementById('jcCleanDock');
-    if(!dock) return;
+  function syncPanel(){
+    const panel = document.getElementById('jcPlayerPanel');
+    if(!panel) return;
 
     const micOn = typeof voiceOn !== 'undefined' && !!voiceOn;
-    const mic = dock.querySelector('[data-clean-act="mic"]');
+    const mic = panel.querySelector('[data-player-act="mic"]');
     if(mic){
       mic.classList.toggle('active', micOn);
       mic.classList.toggle('muted', !micOn);
       const label = mic.querySelector('.label');
       if(label) label.textContent = micOn ? 'Вкл' : 'Мик';
+      mic.title = micOn ? 'Выключить микрофон' : 'Включить микрофон';
     }
 
-    const chat = dock.querySelector('[data-clean-act="chat"]');
+    const chat = panel.querySelector('[data-player-act="chat"]');
     if(chat){
-      const chatActive = innerWidth <= 760 ? document.body.classList.contains('mobile-chat-open') : !document.body.classList.contains('chat-hidden');
-      chat.classList.toggle('active', chatActive);
+      const active = innerWidth <= 760 ? document.body.classList.contains('mobile-chat-open') : !document.body.classList.contains('chat-hidden');
+      chat.classList.toggle('active', active);
+      chat.title = active ? 'Скрыть чат' : 'Показать чат';
     }
 
-    const cinema = dock.querySelector('[data-clean-act="cinema"]');
-    if(cinema) cinema.classList.toggle('active', document.body.classList.contains('jc-site-cinema-clean'));
-
-    const cbtn = document.getElementById('jcCleanCinemaBtn');
-    if(cbtn) cbtn.textContent = document.body.classList.contains('jc-site-cinema-clean') ? 'Выйти из кино' : 'Кино сайта';
+    const cinema = panel.querySelector('[data-player-act="cinema"]');
+    if(cinema){
+      cinema.classList.toggle('active', document.body.classList.contains('jc-site-fullscreen'));
+      cinema.title = document.body.classList.contains('jc-site-fullscreen') ? 'Выйти из кино' : 'Кино сайта';
+    }
 
     if(typeof els !== 'undefined' && els.externalLink) els.externalLink.textContent = 'Открыть';
   }
@@ -5092,106 +5049,105 @@ setTimeout(jc251Patch, 1000);
     try{
       if(typeof voiceOn !== 'undefined' && voiceOn){
         await stopVoice();
-        toast('Микрофон выключен');
+        showToast('Микрофон выключен');
       }else{
         await startVoice();
-        toast((typeof voiceOn !== 'undefined' && voiceOn) ? 'Микрофон включён' : 'Микрофон недоступен');
+        showToast((typeof voiceOn !== 'undefined' && voiceOn) ? 'Микрофон включён' : 'Микрофон недоступен');
       }
     }catch(e){
-      toast('Микрофон недоступен');
+      showToast('Микрофон недоступен');
     }
-    sync();
+    syncPanel();
   }
 
   function toggleChat(){
     if(innerWidth <= 760) document.body.classList.toggle('mobile-chat-open');
     else document.body.classList.toggle('chat-hidden');
-    sync();
+    syncPanel();
   }
 
-  async function enterCinema(){
+  async function enterSiteFullscreen(){
     try{ if(typeof section === 'function') section('watchSection'); }catch(e){}
-    document.body.classList.add('jc-site-cinema-clean','jc-watch-active','chat-hidden');
+    document.body.classList.add('jc-site-fullscreen','chat-hidden');
     try{
-      if(!document.fullscreenElement && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+      if(!document.fullscreenElement && document.documentElement.requestFullscreen){
+        await document.documentElement.requestFullscreen();
+      }
     }catch(e){}
-    position();
-    sync();
-    toast('Кино сайта включено');
+    syncPanel();
+    showToast('Кино сайта включено');
   }
 
-  async function exitCinema(){
-    document.body.classList.remove('jc-site-cinema-clean');
+  async function exitSiteFullscreen(){
+    document.body.classList.remove('jc-site-fullscreen');
     try{
       if(document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
     }catch(e){}
-    position();
-    sync();
+    syncPanel();
   }
 
-  async function toggleCinema(){
-    if(document.body.classList.contains('jc-site-cinema-clean')) await exitCinema();
-    else await enterCinema();
+  async function toggleSiteFullscreen(){
+    if(document.body.classList.contains('jc-site-fullscreen')) await exitSiteFullscreen();
+    else await enterSiteFullscreen();
   }
 
-  function toast(text){
-    const t = document.getElementById('jcCleanToast');
-    if(!t) return;
-    t.textContent = text;
-    t.classList.add('show');
-    clearTimeout(t._timer);
-    t._timer = setTimeout(function(){ t.classList.remove('show'); }, 1600);
+  function showToast(text){
+    const toast = document.getElementById('jcPlayerToast');
+    if(!toast) return;
+    toast.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(function(){ toast.classList.remove('show'); }, 1600);
   }
 
-  function showTop(m){
-    ensure();
+  function showTopMessage(m){
+    ensurePanel();
     if(!m || (!m.text && !m.mediaUrl)) return;
-    const strip = document.getElementById('jcCleanTopStrip');
-    if(!strip) return;
-    const img = strip.querySelector('img');
-    const div = strip.querySelector('div');
+    const box = document.getElementById('jcPlayerTopMessage');
+    if(!box) return;
+
+    const img = box.querySelector('img');
+    const div = box.querySelector('div');
     const name = `${esc(m.nickname || 'User')}#${esc(m.tag || '0000')}`;
-    const msg = m.type === 'gif' ? 'GIF' : String(m.text || '').slice(0,150);
+    const msg = m.type === 'gif' ? 'GIF' : String(m.text || '').slice(0, 150);
+
     if(img) img.src = m.avatarUrl || avatar(m.nickname || 'JC');
-    if(div) div.innerHTML = '<b>'+name+'</b>'+esc(msg);
-    strip.classList.add('show');
-    clearTimeout(strip._timer);
-    strip._timer = setTimeout(function(){ strip.classList.remove('show'); }, 5200);
+    if(div) div.innerHTML = '<b>' + name + '</b>' + esc(msg);
+
+    box.classList.add('show');
+    clearTimeout(box._timer);
+    box._timer = setTimeout(function(){ box.classList.remove('show'); }, 5200);
   }
 
   function patchAddChat(){
-    if(window.__jcCleanAddChatPatched) return;
+    if(window.__jcStage27AddChatPatched) return;
     if(typeof addChat !== 'function') return;
-    window.__jcCleanAddChatPatched = true;
+    window.__jcStage27AddChatPatched = true;
     const prev = addChat;
     addChat = function(m){
       prev(m);
-      setTimeout(function(){ showTop(m); }, 60);
+      setTimeout(function(){ showTopMessage(m); }, 60);
     };
   }
 
   document.addEventListener('fullscreenchange', function(){
-    if(!document.fullscreenElement && document.body.classList.contains('jc-site-cinema-clean')){
-      document.body.classList.remove('jc-site-cinema-clean');
+    if(!document.fullscreenElement && document.body.classList.contains('jc-site-fullscreen')){
+      document.body.classList.remove('jc-site-fullscreen');
     }
-    setTimeout(function(){ position(); sync(); }, 80);
+    setTimeout(syncPanel, 80);
   });
 
-  window.addEventListener('scroll', function(){ setTimeout(position, 30); }, {passive:true});
-  window.addEventListener('resize', function(){ setTimeout(position, 30); }, {passive:true});
-
-  setInterval(function(){
-    ensure();
+  function tick(){
+    ensurePanel();
     patchAddChat();
-    position();
-    sync();
-  }, 450);
+    syncPanel();
 
-  setTimeout(function(){
-    ensure();
-    patchAddChat();
-    position();
-    sync();
-    console.log('JustClover Stage 26 clean from stable active');
-  }, 900);
+    // Страховка: правую панель Голос удаляем из DOM, если она появилась позже.
+    document.querySelectorAll('.voice-card, #voiceCard, [class*="voice-card"]').forEach(function(el){
+      el.style.display = 'none';
+    });
+  }
+
+  setInterval(tick, 500);
+  setTimeout(tick, 700);
 })();

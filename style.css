@@ -4723,127 +4723,114 @@ body.jc-wallpaper-paused #jcWallpaperMediaLayer img{
 
 
 /* =========================================================
-   JustClover Stage 26 CLEAN FROM STABLE
-   Берётся стабильная версия 25.1 без старых Stage26 конфликтов.
+   JustClover Stage 27 — Player mic/chat panel
+   Цель:
+   - убрать правую панель "Голос";
+   - убрать стикеры/реакции снизу плеера;
+   - добавить аккуратную панель внутри плеера: микрофон, чат, каталог, кино;
+   - в полноэкранном "Кино сайта" оставить только одну кнопку микрофона.
    ========================================================= */
 
 html::after{
-  content:'26 CLEAN';
+  content:'27 PLAYER';
   position:fixed;
   left:8px;
   bottom:8px;
   z-index:2147483647;
   padding:4px 8px;
   border-radius:999px;
-  background:rgba(34,197,94,.86);
+  background:rgba(34,197,94,.88);
   color:#020617;
   font:900 10px/1 system-ui,-apple-system,Segoe UI,sans-serif;
   pointer-events:none;
   opacity:.82;
 }
 
-/* Компактный голос справа */
-.voice-card{
-  min-height:56px!important;
-  max-height:72px!important;
-  padding:10px 12px!important;
-  display:grid!important;
-  grid-template-columns:1fr auto!important;
-  grid-template-areas:"title btn" "status btn"!important;
-  gap:4px 10px!important;
-  align-items:center!important;
+/* 1) Полностью убираем правую панель "Голос" */
+.voice-card,
+#voiceCard,
+aside .voice-card,
+.watch-sidebar .voice-card,
+.side-card.voice-card,
+.card.voice-card,
+[class*="voice-card"]{
+  display:none!important;
+  visibility:hidden!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
   overflow:hidden!important;
 }
 
-.voice-card h3,
-.voice-card .card-title,
-.voice-card .voice-wave,
-.voice-card [class*="wave"],
-.voice-card .pill,
-.voice-card .badge,
-.voice-card [class*="pill"],
-.voice-card [class*="badge"]{
+/* Если правая колонка была сеткой, чат занимает больше места */
+.watch-sidebar{
+  grid-template-rows:auto minmax(0,1fr)!important;
+}
+
+/* 2) Скрываем реакции/стикеры снизу плеера — на их месте будет control panel */
+.reaction-bar,
+.player-reactions,
+.jc-reactions,
+[class*="reaction-bar"],
+[class*="reactions"],
+#reactionBar{
   display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
 }
 
-.voice-card::before{
-  content:'Голос';
-  grid-area:title;
-  display:block;
-  color:var(--text);
-  font-size:15px;
-  font-weight:950;
-  line-height:1;
+/* Дополнительное убийство старых доков Stage26, если они всё-таки остались в app.js */
+.jc-rave-fixed-dock,
+.jc-player-overlay-ui,
+.jc-player-control-dock,
+.jc-site-cinema-btn,
+.jc-native-fullscreen-warning,
+.jc-rave-fullscreen-note,
+#jcCleanDock,
+#jcCleanPlayerDock,
+#jcCleanCinemaBtn{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
 }
 
-#voiceBtn{
-  grid-area:btn;
-  width:38px!important;
-  height:38px!important;
-  min-width:38px!important;
-  max-width:38px!important;
-  padding:0!important;
-  border-radius:999px!important;
-  display:grid!important;
-  place-items:center!important;
-  font-size:0!important;
+/* 3) Новая панель управления внутри плеера */
+.player-frame{
+  position:relative!important;
+  overflow:hidden!important;
 }
 
-#voiceBtn::before{
-  content:'🎤';
-  font-size:15px;
-}
-
-#voiceStatus{
-  grid-area:status;
-  margin:0!important;
-  font-size:10px!important;
-  line-height:1.1!important;
-  opacity:.68;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-/* Новый clean dock */
-#jcCleanDock{
-  position:fixed;
+#jcPlayerPanel{
+  position:absolute;
   left:50%;
-  top:50%;
-  z-index:2147483000;
-  transform:translate(-50%,-50%);
+  bottom:16px;
+  z-index:70;
+  transform:translateX(-50%);
   display:flex;
   align-items:center;
   gap:8px;
   padding:8px;
   border-radius:999px;
-  border:1px solid rgba(255,255,255,.16);
-  background:rgba(3,6,14,.78);
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(3,6,14,.66);
   backdrop-filter:blur(18px) saturate(145%);
   -webkit-backdrop-filter:blur(18px) saturate(145%);
-  box-shadow:0 18px 56px rgba(0,0,0,.48), 0 0 36px color-mix(in srgb,var(--primary2) 16%, transparent);
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .16s ease, transform .16s ease;
-}
-
-body.jc-watch-active #jcCleanDock,
-body.jc-site-cinema-clean #jcCleanDock{
-  opacity:1;
+  box-shadow:0 18px 56px rgba(0,0,0,.45), 0 0 34px color-mix(in srgb,var(--primary2) 15%, transparent);
+  opacity:.96;
   pointer-events:auto;
 }
 
-#jcCleanDock:hover{
-  transform:translate(-50%,calc(-50% - 2px));
-}
-
-.jc-clean-dock-btn{
+#jcPlayerPanel .jc-player-btn{
   height:40px;
-  min-width:52px;
+  min-width:46px;
   padding:0 12px;
   border-radius:999px;
   border:1px solid rgba(255,255,255,.14);
-  background:rgba(255,255,255,.075);
+  background:rgba(255,255,255,.08);
   color:#fff;
   cursor:pointer;
   display:flex;
@@ -4857,24 +4844,24 @@ body.jc-site-cinema-clean #jcCleanDock{
   position:relative;
 }
 
-.jc-clean-dock-btn:hover{
+#jcPlayerPanel .jc-player-btn:hover{
   transform:translateY(-1px);
-  border-color:color-mix(in srgb,var(--primary2) 42%,rgba(255,255,255,.16));
+  border-color:color-mix(in srgb,var(--primary2) 45%, rgba(255,255,255,.16));
   box-shadow:0 10px 30px rgba(0,0,0,.36), var(--glow);
 }
 
-.jc-clean-dock-btn.active{
+#jcPlayerPanel .jc-player-btn.active{
   background:linear-gradient(135deg,var(--primary),var(--primary2));
   border-color:rgba(255,255,255,.24);
 }
 
-.jc-clean-dock-btn.muted{
+#jcPlayerPanel .jc-player-btn.muted{
   background:rgba(248,113,113,.16);
   border-color:rgba(248,113,113,.30);
   color:#fecdd3;
 }
 
-.jc-clean-dock-btn svg{
+#jcPlayerPanel .jc-player-btn svg{
   width:17px;
   height:17px;
   stroke:currentColor;
@@ -4885,7 +4872,7 @@ body.jc-site-cinema-clean #jcCleanDock{
   flex:0 0 auto;
 }
 
-.jc-clean-dock-btn .slash{
+#jcPlayerPanel .jc-player-btn .slash{
   position:absolute;
   left:13px;
   top:19px;
@@ -4898,61 +4885,25 @@ body.jc-site-cinema-clean #jcCleanDock{
   display:none;
 }
 
-.jc-clean-dock-btn.muted[data-clean-act="mic"] .slash{
+#jcPlayerPanel .jc-player-btn.muted[data-player-act="mic"] .slash{
   display:block;
 }
 
-#jcCleanCinemaBtn{
-  position:fixed;
-  right:22px;
-  bottom:96px;
-  z-index:2147482999;
-  min-height:42px;
-  padding:0 16px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.18);
-  background:linear-gradient(135deg,var(--primary),var(--primary2));
-  color:#fff;
-  font-size:13px;
-  font-weight:950;
-  cursor:pointer;
-  box-shadow:0 18px 52px rgba(0,0,0,.48), var(--glow);
-  opacity:0;
-  pointer-events:none;
-  transition:.16s ease;
-}
-
-body.jc-watch-active #jcCleanCinemaBtn{
-  opacity:1;
-  pointer-events:auto;
-}
-
-body.jc-site-cinema-clean #jcCleanCinemaBtn{
-  right:18px;
-  bottom:18px;
-  opacity:1;
-  pointer-events:auto;
-  background:rgba(3,6,14,.78);
-  backdrop-filter:blur(14px);
-}
-
-#jcCleanCinemaBtn:hover{
-  transform:translateY(-2px);
-}
-
-#jcCleanTopStrip{
-  position:fixed;
+/* Верхняя строка сообщений поверх плеера */
+#jcPlayerTopMessage{
+  position:absolute;
   left:50%;
-  top:96px;
+  top:14px;
+  z-index:69;
   transform:translateX(-50%) translateY(-8px);
-  z-index:2147482998;
-  width:min(760px,calc(100vw - 44px));
+  width:min(760px,calc(100% - 32px));
   min-height:36px;
   padding:7px 11px;
   border-radius:999px;
   border:1px solid rgba(255,255,255,.13);
-  background:rgba(3,6,14,.66);
+  background:rgba(3,6,14,.62);
   backdrop-filter:blur(18px) saturate(140%);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
   display:flex;
   align-items:center;
   gap:9px;
@@ -4964,12 +4915,12 @@ body.jc-site-cinema-clean #jcCleanCinemaBtn{
   box-shadow:0 14px 44px rgba(0,0,0,.42);
 }
 
-#jcCleanTopStrip.show{
+#jcPlayerTopMessage.show{
   opacity:1;
   transform:translateX(-50%) translateY(0);
 }
 
-#jcCleanTopStrip img{
+#jcPlayerTopMessage img{
   width:24px;
   height:24px;
   border-radius:9px;
@@ -4977,7 +4928,7 @@ body.jc-site-cinema-clean #jcCleanCinemaBtn{
   border:1px solid rgba(255,255,255,.14);
 }
 
-#jcCleanTopStrip div{
+#jcPlayerTopMessage div{
   min-width:0;
   white-space:nowrap;
   overflow:hidden;
@@ -4986,17 +4937,17 @@ body.jc-site-cinema-clean #jcCleanCinemaBtn{
   font-weight:800;
 }
 
-#jcCleanTopStrip b{
+#jcPlayerTopMessage b{
   color:var(--primary2);
   margin-right:6px;
 }
 
-#jcCleanToast{
-  position:fixed;
+#jcPlayerToast{
+  position:absolute;
   left:50%;
-  top:50%;
-  transform:translateX(-50%) translateY(44px);
-  z-index:2147483001;
+  bottom:70px;
+  z-index:71;
+  transform:translateX(-50%) translateY(8px);
   padding:9px 13px;
   border-radius:999px;
   border:1px solid rgba(255,255,255,.14);
@@ -5010,36 +4961,37 @@ body.jc-site-cinema-clean #jcCleanCinemaBtn{
   transition:.2s ease;
 }
 
-#jcCleanToast.show{
+#jcPlayerToast.show{
   opacity:1;
-  transform:translateX(-50%) translateY(34px);
+  transform:translateX(-50%) translateY(0);
 }
 
-/* Site cinema mode */
-body.jc-site-cinema-clean{
+/* 4) Кино сайта: на весь экран, поверх видео — только микрофон */
+body.jc-site-fullscreen{
   overflow:hidden!important;
   background:#000!important;
 }
 
-body.jc-site-cinema-clean .topbar,
-body.jc-site-cinema-clean .rail,
-body.jc-site-cinema-clean .watch-header,
-body.jc-site-cinema-clean .source-strip,
-body.jc-site-cinema-clean .reaction-bar,
-body.jc-site-cinema-clean .history-grid,
-body.jc-site-cinema-clean .queue-card,
-body.jc-site-cinema-clean .jc-mobile-nav,
-body.jc-site-cinema-clean .jc-mobile-chat-toggle{
+body.jc-site-fullscreen .topbar,
+body.jc-site-fullscreen .rail,
+body.jc-site-fullscreen .watch-header,
+body.jc-site-fullscreen .source-strip,
+body.jc-site-fullscreen .reaction-bar,
+body.jc-site-fullscreen .history-grid,
+body.jc-site-fullscreen .queue-card,
+body.jc-site-fullscreen .jc-mobile-nav,
+body.jc-site-fullscreen .jc-mobile-chat-toggle,
+body.jc-site-fullscreen .watch-sidebar{
   display:none!important;
 }
 
-body.jc-site-cinema-clean .app,
-body.jc-site-cinema-clean .main-shell,
-body.jc-site-cinema-clean #appView,
-body.jc-site-cinema-clean .section.active,
-body.jc-site-cinema-clean #watchSection,
-body.jc-site-cinema-clean .watch-layout,
-body.jc-site-cinema-clean .watch-stage{
+body.jc-site-fullscreen .app,
+body.jc-site-fullscreen .main-shell,
+body.jc-site-fullscreen #appView,
+body.jc-site-fullscreen .section.active,
+body.jc-site-fullscreen #watchSection,
+body.jc-site-fullscreen .watch-layout,
+body.jc-site-fullscreen .watch-stage{
   position:fixed!important;
   inset:0!important;
   width:100vw!important;
@@ -5054,7 +5006,7 @@ body.jc-site-cinema-clean .watch-stage{
   display:block!important;
 }
 
-body.jc-site-cinema-clean .player-frame{
+body.jc-site-fullscreen .player-frame{
   position:fixed!important;
   inset:0!important;
   width:100vw!important;
@@ -5068,11 +5020,11 @@ body.jc-site-cinema-clean .player-frame{
   z-index:2147482100!important;
 }
 
-body.jc-site-cinema-clean .player-frame iframe,
-body.jc-site-cinema-clean .player-frame video,
-body.jc-site-cinema-clean #youtubePlayer,
-body.jc-site-cinema-clean #iframePlayer,
-body.jc-site-cinema-clean #videoPlayer{
+body.jc-site-fullscreen .player-frame iframe,
+body.jc-site-fullscreen .player-frame video,
+body.jc-site-fullscreen #youtubePlayer,
+body.jc-site-fullscreen #iframePlayer,
+body.jc-site-fullscreen #videoPlayer{
   position:absolute!important;
   inset:0!important;
   width:100%!important;
@@ -5084,54 +5036,51 @@ body.jc-site-cinema-clean #videoPlayer{
   background:#000!important;
 }
 
-body.jc-site-cinema-clean #jcCleanDock{
+body.jc-site-fullscreen #jcPlayerPanel{
+  position:fixed!important;
   left:50%!important;
+  bottom:24px!important;
   top:auto!important;
-  bottom:22px!important;
   transform:translateX(-50%)!important;
-  opacity:1!important;
+  z-index:2147483000!important;
+  padding:8px!important;
 }
 
-body.jc-site-cinema-clean #jcCleanDock:hover{
-  transform:translateX(-50%) translateY(-2px)!important;
+body.jc-site-fullscreen #jcPlayerPanel .jc-player-btn:not([data-player-act="mic"]){
+  display:none!important;
 }
 
-body.jc-site-cinema-clean #jcCleanTopStrip{
+body.jc-site-fullscreen #jcPlayerPanel .jc-player-btn[data-player-act="mic"]{
+  min-width:54px!important;
+  width:54px!important;
+  height:54px!important;
+  padding:0!important;
+}
+
+body.jc-site-fullscreen #jcPlayerPanel .jc-player-btn[data-player-act="mic"] .label{
+  display:none!important;
+}
+
+body.jc-site-fullscreen #jcPlayerPanel .jc-player-btn[data-player-act="mic"] svg{
+  width:22px!important;
+  height:22px!important;
+}
+
+body.jc-site-fullscreen #jcPlayerTopMessage{
+  position:fixed!important;
   top:18px!important;
   width:min(900px,calc(100vw - 44px))!important;
+  z-index:2147482999!important;
 }
 
-body.jc-site-cinema-clean #jcCleanToast{
-  top:auto!important;
-  bottom:84px!important;
-  transform:translateX(-50%) translateY(8px)!important;
-}
-
-body.jc-site-cinema-clean #jcCleanToast.show{
-  transform:translateX(-50%) translateY(0)!important;
-}
-
-body.jc-site-cinema-clean .watch-sidebar{
+body.jc-site-fullscreen #jcPlayerToast{
   position:fixed!important;
-  right:0!important;
-  top:0!important;
-  bottom:0!important;
-  width:min(390px,92vw)!important;
-  z-index:2147482900!important;
-  padding:14px!important;
-  background:linear-gradient(90deg,rgba(0,0,0,0),rgba(2,4,10,.78) 14%,rgba(2,4,10,.94))!important;
-  backdrop-filter:blur(16px)!important;
-  transform:translateX(calc(100% - 16px))!important;
-  transition:transform .2s ease!important;
-  display:grid!important;
-  gap:12px!important;
+  top:auto!important;
+  bottom:90px!important;
+  z-index:2147483001!important;
 }
 
-body.jc-site-cinema-clean:not(.chat-hidden) .watch-sidebar,
-body.jc-site-cinema-clean.mobile-chat-open .watch-sidebar{
-  transform:translateX(0)!important;
-}
-
+/* Компактный внешний источник */
 .external-player{
   right:14px!important;
   bottom:14px!important;
@@ -5154,40 +5103,26 @@ body.jc-site-cinema-clean.mobile-chat-open .watch-sidebar{
   font-size:11px!important;
 }
 
+/* Мобилка */
 @media(max-width:760px){
-  #jcCleanDock{
+  #jcPlayerPanel{
     gap:6px;
     padding:7px;
+    bottom:12px;
   }
 
-  .jc-clean-dock-btn{
+  #jcPlayerPanel .jc-player-btn{
     width:42px;
     min-width:42px;
     padding:0;
   }
 
-  .jc-clean-dock-btn span.label{
+  #jcPlayerPanel .jc-player-btn .label{
     display:none!important;
   }
 
-  #jcCleanCinemaBtn{
-    right:12px;
-    bottom:82px;
-    min-height:38px;
-    padding:0 12px;
-    font-size:12px;
-  }
-
-  body.jc-site-cinema-clean .watch-sidebar{
-    top:auto!important;
-    height:min(70vh,620px)!important;
-    width:100vw!important;
-    border-radius:24px 24px 0 0!important;
-    transform:translateY(100%)!important;
-  }
-
-  body.jc-site-cinema-clean.mobile-chat-open .watch-sidebar,
-  body.jc-site-cinema-clean:not(.chat-hidden) .watch-sidebar{
-    transform:translateY(0)!important;
+  #jcPlayerTopMessage{
+    width:calc(100% - 20px);
+    top:10px;
   }
 }

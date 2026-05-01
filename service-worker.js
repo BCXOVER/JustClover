@@ -1,4 +1,4 @@
-/* JustClover cache killer stage26-clean-from-stable-20260501-1 */
+/* JustClover cache killer stage27-player-mic-chat-panel-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
