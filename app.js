@@ -2,7 +2,7 @@ import { firebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInAnonymously,signInWithPopup,GoogleAuthProvider,signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { getDatabase,ref,get,set,update,push,remove,onValue,onChildAdded,onDisconnect,serverTimestamp,query,orderByChild,equalTo,off } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
-console.log('JustClover room-clean app.js loaded: roomclean-20260501-14');
+console.log('JustClover watch layout app.js loaded: watchlayout-20260501-15');
 window.addEventListener('error', e => console.error('JustClover runtime error:', e.message, e.error));
 const $=id=>document.getElementById(id);
 const els={setupWarning:$('setupWarning'),authView:$('authView'),appView:$('appView'),topUser:$('topUser'),logoutBtn:$('logoutBtn'),openProfileBtn:$('openProfileBtn'),loginTab:$('loginTab'),registerTab:$('registerTab'),guestTab:$('guestTab'),authForm:$('authForm'),guestSubmit:$('guestSubmit'),googleSubmit:$('googleSubmit'),authSubmit:$('authSubmit'),nickLabel:$('nickLabel'),nickInput:$('nickInput'),emailInput:$('emailInput'),passwordInput:$('passwordInput'),authStatus:$('authStatus'),miniProfile:$('miniProfile'),miniAvatar:$('miniAvatar'),miniName:$('miniName'),miniTag:$('miniTag'),miniStatus:$('miniStatus'),roomNameInput:$('roomNameInput'),createRoomBtn:$('createRoomBtn'),joinRoomInput:$('joinRoomInput'),joinRoomBtn:$('joinRoomBtn'),copyInviteBtn:$('copyInviteBtn'),openRoomBtn:$('openRoomBtn'),closeRoomBtn:$('closeRoomBtn'),publicRoomBtn:$('publicRoomBtn'),inviteRoomBtn:$('inviteRoomBtn'),roomStatus:$('roomStatus'),membersList:$('membersList'),sourceType:$('sourceType'),sourceUrl:$('sourceUrl'),localVideoFile:$('localVideoFile'),sourceTitle:$('sourceTitle'),setSourceBtn:$('setSourceBtn'),sourceOpenBtn:$('sourceOpenBtn'),sourceOpenBtnMirror:$('sourceOpenBtnMirror'),sourceHelp:$('sourceHelp'),sourceNote:$('sourceNote'),videoPlayer:$('videoPlayer'),youtubePlayer:$('youtubePlayer'),youtubeWrap:$('youtubeWrap'),iframePlayer:$('iframePlayer'),externalPlayer:$('externalPlayer'),externalText:$('externalText'),externalLink:$('externalLink'),emptyPlayer:$('emptyPlayer'),publicRoomsList:$('publicRoomsList'),onlineUsersList:$('onlineUsersList'),chatMessages:$('chatMessages'),chatForm:$('chatForm'),chatInput:$('chatInput'),voiceBtn:$('voiceBtn'),voiceStatus:$('voiceStatus'),remoteAudio:$('remoteAudio'),profileNick:$('profileNick'),profileTag:$('profileTag'),profileAvatar:$('profileAvatar'),profileCover:$('profileCover'),profileStatusText:$('profileStatusText'),profileBio:$('profileBio'),profileAccent:$('profileAccent'),saveProfileBtn:$('saveProfileBtn'),profileSaveStatus:$('profileSaveStatus'),profilePreviewCard:$('profilePreviewCard'),profilePreviewAvatar:$('profilePreviewAvatar'),profilePreviewName:$('profilePreviewName'),profilePreviewTag:$('profilePreviewTag'),friendSearchInput:$('friendSearchInput'),friendSearchBtn:$('friendSearchBtn'),friendSearchResults:$('friendSearchResults'),incomingRequestsList:$('incomingRequestsList'),friendsList:$('friendsList'),dmEmptyState:$('dmEmptyState'),dmTitle:$('dmTitle'),dmMessages:$('dmMessages'),dmForm:$('dmForm'),dmText:$('dmText'),dmMediaUrl:$('dmMediaUrl'),sendDmBtn:$('sendDmBtn'),friendRoomJoinBtn:$('friendRoomJoinBtn'),mediaPicker:$('mediaPicker'),mediaPickerBackdrop:$('mediaPickerBackdrop'),mediaPickerCloseBtn:$('mediaPickerCloseBtn'),mediaSearchForm:$('mediaSearchForm'),mediaSearchInput:$('mediaSearchInput'),mediaPickerResults:$('mediaPickerResults'),mediaPickerHint:$('mediaPickerHint'),mediaPasteBtn:$('mediaPasteBtn'),mediaExternalBtn:$('mediaExternalBtn'),youtubeApiBox:$('youtubeApiBox'),ytApiKeyInput:$('ytApiKeyInput'),saveYtApiKeyBtn:$('saveYtApiKeyBtn'),emojiBtn:$('emojiBtn'),gifBtn:$('gifBtn'),emojiPanel:$('emojiPanel'),reactionBurst:$('reactionBurst'),gifPicker:$('gifPicker'),gifPickerBackdrop:$('gifPickerBackdrop'),gifPickerCloseBtn:$('gifPickerCloseBtn'),gifSearchForm:$('gifSearchForm'),gifSearchInput:$('gifSearchInput'),gifPickerResults:$('gifPickerResults'),gifPickerHint:$('gifPickerHint'),giphyApiKeyInput:$('giphyApiKeyInput'),saveGiphyApiKeyBtn:$('saveGiphyApiKeyBtn'),gifPasteBtn:$('gifPasteBtn'),openGiphyFromPickerBtn:$('openGiphyFromPickerBtn')};
@@ -1231,4 +1231,117 @@ setInterval(jcRoomCleanSync, 1000);
 setTimeout(jcRoomCleanSync, 60);
 setTimeout(jcRoomCleanSync, 500);
 setTimeout(jcRoomCleanSync, 1600);
+
+
+/* ===== Watch Layout Controls watchlayout-20260501-15 ===== */
+console.log('JustClover watch layout controls loaded: watchlayout-20260501-15');
+
+els.watchLayoutTools = document.getElementById('watchLayoutTools');
+els.watchInviteTopBtn = document.getElementById('watchInviteTopBtn');
+els.watchCatalogTopBtn = document.getElementById('watchCatalogTopBtn');
+els.watchFitBtn = document.getElementById('watchFitBtn');
+els.watchCinemaBtn = document.getElementById('watchCinemaBtn');
+els.watchChatToggleBtn = document.getElementById('watchChatToggleBtn');
+els.watchChatSizeRange = document.getElementById('watchChatSizeRange');
+
+const JC_LAYOUT_KEY = 'jc-watch-layout-v1';
+
+function jcLoadWatchLayout(){
+  try {
+    return JSON.parse(localStorage.getItem(JC_LAYOUT_KEY) || '{}');
+  } catch {
+    return {};
+  }
+}
+
+function jcSaveWatchLayout(next){
+  const current = jcLoadWatchLayout();
+  const merged = {...current, ...next};
+  localStorage.setItem(JC_LAYOUT_KEY, JSON.stringify(merged));
+  return merged;
+}
+
+function jcApplyWatchLayout(){
+  const cfg = jcLoadWatchLayout();
+  const chatW = Number(cfg.chatWidth || 340);
+  document.documentElement.style.setProperty('--jc-watch-chat-width', Math.max(260, Math.min(520, chatW)) + 'px');
+  document.body.dataset.watchFit = cfg.fit || 'contain';
+  document.body.dataset.watchCinema = cfg.cinema ? '1' : '0';
+  document.body.dataset.chatHidden = cfg.chatHidden ? '1' : '0';
+
+  if(els.watchChatSizeRange) els.watchChatSizeRange.value = String(Math.max(260, Math.min(520, chatW)));
+  if(els.watchFitBtn) els.watchFitBtn.textContent = cfg.fit === 'cover' ? 'Растянуть' : cfg.fit === 'wide' ? '21:9' : '16:9';
+  if(els.watchCinemaBtn) els.watchCinemaBtn.textContent = cfg.cinema ? 'Обычный' : 'Кино';
+  if(els.watchChatToggleBtn) els.watchChatToggleBtn.textContent = cfg.chatHidden ? 'Показать чат' : 'Скрыть чат';
+}
+
+function jcCycleFit(){
+  const cfg = jcLoadWatchLayout();
+  const order = ['contain','wide','cover'];
+  const cur = cfg.fit || 'contain';
+  const next = order[(order.indexOf(cur) + 1) % order.length] || 'contain';
+  jcSaveWatchLayout({fit: next});
+  jcApplyWatchLayout();
+}
+
+function jcToggleCinema(){
+  const cfg = jcLoadWatchLayout();
+  jcSaveWatchLayout({cinema: !cfg.cinema});
+  jcApplyWatchLayout();
+}
+
+function jcToggleChat(){
+  const cfg = jcLoadWatchLayout();
+  jcSaveWatchLayout({chatHidden: !cfg.chatHidden});
+  jcApplyWatchLayout();
+}
+
+async function jcWatchInvite(){
+  if(typeof jcCopyInvite === 'function') return jcCopyInvite();
+  if(!currentRoomId) return status(els.roomStatus, 'Сначала создай комнату.');
+  const u = new URL(location.href);
+  u.searchParams.set('room', currentRoom?.roomCode || currentRoomId);
+  if(currentRoom?.roomPassword) u.searchParams.set('pass', currentRoom.roomPassword);
+  await navigator.clipboard.writeText(u.toString()).catch(()=>{});
+  status(els.roomStatus, 'Invite-ссылка скопирована.');
+}
+
+function jcOpenCatalogFromWatch(){
+  section('homeSection');
+  setTimeout(()=>document.querySelector('.home-catalog-main')?.scrollIntoView({behavior:'smooth', block:'start'}), 80);
+}
+
+if(els.watchInviteTopBtn) els.watchInviteTopBtn.onclick = jcWatchInvite;
+if(els.watchCatalogTopBtn) els.watchCatalogTopBtn.onclick = jcOpenCatalogFromWatch;
+if(els.watchFitBtn) els.watchFitBtn.onclick = jcCycleFit;
+if(els.watchCinemaBtn) els.watchCinemaBtn.onclick = jcToggleCinema;
+if(els.watchChatToggleBtn) els.watchChatToggleBtn.onclick = jcToggleChat;
+if(els.watchChatSizeRange){
+  els.watchChatSizeRange.oninput = e => {
+    jcSaveWatchLayout({chatWidth: Number(e.target.value) || 340});
+    jcApplyWatchLayout();
+  };
+}
+
+function jcWatchLayoutSync(){
+  jcApplyWatchLayout();
+  const hasRoom = !!currentRoomId;
+  if(els.watchInviteTopBtn) els.watchInviteTopBtn.disabled = !hasRoom;
+}
+
+const jcWatchOldRenderRoom = renderRoom;
+renderRoom = function(){
+  jcWatchOldRenderRoom();
+  jcWatchLayoutSync();
+};
+
+const jcWatchOldSection = section;
+section = function(id){
+  jcWatchOldSection(id);
+  requestAnimationFrame(jcWatchLayoutSync);
+};
+
+jcWatchLayoutSync();
+setTimeout(jcWatchLayoutSync, 400);
+setTimeout(jcWatchLayoutSync, 1200);
 

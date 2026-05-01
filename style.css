@@ -1105,3 +1105,266 @@ body[data-has-room="1"] .home-list-grid {
   }
 }
 
+
+/* ===== Watch Layout Controls watchlayout-20260501-15 ===== */
+:root {
+  --jc-watch-chat-width: 340px;
+}
+
+.watch-layout-tools {
+  grid-column:1 / -1;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  overflow-x:auto;
+  padding:10px 10px 0;
+  order:-1;
+  scrollbar-width:thin;
+}
+
+.watch-tool-btn {
+  flex:0 0 auto;
+  min-height:38px;
+  border-radius:999px;
+  padding:8px 13px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.065);
+  color:#fff;
+  font-weight:850;
+  cursor:pointer;
+  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.watch-tool-btn:hover {
+  transform:translateY(-2px);
+  background:rgba(255,255,255,.12);
+  box-shadow:0 12px 28px rgba(0,0,0,.25), 0 0 18px color-mix(in srgb,var(--primary2) 18%,transparent);
+}
+
+.watch-tool-btn:disabled {
+  opacity:.48;
+  transform:none;
+  cursor:not-allowed;
+}
+
+.watch-chat-size {
+  flex:0 0 170px;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  align-items:center;
+  gap:8px;
+  min-height:38px;
+  border-radius:999px;
+  padding:6px 10px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.045);
+  color:var(--soft);
+  font-size:12px;
+  font-weight:850;
+}
+
+.watch-chat-size input {
+  padding:0;
+  height:4px;
+  accent-color:var(--primary2);
+}
+
+.anime-watch-shell {
+  grid-template-columns:minmax(0,1fr) var(--jc-watch-chat-width)!important;
+  align-items:stretch!important;
+}
+
+.anime-stage-top {
+  grid-template-rows:auto auto;
+  height:auto!important;
+  min-height:86px!important;
+}
+
+.anime-stage-top > .anime-icon,
+.anime-stage-top > .anime-logo-text {
+  grid-row:2;
+}
+
+.anime-nowbar {
+  padding:14px 18px 10px!important;
+}
+
+.anime-nowbar h2 {
+  font-size:28px!important;
+}
+
+.anime-nowbar .status {
+  max-width:560px;
+}
+
+.anime-player-frame {
+  display:block!important;
+  width:100%!important;
+  min-height:0!important;
+  height:auto!important;
+  aspect-ratio:16/9!important;
+  background:#020206!important;
+}
+
+.anime-player-frame video,
+.anime-player-frame iframe,
+.anime-player-frame #youtubeWrap,
+.anime-player-frame #youtubeWrap iframe,
+#youtubeWrap,
+#youtubePlayer {
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  display:block!important;
+}
+
+body[data-watch-fit="wide"] .anime-player-frame {
+  aspect-ratio:21/9!important;
+}
+
+body[data-watch-fit="cover"] .anime-player-frame {
+  aspect-ratio:auto!important;
+  height:clamp(420px,62vh,760px)!important;
+}
+
+body[data-watch-fit="cover"] .anime-player-frame iframe,
+body[data-watch-fit="cover"] .anime-player-frame video,
+body[data-watch-fit="cover"] #youtubeWrap {
+  object-fit:cover!important;
+}
+
+.anime-empty-player {
+  min-height:100%!important;
+}
+
+.anime-side {
+  min-width:0!important;
+  height:100%!important;
+  max-height:calc(100vh - 135px)!important;
+  position:sticky!important;
+  top:92px!important;
+}
+
+.anime-chat-card {
+  min-height:0!important;
+  height:min(560px, calc(100vh - 430px))!important;
+  display:grid!important;
+  grid-template-rows:auto minmax(0,1fr) auto auto!important;
+}
+
+.anime-chat-card .messages {
+  min-height:0!important;
+  max-height:none!important;
+  overflow:auto!important;
+}
+
+body[data-chat-hidden="1"] .anime-watch-shell {
+  grid-template-columns:minmax(0,1fr)!important;
+}
+
+body[data-chat-hidden="1"] .anime-side {
+  display:none!important;
+}
+
+body[data-watch-cinema="1"] .rail,
+body[data-watch-cinema="1"] .topbar {
+  display:none!important;
+}
+
+body[data-watch-cinema="1"] .shell {
+  width:min(100%, 98vw)!important;
+  margin:8px auto!important;
+}
+
+body[data-watch-cinema="1"] .anime-watch-shell {
+  grid-template-columns:minmax(0,1fr) var(--jc-watch-chat-width)!important;
+}
+
+body[data-watch-cinema="1"] .anime-side {
+  top:8px!important;
+  max-height:calc(100vh - 16px)!important;
+}
+
+body[data-watch-cinema="1"] .anime-player-frame {
+  height:auto!important;
+  aspect-ratio:16/9!important;
+}
+
+body[data-watch-cinema="1"][data-watch-fit="cover"] .anime-player-frame {
+  height:calc(100vh - 210px)!important;
+  aspect-ratio:auto!important;
+}
+
+.player-frame .empty-player:not(.hidden) ~ #reactionBurst,
+.anime-player-frame .empty-player:not(.hidden) {
+  display:grid;
+}
+
+.anime-player-card {
+  overflow:hidden!important;
+  border-radius:0 0 26px 26px!important;
+}
+
+.anime-reaction-dock {
+  padding:10px!important;
+}
+
+@media(max-width:1180px) {
+  .anime-watch-shell {
+    grid-template-columns:1fr!important;
+  }
+  .anime-side {
+    position:relative!important;
+    top:auto!important;
+    max-height:none!important;
+  }
+  .anime-chat-card {
+    height:420px!important;
+  }
+}
+
+@media(max-width:780px) {
+  .watch-layout-tools {
+    padding:8px;
+    gap:6px;
+  }
+  .watch-tool-btn {
+    min-height:34px;
+    padding:7px 10px;
+    font-size:12px;
+  }
+  .watch-chat-size {
+    flex-basis:140px;
+  }
+  .anime-stage-top {
+    min-height:76px!important;
+  }
+  .anime-nowbar {
+    padding:10px 12px!important;
+  }
+  .anime-nowbar h2 {
+    font-size:22px!important;
+  }
+  .anime-player-frame {
+    aspect-ratio:16/10!important;
+  }
+  body[data-watch-fit="wide"] .anime-player-frame {
+    aspect-ratio:16/10!important;
+  }
+  body[data-watch-fit="cover"] .anime-player-frame {
+    height:54vh!important;
+  }
+  body[data-watch-cinema="1"] .anime-watch-shell {
+    grid-template-columns:1fr!important;
+  }
+}
+
+@media(max-width:520px) {
+  .watch-chat-size {
+    display:none;
+  }
+  .anime-chat-card {
+    height:360px!important;
+  }
+}
+
