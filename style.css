@@ -3118,3 +3118,118 @@ body.room-active #roomStatus{
     grid-template-columns:1fr!important;
   }
 }
+
+
+/* =========================================================
+   JustClover Stage 18.8 — Lobby final clean
+   Убирает лишний Invite внутри формы, дубли "Код" и debug-точки.
+   ========================================================= */
+
+#jcQuickInviteBtn,
+.jc-room-advanced button[id*="Invite"],
+.jc-room-advanced .jc-room-invite-quick{
+  display:none!important;
+  visibility:hidden!important;
+  width:0!important;
+  height:0!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  overflow:hidden!important;
+}
+
+.jc-room-advanced .split:has(#jcQuickInviteBtn){
+  display:none!important;
+}
+
+.jc-lobby-version-dot,
+body::before .jc-lobby-version-dot{
+  display:none!important;
+  opacity:0!important;
+  visibility:hidden!important;
+}
+
+/* если какие-то debug/status точки остались снизу справа */
+body > div[style*="position: fixed"][style*="bottom"][style*="right"]{
+  display:none!important;
+}
+
+.room-card .jc-room-card-actions .btn[data-copy-room-code] + .btn[data-copy-room-code],
+.room-card .jc-room-card-actions .btn[data-copy] + .btn[data-copy],
+.room-card .jc-room-card-actions .btn.soft + .btn.soft{
+  display:none!important;
+}
+
+/* Строка текущей комнаты заменяет старый текст, поэтому скрываем дублирующую подпись */
+body.room-active #roomStatus{
+  display:none!important;
+}
+
+.jc-current-room-strip{
+  margin-bottom:10px!important;
+}
+
+/* Блок настроек без пустой строки */
+.jc-room-advanced{
+  gap:9px!important;
+}
+
+.jc-room-toggle-row{
+  margin-top:2px;
+}
+
+/* В публичной комнате оставляем только одну кнопку Код */
+.jc-room-card-actions{
+  display:flex!important;
+  align-items:center;
+  gap:8px!important;
+}
+
+
+/* =========================================================
+   JustClover Stage 18.9 — duplicate buttons/status final fix
+   ========================================================= */
+
+/* Убираем второй "Код" в карточке открытой комнаты максимально жёстко */
+#publicRoomsList .room-card .jc-room-card-actions button:nth-of-type(2):not([data-join]),
+#publicRoomsList .room-card .jc-room-card-actions button[data-copy-room-code],
+#publicRoomsList .room-card .jc-room-card-actions button[data-copy-room-code="1"]{
+  display:none!important;
+}
+
+/* Если кнопки не в actions, скрываем все Код после первой через класс из JS */
+.jc-duplicate-code-btn{
+  display:none!important;
+}
+
+/* Старый статус "Ты в комнате" теперь всегда скрыт в лобби */
+#homeSection #roomStatus,
+#homeSection [id="roomStatus"],
+#homeSection .room-status,
+#homeSection .status:has(+ .jc-current-room-strip),
+#homeSection .jc-room-old-status-hidden{
+  display:none!important;
+}
+
+/* Карточка текущей комнаты заменяет статус */
+.jc-current-room-strip{
+  margin-top:14px!important;
+  margin-bottom:0!important;
+}
+
+/* Чуть выравниваем публичную комнату после удаления дубля */
+#publicRoomsList .room-card{
+  grid-template-columns:52px minmax(0,1fr) auto!important;
+}
+
+#publicRoomsList .room-card .jc-room-card-actions{
+  display:flex!important;
+  gap:8px!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  min-width:max-content!important;
+}
+
+#publicRoomsList .room-card .jc-room-card-actions .btn{
+  min-width:54px;
+}

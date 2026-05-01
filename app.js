@@ -2804,3 +2804,182 @@ function jc187Patch(){
 }
 
 setTimeout(jc187Patch, 900);
+
+
+/* =========================================================
+   JustClover Stage 18.8 Lobby Final Clean JS
+   Version: stage18-8-lobby-final-clean-20260501-1
+   ========================================================= */
+
+function jc188KillExtraInvite(){
+  document.querySelectorAll('#jcQuickInviteBtn, .jc-room-advanced .jc-room-invite-quick').forEach(el => {
+    const parent = el.parentElement;
+    el.remove();
+    if(parent && parent.classList.contains('split') && !parent.querySelector('input,button')) parent.remove();
+  });
+
+  document.querySelectorAll('.jc-room-advanced button').forEach(btn => {
+    if((btn.textContent || '').trim().toLowerCase() === 'invite'){
+      const parent = btn.parentElement;
+      btn.remove();
+      if(parent && parent.classList.contains('split') && !parent.querySelector('input,button')) parent.remove();
+    }
+  });
+}
+
+function jc188RemoveDuplicateCodeButtons(){
+  document.querySelectorAll('#publicRoomsList .room-card').forEach(card => {
+    const codeButtons = [...card.querySelectorAll('button')].filter(b => {
+      const t = (b.textContent || '').trim().toLowerCase();
+      return t === 'код' || b.dataset.copyRoomCode || b.dataset.copy;
+    });
+
+    codeButtons.forEach((b, i) => {
+      if(i > 0) b.remove();
+    });
+
+    const joinButtons = [...card.querySelectorAll('button')].filter(b => (b.textContent || '').trim().toLowerCase().includes('войти'));
+    joinButtons.forEach((b, i) => {
+      if(i > 0) b.remove();
+    });
+  });
+}
+
+function jc188RemoveDebugDots(){
+  document.querySelectorAll('.jc-lobby-version-dot').forEach(el => el.remove());
+
+  // Удаляем только крошечные fixed-точки снизу справа, не трогая нормальные элементы.
+  document.querySelectorAll('body > div').forEach(el => {
+    const s = getComputedStyle(el);
+    const r = el.getBoundingClientRect();
+    if(
+      s.position === 'fixed' &&
+      r.width <= 16 &&
+      r.height <= 16 &&
+      parseFloat(s.right || '999') <= 40 &&
+      parseFloat(s.bottom || '999') <= 40
+    ){
+      el.remove();
+    }
+  });
+}
+
+function jc188HideRoomStatusDuplicate(){
+  if(document.body.classList.contains('room-active') && els?.roomStatus){
+    els.roomStatus.style.display = 'none';
+  } else if(els?.roomStatus){
+    els.roomStatus.style.display = '';
+  }
+}
+
+function jc188Clean(){
+  jc188KillExtraInvite();
+  jc188RemoveDuplicateCodeButtons();
+  jc188RemoveDebugDots();
+  jc188HideRoomStatusDuplicate();
+}
+
+const jc188OldRenderRooms = renderRooms;
+renderRooms = function(rooms){
+  jc188OldRenderRooms(rooms);
+  setTimeout(jc188RemoveDuplicateCodeButtons, 40);
+};
+
+function jc188Patch(){
+  jc188Clean();
+  setInterval(jc188Clean, 600);
+  console.log('JustClover Stage 18.8 lobby final clean active: stage18-8-lobby-final-clean-20260501-1');
+}
+
+setTimeout(jc188Patch, 500);
+
+
+/* =========================================================
+   JustClover Stage 18.9 duplicate buttons/status final fix JS
+   Version: stage18-9-lobby-duplicate-finalfix-20260501-1
+   ========================================================= */
+
+function jc189CleanPublicRoomCards(){
+  document.querySelectorAll('#publicRoomsList .room-card').forEach(card => {
+    const buttons = [...card.querySelectorAll('button')];
+
+    const codeButtons = buttons.filter(b => {
+      const text = (b.textContent || '').trim().toLowerCase();
+      return text === 'код' || b.dataset.copy || b.dataset.copyRoomCode;
+    });
+
+    codeButtons.forEach((btn, i) => {
+      if(i === 0){
+        btn.style.display = '';
+        btn.classList.remove('jc-duplicate-code-btn');
+      } else {
+        btn.classList.add('jc-duplicate-code-btn');
+        btn.style.display = 'none';
+        // лучше удалить, чтобы не осталось места
+        setTimeout(() => btn.remove(), 0);
+      }
+    });
+
+    const joinButtons = buttons.filter(b => (b.textContent || '').trim().toLowerCase().includes('войти'));
+    joinButtons.forEach((btn, i) => {
+      if(i > 0) setTimeout(() => btn.remove(), 0);
+    });
+  });
+}
+
+function jc189HideOldRoomStatus(){
+  const rs = document.getElementById('roomStatus') || els?.roomStatus;
+  if(rs){
+    rs.classList.add('jc-room-old-status-hidden');
+    rs.style.display = 'none';
+  }
+
+  // На случай если текст создан не в #roomStatus
+  document.querySelectorAll('#homeSection p, #homeSection div, #homeSection span').forEach(el => {
+    if((el.textContent || '').trim().startsWith('Ты в комнате:')){
+      el.classList.add('jc-room-old-status-hidden');
+      el.style.display = 'none';
+    }
+  });
+}
+
+function jc189MakeCurrentRoomStripMain(){
+  const strip = document.querySelector('.jc-current-room-strip');
+  if(!strip) return;
+
+  document.body.classList.toggle('room-active', !!currentRoomId);
+
+  const title = strip.querySelector('[data-current-room-title]');
+  const meta = strip.querySelector('[data-current-room-meta]');
+
+  if(title) title.textContent = currentRoom?.name || currentRoomId || 'Комната';
+  if(meta){
+    const mode = currentRoom
+      ? `${currentRoom.visibility === 'open' ? 'открыта' : 'закрыта'} · ${currentRoom.joinMode === 'public' ? 'публичная' : 'по ссылке'}${currentRoom.passwordEnabled ? ' · пароль' : ''}`
+      : 'комната не создана';
+    meta.textContent = `Код: ${currentRoomId || 'нет'} · ${mode}`;
+  }
+}
+
+const jc189OldRenderRooms = renderRooms;
+renderRooms = function(rooms){
+  jc189OldRenderRooms(rooms);
+  setTimeout(jc189CleanPublicRoomCards, 20);
+  setTimeout(jc189CleanPublicRoomCards, 180);
+};
+
+function jc189FinalFix(){
+  jc189CleanPublicRoomCards();
+  jc189HideOldRoomStatus();
+  jc189MakeCurrentRoomStripMain();
+
+  setInterval(() => {
+    jc189CleanPublicRoomCards();
+    jc189HideOldRoomStatus();
+    jc189MakeCurrentRoomStripMain();
+  }, 500);
+
+  console.log('JustClover Stage 18.9 duplicate/status final fix active: stage18-9-lobby-duplicate-finalfix-20260501-1');
+}
+
+setTimeout(jc189FinalFix, 450);
