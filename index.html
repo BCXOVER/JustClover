@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#080912" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icons/icon.svg" />
-  <link rel="stylesheet" href="./style.css?v=ravesources-20260501-2" />
+  <link rel="stylesheet" href="./style.css?v=fullrave-20260501-3" />
 </head>
 <body>
   <div class="bg"><div class="orb orb-a"></div><div class="orb orb-b"></div><div class="grid-bg"></div></div>
@@ -37,7 +37,7 @@
       <div class="hero panel">
         <div class="hero-kicker">Rave-like private watch party</div>
         <h1>Смотри вместе с друзьями в своём пространстве</h1>
-        <p>JustClover — тёмный watch-party сайт с профилями, комнатами, друзьями, чатом и источниками YouTube / VK Video / Anilibrix / Local video / Google Drive / Yandex Disk.</p>
+        <p>JustClover — тёмный watch-party сайт с профилями, комнатами, друзьями, чатом, реакциями, GIF и источниками YouTube / VK Video / Anilibrix / Local video / Google Drive / Yandex Disk.</p>
         <div class="hero-row">
           <span>Rooms</span><span>Friends</span><span>Voice</span><span>Media</span>
         </div>
@@ -147,13 +147,33 @@
                   <iframe id="iframePlayer" class="hidden embed-box" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
                   <div id="externalPlayer" class="external-player hidden"><h3>Внешний источник</h3><p id="externalText"></p><a id="externalLink" class="btn primary" target="_blank" rel="noreferrer">Открыть</a></div>
                   <div id="emptyPlayer" class="empty-player">Выбери источник, чтобы начать просмотр.</div>
+                  <div id="reactionBurst" class="reaction-burst hidden"></div>
+                </div>
+                <div class="reaction-dock" aria-label="Быстрые реакции">
+                  <button class="reaction-btn" data-room-reaction="🔥" type="button">🔥</button>
+                  <button class="reaction-btn" data-room-reaction="😂" type="button">😂</button>
+                  <button class="reaction-btn" data-room-reaction="❤️" type="button">❤️</button>
+                  <button class="reaction-btn" data-room-reaction="😮" type="button">😮</button>
+                  <button class="reaction-btn" data-room-reaction="🍀" type="button">🍀</button>
                 </div>
               </div>
             </div>
             <div class="watch-side">
               <div class="card panel"><h3>Участники</h3><div id="membersList" class="list compact"></div></div>
               <div class="card panel"><h3>Голос</h3><button id="voiceBtn" class="btn soft" type="button">Включить голос</button><p id="voiceStatus" class="status">Голос выключен.</p><div id="remoteAudio"></div></div>
-              <div class="card panel chat-card"><h3>Чат комнаты</h3><div id="chatMessages" class="messages"></div><form id="chatForm" class="message-form"><input id="chatInput" maxlength="300" placeholder="Сообщение" /><button class="btn primary" type="submit">Отправить</button></form></div>
+              <div class="card panel chat-card">
+                <h3>Чат комнаты</h3>
+                <div id="chatMessages" class="messages"></div>
+                <div id="emojiPanel" class="emoji-panel hidden" aria-label="Эмодзи"></div>
+                <form id="chatForm" class="message-form enhanced">
+                  <div class="chat-input-wrap">
+                    <button id="emojiBtn" class="chat-tool" type="button" title="Эмодзи">😊</button>
+                    <button id="gifBtn" class="chat-tool" type="button" title="GIF по ссылке">GIF</button>
+                    <input id="chatInput" maxlength="300" placeholder="Сообщение, реакция или GIF..." />
+                  </div>
+                  <button class="btn primary" type="submit">Отправить</button>
+                </form>
+              </div>
             </div>
           </div>
         </section>
@@ -191,7 +211,52 @@
     </section>
   </main>
 
+  <div id="mediaPicker" class="media-picker hidden" aria-hidden="true">
+    <div id="mediaPickerBackdrop" class="media-picker-backdrop"></div>
+    <section class="media-picker-panel panel" role="dialog" aria-modal="true" aria-label="Каталог источников">
+      <div class="media-picker-top">
+        <div>
+          <div class="hero-kicker">Media picker</div>
+          <h2>Выбери видео в комнату</h2>
+          <p id="mediaPickerHint" class="status">Ищи YouTube внутри JustClover или быстро вставляй ссылку VK/Drive/Yandex из буфера.</p>
+        </div>
+        <button id="mediaPickerCloseBtn" class="icon-btn" type="button" aria-label="Закрыть">×</button>
+      </div>
+
+      <div class="media-picker-tabs" role="tablist">
+        <button class="picker-tab active" data-picker-source="youtube" type="button">YouTube</button>
+        <button class="picker-tab" data-picker-source="vk" type="button">VK Video</button>
+        <button class="picker-tab" data-picker-source="gdrive" type="button">Google Drive</button>
+        <button class="picker-tab" data-picker-source="yadisk" type="button">Yandex Disk</button>
+        <button class="picker-tab" data-picker-source="direct" type="button">Direct</button>
+      </div>
+
+      <div id="youtubeApiBox" class="api-box">
+        <div>
+          <strong>YouTube-поиск</strong>
+          <span>Для поиска прямо внутри сайта вставь YouTube Data API key. Ключ хранится только в твоём браузере.</span>
+        </div>
+        <input id="ytApiKeyInput" placeholder="YouTube API key, можно оставить пустым" autocomplete="off" />
+        <button id="saveYtApiKeyBtn" class="btn soft" type="button">Сохранить</button>
+      </div>
+
+      <form id="mediaSearchForm" class="media-search">
+        <input id="mediaSearchInput" placeholder="Искать видео, сериал или вставить ссылку..." autocomplete="off" />
+        <button class="btn primary" type="submit">Искать</button>
+        <button id="mediaPasteBtn" class="btn soft" type="button">Вставить из буфера</button>
+      </form>
+
+      <div class="quick-open-row">
+        <button id="mediaExternalBtn" class="btn soft" type="button">Открыть источник в новой вкладке</button>
+        <span class="status">Для YouTube с API поиск работает внутри сайта; для VK пока лучший быстрый сценарий — копируешь ссылку и жмёшь “Вставить из буфера”.</span>
+      </div>
+
+      <div id="mediaPickerResults" class="media-picker-results"></div>
+    </section>
+  </div>
+
+
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script type="module" src="./app.js?v=ravesources-20260501-2"></script>
+  <script type="module" src="./app.js?v=fullrave-20260501-3"></script>
 </body>
 </html>
