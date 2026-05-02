@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 56 — Sidebar Chat Fix
-   Version: stage56-sidebar-chat-fix-20260502-1
+   JustClover Stage 57 — Chat Shell Hardfix
+   Version: stage57-chat-shell-hardfix-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage56-sidebar-chat-fix-20260502-1";
+const JC40_BUILD = "stage57-chat-shell-hardfix-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 56 SIDEBARFIX loader:", JC40_BUILD);
+console.log("JustClover Stage 57 CHATSHELL loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 56: base app import failed", e);
+  console.error("JustClover Stage 57: base app import failed", e);
   throw e;
 }
 
@@ -528,11 +528,11 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 56 — Sidebar Chat Fix
-   Version: stage56-sidebar-chat-fix-20260502-1
+   JustClover Stage 57 — Chat Shell Hardfix
+   Version: stage57-chat-shell-hardfix-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage56-sidebar-chat-fix-20260502-1";
+  const BUILD = "stage57-chat-shell-hardfix-20260502-1";
   const STORE_KEY = "jc55ActiveViewMode";
   let desired = false;
 
@@ -1145,6 +1145,92 @@ try{
       chatIsDirectChild: !!(sidebar && chat && chat.parentElement === sidebar),
       hiddenSide: document.querySelectorAll('[data-jc56-hidden-side]').length,
       hiddenCinema: document.querySelectorAll('[data-jc56-hidden-cinema]').length
+    };
+  };
+})();
+
+
+// Stage 57 — hard chat shell rebuild for active view.
+(function(){
+  function ensureChatShell(){
+    if(!document.body.classList.contains('jc41-rave-focus')) return false;
+    const layout = document.querySelector('.watch-layout');
+    const sidebar = document.querySelector('.watch-sidebar');
+    const chat = document.querySelector('.chat-card');
+    if(!layout || !sidebar || !chat) return false;
+
+    let shell = document.getElementById('jc57ChatShell');
+    if(!shell){
+      shell = document.createElement('div');
+      shell.id = 'jc57ChatShell';
+      shell.className = 'jc57-chat-shell';
+    }
+
+    // Keep shell inside sidebar so column sizing stays intact, but detach chat from any hidden wrappers.
+    if(shell.parentElement !== sidebar){
+      try{ sidebar.prepend(shell); }catch(_){ sidebar.appendChild(shell); }
+    }
+    if(chat.parentElement !== shell){
+      try{ shell.appendChild(chat); }catch(_){}
+    }
+
+    Array.from(sidebar.children).forEach((el)=>{
+      if(el !== shell){
+        el.style.setProperty('display','none','important');
+        el.setAttribute('data-jc57-hidden-side','1');
+      }
+    });
+
+    shell.setAttribute('data-jc57-shell','1');
+    chat.setAttribute('data-jc57-chat-shell','1');
+
+    const head = chat.querySelector('.side-card-head');
+    const messages = chat.querySelector('#chatMessages, .messages');
+    const form = chat.querySelector('#chatForm, .message-form, form');
+    if(head) head.setAttribute('data-jc57-chat-head','1');
+    if(messages) messages.setAttribute('data-jc57-chat-messages','1');
+    if(form) form.setAttribute('data-jc57-chat-form','1');
+
+    return true;
+  }
+
+  function hideCinemaButtons(root=document){
+    const nodes = Array.from(root.querySelectorAll('button,a,[role="button"],.chip,.pill,.segmented button'));
+    nodes.forEach((el)=>{
+      const txt = String(el.textContent||'').trim().toLowerCase();
+      const meta = ((el.getAttribute('aria-label')||'') + ' ' + (el.getAttribute('title')||'')).toLowerCase();
+      const hay = (txt + ' ' + meta).replace(/\s+/g,' ');
+      if(/(^|\s)кино($|\s)/i.test(hay) || /(^|\s)(cinema|movie)($|\s)/i.test(hay)){
+        el.style.setProperty('display','none','important');
+        el.setAttribute('data-jc57-hidden-cinema','1');
+      }
+    });
+  }
+
+  function tick(){
+    try{ ensureChatShell(); }catch(_){}
+    try{ hideCinemaButtons(document); }catch(_){}
+  }
+
+  tick();
+  window.addEventListener('load', ()=>setTimeout(tick, 0), {once:false});
+  document.addEventListener('click', ()=>setTimeout(tick, 30), true);
+  const mo = new MutationObserver(()=>{ setTimeout(tick, 0); });
+  mo.observe(document.documentElement || document.body, {subtree:true, childList:true, attributes:true, characterData:true});
+
+  window.jc57EnsureChatShell = function(){ return ensureChatShell(); };
+  window.jc57ActiveViewDebug = function(){
+    const sidebar = document.querySelector('.watch-sidebar');
+    const shell = document.getElementById('jc57ChatShell');
+    const chat = document.querySelector('#jc57ChatShell .chat-card');
+    return {
+      build: window.JUSTCLOVER_BUILD,
+      raveFocus: document.body.classList.contains('jc41-rave-focus'),
+      sidebarChildren: sidebar ? sidebar.children.length : 0,
+      shellInSidebar: !!(sidebar && shell && shell.parentElement===sidebar),
+      chatInShell: !!(shell && chat && chat.parentElement===shell),
+      hiddenSide: document.querySelectorAll('[data-jc57-hidden-side]').length,
+      hiddenCinema: document.querySelectorAll('[data-jc57-hidden-cinema]').length
     };
   };
 })();

@@ -1,4 +1,4 @@
-/* JustClover cache killer stage56-sidebar-chat-fix-20260502-1 */
+/* JustClover cache killer stage57-chat-shell-hardfix-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
