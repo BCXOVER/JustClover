@@ -6,7 +6,7 @@
   <title>JustClover</title>
   <meta name="theme-color" content="#080912" />
   <script>
-    window.JUSTCLOVER_BUILD = "stage44-active-view-clean-player-dock-20260502-1";
+    window.JUSTCLOVER_BUILD = "stage45-active-player-restore-20260502-1";
   </script>
   <style>
     html,body{margin:0;min-height:100%;background:#06070d;color:#f5f7ff;font-family:Inter,Segoe UI,Arial,sans-serif}
@@ -18,7 +18,7 @@
 <body>
   <div class="jc40-loader">
     <div class="jc40-loader-card">
-      <b>JustClover Stage 44</b>
+      <b>JustClover Stage 45</b>
       <p>Загружаю активный просмотр: чистый плеер, dock под видео и fullscreen…</p>
     </div>
   </div>
@@ -27,7 +27,7 @@
     (async function(){
       const BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
       const BASE_VERSION = "stage37-catalog-hard-scroll-fix-20260502-1";
-      const BUILD = "stage44-active-view-clean-player-dock-20260502-1";
+      const BUILD = "stage45-active-player-restore-20260502-1";
       const BASE_INDEX = "https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@" + BASE_COMMIT + "/index.html";
 
       try {
@@ -38,19 +38,19 @@
           caches.keys().then(keys => keys.forEach(k => caches.delete(k))).catch(() => {});
         }
 
-        const res = await fetch(BASE_INDEX + "?jc44=" + Date.now(), { cache: "no-store" });
+        const res = await fetch(BASE_INDEX + "?jc45=" + Date.now(), { cache: "no-store" });
         if (!res.ok) throw new Error("Не удалось загрузить базовый index: " + res.status);
         let html = await res.text();
         html = html.replaceAll(BASE_VERSION, BUILD);
-        html = html.replace(/37 HARD/g, "44 ACTIVE");
-        html = html.replace(/Stage 37 HARD/g, "Stage 44 ACTIVE");
+        html = html.replace(/37 HARD/g, "45 ACTIVE");
+        html = html.replace(/Stage 37 HARD/g, "Stage 45 ACTIVE");
 
         document.open();
         document.write(html);
         document.close();
       } catch (e) {
-        console.error("JustClover Stage 44 boot failed", e);
-        document.body.innerHTML = '<div class="jc40-loader"><div class="jc40-loader-card"><b>Stage 44 не загрузился</b><p>' + String(e.message || e) + '</p><p>Проверь интернет/CDN или загрузи предыдущий архив.</p></div></div>';
+        console.error("JustClover Stage 45 boot failed", e);
+        document.body.innerHTML = '<div class="jc40-loader"><div class="jc40-loader-card"><b>Stage 45 не загрузился</b><p>' + String(e.message || e) + '</p><p>Проверь интернет/CDN или загрузи предыдущий архив.</p></div></div>';
       }
     })();
   </script>

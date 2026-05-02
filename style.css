@@ -1,12 +1,12 @@
 @import url("https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@f658b5bfad3fade4eb7f9c4d82865452cdc19f00/style.css");
 
 /* =========================================================
-   JustClover Stage 44 — Active View Clean Player Dock CSS
-   Version: stage44-active-view-clean-player-dock-20260502-1
+   JustClover Stage 45 — Active View Clean Player Dock CSS
+   Version: stage45-active-player-restore-20260502-1
    ========================================================= */
 
 html::after{
-  content:'44 ACTIVE'!important;
+  content:'45 ACTIVE'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -351,7 +351,7 @@ body.jc40-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
 
 
 /* =========================================================
-   JustClover Stage 44 — Active View Clean Player Dock
+   JustClover Stage 45 — Active View Clean Player Dock
    В просмотре больше нет page scroll: колесо работает только внутри чата/списков/каталога.
    ========================================================= */
 
@@ -560,12 +560,12 @@ body.jc40-watch-mode [class*="queue"]{
 }
 
 /* =========================================================
-   JustClover Stage 44 — Active View Clean Player Dock
+   JustClover Stage 45 — Active View Clean Player Dock
    Большой плеер + чат + микрофон, без лишних полос над плеером.
    ========================================================= */
 
 html::after{
-  content:'44 ACTIVE'!important;
+  content:'45 ACTIVE'!important;
   background:rgba(34,197,94,.94)!important;
 }
 
@@ -648,7 +648,7 @@ body.jc41-rave-focus #jc41RaveFloating{
   justify-content:flex-start!important;
 }
 
-body.jc41-rave-focus #jc44ActiveDock{
+body.jc41-rave-focus #jc45ActiveDock{
   flex:0 0 auto!important;
   display:block!important;
   width:100%!important;
@@ -882,7 +882,6 @@ body.jc41-rave-focus .chat-card .message-form{
 }
 
 /* Низ под плеером в фокусе скрыт, чтобы видео было выше и больше. */
-body.jc41-rave-focus .watch-main .card,
 body.jc41-rave-focus .watch-main [class*="history"],
 body.jc41-rave-focus .watch-main [class*="queue"]{
   display:none!important;
@@ -908,7 +907,7 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
     max-width:calc(100vw - 16px)!important;
     overflow-x:auto!important;
   }
-  body.jc41-rave-focus #jc44ActiveDock{
+  body.jc41-rave-focus #jc45ActiveDock{
     padding:10px 10px 12px!important;
   }
   #jc41RaveFloating button{
@@ -918,20 +917,20 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
 
 
 /* Stage 43: fullscreen target is the whole left player column, so the exit button stays visible. */
-#jc44ActiveFullscreenTarget:fullscreen,
-#jc44ActiveFullscreenTarget:-webkit-full-screen{
+#jc45ActiveFullscreenTarget:fullscreen,
+#jc45ActiveFullscreenTarget:-webkit-full-screen{
   width:100vw!important;
   height:100vh!important;
   background:#000!important;
 }
 
-#jc44ActiveFullscreenTarget:fullscreen .watch-sidebar,
-#jc44ActiveFullscreenTarget:-webkit-full-screen .watch-sidebar{
+#jc45ActiveFullscreenTarget:fullscreen .watch-sidebar,
+#jc45ActiveFullscreenTarget:-webkit-full-screen .watch-sidebar{
   display:none!important;
 }
 
-#jc44ActiveFullscreenTarget:fullscreen #jc44ActiveDock,
-#jc44ActiveFullscreenTarget:-webkit-full-screen #jc44ActiveDock{
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock{
   position:relative!important;
   z-index:2!important;
   background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.85))!important;
@@ -939,12 +938,12 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
 
 
 /* =========================================================
-   JustClover Stage 44 — Active View Clean Player Dock OVERRIDES
+   JustClover Stage 45 — Active View Clean Player Dock OVERRIDES
    Панель сразу под плеером; история/очередь скрыты в активном просмотре.
    ========================================================= */
 
 html::after{
-  content:'44 ACTIVE'!important;
+  content:'45 ACTIVE'!important;
 }
 
 body.jc41-rave-focus .watch-stage{
@@ -957,11 +956,11 @@ body.jc41-rave-focus .watch-stage{
 }
 
 /* В активном просмотре оставляем только плеер и dock. Всё остальное внутри stage прячем. */
-body.jc41-rave-focus .watch-stage > :not(.player-card):not(.player-card-redesign):not(#jc44ActiveDock){
+body.jc41-rave-focus .watch-stage > :not(.player-card):not(.player-card-redesign):not(#jc45ActiveDock){
   display:none!important;
 }
 
-body.jc41-rave-focus .jc44-active-hidden-panel{
+body.jc41-rave-focus .jc45-active-hidden-panel{
   display:none!important;
 }
 
@@ -974,7 +973,7 @@ body.jc41-rave-focus .player-card{
   max-height:none!important;
 }
 
-body.jc41-rave-focus #jc44ActiveDock{
+body.jc41-rave-focus #jc45ActiveDock{
   order:2!important;
   flex:0 0 auto!important;
   display:block!important;
@@ -986,7 +985,7 @@ body.jc41-rave-focus #jc44ActiveDock{
   z-index:6!important;
 }
 
-body.jc41-rave-focus #jc44ActiveDock #jc41RaveFloating{
+body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
   position:relative!important;
   left:auto!important;
   top:auto!important;
@@ -1003,8 +1002,8 @@ body.jc41-rave-focus #jc44ActiveDock #jc41RaveFloating{
 }
 
 /* Fullscreen открывается на watch-stage, поэтому кнопка Выйти остаётся видимой под плеером. */
-#jc44ActiveFullscreenTarget:fullscreen,
-#jc44ActiveFullscreenTarget:-webkit-full-screen{
+#jc45ActiveFullscreenTarget:fullscreen,
+#jc45ActiveFullscreenTarget:-webkit-full-screen{
   width:100vw!important;
   height:100vh!important;
   max-height:100vh!important;
@@ -1014,22 +1013,114 @@ body.jc41-rave-focus #jc44ActiveDock #jc41RaveFloating{
   overflow:hidden!important;
 }
 
-#jc44ActiveFullscreenTarget:fullscreen > :not(.player-card):not(.player-card-redesign):not(#jc44ActiveDock),
-#jc44ActiveFullscreenTarget:-webkit-full-screen > :not(.player-card):not(.player-card-redesign):not(#jc44ActiveDock){
+#jc45ActiveFullscreenTarget:fullscreen > :not(.player-card):not(.player-card-redesign):not(#jc45ActiveDock),
+#jc45ActiveFullscreenTarget:-webkit-full-screen > :not(.player-card):not(.player-card-redesign):not(#jc45ActiveDock){
   display:none!important;
 }
 
-#jc44ActiveFullscreenTarget:fullscreen .player-card,
-#jc44ActiveFullscreenTarget:fullscreen .player-card-redesign,
-#jc44ActiveFullscreenTarget:-webkit-full-screen .player-card,
-#jc44ActiveFullscreenTarget:-webkit-full-screen .player-card-redesign{
+#jc45ActiveFullscreenTarget:fullscreen .player-card,
+#jc45ActiveFullscreenTarget:fullscreen .player-card-redesign,
+#jc45ActiveFullscreenTarget:-webkit-full-screen .player-card,
+#jc45ActiveFullscreenTarget:-webkit-full-screen .player-card-redesign{
   flex:1 1 auto!important;
   min-height:0!important;
 }
 
-#jc44ActiveFullscreenTarget:fullscreen #jc44ActiveDock,
-#jc44ActiveFullscreenTarget:-webkit-full-screen #jc44ActiveDock{
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock{
   flex:0 0 auto!important;
   min-height:56px!important;
   background:linear-gradient(180deg,rgba(0,0,0,.20),rgba(0,0,0,.90))!important;
+}
+
+
+/* =========================================================
+   JustClover Stage 45 — Active Player Restore OVERRIDES
+   Не прячем watch-main/player. Прячем только историю и очередь.
+   ========================================================= */
+
+html::after{
+  content:'45 ACTIVE'!important;
+}
+
+body.jc41-rave-focus .watch-main,
+body.jc41-rave-focus .watch-stage,
+body.jc41-rave-focus .player-card,
+body.jc41-rave-focus .player-card-redesign,
+body.jc41-rave-focus .player-shell,
+body.jc41-rave-focus .player-frame{
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
+body.jc41-rave-focus .watch-stage{
+  flex-direction:column!important;
+}
+
+body.jc41-rave-focus .player-frame{
+  display:block!important;
+}
+
+body.jc41-rave-focus .player-frame iframe,
+body.jc41-rave-focus .player-frame video,
+body.jc41-rave-focus .embed-box{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
+/* Скрывать можно только явно помеченные панели истории/очереди, но не каркас и не плеер. */
+body.jc41-rave-focus .jc45-active-hidden-panel:not(.watch-main):not(.watch-stage):not(.player-card):not(.player-card-redesign):not(.player-shell):not(.player-frame),
+body.jc41-rave-focus .watch-main [class*="history"],
+body.jc41-rave-focus .watch-main [class*="queue"]{
+  display:none!important;
+}
+
+body.jc41-rave-focus .watch-stage > :not(.player-card):not(.player-card-redesign):not(#jc45ActiveDock){
+  display:none!important;
+}
+
+body.jc41-rave-focus .watch-stage > .player-card,
+body.jc41-rave-focus .watch-stage > .player-card-redesign,
+body.jc41-rave-focus .watch-stage > #jc45ActiveDock{
+  display:flex!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock{
+  order:2!important;
+  flex:0 0 auto!important;
+  display:block!important;
+  width:100%!important;
+  min-height:56px!important;
+  padding:10px 18px 12px!important;
+  background:#03040a!important;
+  border-top:1px solid rgba(255,255,255,.10)!important;
+  z-index:6!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen,
+#jc45ActiveFullscreenTarget:-webkit-full-screen{
+  width:100vw!important;
+  height:100vh!important;
+  display:flex!important;
+  flex-direction:column!important;
+  background:#000!important;
+  overflow:hidden!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen .player-card,
+#jc45ActiveFullscreenTarget:fullscreen .player-card-redesign,
+#jc45ActiveFullscreenTarget:-webkit-full-screen .player-card,
+#jc45ActiveFullscreenTarget:-webkit-full-screen .player-card-redesign{
+  display:flex!important;
+  flex:1 1 auto!important;
+  min-height:0!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock{
+  display:block!important;
+  flex:0 0 auto!important;
+  min-height:56px!important;
 }

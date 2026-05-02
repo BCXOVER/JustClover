@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 44 — Active View Clean Player Dock
-   Version: stage44-active-view-clean-player-dock-20260502-1
+   JustClover Stage 45 — Active View Clean Player Dock
+   Version: stage45-active-player-restore-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage44-active-view-clean-player-dock-20260502-1";
+const JC40_BUILD = "stage45-active-player-restore-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 44 ACTIVE loader:", JC40_BUILD);
+console.log("JustClover Stage 45 ACTIVE loader:", JC40_BUILD);
 
 try {
-  await import(JC40_BASE_APP + `?base=stage37&stage44=${Date.now()}`);
+  await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 44: base app import failed", e);
+  console.error("JustClover Stage 45: base app import failed", e);
   throw e;
 }
 
@@ -528,15 +528,15 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 44 — Active View Clean Player Dock
-   Version: stage44-active-view-clean-player-dock-20260502-1
+   JustClover Stage 45 — Active View Clean Player Dock
+   Version: stage45-active-player-restore-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage44-active-view-clean-player-dock-20260502-1";
-  const STORE_KEY = "jc44ActiveViewMode";
+  const BUILD = "stage45-active-player-restore-20260502-1";
+  const STORE_KEY = "jc45ActiveViewMode";
   let desired = false;
 
-  try { desired = localStorage.getItem(STORE_KEY) === "1"; } catch(_) {}
+  try { desired = localStorage.getItem(STORE_KEY) === "1" || localStorage.getItem("jc44ActiveViewMode") === "1" || localStorage.getItem("jc43ActiveViewMode") === "1"; } catch(_) {}
 
   function isWatchMode(){
     const app = document.getElementById('appView');
@@ -595,40 +595,52 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
     if(!stage || !playerCard) return null;
 
     let oldDock = document.getElementById('jc43ActiveDock');
-    if(oldDock) oldDock.id = 'jc44ActiveDock';
+    if(oldDock) oldDock.id = 'jc45ActiveDock';
 
-    let dock = document.getElementById('jc44ActiveDock');
+    let dock = document.getElementById('jc45ActiveDock');
     if(!dock){
       dock = document.createElement('div');
-      dock.id = 'jc44ActiveDock';
+      dock.id = 'jc45ActiveDock';
     }
 
     if(dock.parentNode !== stage || dock.previousElementSibling !== playerCard){
       playerCard.insertAdjacentElement('afterend', dock);
     }
 
-    stage.id = 'jc44ActiveFullscreenTarget';
-    if(main && main.id === 'jc44ActiveFullscreenTarget') main.removeAttribute('id');
+    stage.id = 'jc45ActiveFullscreenTarget';
+    if(main && main.id === 'jc45ActiveFullscreenTarget') main.removeAttribute('id');
     return dock;
   }
 
   function markActiveHiddenPanels(on){
-    document.querySelectorAll('.jc44-active-hidden-panel').forEach(el => {
-      if(!on) el.classList.remove('jc44-active-hidden-panel');
+    // Stage45: сначала снимаем ВСЕ старые/новые hidden-классы, чтобы не остался скрытым watch-main/player.
+    document.querySelectorAll('.jc45-active-hidden-panel,.jc44-active-hidden-panel,.jc43-active-hidden-panel').forEach(el => {
+      el.classList.remove('jc45-active-hidden-panel','jc44-active-hidden-panel','jc43-active-hidden-panel');
     });
     if(!on) return;
 
     const stage = document.querySelector('.watch-stage');
     if(!stage) return;
+
+    // Никогда не скрываем каркас активного просмотра и сам плеер.
+    const protectedSelector = '.watch-main,.watch-stage,.player-card,.player-card-redesign,.player-shell,.player-frame,#jc45ActiveDock,#jc41RaveFloating';
     const badText = /История источников|Очередь видео/i;
 
-    stage.querySelectorAll('h1,h2,h3,h4,strong,b,span,div').forEach(el => {
+    // Скрываем только отдельные панели-дети stage после плеера, но не весь watch-main.
+    Array.from(stage.children).forEach(child => {
+      if(!child || child.matches?.(protectedSelector) || child.closest?.('.player-card,.player-card-redesign,.player-shell,.player-frame,#jc45ActiveDock,#jc41RaveFloating')) return;
+      if(badText.test(child.textContent || '')) child.classList.add('jc45-active-hidden-panel');
+    });
+
+    // На случай если история/очередь вложены глубже: поднимаемся только до небольшой панели,
+    // но останавливаемся перед player/stage/main, чтобы больше не прятать весь плеер.
+    stage.querySelectorAll('h1,h2,h3,h4,strong,b').forEach(el => {
       if(!badText.test(el.textContent || '')) return;
-      if(el.closest('.player-frame,#jc44ActiveDock,#jc41RaveFloating')) return;
-      const panel = el.closest('.panel,.card,[class*="panel"],[class*="history"],[class*="queue"]') || el.parentElement || el;
-      if(panel && !panel.closest('.player-frame,#jc44ActiveDock,#jc41RaveFloating')){
-        panel.classList.add('jc44-active-hidden-panel');
-      }
+      if(el.closest?.(protectedSelector)) return;
+      let panel = el.closest?.('.source-history,.queue-card,[class*="history"],[class*="queue"],.side-card,.panel,.card');
+      if(!panel || panel.matches?.(protectedSelector) || panel.closest?.('.player-card,.player-card-redesign,.player-shell,.player-frame,#jc45ActiveDock,#jc41RaveFloating')) return;
+      if(panel === stage || panel.classList?.contains('watch-stage') || panel.classList?.contains('watch-main')) return;
+      panel.classList.add('jc45-active-hidden-panel');
     });
   }
 
@@ -639,7 +651,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       return;
     }
 
-    const fullscreenTarget = document.getElementById('jc44ActiveFullscreenTarget') || document.querySelector('.watch-stage') || document.querySelector('.watch-main') || document.querySelector('.player-shell') || document.querySelector('.player-card') || document.querySelector('.player-frame');
+    const fullscreenTarget = document.getElementById('jc45ActiveFullscreenTarget') || document.querySelector('.watch-stage') || document.querySelector('.watch-main') || document.querySelector('.player-shell') || document.querySelector('.player-card') || document.querySelector('.player-frame');
     if(await requestFullOn(fullscreenTarget || document.documentElement)){
       syncFullscreenButtons();
       return;
@@ -725,8 +737,8 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       markActiveHiddenPanels(true);
       hardTop();
     } else {
-      const dock = document.getElementById('jc44ActiveDock') || document.getElementById('jc43ActiveDock');
-      const target = document.getElementById('jc44ActiveFullscreenTarget') || document.getElementById('jc43ActiveFullscreenTarget');
+      const dock = document.getElementById('jc45ActiveDock') || document.getElementById('jc43ActiveDock');
+      const target = document.getElementById('jc45ActiveFullscreenTarget') || document.getElementById('jc43ActiveFullscreenTarget');
       if(floating && floating.parentNode !== document.body) document.body.appendChild(floating);
       markActiveHiddenPanels(false);
       if(dock) dock.remove();
@@ -782,9 +794,9 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       hasToggle: !!document.getElementById('jc41RaveToggle'),
       hasFloating: !!document.getElementById('jc41RaveFloating'),
       hasFullscreenButton: !!document.querySelector('[data-jc41-full]'),
-      hasDock: !!document.getElementById('jc44ActiveDock'),
+      hasDock: !!document.getElementById('jc45ActiveDock'),
       fullscreenElement: document.fullscreenElement?.id || document.fullscreenElement?.tagName || '',
-      fullscreenTarget: document.getElementById('jc44ActiveFullscreenTarget')?.id || '',
+      fullscreenTarget: document.getElementById('jc45ActiveFullscreenTarget')?.id || '',
       playerHeight: document.querySelector('.player-frame')?.getBoundingClientRect?.().height || 0,
       sidebarWidth: document.querySelector('.watch-sidebar')?.getBoundingClientRect?.().width || 0
     };
@@ -806,7 +818,7 @@ try {
 } catch(_) {}
 
 
-// Stage 44 public aliases.
+// Stage 45 public aliases.
 try {
   window.jc44ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
   window.jc44ToggleActiveView = window.jc42ToggleActiveView || window.jc41ToggleRaveMode;
@@ -815,10 +827,19 @@ try {
 } catch(_) {}
 
 
-// Stage 44 public aliases.
+// Stage 45 public aliases.
 try {
   window.jc44ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
   window.jc44ToggleActiveView = window.jc42ToggleActiveView || window.jc41ToggleRaveMode;
   window.jc44SetActiveView = window.jc42SetActiveView || window.jc41SetRaveMode;
   window.jc44ToggleFullscreen = window.jc42ToggleFullscreen;
+} catch(_) {}
+
+
+// Stage 45 public aliases.
+try {
+  window.jc45ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc45ToggleActiveView = window.jc42ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc45SetActiveView = window.jc42SetActiveView || window.jc41SetRaveMode;
+  window.jc45ToggleFullscreen = window.jc42ToggleFullscreen;
 } catch(_) {}
