@@ -1,4 +1,4 @@
-/* JustClover cache killer stage89-glass-chat-dock-20260502-1 */
+/* JustClover cache killer stage90-true-live-background-glass-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));

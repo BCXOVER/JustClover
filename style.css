@@ -3337,7 +3337,7 @@ html::after{
 
 /* =========================================================
    JustClover Stage 81 — Real Stable Player Dock
-   Version: stage89-glass-chat-dock-20260502-1
+   Version: stage90-true-live-background-glass-20260502-1
 
    One stable active-room layout:
    topbar / player / real bottom controls / chat.
@@ -3746,7 +3746,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
 
 /* =========================================================
    JustClover Stage 81 — Player Mic Overlay
-   Version: stage89-glass-chat-dock-20260502-1
+   Version: stage90-true-live-background-glass-20260502-1
 
    Keep Stage80 stable layout. Remove chat button from the lower dock and move
    mic control inside the player so it remains available in fullscreen.
@@ -3895,7 +3895,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc81PlayerMic{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage89-glass-chat-dock-20260502-1
+   Version: stage90-true-live-background-glass-20260502-1
 
    Keep Stage80 layout. Mic is mounted on .watch-main, not inside the iframe
    and not hidden by old jc67 player-child rules, so it remains visible in
@@ -4068,7 +4068,7 @@ body.jc80-real-dock .watch-main #jc82PlayerMic[hidden]{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage89-glass-chat-dock-20260502-1
+   Version: stage90-true-live-background-glass-20260502-1
    Put mic back into bottom dock; hide overlay mic; hide chat.
    ========================================================= */
 html::after{ content:'88 ICONMIC'!important; }
@@ -4231,7 +4231,7 @@ body.jc88-icon-mic-dock #jc86FullscreenProxy{
 
 /* =========================================================
    JustClover Stage 89 — Glass Chat + Dock Transparency
-   Version: stage89-glass-chat-dock-20260502-1
+   Version: stage90-true-live-background-glass-20260502-1
 
    Keep Stage88 active layout and mic dock behavior.
    Make the strip under the player translucent so the live background can show
@@ -4348,4 +4348,172 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
       radial-gradient(circle at top right,rgba(251,113,133,.10),transparent 42%),
       linear-gradient(180deg,rgba(20,16,30,.34),rgba(9,9,18,.54))!important;
   }
+}
+
+/* =========================================================
+   JustClover Stage 90 — True Live Background Glass
+   Version: stage90-true-live-background-glass-20260502-1
+
+   Stage89 was glass over a dark layer. Stage90 lifts the native live bg layer
+   behind active room and makes dock/chat/sidebar actually see-through.
+   ========================================================= */
+
+html::after{
+  content:'90 LIVEGLASS'!important;
+  background:rgba(56,189,248,.96)!important;
+  color:#03130a!important;
+}
+
+/* Bring the app's own animated/live background layer above the root dark bg,
+   but still behind UI/video/chat. */
+body.jc80-real-dock .bg{
+  display:block!important;
+  position:fixed!important;
+  inset:0!important;
+  z-index:0!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:none!important;
+}
+body.jc80-real-dock .bg .aurora,
+body.jc80-real-dock .bg .grid-bg,
+body.jc80-real-dock .bg .grain,
+body.jc80-real-dock .aurora,
+body.jc80-real-dock .grid-bg,
+body.jc80-real-dock .grain{
+  display:block!important;
+  visibility:visible!important;
+  pointer-events:none!important;
+}
+
+/* Fallback background layer created by Stage90 JS when the native .bg sits
+   too low in a stacking context. */
+#jc90LiveBg{
+  position:fixed!important;
+  inset:0!important;
+  z-index:0!important;
+  pointer-events:none!important;
+  opacity:1!important;
+  background:
+    radial-gradient(circle at 28% 12%,rgba(80,120,255,.18),transparent 34%),
+    radial-gradient(circle at 78% 18%,rgba(251,113,133,.16),transparent 35%),
+    radial-gradient(circle at 55% 85%,rgba(34,197,94,.10),transparent 38%),
+    #06070d!important;
+  background-size:cover!important;
+  background-position:center!important;
+}
+body:not(.jc80-real-dock) #jc90LiveBg{
+  display:none!important;
+}
+
+/* Put real UI over the live bg. */
+body.jc80-real-dock #appView,
+body.jc80-real-dock .app,
+body.jc80-real-dock .content,
+body.jc80-real-dock #watchSection,
+body.jc80-real-dock .watch-layout,
+body.jc80-real-dock .watch-main,
+body.jc80-real-dock .watch-sidebar,
+body.jc80-real-dock .topbar,
+body.jc80-real-dock #jc51RaveTopbar{
+  position:relative!important;
+  z-index:2!important;
+}
+body.jc80-real-dock .watch-main,
+body.jc80-real-dock .watch-sidebar{
+  position:fixed!important;
+}
+
+/* Remove remaining dark backing layers outside the actual video rectangle. */
+html.jc80-real-dock,
+body.jc80-real-dock,
+body.jc80-real-dock #appView.app,
+body.jc80-real-dock .content,
+body.jc80-real-dock #watchSection,
+body.jc80-real-dock .watch-layout,
+body.jc80-real-dock .watch-main{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+}
+
+/* Keep only the player itself dark/solid. */
+body.jc80-real-dock .watch-stage,
+body.jc80-real-dock .player-card-redesign,
+body.jc80-real-dock .player-card,
+body.jc80-real-dock .player-shell,
+body.jc80-real-dock .player-frame,
+body.jc80-real-dock .player-frame iframe,
+body.jc80-real-dock .player-frame video,
+body.jc80-real-dock .player-frame .embed-box,
+body.jc80-real-dock .player-frame #youtubePlayer,
+body.jc80-real-dock .player-frame #youtubePlayer iframe,
+body.jc80-real-dock .player-frame #iframePlayer,
+body.jc80-real-dock .player-frame #videoPlayer,
+body.jc80-real-dock .player-frame #jc65DirectPlayer,
+body.jc80-real-dock .player-frame .jc65-direct-player,
+body.jc80-real-dock .player-frame .jc67-main-player{
+  background:#000!important;
+}
+
+/* The strip below video: translucent enough to actually see the live bg. */
+body.jc80-real-dock #jc80Dock{
+  background:linear-gradient(180deg,rgba(6,7,13,.03),rgba(6,7,13,.12))!important;
+  background-color:rgba(6,7,13,.08)!important;
+  border-top:1px solid rgba(255,255,255,.07)!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(10px) saturate(145%)!important;
+  -webkit-backdrop-filter:blur(10px) saturate(145%)!important;
+}
+body.jc80-real-dock #jc80Dock .jc80-dock-inner{
+  background:rgba(8,10,18,.34)!important;
+  border:1px solid rgba(255,255,255,.13)!important;
+  box-shadow:0 10px 26px rgba(0,0,0,.20)!important;
+  backdrop-filter:blur(18px) saturate(160%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(160%)!important;
+}
+
+/* Right chat column: more transparent, but still readable. */
+body.jc80-real-dock .watch-sidebar{
+  background:
+    radial-gradient(circle at top right,rgba(251,113,133,.10),transparent 44%),
+    linear-gradient(180deg,rgba(18,12,26,.22),rgba(8,7,14,.34))!important;
+  border-left:1px solid rgba(255,255,255,.07)!important;
+  backdrop-filter:blur(16px) saturate(150%)!important;
+  -webkit-backdrop-filter:blur(16px) saturate(150%)!important;
+}
+body.jc80-real-dock .chat-card{
+  background:rgba(10,12,22,.18)!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+  box-shadow:0 14px 34px rgba(0,0,0,.14)!important;
+  backdrop-filter:blur(12px) saturate(145%)!important;
+  -webkit-backdrop-filter:blur(12px) saturate(145%)!important;
+}
+body.jc80-real-dock .chat-card .side-card-head,
+body.jc80-real-dock .chat-card .message-form,
+body.jc80-real-dock .chat-card #chatForm{
+  background:rgba(10,12,22,.10)!important;
+  border-color:rgba(255,255,255,.08)!important;
+}
+body.jc80-real-dock .chat-card input,
+body.jc80-real-dock .chat-card textarea,
+body.jc80-real-dock .chat-card .message-input,
+body.jc80-real-dock .chat-card [contenteditable="true"]{
+  background:rgba(255,255,255,.06)!important;
+  border-color:rgba(255,255,255,.13)!important;
+}
+body.jc80-real-dock .chat-card .message,
+body.jc80-real-dock .chat-card [data-message-id],
+body.jc80-real-dock .chat-card .chat-message{
+  background:rgba(255,255,255,.035)!important;
+  border-color:rgba(255,255,255,.07)!important;
+}
+
+/* Topbar also lets the bg through. */
+body.jc80-real-dock .topbar,
+body.jc80-real-dock #jc51RaveTopbar{
+  background:linear-gradient(90deg,rgba(18,10,22,.34),rgba(8,8,14,.42))!important;
+  border-bottom:1px solid rgba(255,255,255,.08)!important;
+  backdrop-filter:blur(16px) saturate(150%)!important;
+  -webkit-backdrop-filter:blur(16px) saturate(150%)!important;
 }
