@@ -4951,8 +4951,8 @@ setTimeout(jc251Patch, 1000);
    JustClover Stage 28 CLEAN — player/cinema JS
    Version: stage28-clean-cinema-player-20260502-1
    ========================================================= */
-console.log("JustClover Stage 30.3 CLEAN loaded:", "stage30-3-remove-rave-card-20260502-1");
-window.JUSTCLOVER_BUILD = "stage30-3-remove-rave-card-20260502-1";
+console.log("JustClover Stage 31 SYNC loaded:", "stage31-youtube-sync-lock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
 
 try{
   if(localStorage.getItem('jc28LastBuild') !== window.JUSTCLOVER_BUILD){
@@ -4965,7 +4965,7 @@ try{
 
 
 (function(){
-  const BUILD = "stage30-3-remove-rave-card-20260502-1";
+  const BUILD = "stage31-youtube-sync-lock-20260502-1";
   let zoom = Number(localStorage.getItem('jc28CinemaZoomV4') || '0') || 0;
 
   function svg(name){
@@ -5415,10 +5415,10 @@ try{
 
 /* =========================================================
    JustClover Stage 30 — Rave-like clean sources JS
-   Version: stage30-3-remove-rave-card-20260502-1
+   Version: stage31-youtube-sync-lock-20260502-1
    ========================================================= */
-console.log("JustClover Stage 30.3 CLEAN loaded:", "stage30-3-remove-rave-card-20260502-1");
-window.JUSTCLOVER_BUILD = "stage30-3-remove-rave-card-20260502-1";
+console.log("JustClover Stage 31 SYNC loaded:", "stage31-youtube-sync-lock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
 
 (function(){
   function sourceLabel(type){
@@ -5621,7 +5621,7 @@ window.JUSTCLOVER_BUILD = "stage30-3-remove-rave-card-20260502-1";
 
 /* =========================================================
    JustClover Stage 30.1 — YouTube/VK source reload + sync bounce fix
-   Version: stage30-3-remove-rave-card-20260502-1
+   Version: stage31-youtube-sync-lock-20260502-1
 
    Причина бага:
    renderRoom() вызывается на КАЖДОЕ изменение rooms/{id}, включая playback.
@@ -5629,8 +5629,8 @@ window.JUSTCLOVER_BUILD = "stage30-3-remove-rave-card-20260502-1";
    Для YouTube это вызывало ytPlayer.loadVideoById(...) снова и снова,
    поэтому видео бесконечно ставилось на паузу/включалось.
    ========================================================= */
-console.log("JustClover Stage 30.3 CLEAN loaded:", "stage30-3-remove-rave-card-20260502-1");
-window.JUSTCLOVER_BUILD = "stage30-3-remove-rave-card-20260502-1";
+console.log("JustClover Stage 31 SYNC loaded:", "stage31-youtube-sync-lock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
 
 (function(){
   function sourceKey(s){
@@ -5773,10 +5773,10 @@ window.JUSTCLOVER_BUILD = "stage30-3-remove-rave-card-20260502-1";
 
 /* =========================================================
    JustClover Stage 30.2 — remove ad labels everywhere
-   Version: stage30-3-remove-rave-card-20260502-1
+   Version: stage31-youtube-sync-lock-20260502-1
    ========================================================= */
-console.log("JustClover Stage 30.3 CLEAN loaded:", "stage30-3-remove-rave-card-20260502-1");
-window.JUSTCLOVER_BUILD = "stage30-3-remove-rave-card-20260502-1";
+console.log("JustClover Stage 31 SYNC loaded:", "stage31-youtube-sync-lock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
 
 (function(){
   function labelFromType(type){
@@ -5877,10 +5877,10 @@ window.JUSTCLOVER_BUILD = "stage30-3-remove-rave-card-20260502-1";
 
 /* =========================================================
    JustClover Stage 30.3 — remove big Rave sources card JS
-   Version: stage30-3-remove-rave-card-20260502-1
+   Version: stage31-youtube-sync-lock-20260502-1
    ========================================================= */
-console.log("JustClover Stage 30.3 CLEAN loaded:", "stage30-3-remove-rave-card-20260502-1");
-window.JUSTCLOVER_BUILD = "stage30-3-remove-rave-card-20260502-1";
+console.log("JustClover Stage 31 SYNC loaded:", "stage31-youtube-sync-lock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
 
 (function(){
   function removeBigRaveCard(){
@@ -5898,4 +5898,505 @@ window.JUSTCLOVER_BUILD = "stage30-3-remove-rave-card-20260502-1";
   setInterval(removeBigRaveCard, 500);
   setTimeout(removeBigRaveCard, 200);
   setTimeout(removeBigRaveCard, 1200);
+})();
+
+
+/* =========================================================
+   JustClover Stage 31 — YouTube Sync Lock Clean Rewrite
+   Version: stage31-youtube-sync-lock-20260502-1
+
+   Исправляет бесконечный play/pause loop:
+   - source загружается только если sourceKey реально изменился;
+   - host-only playback: playback пишет только хост комнаты;
+   - byClientId/actionId, чтобы не применять свои же события;
+   - local lock после локального действия;
+   - debounce writePlayback;
+   - applyPlayback не дёргает play/pause/seek, если состояние уже почти такое же;
+   - YouTube poll больше не спамит play/pause каждую секунду.
+   ========================================================= */
+console.log("JustClover Stage 31 SYNC loaded:", "stage31-youtube-sync-lock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
+
+(function(){
+  const BUILD = "stage31-youtube-sync-lock-20260502-1";
+  const CLIENT_KEY = "jcClientId";
+  let jc31ClientId = "";
+  try {
+    jc31ClientId = localStorage.getItem(CLIENT_KEY) || crypto.randomUUID();
+    localStorage.setItem(CLIENT_KEY, jc31ClientId);
+  } catch(e) {
+    jc31ClientId = "client-" + Math.random().toString(36).slice(2) + Date.now();
+  }
+
+  let lastLoadedSourceKey = "";
+  let lastPlaybackApplyKey = "";
+  let lastWriteAt = 0;
+  let lastWritePlaying = null;
+  let lastWriteTime = 0;
+  let localLockUntil = 0;
+  let lastYtState = null;
+  let lastYtWriteAt = 0;
+  let lastDebug = "init";
+
+  function dbg(...args){
+    lastDebug = args.map(x => typeof x === "string" ? x : JSON.stringify(x)).join(" ");
+    console.log("[JC31 sync]", ...args);
+  }
+
+  function makeActionId(){
+    try { return crypto.randomUUID(); }
+    catch(e) { return "act-" + Date.now() + "-" + Math.random().toString(36).slice(2); }
+  }
+
+  function sourceKey(s){
+    if(!s || !s.type || s.type === "none") return "none";
+    return [
+      s.type || "",
+      s.videoId || "",
+      s.embedUrl || "",
+      s.url || "",
+      s.filename || "",
+      s.size || "",
+      s.title || ""
+    ].join("|");
+  }
+
+  function playbackSourceKey(){
+    try { return sourceKey(currentSource); } catch(e) { return "none"; }
+  }
+
+  function isHost(){
+    try {
+      return !!(currentUser && currentRoom && currentRoom.ownerUid === currentUser.uid);
+    } catch(e) {
+      return false;
+    }
+  }
+
+  function isYouTubeReady(){
+    try { return !!(ytPlayer && typeof ytPlayer.getPlayerState === "function"); }
+    catch(e) { return false; }
+  }
+
+  function getYTVideoId(){
+    try {
+      const data = ytPlayer?.getVideoData?.();
+      return data?.video_id || "";
+    } catch(e) {
+      return "";
+    }
+  }
+
+  function ytStateName(st){
+    try {
+      if(st === YT.PlayerState.PLAYING) return "playing";
+      if(st === YT.PlayerState.PAUSED) return "paused";
+      if(st === YT.PlayerState.BUFFERING) return "buffering";
+      if(st === YT.PlayerState.ENDED) return "ended";
+      if(st === YT.PlayerState.CUED) return "cued";
+      if(st === YT.PlayerState.UNSTARTED) return "unstarted";
+    } catch(e) {}
+    return String(st);
+  }
+
+  function isSourceMounted(s){
+    if(!s || !s.type || s.type === "none") {
+      return !!(els?.emptyPlayer && !els.emptyPlayer.classList.contains("hidden"));
+    }
+
+    if(s.type === "youtube") {
+      if(!isYouTubeReady()) return false;
+      const id = getYTVideoId();
+      return !s.videoId || !id || id === s.videoId;
+    }
+
+    if(s.type === "vk" || s.type === "anilibrix") {
+      const iframe = els?.iframePlayer;
+      const src = iframe?.getAttribute("src") || "";
+      const target = s.embedUrl || s.url || "";
+      return !!src && src !== "about:blank" && (!target || src === target);
+    }
+
+    if(s.type === "local") {
+      return !!(els?.videoPlayer && (els.videoPlayer.currentSrc || els.videoPlayer.src));
+    }
+
+    return false;
+  }
+
+  function markLocalLock(ms = 1700){
+    localLockUntil = Math.max(localLockUntil, Date.now() + ms);
+  }
+
+  function shouldIgnoreRemote(p){
+    if(!p) return true;
+
+    const now = Date.now();
+    if(p.byClientId && p.byClientId === jc31ClientId && now - (Number(p.updatedAt) || now) < 10000) {
+      dbg("ignore own client playback", p.actionId || "");
+      return true;
+    }
+
+    if(p.byUid && currentUser?.uid && p.byUid === currentUser.uid && now - (Number(p.updatedAt) || now) < 10000) {
+      dbg("ignore own uid playback", p.actionId || "");
+      return true;
+    }
+
+    if(now < localLockUntil) {
+      dbg("ignore remote during local lock");
+      return true;
+    }
+
+    if(p.sourceKey && p.sourceKey !== playbackSourceKey()) {
+      dbg("ignore playback source mismatch", p.sourceKey, playbackSourceKey());
+      return true;
+    }
+
+    const key = [
+      p.actionId || "",
+      p.byClientId || "",
+      p.byUid || "",
+      p.updatedAt || "",
+      p.playing ? "1" : "0",
+      Math.round((Number(p.time) || 0) * 10) / 10
+    ].join("|");
+
+    if(key === lastPlaybackApplyKey) {
+      dbg("ignore duplicate playback");
+      return true;
+    }
+
+    lastPlaybackApplyKey = key;
+    return false;
+  }
+
+  function currentPlayerTime(){
+    try {
+      if(currentSource?.type === "youtube" && ytPlayer?.getCurrentTime) return Number(ytPlayer.getCurrentTime()) || 0;
+      if(currentSource?.type === "local" && els?.videoPlayer) return Number(els.videoPlayer.currentTime) || 0;
+    } catch(e) {}
+    return 0;
+  }
+
+  function currentPlayerPlaying(){
+    try {
+      if(currentSource?.type === "youtube" && ytPlayer?.getPlayerState) {
+        const st = ytPlayer.getPlayerState();
+        return st === YT.PlayerState.PLAYING || st === YT.PlayerState.BUFFERING;
+      }
+      if(currentSource?.type === "local" && els?.videoPlayer) return !els.videoPlayer.paused;
+    } catch(e) {}
+    return false;
+  }
+
+  function setRoomStatusSafe(){
+    try {
+      if(!currentRoom) return;
+      const owner = currentRoom.ownerUid === currentUser?.uid;
+      [els.openRoomBtn, els.closeRoomBtn, els.publicRoomBtn, els.inviteRoomBtn].forEach(b => {
+        if(b) b.disabled = !owner;
+      });
+      status(els.roomStatus, `${currentRoom.name || currentRoom.id} — ${currentRoom.visibility === "open" ? "открыта" : "закрыта"}, ${currentRoom.joinMode === "public" ? "публичная" : "по ссылке"}`);
+    } catch(e) {}
+  }
+
+  // renderRoom теперь не перезагружает плеер при каждом playback update.
+  renderRoom = function(){
+    if(!currentRoom) return;
+    setRoomStatusSafe();
+
+    const incomingSource = currentRoom.source || {type:"none"};
+    const incomingKey = sourceKey(incomingSource);
+
+    if(incomingKey !== lastLoadedSourceKey || !isSourceMounted(incomingSource)){
+      dbg("source changed -> load", incomingKey);
+      loadSource(incomingSource);
+    } else {
+      currentSource = incomingSource;
+    }
+
+    applyPlayback(currentRoom.playback);
+  };
+
+  // loadSource с sourceKey guard.
+  loadSource = async function(s = {type:"none"}){
+    const key = sourceKey(s);
+    currentSource = s || {type:"none"};
+
+    if(key === lastLoadedSourceKey && isSourceMounted(s)){
+      dbg("source unchanged skip reload", key);
+      return;
+    }
+
+    lastLoadedSourceKey = key;
+    lastPlaybackApplyKey = "";
+    lastYtState = null;
+
+    hidePlayers();
+
+    if(!s || !s.type || s.type === "none"){
+      show(els.emptyPlayer);
+      status(els.sourceNote, "Источник не выбран.");
+      return;
+    }
+
+    if(s.type === "local"){
+      loadLocal();
+      return;
+    }
+
+    if(s.type === "vk"){
+      ext(s.embedUrl || s.url, s.title || "VK Video", "VK Video открыт через iframe.");
+      return;
+    }
+
+    if(s.type === "anilibrix"){
+      ext(s.embedUrl || s.url, s.title || "Anilibrix", "Anilibrix открыт через iframe.");
+      return;
+    }
+
+    if(s.type === "youtube"){
+      show(els.youtubePlayer);
+      await loadYT(s.videoId);
+      status(els.sourceNote, `YouTube: ${s.title || s.videoId}`);
+      return;
+    }
+
+    show(els.emptyPlayer);
+  };
+
+  // YouTube: не loadVideoById повторно, если видео уже то же.
+  loadYT = async function(id){
+    if(!id){
+      status(els.sourceNote, "YouTube ID не найден.");
+      return;
+    }
+
+    if(!await waitYT()){
+      status(els.sourceNote, "YouTube API не загрузился. Проверь VPN/сеть.");
+      return;
+    }
+
+    const opts = {
+      width: "100%",
+      height: "100%",
+      videoId: id,
+      playerVars: { playsinline: 1, rel: 0, origin: location.origin },
+      events: { onStateChange: onYTState, onReady: startYTPoll, onError: onYTError }
+    };
+
+    if(!ytPlayer){
+      dbg("create yt player", id);
+      ytPlayer = new YT.Player("youtubePlayer", opts);
+      return;
+    }
+
+    const loadedId = getYTVideoId();
+    if(loadedId === id){
+      dbg("yt already loaded", id);
+      startYTPoll();
+      return;
+    }
+
+    dbg("cue yt video", id);
+    try {
+      ytPlayer.cueVideoById(id);
+    } catch(e) {
+      ytPlayer.loadVideoById(id);
+    }
+    startYTPoll();
+  };
+
+  onYTState = function(e){
+    if(applyingRemote || !currentRoomId || currentSource?.type !== "youtube") return;
+    if(!isHost()) {
+      dbg("yt state ignored: not host", ytStateName(e.data));
+      return;
+    }
+
+    const st = e?.data;
+    if(st !== YT.PlayerState.PLAYING && st !== YT.PlayerState.PAUSED) return;
+
+    const playing = st === YT.PlayerState.PLAYING;
+    const now = Date.now();
+    const time = ytPlayer?.getCurrentTime?.() || 0;
+
+    if(lastYtState === st && now - lastYtWriteAt < 1200){
+      dbg("yt duplicate state ignored", ytStateName(st));
+      return;
+    }
+
+    lastYtState = st;
+    lastYtWriteAt = now;
+    markLocalLock(1200);
+    dbg("yt local state -> write", ytStateName(st), time);
+    writePlayback(playing, time, "yt-state");
+  };
+
+  // Poll пишет только редкие time-sync события от хоста.
+  startYTPoll = function(){
+    if(ytPoll) clearInterval(ytPoll);
+    lastYtTime = ytPlayer?.getCurrentTime?.() || 0;
+    let lastTickWriteAt = 0;
+
+    ytPoll = setInterval(() => {
+      if(applyingRemote || currentSource?.type !== "youtube" || !currentRoomId || !ytPlayer) return;
+      if(!isHost()) return;
+
+      const st = ytPlayer.getPlayerState?.();
+      const nowTime = ytPlayer.getCurrentTime?.() || 0;
+      const now = Date.now();
+
+      if(st === YT.PlayerState.PLAYING && now - lastTickWriteAt > 5000 && Math.abs(nowTime - lastWriteTime) > 3){
+        lastTickWriteAt = now;
+        writePlayback(true, nowTime, "yt-time");
+      }
+
+      lastYtTime = nowTime;
+    }, 1000);
+  };
+
+  writePlayback = async function(play, time, reason = "manual"){
+    if(!currentRoomId || !currentUser) return;
+    if(!isHost()){
+      dbg("write ignored: not host", reason);
+      return;
+    }
+
+    const now = Date.now();
+    const t = Number(time) || 0;
+    const sameState = lastWritePlaying === !!play && Math.abs(t - lastWriteTime) < 0.8;
+
+    if(sameState && now - lastWriteAt < 1000){
+      dbg("write debounce", reason);
+      return;
+    }
+
+    lastWriteAt = now;
+    lastWritePlaying = !!play;
+    lastWriteTime = t;
+    markLocalLock(1200);
+
+    const payload = {
+      playing: !!play,
+      time: t,
+      updatedAt: now,
+      byUid: currentUser.uid,
+      byClientId: jc31ClientId,
+      actionId: makeActionId(),
+      sourceKey: playbackSourceKey(),
+      reason
+    };
+
+    dbg("write playback", payload);
+    await update(ref(db, `rooms/${currentRoomId}/playback`), payload);
+  };
+
+  applyPlayback = async function(p){
+    if(shouldIgnoreRemote(p)) return;
+    if(!currentSource || currentSource.type === "none") return;
+
+    const now = Date.now();
+    const baseTime = Number(p.time) || 0;
+    const age = p.playing ? Math.max(0, (now - (Number(p.updatedAt) || now)) / 1000) : 0;
+    const target = baseTime + age;
+    const drift = Math.abs(currentPlayerTime() - target);
+    const alreadyPlaying = currentPlayerPlaying();
+
+    if(drift < 2.5 && alreadyPlaying === !!p.playing){
+      dbg("remote already close", {drift, playing: alreadyPlaying});
+      return;
+    }
+
+    applyingRemote = true;
+    dbg("apply remote", {target, drift, play: !!p.playing});
+
+    try {
+      if(currentSource.type === "local" && els?.videoPlayer){
+        if(drift > 2.5) els.videoPlayer.currentTime = target;
+        if(p.playing && els.videoPlayer.paused) await els.videoPlayer.play().catch(() => {});
+        if(!p.playing && !els.videoPlayer.paused) els.videoPlayer.pause();
+      }
+
+      if(currentSource.type === "youtube" && ytPlayer){
+        if(drift > 2.5) ytPlayer.seekTo(target, true);
+
+        const st = ytPlayer.getPlayerState?.();
+        const isPlaying = st === YT.PlayerState.PLAYING || st === YT.PlayerState.BUFFERING;
+
+        if(p.playing && !isPlaying) ytPlayer.playVideo();
+        if(!p.playing && isPlaying) ytPlayer.pauseVideo();
+      }
+    } finally {
+      setTimeout(() => {
+        applyingRemote = false;
+      }, 900);
+    }
+  };
+
+  // Local video: старые listeners остаются, но новый writePlayback host-only + debounce.
+  try {
+    els.videoPlayer?.addEventListener("play", () => {
+      if(!applyingRemote && currentSource?.type === "local"){
+        markLocalLock(1200);
+        writePlayback(true, els.videoPlayer.currentTime, "local-play");
+      }
+    });
+    els.videoPlayer?.addEventListener("pause", () => {
+      if(!applyingRemote && currentSource?.type === "local"){
+        markLocalLock(1200);
+        writePlayback(false, els.videoPlayer.currentTime, "local-pause");
+      }
+    });
+    els.videoPlayer?.addEventListener("seeked", () => {
+      if(!applyingRemote && currentSource?.type === "local"){
+        markLocalLock(1400);
+        writePlayback(!els.videoPlayer.paused, els.videoPlayer.currentTime, "local-seek");
+      }
+    });
+  } catch(e) {}
+
+  function ensurePill(){
+    if(document.getElementById("jc31SyncPill")) return;
+    const p = document.createElement("div");
+    p.id = "jc31SyncPill";
+    p.textContent = "31 SYNC";
+    document.body.appendChild(p);
+  }
+
+  window.jcSyncDebug = function(){
+    return {
+      build: BUILD,
+      clientId: jc31ClientId,
+      isHost: isHost(),
+      currentRoomId,
+      currentUserUid: currentUser?.uid || "",
+      roomOwnerUid: currentRoom?.ownerUid || "",
+      currentSource,
+      sourceKey: playbackSourceKey(),
+      lastLoadedSourceKey,
+      applyingRemote,
+      localLockMsLeft: Math.max(0, localLockUntil - Date.now()),
+      lastWriteAt,
+      lastWritePlaying,
+      lastWriteTime,
+      lastYtState: ytStateName(lastYtState),
+      ytVideoId: getYTVideoId(),
+      ytState: (() => {
+        try { return ytStateName(ytPlayer?.getPlayerState?.()); } catch(e) { return ""; }
+      })(),
+      lastDebug
+    };
+  };
+
+  setInterval(() => {
+    document.body.classList.add("jc31-sync-lock");
+    ensurePill();
+  }, 1000);
+
+  setTimeout(() => {
+    document.body.classList.add("jc31-sync-lock");
+    ensurePill();
+    dbg("ready", window.jcSyncDebug());
+  }, 600);
 })();
