@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 68 — Player Geometry Fix
-   Version: stage68-player-geometry-fix-20260502-1
+   JustClover Stage 69 — Persistent Player State
+   Version: stage69-persistent-player-state-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage68-player-geometry-fix-20260502-1";
+const JC40_BUILD = "stage69-persistent-player-state-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 68 PLAYERGEOMETRY loader:", JC40_BUILD);
+console.log("JustClover Stage 69 PLAYERSTATE loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 68: base app import failed", e);
+  console.error("JustClover Stage 69: base app import failed", e);
   throw e;
 }
 
@@ -625,11 +625,11 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 68 — Player Geometry Fix
-   Version: stage68-player-geometry-fix-20260502-1
+   JustClover Stage 69 — Persistent Player State
+   Version: stage69-persistent-player-state-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage68-player-geometry-fix-20260502-1";
+  const BUILD = "stage69-persistent-player-state-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1151,12 +1151,12 @@ try{
 }catch(_){}
 
 /* =========================================================
-   JustClover Stage 68 — Player Geometry Fix
+   JustClover Stage 69 — Persistent Player State
    Главная идея: после входа в комнату показываем только active-view.
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage68-player-geometry-fix-20260502-1";
+  const BUILD = "stage69-persistent-player-state-20260502-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1393,7 +1393,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage68-player-geometry-fix-20260502-1";
+  const BUILD = "stage69-persistent-player-state-20260502-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1434,12 +1434,80 @@ try{
       const v = normalizeUrl(el?.value || el?.dataset?.currentSourceUrl || el?.dataset?.sourceUrl || '');
       if(v) return v;
     }
-    return '';
+    const embed = getNativeEmbedSource();
+    if(embed?.url) return embed.url;
+    const persisted = getPersistedSource();
+    return persisted?.url || '';
   }
 
   function getNativeSourceType(){
     const st = document.getElementById('sourceType');
     return String(st?.value || lastType || '').toLowerCase();
+  }
+
+  function roomKey(){
+    try{ return new URLSearchParams(location.search).get('room') || 'default'; }catch(_){ return 'default'; }
+  }
+
+  function sourceStoreKeys(){
+    const room = roomKey();
+    return [`jc69:lastSource:${room}`, `jc69:lastSource`, `jc68:lastSource:${room}`, `jc68:lastSource`];
+  }
+
+  function inferTypeFromUrl(url, fallback){
+    const u = String(url || '').toLowerCase();
+    if(/youtu\.be|youtube\.com|youtube-nocookie\.com/.test(u)) return 'youtube';
+    if(/vk\.com|vkvideo\.ru|video_ext\.php/.test(u)) return 'vk';
+    if(/\.(mp4|webm|ogg)(?:[?#].*)?$/.test(u)) return 'mp4';
+    return String(fallback || '').toLowerCase();
+  }
+
+  function persistSource(url, type){
+    url = normalizeUrl(url);
+    if(!url) return false;
+    const data = { url, type: inferTypeFromUrl(url, type || lastType), room: roomKey(), savedAt: Date.now(), build: window.JUSTCLOVER_BUILD };
+    try{
+      localStorage.setItem(`jc69:lastSource:${data.room}`, JSON.stringify(data));
+      localStorage.setItem('jc69:lastSource', JSON.stringify(data));
+      sessionStorage.setItem(`jc69:lastSource:${data.room}`, JSON.stringify(data));
+    }catch(_){}
+    return true;
+  }
+
+  function getPersistedSource(){
+    const params = new URLSearchParams(location.search);
+    const qsUrl = params.get('jcsrc') || params.get('source') || '';
+    const qsType = params.get('jcstype') || params.get('sourceType') || '';
+    if(qsUrl) return { url: normalizeUrl(qsUrl), type: inferTypeFromUrl(qsUrl, qsType) };
+
+    for(const key of sourceStoreKeys()){
+      try{
+        const raw = localStorage.getItem(key) || sessionStorage.getItem(key);
+        if(!raw) continue;
+        const data = JSON.parse(raw);
+        if(data && data.url) return { url: normalizeUrl(data.url), type: inferTypeFromUrl(data.url, data.type) };
+      }catch(_){}
+    }
+    return null;
+  }
+
+  function getNativeEmbedSource(){
+    const candidates = [
+      document.querySelector('#iframePlayer[src]:not([src="about:blank"])'),
+      document.querySelector('#youtubePlayer iframe[src]'),
+      document.querySelector('#videoPlayer[src]'),
+      document.querySelector('.player-frame iframe[src*="youtube"]:not(#jc65DirectPlayer)'),
+      document.querySelector('.player-frame iframe[src*="youtu.be"]:not(#jc65DirectPlayer)'),
+      document.querySelector('.player-frame iframe[src*="youtube-nocookie"]:not(#jc65DirectPlayer)'),
+      document.querySelector('.player-frame iframe[src*="vk.com"]:not(#jc65DirectPlayer)'),
+      document.querySelector('.player-frame iframe[src*="vkvideo"]:not(#jc65DirectPlayer)'),
+      document.querySelector('.player-frame video[src]:not(#jc65DirectPlayer)')
+    ];
+    for(const el of candidates){
+      const src = normalizeUrl(el?.src || el?.currentSrc || '');
+      if(src && src !== 'about:blank') return { url: src, type: inferTypeFromUrl(src, getNativeSourceType()) };
+    }
+    return null;
   }
 
   function parseYouTubeId(raw){
@@ -1537,6 +1605,7 @@ try{
     lastRenderedKey = key;
     lastUrl = url;
     lastType = type || kind;
+    persistSource(lastUrl, lastType);
 
     removeDirectPlayer();
 
@@ -1637,15 +1706,18 @@ try{
     if(isAuthScreen()) return;
     keepNativeControlsAlive();
     fixYouTubeNativeVisibility();
-    // If user already typed/selected a source and native player is still empty, render fallback.
-    const url = lastUrl || getNativeSourceUrl();
-    if(url) ensureDirectPlayer(url, lastType || getNativeSourceType());
+    // If room source was restored by native app after reload, mirror it into the main player.
+    const embed = getNativeEmbedSource();
+    const persisted = getPersistedSource();
+    const url = lastUrl || embed?.url || getNativeSourceUrl() || persisted?.url || '';
+    const type = lastType || embed?.type || getNativeSourceType() || persisted?.type || '';
+    if(url) ensureDirectPlayer(url, type);
   }
 
   hookSourceSubmit();
   tick();
-  setTimeout(tick, 300);
-  setTimeout(tick, 1000);
+  // Reload recovery: base app may restore room.source with delay, so retry without loops.
+  [250, 700, 1400, 2500, 4200].forEach(ms => setTimeout(tick, ms));
   setInterval(tick, 1200);
 
   window.jc65RenderSource = ensureDirectPlayer;
@@ -1685,13 +1757,13 @@ try{
 
 
 /* =========================================================
-   Stage 68 — Player Geometry Fix.
+   Stage 69 — Persistent Player State.
    Главный плеер остаётся рабочим direct-shell, но геометрия больше не
    растягивает iframe на кривой контейнер. Для YouTube/VK держим чистый
    16:9 внутри левой области, центрируем и не залезаем под чат.
    ========================================================= */
 (function(){
-  const BUILD = "stage68-player-geometry-fix-20260502-1";
+  const BUILD = "stage69-persistent-player-state-20260502-1";
 
   function isAuthScreen(){
     return !!window.__jc62IsAuthScreen?.();
@@ -1827,3 +1899,25 @@ try{
     };
   };
 })();
+
+
+// Stage 69 public helpers — persistent source restore after reload.
+try{
+  window.jc69PlayerDebug = function(){
+    const base = window.jc68PlayerDebug ? window.jc68PlayerDebug() : (window.jc67PlayerDebug ? window.jc67PlayerDebug() : {});
+    let stored = null;
+    try{ stored = localStorage.getItem('jc69:lastSource:' + (new URLSearchParams(location.search).get('room') || 'default')) || localStorage.getItem('jc69:lastSource'); }catch(_){}
+    base.stage69 = true;
+    base.persisted = stored;
+    base.direct = !!document.getElementById('jc65DirectPlayer');
+    return base;
+  };
+  window.jc69ForgetSource = function(){
+    try{
+      const room = new URLSearchParams(location.search).get('room') || 'default';
+      ['jc69:lastSource:'+room,'jc69:lastSource','jc68:lastSource:'+room,'jc68:lastSource'].forEach(k=>localStorage.removeItem(k));
+      document.getElementById('jc65DirectPlayer')?.remove();
+    }catch(_){}
+    return true;
+  };
+}catch(_){}
