@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 48 — Restore Player Compact Bottom Controls
-   Version: stage48-restore-player-compact-bottom-20260502-1
+   JustClover Stage 50 — Edge-to-Edge Active View
+   Version: stage50-rave-like-active-view-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage48-restore-player-compact-bottom-20260502-1";
+const JC40_BUILD = "stage50-rave-like-active-view-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 48 ACTIVE loader:", JC40_BUILD);
+console.log("JustClover Stage 50 ACTIVE loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 48: base app import failed", e);
+  console.error("JustClover Stage 50: base app import failed", e);
   throw e;
 }
 
@@ -528,15 +528,15 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 48 — Restore Player Compact Bottom Controls
-   Version: stage48-restore-player-compact-bottom-20260502-1
+   JustClover Stage 50 — Edge-to-Edge Active View
+   Version: stage50-rave-like-active-view-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage48-restore-player-compact-bottom-20260502-1";
-  const STORE_KEY = "jc48ActiveViewMode";
+  const BUILD = "stage50-rave-like-active-view-20260502-1";
+  const STORE_KEY = "jc50ActiveViewMode";
   let desired = false;
 
-  try { desired = localStorage.getItem(STORE_KEY) === "1" || localStorage.getItem("jc47ActiveViewMode") === "1" || localStorage.getItem("jc46ActiveViewMode") === "1" || localStorage.getItem("jc45ActiveViewMode") === "1" || localStorage.getItem("jc44ActiveViewMode") === "1" || localStorage.getItem("jc43ActiveViewMode") === "1"; } catch(_) {}
+  try { desired = localStorage.getItem(STORE_KEY) === "1" || localStorage.getItem("jc49ActiveViewMode") === "1" || localStorage.getItem("jc48ActiveViewMode") === "1" || localStorage.getItem("jc47ActiveViewMode") === "1" || localStorage.getItem("jc46ActiveViewMode") === "1" || localStorage.getItem("jc45ActiveViewMode") === "1" || localStorage.getItem("jc44ActiveViewMode") === "1" || localStorage.getItem("jc43ActiveViewMode") === "1"; } catch(_) {}
 
   function isWatchMode(){
     const app = document.getElementById('appView');
@@ -959,4 +959,22 @@ try {
   window.jc48ToggleActiveView = window.jc46ToggleActiveView || window.jc45ToggleActiveView || window.jc42ToggleActiveView || window.jc41ToggleRaveMode;
   window.jc48SetActiveView = window.jc46SetActiveView || window.jc45SetActiveView || window.jc42SetActiveView || window.jc41SetRaveMode;
   window.jc48ToggleFullscreen = window.jc46ToggleFullscreen || window.jc45ToggleFullscreen || window.jc42ToggleFullscreen;
+} catch(_) {}
+
+
+// Stage 50 public aliases.
+try {
+  window.jc49ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc49ToggleActiveView = window.jc48ToggleActiveView || window.jc46ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc49SetActiveView = window.jc48SetActiveView || window.jc46SetActiveView || window.jc41SetRaveMode;
+  window.jc49ToggleFullscreen = window.jc48ToggleFullscreen || window.jc46ToggleFullscreen || window.jc42ToggleFullscreen;
+} catch(_) {}
+
+
+// Stage 50 public aliases — Rave-like active view.
+try {
+  window.jc50ActiveViewDebug = function(){ return window.jc49ActiveViewDebug ? window.jc49ActiveViewDebug() : (window.jc48ActiveViewDebug ? window.jc48ActiveViewDebug() : { build: window.JUSTCLOVER_BUILD }); };
+  window.jc50ToggleActiveView = window.jc49ToggleActiveView || window.jc48ToggleActiveView || window.jc46ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc50SetActiveView = window.jc49SetActiveView || window.jc48SetActiveView || window.jc46SetActiveView || window.jc41SetRaveMode;
+  window.jc50ToggleFullscreen = window.jc49ToggleFullscreen || window.jc48ToggleFullscreen || window.jc46ToggleFullscreen || window.jc42ToggleFullscreen;
 } catch(_) {}
