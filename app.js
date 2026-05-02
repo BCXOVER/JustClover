@@ -4951,8 +4951,8 @@ setTimeout(jc251Patch, 1000);
    JustClover Stage 28 CLEAN — player/cinema JS
    Version: stage28-clean-cinema-player-20260502-1
    ========================================================= */
-console.log("JustClover Stage 35 SCROLL loaded:", "stage35-player-scroll-guard-20260502-1");
-window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
+console.log("JustClover Stage 36 CATALOG loaded:", "stage36-catalog-scroll-unlock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage36-catalog-scroll-unlock-20260502-1";
 
 try{
   if(localStorage.getItem('jc28LastBuild') !== window.JUSTCLOVER_BUILD){
@@ -4965,7 +4965,7 @@ try{
 
 
 (function(){
-  const BUILD = "stage35-player-scroll-guard-20260502-1";
+  const BUILD = "stage36-catalog-scroll-unlock-20260502-1";
   let zoom = Number(localStorage.getItem('jc28CinemaZoomV4') || '0') || 0;
 
   function svg(name){
@@ -5415,10 +5415,10 @@ try{
 
 /* =========================================================
    JustClover Stage 30 — Rave-like clean sources JS
-   Version: stage35-player-scroll-guard-20260502-1
+   Version: stage36-catalog-scroll-unlock-20260502-1
    ========================================================= */
-console.log("JustClover Stage 35 SCROLL loaded:", "stage35-player-scroll-guard-20260502-1");
-window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
+console.log("JustClover Stage 36 CATALOG loaded:", "stage36-catalog-scroll-unlock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage36-catalog-scroll-unlock-20260502-1";
 
 (function(){
   function sourceLabel(type){
@@ -5621,7 +5621,7 @@ window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
 
 /* =========================================================
    JustClover Stage 30.1 — YouTube/VK source reload + sync bounce fix
-   Version: stage35-player-scroll-guard-20260502-1
+   Version: stage36-catalog-scroll-unlock-20260502-1
 
    Причина бага:
    renderRoom() вызывается на КАЖДОЕ изменение rooms/{id}, включая playback.
@@ -5629,8 +5629,8 @@ window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
    Для YouTube это вызывало ytPlayer.loadVideoById(...) снова и снова,
    поэтому видео бесконечно ставилось на паузу/включалось.
    ========================================================= */
-console.log("JustClover Stage 35 SCROLL loaded:", "stage35-player-scroll-guard-20260502-1");
-window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
+console.log("JustClover Stage 36 CATALOG loaded:", "stage36-catalog-scroll-unlock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage36-catalog-scroll-unlock-20260502-1";
 
 (function(){
   function sourceKey(s){
@@ -5773,10 +5773,10 @@ window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
 
 /* =========================================================
    JustClover Stage 30.2 — remove ad labels everywhere
-   Version: stage35-player-scroll-guard-20260502-1
+   Version: stage36-catalog-scroll-unlock-20260502-1
    ========================================================= */
-console.log("JustClover Stage 35 SCROLL loaded:", "stage35-player-scroll-guard-20260502-1");
-window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
+console.log("JustClover Stage 36 CATALOG loaded:", "stage36-catalog-scroll-unlock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage36-catalog-scroll-unlock-20260502-1";
 
 (function(){
   function labelFromType(type){
@@ -5877,10 +5877,10 @@ window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
 
 /* =========================================================
    JustClover Stage 30.3 — remove big Rave sources card JS
-   Version: stage35-player-scroll-guard-20260502-1
+   Version: stage36-catalog-scroll-unlock-20260502-1
    ========================================================= */
-console.log("JustClover Stage 35 SCROLL loaded:", "stage35-player-scroll-guard-20260502-1");
-window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
+console.log("JustClover Stage 36 CATALOG loaded:", "stage36-catalog-scroll-unlock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage36-catalog-scroll-unlock-20260502-1";
 
 (function(){
   function removeBigRaveCard(){
@@ -5903,7 +5903,7 @@ window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
 
 /* =========================================================
    JustClover Stage 31 — YouTube Sync Lock Clean Rewrite
-   Version: stage35-player-scroll-guard-20260502-1
+   Version: stage36-catalog-scroll-unlock-20260502-1
 
    Исправляет бесконечный play/pause loop:
    - source загружается только если sourceKey реально изменился;
@@ -5914,11 +5914,11 @@ window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
    - applyPlayback не дёргает play/pause/seek, если состояние уже почти такое же;
    - YouTube poll больше не спамит play/pause каждую секунду.
    ========================================================= */
-console.log("JustClover Stage 35 SCROLL loaded:", "stage35-player-scroll-guard-20260502-1");
-window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
+console.log("JustClover Stage 36 CATALOG loaded:", "stage36-catalog-scroll-unlock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage36-catalog-scroll-unlock-20260502-1";
 
 (function(){
-  const BUILD = "stage35-player-scroll-guard-20260502-1";
+  const BUILD = "stage36-catalog-scroll-unlock-20260502-1";
   const CLIENT_KEY = "jcClientId";
   let jc31ClientId = "";
   try {
@@ -6404,7 +6404,7 @@ window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
 
 /* =========================================================
    JustClover Stage 32 — Smart YouTube/VK link parser
-   Version: stage35-player-scroll-guard-20260502-1
+   Version: stage36-catalog-scroll-unlock-20260502-1
 
    Исправляет:
    - YouTube share/live/shorts/embed/youtu.be/music links;
@@ -6413,8 +6413,8 @@ window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
    - VK links with z=video-123_456;
    - автодетект источника при вставке ссылки.
    ========================================================= */
-console.log("JustClover Stage 35 SCROLL loaded:", "stage35-player-scroll-guard-20260502-1");
-window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
+console.log("JustClover Stage 36 CATALOG loaded:", "stage36-catalog-scroll-unlock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage36-catalog-scroll-unlock-20260502-1";
 
 (function(){
   function cleanRaw(raw){
@@ -6775,7 +6775,7 @@ window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
 
 /* =========================================================
    JustClover Stage 33 — Reliable YouTube/VK embed/play fix
-   Version: stage35-player-scroll-guard-20260502-1
+   Version: stage36-catalog-scroll-unlock-20260502-1
 
    Фиксит ситуацию: ссылку вставили, источник сохранился,
    но видео не появляется/не воспроизводится.
@@ -6785,8 +6785,8 @@ window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
    - YouTube получает fallback через youtube-nocookie iframe, если API не готов;
    - после установки источника он сразу загружается локально, не ждём Firebase roundtrip.
    ========================================================= */
-console.log("JustClover Stage 35 SCROLL loaded:", "stage35-player-scroll-guard-20260502-1");
-window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
+console.log("JustClover Stage 36 CATALOG loaded:", "stage36-catalog-scroll-unlock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage36-catalog-scroll-unlock-20260502-1";
 
 (function(){
   function clean(raw){
@@ -7165,15 +7165,15 @@ window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
 
 /* =========================================================
    JustClover Stage 34 — Source buttons rebind + paste-and-run
-   Version: stage35-player-scroll-guard-20260502-1
+   Version: stage36-catalog-scroll-unlock-20260502-1
 
    Почему прошлые фиксы могли "не работать":
    старые кнопки уже были привязаны к старому setSource/jcStage8SetSourceFromFields.
    Здесь перехватываем клики на кнопки источников в capture-фазе
    и всегда запускаем новый надёжный обработчик.
    ========================================================= */
-console.log("JustClover Stage 35 SCROLL loaded:", "stage35-player-scroll-guard-20260502-1");
-window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
+console.log("JustClover Stage 36 CATALOG loaded:", "stage36-catalog-scroll-unlock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage36-catalog-scroll-unlock-20260502-1";
 
 (function(){
   function toast(text){
@@ -7598,13 +7598,13 @@ window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
 
 /* =========================================================
    JustClover Stage 35 — Player Scroll Guard
-   Version: stage35-player-scroll-guard-20260502-1
+   Version: stage36-catalog-scroll-unlock-20260502-1
 
    Исправляет баг:
    при клике Play в YouTube/VK страница сама скроллится вниз к выбору источников.
    ========================================================= */
-console.log("JustClover Stage 35 SCROLL loaded:", "stage35-player-scroll-guard-20260502-1");
-window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
+console.log("JustClover Stage 36 CATALOG loaded:", "stage36-catalog-scroll-unlock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage36-catalog-scroll-unlock-20260502-1";
 
 (function(){
   let guardUntil = 0;
@@ -7775,7 +7775,7 @@ window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
 
   window.jcScrollDebug = function(){
     return {
-      build:"stage35-player-scroll-guard-20260502-1",
+      build:"stage36-catalog-scroll-unlock-20260502-1",
       scrollY: window.scrollY,
       guardY,
       guardMsLeft: Math.max(0, guardUntil - Date.now()),
@@ -7795,5 +7795,172 @@ window.JUSTCLOVER_BUILD = "stage35-player-scroll-guard-20260502-1";
   setTimeout(() => {
     ensurePill();
     console.log('[JC35 scroll] ready', window.jcScrollDebug());
+  }, 500);
+})();
+
+
+/* =========================================================
+   JustClover Stage 36 — Catalog scroll unlock
+   Version: stage36-catalog-scroll-unlock-20260502-1
+
+   Stage 35 слишком агрессивно возвращал scroll после клика по плееру.
+   Если сразу открыть каталог, guard продолжал думать, что клик был "в плеере",
+   и не давал нормально листать каталог. Здесь guard отключается, пока каталог открыт.
+   ========================================================= */
+console.log("JustClover Stage 36 CATALOG loaded:", "stage36-catalog-scroll-unlock-20260502-1");
+window.JUSTCLOVER_BUILD = "stage36-catalog-scroll-unlock-20260502-1";
+
+(function(){
+  function catalogLayer(){
+    return document.querySelector('.jc-catalog-layer');
+  }
+
+  function catalogOpen(){
+    return !!document.querySelector('.jc-catalog-layer.open');
+  }
+
+  function inCatalog(target){
+    return !!target?.closest?.('.jc-catalog-layer');
+  }
+
+  function syncCatalogState(){
+    document.body.classList.toggle('jc-catalog-open', catalogOpen());
+    document.body.classList.add('jc36-catalog-scroll');
+  }
+
+  // Когда открывается каталог — сразу гасим Stage35 guard.
+  function disableStage35Guard(){
+    if(!catalogOpen()) return;
+    document.body.classList.remove('jc35-scroll-guard');
+
+    // Stage35 хранит переменные в своём closure, но мы можем сбросить его эффект:
+    // просто разрешаем текущий scroll и не даём фокусу каталога возвращать страницу.
+    try {
+      const active = document.activeElement;
+      if(active && active.id === 'jcCatalogUrl') {
+        // Не blur сразу: пользователю может быть нужно вводить ссылку.
+        // Только не даём браузеру скроллить страницу под ним.
+        active.scrollIntoView = function(){};
+      }
+    } catch(e) {}
+  }
+
+  // Открытие каталога теперь без принудительного возврата scroll и без конфликта с guard.
+  if(typeof jcStage8OpenCatalog === 'function' && !window.__jc36CatalogOpenPatched){
+    window.__jc36CatalogOpenPatched = true;
+    const prevOpen = jcStage8OpenCatalog;
+
+    jcStage8OpenCatalog = function(preselect='youtube'){
+      const res = prevOpen(preselect);
+      setTimeout(() => {
+        syncCatalogState();
+        disableStage35Guard();
+        document.body.classList.remove('jc35-scroll-guard');
+      }, 20);
+      setTimeout(() => {
+        syncCatalogState();
+        disableStage35Guard();
+      }, 120);
+      return res;
+    };
+  }
+
+  // Клик/скролл внутри каталога не должен считаться кликом по плееру.
+  document.addEventListener('pointerdown', e => {
+    if(inCatalog(e.target)){
+      document.body.classList.remove('jc35-scroll-guard');
+      syncCatalogState();
+      e.stopPropagation();
+    }
+  }, true);
+
+  document.addEventListener('click', e => {
+    if(inCatalog(e.target)){
+      document.body.classList.remove('jc35-scroll-guard');
+      syncCatalogState();
+      // Не stopImmediatePropagation: иначе сломаем кнопки каталога.
+      e.stopPropagation();
+    }
+  }, true);
+
+  document.addEventListener('wheel', e => {
+    if(inCatalog(e.target)){
+      document.body.classList.remove('jc35-scroll-guard');
+      syncCatalogState();
+      // Не preventDefault: каталог должен листаться.
+      e.stopPropagation();
+    }
+  }, {capture:true, passive:true});
+
+  document.addEventListener('touchmove', e => {
+    if(inCatalog(e.target)){
+      document.body.classList.remove('jc35-scroll-guard');
+      syncCatalogState();
+      e.stopPropagation();
+    }
+  }, {capture:true, passive:true});
+
+  // Если закрыли каталог крестиком/кнопкой — вернуть обычное состояние.
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && catalogOpen()){
+      catalogLayer()?.classList.remove('open');
+      setTimeout(syncCatalogState, 30);
+    }
+  }, true);
+
+  // Наблюдаем класс open на каталоге.
+  function watchCatalog(){
+    const layer = catalogLayer();
+    if(!layer || layer.dataset.jc36Watch === '1') return;
+    layer.dataset.jc36Watch = '1';
+
+    const mo = new MutationObserver(() => {
+      syncCatalogState();
+      if(catalogOpen()) disableStage35Guard();
+    });
+    mo.observe(layer, {attributes:true, attributeFilter:['class']});
+  }
+
+  // Подстраховка: если пользователь нажал YouTube/VK и открылся каталог,
+  // это больше не должно запирать scroll.
+  function loop(){
+    watchCatalog();
+    syncCatalogState();
+    if(catalogOpen()) disableStage35Guard();
+    ensurePill();
+  }
+
+  function ensurePill(){
+    if(document.getElementById('jc36CatalogPill')) return;
+    const p = document.createElement('div');
+    p.id = 'jc36CatalogPill';
+    p.textContent = '36 CATALOG';
+    document.body.appendChild(p);
+  }
+
+  window.jcCatalogScrollDebug = function(){
+    return {
+      build:"stage36-catalog-scroll-unlock-20260502-1",
+      catalogOpen: catalogOpen(),
+      bodyClasses: document.body.className,
+      activeElement: document.activeElement?.id || document.activeElement?.tagName || '',
+      scrollY: window.scrollY,
+      catalogScrollTops: [...document.querySelectorAll('.jc-catalog-layer.open *')]
+        .filter(el => el.scrollHeight > el.clientHeight)
+        .slice(0,5)
+        .map(el => ({
+          tag: el.tagName,
+          cls: el.className,
+          top: el.scrollTop,
+          h: el.scrollHeight,
+          ch: el.clientHeight
+        }))
+    };
+  };
+
+  setInterval(loop, 400);
+  setTimeout(() => {
+    loop();
+    console.log('[JC36 catalog] ready', window.jcCatalogScrollDebug());
   }, 500);
 })();
