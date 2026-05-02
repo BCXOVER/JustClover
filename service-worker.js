@@ -1,4 +1,4 @@
-/* JustClover cache killer stage42-active-view-fullscreen-20260502-1 */
+/* JustClover cache killer stage43-active-view-docked-controls-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));

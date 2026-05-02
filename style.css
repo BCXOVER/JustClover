@@ -1,12 +1,12 @@
 @import url("https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@f658b5bfad3fade4eb7f9c4d82865452cdc19f00/style.css");
 
 /* =========================================================
-   JustClover Stage 42 — Active View Fullscreen Button CSS
-   Version: stage42-active-view-fullscreen-20260502-1
+   JustClover Stage 43 — Active View Docked Controls CSS
+   Version: stage43-active-view-docked-controls-20260502-1
    ========================================================= */
 
 html::after{
-  content:'42 ACTIVE'!important;
+  content:'43 ACTIVE'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -351,7 +351,7 @@ body.jc40-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
 
 
 /* =========================================================
-   JustClover Stage 42 — Active View Fullscreen Button
+   JustClover Stage 43 — Active View Docked Controls
    В просмотре больше нет page scroll: колесо работает только внутри чата/списков/каталога.
    ========================================================= */
 
@@ -560,12 +560,12 @@ body.jc40-watch-mode [class*="queue"]{
 }
 
 /* =========================================================
-   JustClover Stage 42 — Active View Fullscreen Button
+   JustClover Stage 43 — Active View Docked Controls
    Большой плеер + чат + микрофон, без лишних полос над плеером.
    ========================================================= */
 
 html::after{
-  content:'42 ACTIVE'!important;
+  content:'43 ACTIVE'!important;
   background:rgba(34,197,94,.94)!important;
 }
 
@@ -631,6 +631,36 @@ body.jc41-rave-focus #jc41RaveFloating{
   display:flex!important;
 }
 
+body.jc41-rave-focus #jc41RaveFloating{
+  position:relative!important;
+  left:auto!important;
+  top:auto!important;
+  z-index:auto!important;
+  display:flex!important;
+  width:100%!important;
+  max-width:none!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  justify-content:flex-start!important;
+}
+
+body.jc41-rave-focus #jc43ActiveDock{
+  flex:0 0 auto!important;
+  display:block!important;
+  width:100%!important;
+  padding:12px 18px 14px!important;
+  background:#03040a!important;
+  border-top:1px solid rgba(255,255,255,.09)!important;
+}
+
+body.jc41-rave-focus #jc41RaveFloating button{
+  min-height:40px!important;
+}
+
 /* Главный активный просмотр: только плеер слева и чат/микрофон справа. */
 html.jc41-rave-focus,
 body.jc41-rave-focus{
@@ -690,6 +720,13 @@ body.jc41-rave-focus .watch-main{
   min-width:0!important;
 }
 
+body.jc41-rave-focus .watch-main{
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
 body.jc41-rave-focus .watch-stage{
   display:flex!important;
   flex-direction:column!important;
@@ -714,6 +751,8 @@ body.jc41-rave-focus .player-card-redesign,
 body.jc41-rave-focus .player-card,
 body.jc41-rave-focus .player-shell{
   flex:1 1 auto!important;
+  display:flex!important;
+  flex-direction:column!important;
   width:100%!important;
   height:100%!important;
   max-height:100%!important;
@@ -729,7 +768,8 @@ body.jc41-rave-focus .player-shell{
 
 body.jc41-rave-focus .player-frame{
   width:100%!important;
-  height:100vh!important;
+  flex:1 1 auto!important;
+  height:auto!important;
   max-height:none!important;
   min-height:0!important;
   aspect-ratio:auto!important;
@@ -865,12 +905,34 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
     grid-template-rows:auto minmax(0,1fr)!important;
   }
   #jc41RaveFloating{
-    left:8px!important;
-    top:8px!important;
     max-width:calc(100vw - 16px)!important;
     overflow-x:auto!important;
+  }
+  body.jc41-rave-focus #jc43ActiveDock{
+    padding:10px 10px 12px!important;
   }
   #jc41RaveFloating button{
     white-space:nowrap!important;
   }
+}
+
+
+/* Stage 43: fullscreen target is the whole left player column, so the exit button stays visible. */
+#jc43ActiveFullscreenTarget:fullscreen,
+#jc43ActiveFullscreenTarget:-webkit-full-screen{
+  width:100vw!important;
+  height:100vh!important;
+  background:#000!important;
+}
+
+#jc43ActiveFullscreenTarget:fullscreen .watch-sidebar,
+#jc43ActiveFullscreenTarget:-webkit-full-screen .watch-sidebar{
+  display:none!important;
+}
+
+#jc43ActiveFullscreenTarget:fullscreen #jc43ActiveDock,
+#jc43ActiveFullscreenTarget:-webkit-full-screen #jc43ActiveDock{
+  position:relative!important;
+  z-index:2!important;
+  background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.85))!important;
 }
