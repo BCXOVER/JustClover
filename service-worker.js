@@ -1,4 +1,4 @@
-/* JustClover cache killer stage53-clean-topbar-20260502-1 */
+/* JustClover cache killer stage54-rave-polish-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));

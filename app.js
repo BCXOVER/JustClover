@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 53 — Clean Topbar
-   Version: stage53-clean-topbar-20260502-1
+   JustClover Stage 54 — Rave Polish
+   Version: stage54-rave-polish-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage53-clean-topbar-20260502-1";
+const JC40_BUILD = "stage54-rave-polish-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 53 CLEANTOP loader:", JC40_BUILD);
+console.log("JustClover Stage 54 RAVEPOLISH loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 53: base app import failed", e);
+  console.error("JustClover Stage 54: base app import failed", e);
   throw e;
 }
 
@@ -528,12 +528,12 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 53 — Clean Topbar
-   Version: stage53-clean-topbar-20260502-1
+   JustClover Stage 54 — Rave Polish
+   Version: stage54-rave-polish-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage53-clean-topbar-20260502-1";
-  const STORE_KEY = "jc53ActiveViewMode";
+  const BUILD = "stage54-rave-polish-20260502-1";
+  const STORE_KEY = "jc54ActiveViewMode";
   let desired = false;
 
   try { desired = localStorage.getItem(STORE_KEY) === "1" || localStorage.getItem("jc51ActiveViewMode") === "1" || localStorage.getItem("jc50ActiveViewMode") === "1" || localStorage.getItem("jc49ActiveViewMode") === "1" || localStorage.getItem("jc48ActiveViewMode") === "1" || localStorage.getItem("jc47ActiveViewMode") === "1" || localStorage.getItem("jc46ActiveViewMode") === "1" || localStorage.getItem("jc45ActiveViewMode") === "1" || localStorage.getItem("jc44ActiveViewMode") === "1" || localStorage.getItem("jc43ActiveViewMode") === "1"; } catch(_) {}
@@ -1036,4 +1036,11 @@ try{
   window.jc53ToggleActiveView = window.jc52ToggleActiveView || window.jc51ToggleActiveView || window.jc50ToggleActiveView || window.jc49ToggleActiveView || window.jc48ToggleActiveView || window.jc41ToggleRaveMode;
   window.jc53SetActiveView = window.jc52SetActiveView || window.jc51SetActiveView || window.jc50SetActiveView || window.jc49SetActiveView || window.jc48SetActiveView || window.jc41SetRaveMode;
   window.jc53ToggleFullscreen = window.jc52ToggleFullscreen || window.jc51ToggleFullscreen || window.jc50ToggleFullscreen || window.jc49ToggleFullscreen || window.jc48ToggleFullscreen || window.jc42ToggleFullscreen;
+}catch(_){ }
+
+
+// Stage 54 public aliases — polish only, no DOM reshuffle.
+try{
+  window.jc54ActiveViewDebug = function(){ return (window.jc53ActiveViewDebug||window.jc52ActiveViewDebug) ? (window.jc53ActiveViewDebug||window.jc52ActiveViewDebug)() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc54ToggleFullscreen = window.jc53ToggleFullscreen || window.jc52ToggleFullscreen || window.jc51ToggleFullscreen || window.jc42ToggleFullscreen;
 }catch(_){ }
