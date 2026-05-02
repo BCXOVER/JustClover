@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 70 — Full Frame Player
-   Version: stage70-fullframe-player-20260502-1
+   JustClover Stage 71 — Stable Persistent Player
+   Version: stage71-stable-persistent-player-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage70-fullframe-player-20260502-1";
+const JC40_BUILD = "stage71-stable-persistent-player-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 69 PLAYERSTATE loader:", JC40_BUILD);
+console.log("JustClover Stage 71 STABLEPLAYER loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 70: base app import failed", e);
+  console.error("JustClover Stage 71: base app import failed", e);
   throw e;
 }
 
@@ -625,11 +625,11 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 70 — Full Frame Player
-   Version: stage70-fullframe-player-20260502-1
+   JustClover Stage 71 — Stable Persistent Player
+   Version: stage71-stable-persistent-player-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage70-fullframe-player-20260502-1";
+  const BUILD = "stage71-stable-persistent-player-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1151,12 +1151,12 @@ try{
 }catch(_){}
 
 /* =========================================================
-   JustClover Stage 70 — Full Frame Player
+   JustClover Stage 71 — Stable Persistent Player
    Главная идея: после входа в комнату показываем только active-view.
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage70-fullframe-player-20260502-1";
+  const BUILD = "stage71-stable-persistent-player-20260502-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1393,7 +1393,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage70-fullframe-player-20260502-1";
+  const BUILD = "stage71-stable-persistent-player-20260502-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1434,80 +1434,12 @@ try{
       const v = normalizeUrl(el?.value || el?.dataset?.currentSourceUrl || el?.dataset?.sourceUrl || '');
       if(v) return v;
     }
-    const embed = getNativeEmbedSource();
-    if(embed?.url) return embed.url;
-    const persisted = getPersistedSource();
-    return persisted?.url || '';
+    return '';
   }
 
   function getNativeSourceType(){
     const st = document.getElementById('sourceType');
     return String(st?.value || lastType || '').toLowerCase();
-  }
-
-  function roomKey(){
-    try{ return new URLSearchParams(location.search).get('room') || 'default'; }catch(_){ return 'default'; }
-  }
-
-  function sourceStoreKeys(){
-    const room = roomKey();
-    return [`jc69:lastSource:${room}`, `jc69:lastSource`, `jc68:lastSource:${room}`, `jc68:lastSource`];
-  }
-
-  function inferTypeFromUrl(url, fallback){
-    const u = String(url || '').toLowerCase();
-    if(/youtu\.be|youtube\.com|youtube-nocookie\.com/.test(u)) return 'youtube';
-    if(/vk\.com|vkvideo\.ru|video_ext\.php/.test(u)) return 'vk';
-    if(/\.(mp4|webm|ogg)(?:[?#].*)?$/.test(u)) return 'mp4';
-    return String(fallback || '').toLowerCase();
-  }
-
-  function persistSource(url, type){
-    url = normalizeUrl(url);
-    if(!url) return false;
-    const data = { url, type: inferTypeFromUrl(url, type || lastType), room: roomKey(), savedAt: Date.now(), build: window.JUSTCLOVER_BUILD };
-    try{
-      localStorage.setItem(`jc69:lastSource:${data.room}`, JSON.stringify(data));
-      localStorage.setItem('jc69:lastSource', JSON.stringify(data));
-      sessionStorage.setItem(`jc69:lastSource:${data.room}`, JSON.stringify(data));
-    }catch(_){}
-    return true;
-  }
-
-  function getPersistedSource(){
-    const params = new URLSearchParams(location.search);
-    const qsUrl = params.get('jcsrc') || params.get('source') || '';
-    const qsType = params.get('jcstype') || params.get('sourceType') || '';
-    if(qsUrl) return { url: normalizeUrl(qsUrl), type: inferTypeFromUrl(qsUrl, qsType) };
-
-    for(const key of sourceStoreKeys()){
-      try{
-        const raw = localStorage.getItem(key) || sessionStorage.getItem(key);
-        if(!raw) continue;
-        const data = JSON.parse(raw);
-        if(data && data.url) return { url: normalizeUrl(data.url), type: inferTypeFromUrl(data.url, data.type) };
-      }catch(_){}
-    }
-    return null;
-  }
-
-  function getNativeEmbedSource(){
-    const candidates = [
-      document.querySelector('#iframePlayer[src]:not([src="about:blank"])'),
-      document.querySelector('#youtubePlayer iframe[src]'),
-      document.querySelector('#videoPlayer[src]'),
-      document.querySelector('.player-frame iframe[src*="youtube"]:not(#jc65DirectPlayer)'),
-      document.querySelector('.player-frame iframe[src*="youtu.be"]:not(#jc65DirectPlayer)'),
-      document.querySelector('.player-frame iframe[src*="youtube-nocookie"]:not(#jc65DirectPlayer)'),
-      document.querySelector('.player-frame iframe[src*="vk.com"]:not(#jc65DirectPlayer)'),
-      document.querySelector('.player-frame iframe[src*="vkvideo"]:not(#jc65DirectPlayer)'),
-      document.querySelector('.player-frame video[src]:not(#jc65DirectPlayer)')
-    ];
-    for(const el of candidates){
-      const src = normalizeUrl(el?.src || el?.currentSrc || '');
-      if(src && src !== 'about:blank') return { url: src, type: inferTypeFromUrl(src, getNativeSourceType()) };
-    }
-    return null;
   }
 
   function parseYouTubeId(raw){
@@ -1605,7 +1537,6 @@ try{
     lastRenderedKey = key;
     lastUrl = url;
     lastType = type || kind;
-    persistSource(lastUrl, lastType);
 
     removeDirectPlayer();
 
@@ -1706,18 +1637,15 @@ try{
     if(isAuthScreen()) return;
     keepNativeControlsAlive();
     fixYouTubeNativeVisibility();
-    // If room source was restored by native app after reload, mirror it into the main player.
-    const embed = getNativeEmbedSource();
-    const persisted = getPersistedSource();
-    const url = lastUrl || embed?.url || getNativeSourceUrl() || persisted?.url || '';
-    const type = lastType || embed?.type || getNativeSourceType() || persisted?.type || '';
-    if(url) ensureDirectPlayer(url, type);
+    // If user already typed/selected a source and native player is still empty, render fallback.
+    const url = lastUrl || getNativeSourceUrl();
+    if(url) ensureDirectPlayer(url, lastType || getNativeSourceType());
   }
 
   hookSourceSubmit();
   tick();
-  // Reload recovery: base app may restore room.source with delay, so retry without loops.
-  [250, 700, 1400, 2500, 4200].forEach(ms => setTimeout(tick, ms));
+  setTimeout(tick, 300);
+  setTimeout(tick, 1000);
   setInterval(tick, 1200);
 
   window.jc65RenderSource = ensureDirectPlayer;
@@ -1743,7 +1671,7 @@ try{
 })();
 
 
-// Stage 67 public helpers. Direct player is the main active-view player; native source form stays alive only for room state.
+// Stage 71 public helpers. Stable direct player + persistent source state.
 try{
   window.jc67RenderSource = window.jc65RenderSource;
   window.jc67PlayerDebug = function(){
@@ -1757,291 +1685,182 @@ try{
 
 
 /* =========================================================
-   Stage 69 — Persistent Player State.
-   Главный плеер остаётся рабочим direct-shell, но геометрия больше не
-   растягивает iframe на кривой контейнер. Для YouTube/VK держим чистый
-   16:9 внутри левой области, центрируем и не залезаем под чат.
+   Stage 71 — Stable Persistent Player.
+   Base: Stage67 because it actually loads YouTube/VK.
+   Removed the later geometry loops idea: no per-frame resize, no iframe reflow.
+   Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = "stage70-fullframe-player-20260502-1";
+  const BUILD = 'stage71-stable-persistent-player-20260502-1';
+  const PREFIX = 'jc71:lastSource:';
+  let restoreAttempts = 0;
+  let lastStableKey = '';
 
-  function isAuthScreen(){
-    return !!window.__jc62IsAuthScreen?.();
+  function auth(){ return !!window.__jc62IsAuthScreen?.(); }
+  function roomId(){
+    try { return new URL(location.href).searchParams.get('room') || 'default'; }
+    catch(_) { return 'default'; }
   }
-
-  function isActiveMain(){
-    return !isAuthScreen() && document.body.classList.contains('jc64-active-first');
+  function key(){ return PREFIX + roomId(); }
+  function isWatch(){
+    const app = document.getElementById('appView');
+    const watch = document.getElementById('watchSection');
+    return !auth() && !!(watch && watch.classList.contains('active') && !app?.classList.contains('hidden'));
   }
-
-  function frame(){
-    return document.querySelector('.player-frame');
+  function normalizeUrl(raw){
+    raw = String(raw || '').trim();
+    if(!raw) return '';
+    try{ return new URL(raw, location.href).href; }catch(_){ return raw; }
   }
-
-  function mainPlayer(){
-    return document.getElementById('jc65DirectPlayer') ||
-      document.querySelector('.jc67-main-player') ||
-      document.querySelector('.player-frame iframe[src*="youtube"], .player-frame iframe[src*="vk.com"], .player-frame iframe[src*="vkvideo"], .player-frame video');
-  }
-
-  function playerKind(el){
-    const kind = String(el?.getAttribute?.('data-jc65-kind') || '').toLowerCase();
-    const src = String(el?.src || '').toLowerCase();
-    if(kind) return kind;
-    if(src.includes('youtube') || src.includes('youtu.be')) return 'youtube';
-    if(src.includes('vk.com') || src.includes('vkvideo')) return 'vk';
-    if(el?.tagName === 'VIDEO') return 'video';
+  function typeFromUrl(url){
+    url = String(url||'').toLowerCase();
+    if(/youtu\.be|youtube\.com|youtube-nocookie\.com/.test(url)) return 'youtube';
+    if(/vk\.com|vkvideo\.ru|video(-?\d+)_(\d+)/.test(url)) return 'vk';
+    if(/\.(mp4|webm|ogg)(?:[?#].*)?$/.test(url)) return 'mp4';
     return '';
   }
+  function currentSourceFromDom(){
+    const url = normalizeUrl(document.getElementById('jc40Url')?.value) ||
+      normalizeUrl(document.getElementById('sourceUrl')?.value) ||
+      normalizeUrl(document.querySelector('#jc65DirectPlayer')?.getAttribute('data-jc65-url'));
+    const type = String(document.querySelector('.jc40-source-card.active')?.dataset?.jc40Source ||
+      document.getElementById('sourceType')?.value || typeFromUrl(url) || '').toLowerCase();
+    return url ? {url, type:type || typeFromUrl(url), room:roomId(), savedAt:Date.now()} : null;
+  }
+  function saveSource(data){
+    if(!data?.url || auth()) return false;
+    const source = {url:normalizeUrl(data.url), type:String(data.type || typeFromUrl(data.url) || '').toLowerCase(), room:roomId(), savedAt:Date.now()};
+    if(!source.url) return false;
+    try{ localStorage.setItem(key(), JSON.stringify(source)); }catch(_){}
+    return true;
+  }
+  function readSource(){
+    try{
+      const raw = localStorage.getItem(key());
+      if(!raw) return null;
+      const data = JSON.parse(raw);
+      if(!data?.url) return null;
+      return {url:normalizeUrl(data.url), type:String(data.type || typeFromUrl(data.url) || '').toLowerCase(), room:roomId(), savedAt:data.savedAt||0};
+    }catch(_){ return null; }
+  }
+  function directPlayer(){ return document.getElementById('jc65DirectPlayer'); }
+  function frame(){ return document.querySelector('.player-frame'); }
 
-  function fitPlayer(){
-    if(!isActiveMain()) return false;
+  function stabilizePlayer(){
+    if(!isWatch()) return false;
     const fr = frame();
-    const el = mainPlayer();
+    const el = directPlayer();
     if(!fr || !el) return false;
+    const src = String(el.src || el.getAttribute('data-jc65-url') || '');
+    const k = `${src}|${roomId()}`;
+    // Important: do not constantly write layout. Only enforce if source changed or first run.
+    if(k === lastStableKey && el.getAttribute('data-jc71-stable') === '1') return true;
+    lastStableKey = k;
 
-    const r = fr.getBoundingClientRect();
-    if(!r.width || !r.height) return false;
-
-    fr.style.setProperty('position','relative','important');
-    fr.style.setProperty('overflow','hidden','important');
-    fr.style.setProperty('background','#000','important');
-
-    const kind = playerKind(el);
-    const isEmbed = kind === 'youtube' || kind === 'vk' || el.tagName === 'IFRAME';
-
-    // Для embed-плееров лучше 16:9, иначе YouTube/VK сами рисуют кривые поля.
-    // Для direct video можно растянуть в contain на весь контейнер.
-    if(isEmbed){
-      const aspect = 16 / 9;
-      let w = r.width;
-      let h = w / aspect;
-
-      if(h > r.height){
-        h = r.height;
-        w = h * aspect;
-      }
-
-      // Чуть ниже центра не опускаем: место под dock уже снаружи, плеер должен выглядеть ровно.
-      const left = Math.round((r.width - w) / 2);
-      const top = Math.round((r.height - h) / 2);
-
-      el.style.setProperty('position','absolute','important');
-      el.style.setProperty('left', left + 'px', 'important');
-      el.style.setProperty('top', top + 'px', 'important');
-      el.style.setProperty('right','auto','important');
-      el.style.setProperty('bottom','auto','important');
-      el.style.setProperty('width', Math.round(w) + 'px', 'important');
-      el.style.setProperty('height', Math.round(h) + 'px', 'important');
-      el.style.setProperty('min-width','0','important');
-      el.style.setProperty('min-height','0','important');
-      el.style.setProperty('max-width','none','important');
-      el.style.setProperty('max-height','none','important');
-      el.style.setProperty('transform','none','important');
-      el.style.setProperty('border','0','important');
-      el.style.setProperty('background','#000','important');
-      el.style.setProperty('z-index','30','important');
-      el.style.setProperty('opacity','1','important');
-      el.style.setProperty('visibility','visible','important');
-    } else {
-      el.style.setProperty('position','absolute','important');
-      el.style.setProperty('inset','0','important');
-      el.style.setProperty('width','100%','important');
-      el.style.setProperty('height','100%','important');
-      el.style.setProperty('object-fit','contain','important');
-      el.style.setProperty('background','#000','important');
-      el.style.setProperty('z-index','30','important');
-    }
-
-    document.body.classList.add('jc68-player-geometry');
-    fr.setAttribute('data-jc68-fit','1');
+    fr.setAttribute('data-jc71-stable-frame','1');
+    el.setAttribute('data-jc71-stable','1');
+    el.style.setProperty('position','absolute','important');
+    el.style.setProperty('inset','0','important');
+    el.style.setProperty('width','100%','important');
+    el.style.setProperty('height','100%','important');
+    el.style.setProperty('min-width','0','important');
+    el.style.setProperty('min-height','0','important');
+    el.style.setProperty('max-width','none','important');
+    el.style.setProperty('max-height','none','important');
+    el.style.setProperty('transform','none','important');
+    el.style.setProperty('border','0','important');
+    el.style.setProperty('background','#000','important');
+    el.style.setProperty('z-index','30','important');
+    el.style.setProperty('opacity','1','important');
+    el.style.setProperty('visibility','visible','important');
     return true;
   }
 
-  function tick(){
-    try{ fitPlayer(); }catch(e){}
+  function renderSaved(delay=0){
+    const data = readSource();
+    if(!data?.url || !isWatch()) return false;
+    setTimeout(()=>{
+      if(!isWatch()) return;
+      const direct = directPlayer();
+      const same = direct && normalizeUrl(direct.getAttribute('data-jc65-url') || '') === data.url;
+      if(!same && typeof window.jc65RenderSource === 'function'){
+        window.jc65RenderSource(data.url, data.type || typeFromUrl(data.url));
+      }
+      stabilizePlayer();
+    }, delay);
+    return true;
   }
 
-  window.addEventListener('resize', tick, {passive:true});
-  window.addEventListener('orientationchange', () => setTimeout(tick, 120), {passive:true});
-  document.addEventListener('fullscreenchange', () => setTimeout(tick, 80), true);
-  document.addEventListener('webkitfullscreenchange', () => setTimeout(tick, 80), true);
-  document.addEventListener('click', () => setTimeout(tick, 80), true);
+  // Wrap the Stage67 renderer: save once, render once, no geometry loop.
+  const prevRender = window.jc65RenderSource;
+  if(typeof prevRender === 'function' && !prevRender.__jc71Wrapped){
+    const wrapped = function(url, type){
+      const data = {url:normalizeUrl(url), type:String(type || typeFromUrl(url) || '').toLowerCase()};
+      if(data.url) saveSource(data);
+      const out = prevRender.apply(this, arguments);
+      setTimeout(stabilizePlayer, 60);
+      setTimeout(stabilizePlayer, 350);
+      return out;
+    };
+    wrapped.__jc71Wrapped = true;
+    window.jc65RenderSource = wrapped;
+    window.jc67RenderSource = wrapped;
+  }
 
-  const mo = new MutationObserver(() => setTimeout(tick, 0));
-  mo.observe(document.documentElement || document.body, {
-    subtree:true,
-    childList:true,
-    attributes:true,
-    attributeFilter:['src','style','class','data-jc65-kind']
-  });
+  document.addEventListener('click', function(e){
+    const btn = e.target?.closest?.('#jc40RunBtn,#setSourceBtn,[data-jc40-paste-run]');
+    if(!btn) return;
+    setTimeout(()=>{
+      const data = currentSourceFromDom();
+      if(data) saveSource(data);
+      stabilizePlayer();
+    }, 80);
+  }, true);
 
-  tick();
-  setTimeout(tick, 250);
-  setTimeout(tick, 900);
-  setInterval(tick, 1200);
+  document.addEventListener('change', function(e){
+    if(e.target?.matches?.('#sourceUrl,#jc40Url,#sourceType,input[name="sourceUrl"]')){
+      setTimeout(()=>{ const data=currentSourceFromDom(); if(data) saveSource(data); }, 80);
+    }
+  }, true);
 
-  window.jc68FitPlayer = fitPlayer;
-  window.jc68PlayerDebug = function(){
+  // Restore with finite attempts only. No infinite reload/re-render loop.
+  function restoreTick(){
+    if(!isWatch()) return;
+    restoreAttempts += 1;
+    const live = currentSourceFromDom();
+    if(live?.url) saveSource(live);
+    renderSaved(0);
+    stabilizePlayer();
+  }
+
+  [250, 800, 1600, 2800, 4500].forEach(ms => setTimeout(restoreTick, ms));
+  window.addEventListener('resize', () => setTimeout(stabilizePlayer, 120), {passive:true});
+  document.addEventListener('fullscreenchange', () => setTimeout(stabilizePlayer, 120), true);
+  document.addEventListener('webkitfullscreenchange', () => setTimeout(stabilizePlayer, 120), true);
+
+  window.jc71SaveCurrentSource = function(){ const data=currentSourceFromDom(); return data ? saveSource(data) : false; };
+  window.jc71RestorePlayer = function(){ return renderSaved(0); };
+  window.jc71StabilizePlayer = stabilizePlayer;
+  window.jc71ForgetSource = function(){ try{ localStorage.removeItem(key()); }catch(_){} return true; };
+  window.jc71PlayerDebug = function(){
     const fr = frame();
-    const el = mainPlayer();
+    const el = directPlayer();
     const frR = fr?.getBoundingClientRect?.();
     const elR = el?.getBoundingClientRect?.();
     return {
       build: BUILD,
-      active: isActiveMain(),
-      hasFrame: !!fr,
-      hasPlayer: !!el,
-      kind: playerKind(el),
+      auth: auth(),
+      watch: isWatch(),
+      storageKey:key(),
+      stored: readSource(),
+      live: currentSourceFromDom(),
+      direct: !!el,
+      directUrl: el?.getAttribute('data-jc65-url') || '',
+      directSrc: el?.src || '',
+      stable: el?.getAttribute('data-jc71-stable') === '1',
       frame: frR ? {x:Math.round(frR.x), y:Math.round(frR.y), w:Math.round(frR.width), h:Math.round(frR.height)} : null,
       player: elR ? {x:Math.round(elR.x), y:Math.round(elR.y), w:Math.round(elR.width), h:Math.round(elR.height)} : null,
-      src: el?.src || '',
-      fitted: fr?.getAttribute?.('data-jc68-fit') === '1'
-    };
-  };
-})();
-
-
-// Stage 69 public helpers — persistent source restore after reload.
-try{
-  window.jc69PlayerDebug = function(){
-    const base = window.jc68PlayerDebug ? window.jc68PlayerDebug() : (window.jc67PlayerDebug ? window.jc67PlayerDebug() : {});
-    let stored = null;
-    try{ stored = localStorage.getItem('jc69:lastSource:' + (new URLSearchParams(location.search).get('room') || 'default')) || localStorage.getItem('jc69:lastSource'); }catch(_){}
-    base.stage69 = true;
-    base.persisted = stored;
-    base.direct = !!document.getElementById('jc65DirectPlayer');
-    return base;
-  };
-  window.jc69ForgetSource = function(){
-    try{
-      const room = new URLSearchParams(location.search).get('room') || 'default';
-      ['jc69:lastSource:'+room,'jc69:lastSource','jc68:lastSource:'+room,'jc68:lastSource'].forEach(k=>localStorage.removeItem(k));
-      document.getElementById('jc65DirectPlayer')?.remove();
-    }catch(_){}
-    return true;
-  };
-}catch(_){}
-
-
-/* =========================================================
-   Stage 70 — Full Frame Player.
-   Stage68/69 сохраняли источник, но contain-геометрия давала белую/серую
-   полосу и кривую посадку. Тут не трогаем auth/chat/source-state: только
-   стабилизируем видимый player shell так, чтобы он закрывал всю левую область.
-   ========================================================= */
-(function(){
-  const BUILD = "stage70-fullframe-player-20260502-1";
-
-  function isAuth(){ return !!window.__jc62IsAuthScreen?.(); }
-  function isWatch(){
-    return !isAuth() && !!document.getElementById('watchSection')?.classList.contains('active') && !document.getElementById('appView')?.classList.contains('hidden');
-  }
-  function frame(){ return document.querySelector('.player-frame'); }
-  function player(){
-    return document.getElementById('jc65DirectPlayer') ||
-      document.querySelector('.player-frame .jc67-main-player') ||
-      document.querySelector('.player-frame iframe[src*="youtube"], .player-frame iframe[src*="vk.com"], .player-frame iframe[src*="vkvideo"], .player-frame video[src]');
-  }
-  function kind(el){
-    const k = String(el?.getAttribute?.('data-jc65-kind') || '').toLowerCase();
-    const src = String(el?.src || '').toLowerCase();
-    if(k) return k;
-    if(src.includes('youtube') || src.includes('youtu.be')) return 'youtube';
-    if(src.includes('vk.com') || src.includes('vkvideo')) return 'vk';
-    if(el?.tagName === 'VIDEO') return 'video';
-    return '';
-  }
-  function paintBlack(el){
-    for(let n=el; n && n !== document.body; n=n.parentElement){
-      try{
-        if(n.matches?.('.player-frame,.player-shell,.player-card,.player-card-redesign,.watch-stage,.watch-main')){
-          n.style.setProperty('background','#000','important');
-          n.style.setProperty('overflow','hidden','important');
-        }
-      }catch(_){}
-    }
-  }
-  function fit(){
-    if(!isWatch()) return false;
-    const fr = frame();
-    const el = player();
-    if(!fr || !el) return false;
-
-    paintBlack(fr);
-    paintBlack(el);
-
-    document.body.classList.add('jc70-player-fullframe');
-    fr.setAttribute('data-jc70-fullframe','1');
-
-    // Direct player должен закрывать весь слот. Старый native iframe/emptyPlayer остаётся под ним,
-    // но больше не должен проглядывать белыми полосами.
-    el.style.setProperty('position','absolute','important');
-    el.style.setProperty('left','0','important');
-    el.style.setProperty('top','0','important');
-    el.style.setProperty('right','0','important');
-    el.style.setProperty('bottom','0','important');
-    el.style.setProperty('inset','0','important');
-    el.style.setProperty('width','100%','important');
-    el.style.setProperty('height','100%','important');
-    el.style.setProperty('min-width','100%','important');
-    el.style.setProperty('min-height','100%','important');
-    el.style.setProperty('max-width','none','important');
-    el.style.setProperty('max-height','none','important');
-    el.style.setProperty('transform','none','important');
-    el.style.setProperty('z-index','50','important');
-    el.style.setProperty('opacity','1','important');
-    el.style.setProperty('visibility','visible','important');
-    el.style.setProperty('display','block','important');
-    el.style.setProperty('border','0','important');
-    el.style.setProperty('background','#000','important');
-    if(el.tagName === 'VIDEO') el.style.setProperty('object-fit','contain','important');
-
-    const empty = document.getElementById('emptyPlayer');
-    if(empty && el.id === 'jc65DirectPlayer'){
-      empty.style.setProperty('display','none','important');
-      empty.style.setProperty('background','#000','important');
-    }
-
-    // Когда direct shell активен, не даём старым iframe/video торчать боком.
-    if(el.id === 'jc65DirectPlayer'){
-      fr.querySelectorAll('iframe,video,.embed-box,#youtubePlayer,#iframePlayer,#videoPlayer').forEach(n=>{
-        if(n === el || n.contains?.(el)) return;
-        try{
-          n.style.setProperty('z-index','1','important');
-          n.style.setProperty('opacity','0','important');
-          n.style.setProperty('pointer-events','none','important');
-        }catch(_){}
-      });
-    }
-    return true;
-  }
-
-  function tick(){ try{ fit(); }catch(_){} }
-  window.addEventListener('resize', tick, {passive:true});
-  window.addEventListener('orientationchange', ()=>setTimeout(tick,80), {passive:true});
-  document.addEventListener('fullscreenchange', ()=>setTimeout(tick,80), true);
-  document.addEventListener('click', ()=>setTimeout(tick,80), true);
-  const mo = new MutationObserver(()=>setTimeout(tick,0));
-  mo.observe(document.documentElement || document.body, {subtree:true, childList:true, attributes:true, attributeFilter:['style','class','src','data-jc65-kind']});
-  tick(); setTimeout(tick,150); setTimeout(tick,600); setInterval(tick,350);
-
-  window.jc70FitPlayer = fit;
-  window.jc70PlayerDebug = function(){
-    const fr = frame();
-    const el = player();
-    const a = fr?.getBoundingClientRect?.();
-    const b = el?.getBoundingClientRect?.();
-    return {
-      build: BUILD,
-      watch:isWatch(),
-      hasFrame:!!fr,
-      hasPlayer:!!el,
-      kind:kind(el),
-      frame:a ? {x:Math.round(a.x),y:Math.round(a.y),w:Math.round(a.width),h:Math.round(a.height)} : null,
-      player:b ? {x:Math.round(b.x),y:Math.round(b.y),w:Math.round(b.width),h:Math.round(b.height)} : null,
-      src:el?.src || '',
-      fullframe:fr?.getAttribute?.('data-jc70-fullframe') === '1',
-      stored: window.jc69PlayerDebug?.().stored || ''
+      attempts: restoreAttempts
     };
   };
 })();
