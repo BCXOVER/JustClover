@@ -3337,7 +3337,7 @@ html::after{
 
 /* =========================================================
    JustClover Stage 81 — Real Stable Player Dock
-   Version: stage90-true-live-background-glass-20260502-1
+   Version: stage91-deep-live-background-glass-20260502-1
 
    One stable active-room layout:
    topbar / player / real bottom controls / chat.
@@ -3746,7 +3746,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
 
 /* =========================================================
    JustClover Stage 81 — Player Mic Overlay
-   Version: stage90-true-live-background-glass-20260502-1
+   Version: stage91-deep-live-background-glass-20260502-1
 
    Keep Stage80 stable layout. Remove chat button from the lower dock and move
    mic control inside the player so it remains available in fullscreen.
@@ -3895,7 +3895,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc81PlayerMic{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage90-true-live-background-glass-20260502-1
+   Version: stage91-deep-live-background-glass-20260502-1
 
    Keep Stage80 layout. Mic is mounted on .watch-main, not inside the iframe
    and not hidden by old jc67 player-child rules, so it remains visible in
@@ -4068,7 +4068,7 @@ body.jc80-real-dock .watch-main #jc82PlayerMic[hidden]{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage90-true-live-background-glass-20260502-1
+   Version: stage91-deep-live-background-glass-20260502-1
    Put mic back into bottom dock; hide overlay mic; hide chat.
    ========================================================= */
 html::after{ content:'88 ICONMIC'!important; }
@@ -4231,7 +4231,7 @@ body.jc88-icon-mic-dock #jc86FullscreenProxy{
 
 /* =========================================================
    JustClover Stage 89 — Glass Chat + Dock Transparency
-   Version: stage90-true-live-background-glass-20260502-1
+   Version: stage91-deep-live-background-glass-20260502-1
 
    Keep Stage88 active layout and mic dock behavior.
    Make the strip under the player translucent so the live background can show
@@ -4352,7 +4352,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
 
 /* =========================================================
    JustClover Stage 90 — True Live Background Glass
-   Version: stage90-true-live-background-glass-20260502-1
+   Version: stage91-deep-live-background-glass-20260502-1
 
    Stage89 was glass over a dark layer. Stage90 lifts the native live bg layer
    behind active room and makes dock/chat/sidebar actually see-through.
@@ -4516,4 +4516,225 @@ body.jc80-real-dock #jc51RaveTopbar{
   border-bottom:1px solid rgba(255,255,255,.08)!important;
   backdrop-filter:blur(16px) saturate(150%)!important;
   -webkit-backdrop-filter:blur(16px) saturate(150%)!important;
+}
+
+/* =========================================================
+   JustClover Stage 91 — Deep Live Background Glass
+   Version: stage91-deep-live-background-glass-20260502-1
+
+   Stage90 made glass but the room still sat on top of dark backing layers.
+   Stage91 puts a real background layer above those backings and aggressively
+   clears dark backgrounds only outside the video itself.
+   ========================================================= */
+
+html::after{
+  content:'91 DEEPGLASS'!important;
+  background:rgba(125,211,252,.96)!important;
+  color:#03130a!important;
+}
+
+body.jc80-real-dock,
+body.jc90-live-glass,
+body.jc91-deep-glass{
+  background:transparent!important;
+  background-color:transparent!important;
+}
+
+#jc91RoomBg{
+  position:fixed!important;
+  inset:0!important;
+  z-index:1!important;
+  pointer-events:none!important;
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+  overflow:hidden!important;
+  background:
+    linear-gradient(180deg,rgba(3,4,10,.14),rgba(3,4,10,.32)),
+    radial-gradient(circle at 24% 18%,rgba(99,102,241,.24),transparent 38%),
+    radial-gradient(circle at 78% 20%,rgba(251,113,133,.18),transparent 38%),
+    radial-gradient(circle at 55% 82%,rgba(34,197,94,.12),transparent 44%),
+    #06070d!important;
+  background-size:cover!important;
+  background-position:center!important;
+}
+body:not(.jc80-real-dock) #jc91RoomBg{
+  display:none!important;
+}
+#jc91RoomBg .jc91-bg-clone,
+#jc91RoomBg .bg,
+#jc91RoomBg .aurora,
+#jc91RoomBg .grid-bg,
+#jc91RoomBg .grain{
+  display:block!important;
+  visibility:visible!important;
+  pointer-events:none!important;
+}
+#jc91RoomBg .jc91-bg-clone,
+#jc91RoomBg .bg{
+  position:absolute!important;
+  inset:0!important;
+  z-index:0!important;
+  opacity:1!important;
+}
+#jc91RoomBg .jc91-dim{
+  position:absolute!important;
+  inset:0!important;
+  z-index:2!important;
+  pointer-events:none!important;
+  background:
+    radial-gradient(circle at 70% 10%,rgba(251,113,133,.08),transparent 40%),
+    linear-gradient(90deg,rgba(2,4,10,.18),rgba(2,4,10,.10) 45%,rgba(2,4,10,.26))!important;
+}
+
+/* Keep original live bg available if it exists. */
+body.jc80-real-dock > .bg,
+body.jc80-real-dock .bg:not(#jc91RoomBg .bg){
+  display:block!important;
+  position:fixed!important;
+  inset:0!important;
+  z-index:1!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:none!important;
+}
+
+/* All UI goes above the background layer. */
+body.jc80-real-dock #appView,
+body.jc80-real-dock .app,
+body.jc80-real-dock .content,
+body.jc80-real-dock #watchSection,
+body.jc80-real-dock .watch-layout,
+body.jc80-real-dock .watch-main,
+body.jc80-real-dock .watch-sidebar,
+body.jc80-real-dock .topbar,
+body.jc80-real-dock #jc51RaveTopbar{
+  z-index:3!important;
+}
+
+/* Kill dark canvases around the video. */
+html.jc80-real-dock,
+body.jc80-real-dock,
+body.jc80-real-dock #appView,
+body.jc80-real-dock #appView.app,
+body.jc80-real-dock .app,
+body.jc80-real-dock .content,
+body.jc80-real-dock #watchSection,
+body.jc80-real-dock .watch-layout,
+body.jc80-real-dock .watch-main{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+}
+
+body.jc80-real-dock .watch-main::before,
+body.jc80-real-dock .watch-main::after,
+body.jc80-real-dock .watch-layout::before,
+body.jc80-real-dock .watch-layout::after,
+body.jc80-real-dock .watch-sidebar::before,
+body.jc80-real-dock .watch-sidebar::after,
+body.jc80-real-dock .chat-card::before,
+body.jc80-real-dock .chat-card::after,
+body.jc80-real-dock #jc80Dock::before,
+body.jc80-real-dock #jc80Dock::after{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+}
+
+/* Keep video black only inside the actual video area. */
+body.jc80-real-dock .watch-stage,
+body.jc80-real-dock .player-card-redesign,
+body.jc80-real-dock .player-card,
+body.jc80-real-dock .player-shell,
+body.jc80-real-dock .player-frame,
+body.jc80-real-dock .player-frame iframe,
+body.jc80-real-dock .player-frame video,
+body.jc80-real-dock .player-frame .embed-box,
+body.jc80-real-dock .player-frame #youtubePlayer,
+body.jc80-real-dock .player-frame #youtubePlayer iframe,
+body.jc80-real-dock .player-frame #iframePlayer,
+body.jc80-real-dock .player-frame #videoPlayer,
+body.jc80-real-dock .player-frame #jc65DirectPlayer,
+body.jc80-real-dock .player-frame .jc65-direct-player,
+body.jc80-real-dock .player-frame .jc67-main-player{
+  background:#000!important;
+}
+
+/* Bottom strip: actually transparent, not black. */
+body.jc80-real-dock #jc80Dock{
+  background:rgba(4,6,12,.06)!important;
+  background-image:linear-gradient(180deg,rgba(4,6,12,.00),rgba(4,6,12,.08))!important;
+  border-top:1px solid rgba(255,255,255,.06)!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(7px) saturate(145%)!important;
+  -webkit-backdrop-filter:blur(7px) saturate(145%)!important;
+}
+body.jc80-real-dock #jc80Dock .jc80-dock-inner{
+  background:rgba(8,10,18,.28)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  box-shadow:0 12px 26px rgba(0,0,0,.18)!important;
+  backdrop-filter:blur(16px) saturate(160%)!important;
+  -webkit-backdrop-filter:blur(16px) saturate(160%)!important;
+}
+
+/* Right chat: glass, with much less black. */
+body.jc80-real-dock .watch-sidebar{
+  background:linear-gradient(180deg,rgba(18,12,26,.16),rgba(6,6,12,.22))!important;
+  background-color:rgba(8,8,14,.18)!important;
+  border-left:1px solid rgba(255,255,255,.065)!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(12px) saturate(145%)!important;
+  -webkit-backdrop-filter:blur(12px) saturate(145%)!important;
+}
+body.jc80-real-dock .chat-card{
+  background:rgba(10,12,22,.12)!important;
+  background-color:rgba(10,12,22,.12)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  box-shadow:0 14px 34px rgba(0,0,0,.12)!important;
+  backdrop-filter:blur(10px) saturate(145%)!important;
+  -webkit-backdrop-filter:blur(10px) saturate(145%)!important;
+}
+body.jc80-real-dock .chat-card .side-card-head,
+body.jc80-real-dock .chat-card .message-form,
+body.jc80-real-dock .chat-card #chatForm{
+  background:rgba(8,10,18,.08)!important;
+  background-color:rgba(8,10,18,.08)!important;
+  border-color:rgba(255,255,255,.075)!important;
+}
+body.jc80-real-dock .chat-card input,
+body.jc80-real-dock .chat-card textarea,
+body.jc80-real-dock .chat-card .message-input,
+body.jc80-real-dock .chat-card [contenteditable="true"]{
+  background:rgba(255,255,255,.055)!important;
+  border-color:rgba(255,255,255,.13)!important;
+}
+body.jc80-real-dock .chat-card .message,
+body.jc80-real-dock .chat-card [data-message-id],
+body.jc80-real-dock .chat-card .chat-message{
+  background:rgba(255,255,255,.03)!important;
+  border-color:rgba(255,255,255,.065)!important;
+}
+
+/* Topbar: transparent enough to match the room. */
+body.jc80-real-dock .topbar,
+body.jc80-real-dock #jc51RaveTopbar{
+  background:linear-gradient(90deg,rgba(18,10,22,.22),rgba(8,8,14,.28))!important;
+  background-color:rgba(8,8,14,.22)!important;
+  border-bottom:1px solid rgba(255,255,255,.06)!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(12px) saturate(145%)!important;
+  -webkit-backdrop-filter:blur(12px) saturate(145%)!important;
+}
+
+/* Force visual transparency on common panel wrappers in active room only. */
+body.jc80-real-dock .side-card,
+body.jc80-real-dock .panel,
+body.jc80-real-dock .panel-soft{
+  background-color:rgba(10,12,22,.12)!important;
+  background-image:none!important;
+  backdrop-filter:blur(10px) saturate(145%)!important;
+  -webkit-backdrop-filter:blur(10px) saturate(145%)!important;
 }

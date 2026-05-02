@@ -1,12 +1,12 @@
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage90-true-live-background-glass-20260502-1
+   Version: stage91-deep-live-background-glass-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage90-true-live-background-glass-20260502-1";
+const JC40_BUILD = "stage91-deep-live-background-glass-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
@@ -626,10 +626,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage90-true-live-background-glass-20260502-1
+   Version: stage91-deep-live-background-glass-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage90-true-live-background-glass-20260502-1";
+  const BUILD = "stage91-deep-live-background-glass-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1156,7 +1156,7 @@ try{
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage90-true-live-background-glass-20260502-1";
+  const BUILD = "stage91-deep-live-background-glass-20260502-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1394,7 +1394,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage90-true-live-background-glass-20260502-1";
+  const BUILD = "stage91-deep-live-background-glass-20260502-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1692,7 +1692,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage90-true-live-background-glass-20260502-1';
+  const BUILD = 'stage91-deep-live-background-glass-20260502-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1873,7 +1873,7 @@ try{
    когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
    ========================================================= */
 (function(){
-  const BUILD = "stage90-true-live-background-glass-20260502-1";
+  const BUILD = "stage91-deep-live-background-glass-20260502-1";
   const CHECK_EVERY_MS = 15000;
   const FIRST_CHECK_MS = 4500;
   const RELOAD_DELAY_MS = 1800;
@@ -1986,13 +1986,13 @@ try{
 
 /* =========================================================
    JustClover Stage 81 — Real Stable Player Dock
-   Version: stage90-true-live-background-glass-20260502-1
+   Version: stage91-deep-live-background-glass-20260502-1
 
    No player resize loop. No fixed/cover iframe fighting.
    JS only creates bottom buttons and toggles the stable CSS class.
    ========================================================= */
 (function(){
-  const BUILD = 'stage90-true-live-background-glass-20260502-1';
+  const BUILD = 'stage91-deep-live-background-glass-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2190,13 +2190,13 @@ try{
 
 /* =========================================================
    JustClover Stage 81 — Player Mic Overlay
-   Version: stage90-true-live-background-glass-20260502-1
+   Version: stage91-deep-live-background-glass-20260502-1
 
    Adds a clear mic toggle inside the player and removes the chat action from
    the bottom dock. Does not change auth, chat DOM, source logic, or player fit.
    ========================================================= */
 (function(){
-  const BUILD = 'stage90-true-live-background-glass-20260502-1';
+  const BUILD = 'stage91-deep-live-background-glass-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2361,14 +2361,14 @@ try{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage90-true-live-background-glass-20260502-1
+   Version: stage91-deep-live-background-glass-20260502-1
 
    Adds a robust mic control mounted on .watch-main. It is not a child of the
    YouTube iframe/player element and therefore remains visible in JustClover
    site fullscreen. No player scale/fit logic is changed.
    ========================================================= */
 (function(){
-  const BUILD = 'stage90-true-live-background-glass-20260502-1';
+  const BUILD = 'stage91-deep-live-background-glass-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2561,7 +2561,7 @@ try{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage90-true-live-background-glass-20260502-1
+   Version: stage91-deep-live-background-glass-20260502-1
 
    Keep Stage80 layout. Put mic back into the bottom dock next to sources and
    fullscreen, keep chat hidden, and mirror voice state on the dock button.
@@ -2569,7 +2569,7 @@ try{
    inside the YouTube/VK iframe cannot show external DOM controls.
    ========================================================= */
 (function(){
-  const BUILD = 'stage90-true-live-background-glass-20260502-1';
+  const BUILD = 'stage91-deep-live-background-glass-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2738,11 +2738,11 @@ try{
 
 /* =========================================================
    JustClover Stage 89 — Glass Chat + Dock Transparency
-   Version: stage90-true-live-background-glass-20260502-1
+   Version: stage91-deep-live-background-glass-20260502-1
    Small runtime marker/debug only; no layout JS hacks added.
    ========================================================= */
 (()=>{
-  const BUILD = 'stage90-true-live-background-glass-20260502-1';
+  const BUILD = 'stage91-deep-live-background-glass-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc89GlassDebug = function(){
     const dock = document.getElementById('jc80Dock');
@@ -2768,11 +2768,11 @@ try{
 
 /* =========================================================
    JustClover Stage 90 — True Live Background Glass
-   Version: stage90-true-live-background-glass-20260502-1
+   Version: stage91-deep-live-background-glass-20260502-1
    Adds a safe background shim only. No player/fullscreen/source/auth changes.
    ========================================================= */
 (()=>{
-  const BUILD = 'stage90-true-live-background-glass-20260502-1';
+  const BUILD = 'stage91-deep-live-background-glass-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   function activeRoom(){
@@ -2851,5 +2851,161 @@ try{
       };
     };
     return { build:BUILD, activeRoom:activeRoom(), bodyClass:document.body?.className || '', layer:pick(layer), nativeBg:pick(bg), dock:pick(dock), sidebar:pick(side), chat:pick(chat) };
+  };
+})();
+
+/* =========================================================
+   JustClover Stage 91 — Deep Live Background Glass
+   Version: stage91-deep-live-background-glass-20260502-1
+   A stronger live-bg layer for active room only. No player/fullscreen/auth edits.
+   ========================================================= */
+(()=>{
+  const BUILD = 'stage91-deep-live-background-glass-20260502-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+  let raf = 0;
+  let lastUrlBg = '';
+
+  function activeRoom(){
+    try{
+      const app = document.getElementById('appView');
+      const watch = document.getElementById('watchSection');
+      return !!(app && !app.classList.contains('hidden') && watch && watch.classList.contains('active'));
+    }catch(_){ return false; }
+  }
+
+  function ensureLayer(){
+    let el = document.getElementById('jc91RoomBg');
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'jc91RoomBg';
+      el.setAttribute('aria-hidden','true');
+      el.innerHTML = '<div class="jc91-bg-clone"></div><div class="jc91-dim"></div>';
+      document.body.insertBefore(el, document.body.firstChild || null);
+    }
+    return el;
+  }
+
+  function area(el){
+    const r = el?.getBoundingClientRect?.();
+    return r ? Math.max(0, r.width) * Math.max(0, r.height) : 0;
+  }
+
+  function getBgFromComputed(el, pseudo){
+    if(!el) return null;
+    let s;
+    try { s = getComputedStyle(el, pseudo || null); } catch(_) { return null; }
+    const img = s.backgroundImage;
+    if(!img || img === 'none') return null;
+    return {
+      image: img,
+      size: s.backgroundSize || 'cover',
+      position: s.backgroundPosition || 'center',
+      repeat: s.backgroundRepeat || 'no-repeat'
+    };
+  }
+
+  function findBestUrlBg(){
+    const selectors = ['.bg','body','#appView','.app','.content','.shell','.section.active','#lobbySection','#homeSection'];
+    const candidates = [];
+    selectors.forEach(sel => document.querySelectorAll(sel).forEach(el => {
+      ['', '::before', '::after'].forEach(p => {
+        const bg = getBgFromComputed(el, p || null);
+        if(!bg) return;
+        const score = (bg.image.includes('url(') ? 100000000 : 0) + area(el);
+        candidates.push({score, bg});
+      });
+    }));
+    document.querySelectorAll('body *').forEach(el => {
+      if(area(el) < window.innerWidth * window.innerHeight * 0.18) return;
+      const bg = getBgFromComputed(el);
+      if(bg && bg.image.includes('url(')) candidates.push({score:100000000 + area(el), bg});
+    });
+    candidates.sort((a,b)=>b.score-a.score);
+    return candidates[0]?.bg || null;
+  }
+
+  function applyBg(layer){
+    const clone = layer.querySelector('.jc91-bg-clone');
+    const best = findBestUrlBg();
+    if(best && best.image){
+      lastUrlBg = best.image;
+      try { localStorage.setItem('jc91LastRoomBg', lastUrlBg); } catch(_) {}
+      layer.style.backgroundImage = `linear-gradient(180deg,rgba(3,4,10,.16),rgba(3,4,10,.32)), ${best.image}`;
+      layer.style.backgroundSize = `cover, ${best.size || 'cover'}`;
+      layer.style.backgroundPosition = `center, ${best.position || 'center'}`;
+      layer.style.backgroundRepeat = `no-repeat, ${best.repeat || 'no-repeat'}`;
+      if(clone) clone.replaceChildren();
+      return;
+    }
+
+    try { lastUrlBg = lastUrlBg || localStorage.getItem('jc91LastRoomBg') || ''; } catch(_) {}
+    if(lastUrlBg){
+      layer.style.backgroundImage = `linear-gradient(180deg,rgba(3,4,10,.16),rgba(3,4,10,.32)), ${lastUrlBg}`;
+      layer.style.backgroundSize = 'cover, cover';
+      layer.style.backgroundPosition = 'center, center';
+      layer.style.backgroundRepeat = 'no-repeat, no-repeat';
+      return;
+    }
+
+    const native = document.querySelector('.bg');
+    if(native && clone && !clone.firstElementChild){
+      try{
+        const copied = native.cloneNode(true);
+        copied.removeAttribute('id');
+        copied.classList.add('jc91-native-bg-copy');
+        clone.replaceChildren(copied);
+      }catch(_){}
+    }
+  }
+
+  function sync(){
+    raf = 0;
+    const on = activeRoom();
+    document.body?.classList?.toggle('jc91-deep-glass', on);
+    const layer = ensureLayer();
+    layer.hidden = !on;
+    if(on) applyBg(layer);
+  }
+
+  function schedule(){ if(!raf) raf = requestAnimationFrame(sync); }
+  const mo = new MutationObserver(schedule);
+  function start(){
+    if(document.body) mo.observe(document.body, {subtree:true, attributes:true, attributeFilter:['class','style']});
+    schedule();
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true});
+  else start();
+  document.addEventListener('click', () => setTimeout(schedule, 40), true);
+  window.addEventListener('resize', schedule, {passive:true});
+  [0,120,400,1000,1800,3200].forEach(t => setTimeout(schedule, t));
+
+  window.jc91DeepGlassDebug = function(){
+    const layer = document.getElementById('jc91RoomBg');
+    const dock = document.getElementById('jc80Dock');
+    const side = document.querySelector('.watch-sidebar');
+    const chat = document.querySelector('.chat-card');
+    const pick = el => {
+      if(!el) return null;
+      const s = getComputedStyle(el);
+      return {
+        display:s.display,
+        hidden:!!el.hidden,
+        zIndex:s.zIndex,
+        backgroundColor:s.backgroundColor,
+        backgroundImage:s.backgroundImage,
+        backdropFilter:s.backdropFilter || s.webkitBackdropFilter || '',
+        opacity:s.opacity
+      };
+    };
+    return {
+      build:BUILD,
+      activeRoom:activeRoom(),
+      bodyClass:document.body?.className || '',
+      layer:pick(layer),
+      lastUrlBg:lastUrlBg,
+      dock:pick(dock),
+      sidebar:pick(side),
+      chat:pick(chat)
+    };
   };
 })();
