@@ -7,10 +7,10 @@
   <meta name="theme-color" content="#080912" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icons/icon.svg" />
-  <link rel="stylesheet" href="./style.css?v=stage28-5-fullscreen-button-20260502-1" />
+  <link rel="stylesheet" href="./style.css?v=stage28-6-hard-fullscreen-button-20260502-1" />
 
   <script>
-    window.JUSTCLOVER_BUILD = "stage28-5-fullscreen-button-20260502-1";
+    window.JUSTCLOVER_BUILD = "stage28-6-hard-fullscreen-button-20260502-1";
     (function(){
       try {
         if ("serviceWorker" in navigator) {
@@ -242,6 +242,7 @@
                         <a id="externalLink" class="btn primary" target="_blank" rel="noreferrer">Открыть</a>
                       </div>
                       <div id="emptyPlayer" class="empty-player">Выбери источник, чтобы начать просмотр.</div>
+                      <button id="jcHardFullscreenBtn" class="jc-hard-full-btn" type="button" title="Во весь экран" aria-label="Во весь экран">⛶</button>
                     </div>
                   </div>
                 </div>
@@ -410,6 +411,70 @@
   </main>
 
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script type="module" src="./app.js?v=stage28-5-fullscreen-button-20260502-1"></script>
+  <script type="module" src="./app.js?v=stage28-6-hard-fullscreen-button-20260502-1"></script>
+
+  <script>
+    window.JUSTCLOVER_BUILD = "stage28-6-hard-fullscreen-button-20260502-1";
+    (function(){
+      function toast(text){
+        var old = document.getElementById('jcHardFullscreenToast');
+        if(!old){
+          old = document.createElement('div');
+          old.id = 'jcHardFullscreenToast';
+          old.className = 'jc-hard-full-toast';
+          document.body.appendChild(old);
+        }
+        old.textContent = text;
+        old.classList.add('show');
+        clearTimeout(old._t);
+        old._t = setTimeout(function(){ old.classList.remove('show'); }, 1600);
+      }
+
+      async function toggleFull(){
+        try{
+          if(document.fullscreenElement){
+            await document.exitFullscreen();
+            toast('Fullscreen выключен');
+          }else{
+            await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
+            toast('Fullscreen включён');
+          }
+        }catch(e){
+          toast('Браузер не дал включить fullscreen');
+        }
+        sync();
+      }
+
+      function sync(){
+        var on = !!document.fullscreenElement;
+        document.body.classList.toggle('jc-hard-browser-full', on);
+        var btn = document.getElementById('jcHardFullscreenBtn');
+        if(btn){
+          btn.textContent = on ? '×' : '⛶';
+          btn.title = on ? 'Выйти из fullscreen' : 'Во весь экран';
+          btn.setAttribute('aria-label', btn.title);
+        }
+      }
+
+      function bind(){
+        var btn = document.getElementById('jcHardFullscreenBtn');
+        if(btn && btn.dataset.bound !== '1'){
+          btn.dataset.bound = '1';
+          btn.addEventListener('click', function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            toggleFull();
+          });
+        }
+        sync();
+      }
+
+      document.addEventListener('DOMContentLoaded', bind);
+      document.addEventListener('fullscreenchange', sync);
+      setInterval(bind, 1000);
+      setTimeout(bind, 300);
+    })();
+  </script>
+
 </body>
 </html>

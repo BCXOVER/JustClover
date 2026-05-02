@@ -4728,7 +4728,7 @@ body.jc-wallpaper-paused #jcWallpaperMediaLayer img{
    ========================================================= */
 
 html::after{
-  content:'28.5 CLEAN';
+  content:'28.6 CLEAN';
   position:fixed;
   left:8px;
   bottom:8px;
@@ -5220,7 +5220,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'28.5 CLEAN'!important;
+  content:'28.6 CLEAN'!important;
 }
 
 /* В CSS-кино держим плеер внутри вкладки, без системного fullscreen overlay */
@@ -5281,7 +5281,7 @@ body.jc28-cinema .player-frame{
    ========================================================= */
 
 html::after{
-  content:'28.5 CLEAN'!important;
+  content:'28.6 CLEAN'!important;
 }
 
 /* В кино iframe не просто 16:9, а заполняет экран с умным zoom.
@@ -5380,7 +5380,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'28.5 CLEAN'!important;
+  content:'28.6 CLEAN'!important;
 }
 
 body.jc28-cinema .player-frame #iframePlayer,
@@ -5454,7 +5454,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'28.5 CLEAN'!important;
+  content:'28.6 CLEAN'!important;
 }
 
 /* Всегда делаем player-frame настоящим viewport для iframe */
@@ -5576,7 +5576,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'28.5 CLEAN'!important;
+  content:'28.6 CLEAN'!important;
 }
 
 /* Чуть шире панель, потому что вернули Full */
@@ -5673,6 +5673,118 @@ body.jc28-browser-full #jc28Panel .jc28-btn[data-jc28-act="full"]{
   }
 
   body.jc28-cinema #jc28NativeFullBtn{
+    right:60px!important;
+    top:12px!important;
+  }
+}
+
+
+/* =========================================================
+   JustClover Stage 28.6 — hard HTML fullscreen button
+   Кнопка fullscreen теперь лежит прямо в index.html внутри player-frame,
+   а не создаётся через app.js. Поэтому она появится даже если app.js-патч
+   не исполнился или был закеширован.
+   ========================================================= */
+
+html::after{
+  content:'28.6 CLEAN'!important;
+}
+
+.jc-hard-full-btn{
+  position:absolute!important;
+  right:12px!important;
+  bottom:12px!important;
+  z-index:214748100!important;
+  width:42px!important;
+  height:42px!important;
+  border-radius:15px!important;
+  border:1px solid rgba(255,255,255,.18)!important;
+  background:rgba(3,6,14,.72)!important;
+  color:#fff!important;
+  display:grid!important;
+  place-items:center!important;
+  cursor:pointer!important;
+  font-size:20px!important;
+  font-weight:950!important;
+  line-height:1!important;
+  backdrop-filter:blur(14px)!important;
+  -webkit-backdrop-filter:blur(14px)!important;
+  box-shadow:0 14px 36px rgba(0,0,0,.42)!important;
+  transition:.15s ease!important;
+  pointer-events:auto!important;
+}
+
+.jc-hard-full-btn:hover{
+  transform:translateY(-1px)!important;
+  border-color:color-mix(in srgb,var(--primary2) 55%,rgba(255,255,255,.18))!important;
+  box-shadow:0 18px 46px rgba(0,0,0,.48), var(--glow)!important;
+}
+
+body.jc-hard-browser-full .jc-hard-full-btn,
+body.jc28-browser-full .jc-hard-full-btn{
+  background:linear-gradient(135deg,var(--primary),var(--primary2))!important;
+  border-color:rgba(255,255,255,.28)!important;
+}
+
+body.jc28-cinema .jc-hard-full-btn{
+  position:fixed!important;
+  top:18px!important;
+  right:76px!important;
+  bottom:auto!important;
+  z-index:2147483006!important;
+}
+
+/* На всякий случай оставляем hard-кнопку видимой поверх iframe и старых режимов */
+body.jc-cinema-open .jc-hard-full-btn,
+body.jc-real-cinema .jc-hard-full-btn,
+body.jc-css-cinema .jc-hard-full-btn,
+body.jc-site-fullscreen .jc-hard-full-btn,
+body.jc-player-frame-fullscreen .jc-hard-full-btn{
+  position:fixed!important;
+  top:18px!important;
+  right:76px!important;
+  bottom:auto!important;
+  z-index:2147483006!important;
+}
+
+.jc-hard-full-toast{
+  position:fixed!important;
+  left:50%!important;
+  bottom:86px!important;
+  z-index:2147483007!important;
+  transform:translateX(-50%) translateY(8px)!important;
+  padding:9px 13px!important;
+  border-radius:999px!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  background:rgba(3,6,14,.78)!important;
+  color:#fff!important;
+  font-size:12px!important;
+  font-weight:850!important;
+  backdrop-filter:blur(14px)!important;
+  pointer-events:none!important;
+  opacity:0!important;
+  transition:.2s ease!important;
+}
+
+.jc-hard-full-toast.show{
+  opacity:1!important;
+  transform:translateX(-50%) translateY(0)!important;
+}
+
+@media(max-width:760px){
+  .jc-hard-full-btn{
+    right:8px!important;
+    bottom:8px!important;
+    width:40px!important;
+    height:40px!important;
+  }
+
+  body.jc28-cinema .jc-hard-full-btn,
+  body.jc-cinema-open .jc-hard-full-btn,
+  body.jc-real-cinema .jc-hard-full-btn,
+  body.jc-css-cinema .jc-hard-full-btn,
+  body.jc-site-fullscreen .jc-hard-full-btn,
+  body.jc-player-frame-fullscreen .jc-hard-full-btn{
     right:60px!important;
     top:12px!important;
   }
