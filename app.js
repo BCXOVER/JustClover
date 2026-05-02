@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 64 — Active First Stable
-   Version: stage64-active-first-stable-20260502-1
+   JustClover Stage 65 — Active First Player Repair
+   Version: stage65-active-first-player-repair-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage64-active-first-stable-20260502-1";
+const JC40_BUILD = "stage65-active-first-player-repair-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 64 ACTIVEFIRST loader:", JC40_BUILD);
+console.log("JustClover Stage 65 PLAYERFIX loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 64: base app import failed", e);
+  console.error("JustClover Stage 65: base app import failed", e);
   throw e;
 }
 
@@ -625,11 +625,11 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 64 — Active First Stable
-   Version: stage64-active-first-stable-20260502-1
+   JustClover Stage 65 — Active First Player Repair
+   Version: stage65-active-first-player-repair-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage64-active-first-stable-20260502-1";
+  const BUILD = "stage65-active-first-player-repair-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1151,12 +1151,12 @@ try{
 }catch(_){}
 
 /* =========================================================
-   JustClover Stage 64 — Active First Stable
+   JustClover Stage 65 — Active First Player Repair
    Главная идея: после входа в комнату показываем только active-view.
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage64-active-first-stable-20260502-1";
+  const BUILD = "stage65-active-first-player-repair-20260502-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1380,6 +1380,289 @@ try{
       youtubeFallback: !!document.getElementById('jc64YouTubeFallback'),
       playerRect: frame ? {...frame.getBoundingClientRect().toJSON?.() || {width:frame.getBoundingClientRect().width,height:frame.getBoundingClientRect().height,top:frame.getBoundingClientRect().top,left:frame.getBoundingClientRect().left}} : null,
       chatRect: chat ? {width:chat.getBoundingClientRect().width,height:chat.getBoundingClientRect().height,top:chat.getBoundingClientRect().top,left:chat.getBoundingClientRect().left} : null
+    };
+  };
+})();
+
+
+
+/* =========================================================
+   JustClover Stage 65 — Player Load Repair
+   Active-first stays main. Auth is untouched.
+   Fix: source controls remain alive offscreen, and YouTube/VK are rendered
+   into the player slot immediately after setting a source.
+   ========================================================= */
+(function(){
+  const BUILD = "stage65-active-first-player-repair-20260502-1";
+  let lastRenderedKey = "";
+  let lastUrl = "";
+  let lastType = "";
+  let renderTimer = null;
+
+  function isAuthScreen(){
+    return !!(window.__jc62IsAuthScreen ? window.__jc62IsAuthScreen() :
+      (document.getElementById('appView')?.classList.contains('hidden')));
+  }
+
+  function isWatchMode(){
+    const app = document.getElementById('appView');
+    const watch = document.getElementById('watchSection');
+    return !!(watch && watch.classList.contains('active') && !app?.classList.contains('hidden') && !isAuthScreen());
+  }
+
+  function qs(sel, root=document){ return root.querySelector(sel); }
+
+  function playerFrame(){
+    return qs('.player-frame') || qs('.player-card-redesign') || qs('.player-card') || qs('.player-shell');
+  }
+
+  function normalizeUrl(raw){
+    raw = String(raw || '').trim();
+    if(!raw) return '';
+    try { return new URL(raw, location.href).href; } catch(_) { return raw; }
+  }
+
+  function getNativeSourceUrl(){
+    const candidates = [
+      document.getElementById('jc40Url'),
+      document.getElementById('sourceUrl'),
+      document.querySelector('input[name="sourceUrl"]'),
+      document.querySelector('[data-current-source-url]'),
+      document.querySelector('[data-source-url]')
+    ];
+    for(const el of candidates){
+      const v = normalizeUrl(el?.value || el?.dataset?.currentSourceUrl || el?.dataset?.sourceUrl || '');
+      if(v) return v;
+    }
+    return '';
+  }
+
+  function getNativeSourceType(){
+    const st = document.getElementById('sourceType');
+    return String(st?.value || lastType || '').toLowerCase();
+  }
+
+  function parseYouTubeId(raw){
+    raw = String(raw || '').trim();
+    if(!raw) return '';
+    try{
+      const u = new URL(raw, location.href);
+      const h = u.hostname.replace(/^www\./,'').toLowerCase();
+      if(h === 'youtu.be') return (u.pathname.split('/').filter(Boolean)[0] || '').replace(/[^A-Za-z0-9_-]/g,'');
+      if(h.endsWith('youtube.com') || h.endsWith('youtube-nocookie.com')){
+        const v = u.searchParams.get('v');
+        if(v) return v.replace(/[^A-Za-z0-9_-]/g,'');
+        const parts = u.pathname.split('/').filter(Boolean);
+        const idx = parts.findIndex(p => ['embed','shorts','live','v'].includes(p));
+        if(idx >= 0 && parts[idx+1]) return parts[idx+1].replace(/[^A-Za-z0-9_-]/g,'');
+      }
+    }catch(_){}
+    const m = raw.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?.*?v=|embed\/|shorts\/|live\/)|[?&]v=)([A-Za-z0-9_-]{8,})/i);
+    return m ? m[1] : '';
+  }
+
+  function parseVkEmbed(raw){
+    raw = String(raw || '').trim();
+    if(!raw) return '';
+    try{
+      const u = new URL(raw, location.href);
+      if(/video_ext\.php$/i.test(u.pathname) || u.pathname.includes('video_ext.php')){
+        return u.href.replace(/^http:/,'https:');
+      }
+      let m = (u.pathname + u.search + u.hash).match(/video(-?\d+)_(\d+)/i);
+      if(!m){
+        const z = u.searchParams.get('z') || '';
+        m = z.match(/video(-?\d+)_(\d+)/i);
+      }
+      if(m){
+        return `https://vk.com/video_ext.php?oid=${encodeURIComponent(m[1])}&id=${encodeURIComponent(m[2])}&hd=2`;
+      }
+    }catch(_){
+      const m = raw.match(/video(-?\d+)_(\d+)/i);
+      if(m) return `https://vk.com/video_ext.php?oid=${encodeURIComponent(m[1])}&id=${encodeURIComponent(m[2])}&hd=2`;
+    }
+    return '';
+  }
+
+  function isVkUrl(url){
+    return /(^|\/\/)(?:m\.)?(?:vk\.com|vkvideo\.ru)\//i.test(String(url||'')) || /video(-?\d+)_(\d+)/i.test(String(url||''));
+  }
+
+  function isYoutubeUrl(url){
+    return /youtu\.be|youtube\.com|youtube-nocookie\.com/i.test(String(url||''));
+  }
+
+  function isDirectVideo(url){
+    return /\.(mp4|webm|ogg)(?:[?#].*)?$/i.test(String(url||''));
+  }
+
+  function removeDirectPlayer(){
+    document.getElementById('jc65DirectPlayer')?.remove();
+  }
+
+  function ensureDirectPlayer(url, type){
+    if(!isWatchMode()) return false;
+    url = normalizeUrl(url || getNativeSourceUrl());
+    type = String(type || getNativeSourceType() || '').toLowerCase();
+    if(!url) return false;
+
+    const frame = playerFrame();
+    if(!frame) return false;
+
+    let kind = '';
+    let src = '';
+
+    const yt = parseYouTubeId(url);
+    if(type === 'youtube' || yt || isYoutubeUrl(url)){
+      if(!yt) return false;
+      kind = 'youtube';
+      // youtube.com tends to be less problematic than nocookie for some browsers/extensions.
+      src = `https://www.youtube.com/embed/${encodeURIComponent(yt)}?playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}`;
+    }else if(type === 'vk' || isVkUrl(url)){
+      const vk = parseVkEmbed(url);
+      if(!vk) return false;
+      kind = 'vk';
+      src = vk;
+    }else if(type === 'mp4' || type === 'direct' || isDirectVideo(url)){
+      kind = 'video';
+      src = url;
+    }else{
+      return false;
+    }
+
+    const key = `${kind}:${src}`;
+    if(key === lastRenderedKey && document.getElementById('jc65DirectPlayer')) return true;
+    lastRenderedKey = key;
+    lastUrl = url;
+    lastType = type || kind;
+
+    removeDirectPlayer();
+
+    let el;
+    if(kind === 'video'){
+      el = document.createElement('video');
+      el.controls = true;
+      el.playsInline = true;
+      el.preload = 'metadata';
+      el.src = src;
+    }else{
+      el = document.createElement('iframe');
+      el.src = src;
+      el.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-write; web-share';
+      el.allowFullscreen = true;
+      el.referrerPolicy = 'strict-origin-when-cross-origin';
+    }
+
+    el.id = 'jc65DirectPlayer';
+    el.className = `jc65-direct-player jc65-${kind}`;
+    el.setAttribute('data-jc65-url', url);
+    el.setAttribute('data-jc65-kind', kind);
+
+    frame.appendChild(el);
+    document.body.classList.add('jc65-direct-player-active');
+    return true;
+  }
+
+  function scheduleRender(url, type, delay=80){
+    if(url) lastUrl = normalizeUrl(url);
+    if(type) lastType = String(type).toLowerCase();
+    clearTimeout(renderTimer);
+    renderTimer = setTimeout(()=>{
+      ensureDirectPlayer(lastUrl || getNativeSourceUrl(), lastType || getNativeSourceType());
+    }, delay);
+    setTimeout(()=>ensureDirectPlayer(lastUrl || getNativeSourceUrl(), lastType || getNativeSourceType()), 450);
+    setTimeout(()=>ensureDirectPlayer(lastUrl || getNativeSourceUrl(), lastType || getNativeSourceType()), 1200);
+  }
+
+  function hookSourceSubmit(){
+    document.addEventListener('click', function(e){
+      const btn = e.target?.closest?.('#jc40RunBtn,#setSourceBtn,[data-jc40-paste-run]');
+      if(!btn) return;
+
+      const url =
+        normalizeUrl(document.getElementById('jc40Url')?.value) ||
+        normalizeUrl(document.getElementById('sourceUrl')?.value) ||
+        lastUrl;
+      const type =
+        String(document.querySelector('.jc40-source-card.active')?.dataset?.jc40Source || '').toLowerCase() ||
+        getNativeSourceType();
+
+      if(url) scheduleRender(url, type, 160);
+    }, true);
+
+    document.addEventListener('change', function(e){
+      if(e.target?.matches?.('#sourceUrl,#jc40Url,#sourceType,input[name="sourceUrl"]')){
+        scheduleRender(getNativeSourceUrl(), getNativeSourceType(), 180);
+      }
+    }, true);
+  }
+
+  function keepNativeControlsAlive(){
+    if(!isWatchMode()) return;
+    const panel = document.querySelector('.source-panel-embedded');
+    if(panel){
+      panel.setAttribute('data-jc65-keepalive','1');
+      panel.style.setProperty('display','block','important');
+      panel.style.setProperty('position','absolute','important');
+      panel.style.setProperty('left','-9999px','important');
+      panel.style.setProperty('top','0','important');
+      panel.style.setProperty('width','1px','important');
+      panel.style.setProperty('height','1px','important');
+      panel.style.setProperty('overflow','hidden','important');
+      panel.style.setProperty('opacity','0','important');
+      panel.style.setProperty('pointer-events','none','important');
+    }
+  }
+
+  function fixYouTubeNativeVisibility(){
+    if(!isWatchMode()) return;
+    const frame = playerFrame();
+    if(!frame) return;
+    frame.querySelectorAll('#youtubePlayer,#youtubePlayer iframe,iframe[src*="youtube"],iframe[src*="youtu.be"],iframe[src*="youtube-nocookie"],iframe[src*="vk.com"],iframe[src*="vkvideo"]').forEach(el=>{
+      el.style.setProperty('display','block','important');
+      el.style.setProperty('position','absolute','important');
+      el.style.setProperty('inset','0','important');
+      el.style.setProperty('width','100%','important');
+      el.style.setProperty('height','100%','important');
+      el.style.setProperty('opacity','1','important');
+      el.style.setProperty('visibility','visible','important');
+      el.style.setProperty('border','0','important');
+    });
+  }
+
+  function tick(){
+    if(isAuthScreen()) return;
+    keepNativeControlsAlive();
+    fixYouTubeNativeVisibility();
+    // If user already typed/selected a source and native player is still empty, render fallback.
+    const url = lastUrl || getNativeSourceUrl();
+    if(url) ensureDirectPlayer(url, lastType || getNativeSourceType());
+  }
+
+  hookSourceSubmit();
+  tick();
+  setTimeout(tick, 300);
+  setTimeout(tick, 1000);
+  setInterval(tick, 1200);
+
+  window.jc65RenderSource = ensureDirectPlayer;
+  window.jc65PlayerDebug = function(){
+    const frame = playerFrame();
+    const direct = document.getElementById('jc65DirectPlayer');
+    return {
+      build: BUILD,
+      auth: isAuthScreen(),
+      watchMode: isWatchMode(),
+      url: lastUrl || getNativeSourceUrl(),
+      type: lastType || getNativeSourceType(),
+      direct: !!direct,
+      directKind: direct?.getAttribute('data-jc65-kind') || '',
+      directSrc: direct?.src || '',
+      nativeSourceUrl: document.getElementById('sourceUrl')?.value || '',
+      catalogUrl: document.getElementById('jc40Url')?.value || '',
+      sourceType: document.getElementById('sourceType')?.value || '',
+      frame: frame ? {w: frame.getBoundingClientRect().width, h: frame.getBoundingClientRect().height} : null,
+      iframes: frame ? Array.from(frame.querySelectorAll('iframe')).map(i => i.src).slice(0,5) : []
     };
   };
 })();

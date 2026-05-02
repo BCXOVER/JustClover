@@ -6,7 +6,7 @@
    ========================================================= */
 
 html::after{
-  content:'64 ACTIVE-FIRST'!important;
+  content:'65 PLAYERFIX'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -565,7 +565,7 @@ body.jc40-watch-mode [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'64 ACTIVE-FIRST'!important;
+  content:'65 PLAYERFIX'!important;
   background:rgba(34,197,94,.94)!important;
 }
 
@@ -943,7 +943,7 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'64 ACTIVE-FIRST'!important;
+  content:'65 PLAYERFIX'!important;
 }
 
 body.jc41-rave-focus .watch-stage{
@@ -1040,7 +1040,7 @@ body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
    ========================================================= */
 
 html::after{
-  content:'64 ACTIVE-FIRST'!important;
+  content:'65 PLAYERFIX'!important;
 }
 
 body.jc41-rave-focus .watch-main,
@@ -1133,7 +1133,7 @@ body.jc41-rave-focus #jc45ActiveDock{
    ========================================================= */
 
 html::after{
-  content:'64 ACTIVE-FIRST'!important;
+  content:'65 PLAYERFIX'!important;
 }
 
 body.jc41-rave-focus .watch-layout{
@@ -1239,7 +1239,7 @@ body.jc41-rave-focus #jc45ActiveDock::after{
    верхняя плашка источника скрывается, снизу — только компактные кнопки.
    ========================================================= */
 
-html::after{ content:'64 ACTIVE-FIRST'!important; }
+html::after{ content:'65 PLAYERFIX'!important; }
 
 body.jc41-rave-focus .watch-layout{
   width:min(100vw,1540px)!important;
@@ -1406,7 +1406,7 @@ body.jc41-rave-focus .chat-card{
    плеер 16:9 без лишней чёрной шапки от растянутого контейнера.
    ========================================================= */
 
-html::after{ content:'64 ACTIVE-FIRST'!important; }
+html::after{ content:'65 PLAYERFIX'!important; }
 
 html.jc41-rave-focus,
 body.jc41-rave-focus{
@@ -1682,7 +1682,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'64 ACTIVE-FIRST'!important;
+  content:'65 PLAYERFIX'!important;
 }
 
 html.jc41-rave-focus,
@@ -1983,7 +1983,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'64 ACTIVE-FIRST'!important;
+  content:'65 PLAYERFIX'!important;
 }
 
 body.jc41-rave-focus{
@@ -2350,7 +2350,7 @@ body.jc41-rave-focus #jc41RaveFloating button{
    ========================================================= */
 
 html::after{
-  content:'64 ACTIVE-FIRST'!important;
+  content:'65 PLAYERFIX'!important;
 }
 
 body.jc41-rave-focus{
@@ -2591,7 +2591,7 @@ html:-webkit-full-screen body.jc41-rave-focus #jc51RaveTopbar{
 
 
 /* Stage 53 — remove top-right mic/chat/fullscreen icons and rebalance topbar */
-html::after{ content:'64 ACTIVE-FIRST'!important; }
+html::after{ content:'65 PLAYERFIX'!important; }
 body.jc41-rave-focus #jc51RaveTopbar{
   grid-template-columns:minmax(260px,1fr) auto minmax(120px,1fr)!important;
 }
@@ -2615,7 +2615,7 @@ body.jc41-rave-focus #jc51RaveTopbar [data-jc51-full]{
 
 
 /* Stage 54 — Rave Polish: remove top black strip feel, darken chat, tighten proportions. */
-html::after{ content:'64 ACTIVE-FIRST'!important; }
+html::after{ content:'65 PLAYERFIX'!important; }
 body.jc41-rave-focus{
   --jc54-chat:clamp(292px,17.2vw,330px)!important;
 }
@@ -2697,8 +2697,8 @@ body:not(.jc40-watch-mode):not(.jc41-rave-focus) .jc-catalog-layer.open{
    ========================================================= */
 
 html::after{
-  content:'64 ACTIVE-FIRST'!important;
-  background:rgba(52,211,153,.96)!important;
+  content:'65 PLAYERFIX'!important;
+  background:rgba(56,189,248,.96)!important;
   color:#02150d!important;
 }
 
@@ -3104,5 +3104,83 @@ body.jc64-active-first:fullscreen{
   body.jc64-active-first #jc51RaveTopbar{
     grid-template-columns:minmax(100px,1fr) auto minmax(40px,1fr)!important;
     padding:0 10px!important;
+  }
+}
+
+
+
+/* =========================================================
+   Stage 65 — Player Load Repair.
+   Keep native source controls alive offscreen and provide a direct player slot
+   for YouTube/VK when active-first hides the old UI.
+   ========================================================= */
+html::after{
+  content:'65 PLAYERFIX'!important;
+  background:rgba(56,189,248,.96)!important;
+  color:#031018!important;
+}
+
+/* Do not kill the native source form; the catalog relies on its handlers. */
+body.jc64-active-first .source-panel-embedded[data-jc65-keepalive],
+body.jc64-active-first .source-panel-embedded{
+  display:block!important;
+  position:absolute!important;
+  left:-9999px!important;
+  top:0!important;
+  width:1px!important;
+  height:1px!important;
+  min-width:1px!important;
+  min-height:1px!important;
+  max-width:1px!important;
+  max-height:1px!important;
+  overflow:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+/* Direct fallback player sits above the empty native slot, but only inside the player. */
+body.jc64-active-first .player-frame #jc65DirectPlayer,
+body.jc64-active-first #jc65DirectPlayer{
+  position:absolute!important;
+  inset:0!important;
+  z-index:8!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:100%!important;
+  min-height:100%!important;
+  border:0!important;
+  opacity:1!important;
+  visibility:visible!important;
+  background:#000!important;
+  object-fit:contain!important;
+}
+
+/* Keep native embeds visible too; fallback is only a safety layer. */
+body.jc64-active-first .player-frame #youtubePlayer,
+body.jc64-active-first .player-frame #youtubePlayer iframe,
+body.jc64-active-first .player-frame iframe[src*="youtube"],
+body.jc64-active-first .player-frame iframe[src*="youtube-nocookie"],
+body.jc64-active-first .player-frame iframe[src*="vk.com"],
+body.jc64-active-first .player-frame iframe[src*="vkvideo"]{
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:100%!important;
+  min-height:100%!important;
+  opacity:1!important;
+  visibility:visible!important;
+  border:0!important;
+}
+
+/* Chat/composer stays above Windows taskbar. */
+body.jc64-active-first{
+  --jc64-bottom-safe:max(22px, env(safe-area-inset-bottom, 0px))!important;
+}
+@media(max-height:760px){
+  body.jc64-active-first{
+    --jc64-bottom-safe:18px!important;
   }
 }

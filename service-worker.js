@@ -1,4 +1,4 @@
-/* JustClover cache killer stage64-active-first-stable-20260502-1 */
+/* JustClover cache killer stage65-active-first-player-repair-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
