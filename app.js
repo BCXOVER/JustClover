@@ -1,12 +1,12 @@
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage88-active-icon-mic-dock-20260502-1
+   Version: stage89-glass-chat-dock-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage88-active-icon-mic-dock-20260502-1";
+const JC40_BUILD = "stage89-glass-chat-dock-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
@@ -626,10 +626,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage88-active-icon-mic-dock-20260502-1
+   Version: stage89-glass-chat-dock-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage88-active-icon-mic-dock-20260502-1";
+  const BUILD = "stage89-glass-chat-dock-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1156,7 +1156,7 @@ try{
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage88-active-icon-mic-dock-20260502-1";
+  const BUILD = "stage89-glass-chat-dock-20260502-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1394,7 +1394,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage88-active-icon-mic-dock-20260502-1";
+  const BUILD = "stage89-glass-chat-dock-20260502-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1692,7 +1692,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage88-active-icon-mic-dock-20260502-1';
+  const BUILD = 'stage89-glass-chat-dock-20260502-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1873,7 +1873,7 @@ try{
    когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
    ========================================================= */
 (function(){
-  const BUILD = "stage88-active-icon-mic-dock-20260502-1";
+  const BUILD = "stage89-glass-chat-dock-20260502-1";
   const CHECK_EVERY_MS = 15000;
   const FIRST_CHECK_MS = 4500;
   const RELOAD_DELAY_MS = 1800;
@@ -1986,13 +1986,13 @@ try{
 
 /* =========================================================
    JustClover Stage 81 — Real Stable Player Dock
-   Version: stage88-active-icon-mic-dock-20260502-1
+   Version: stage89-glass-chat-dock-20260502-1
 
    No player resize loop. No fixed/cover iframe fighting.
    JS only creates bottom buttons and toggles the stable CSS class.
    ========================================================= */
 (function(){
-  const BUILD = 'stage88-active-icon-mic-dock-20260502-1';
+  const BUILD = 'stage89-glass-chat-dock-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2190,13 +2190,13 @@ try{
 
 /* =========================================================
    JustClover Stage 81 — Player Mic Overlay
-   Version: stage88-active-icon-mic-dock-20260502-1
+   Version: stage89-glass-chat-dock-20260502-1
 
    Adds a clear mic toggle inside the player and removes the chat action from
    the bottom dock. Does not change auth, chat DOM, source logic, or player fit.
    ========================================================= */
 (function(){
-  const BUILD = 'stage88-active-icon-mic-dock-20260502-1';
+  const BUILD = 'stage89-glass-chat-dock-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2361,14 +2361,14 @@ try{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage88-active-icon-mic-dock-20260502-1
+   Version: stage89-glass-chat-dock-20260502-1
 
    Adds a robust mic control mounted on .watch-main. It is not a child of the
    YouTube iframe/player element and therefore remains visible in JustClover
    site fullscreen. No player scale/fit logic is changed.
    ========================================================= */
 (function(){
-  const BUILD = 'stage88-active-icon-mic-dock-20260502-1';
+  const BUILD = 'stage89-glass-chat-dock-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2561,7 +2561,7 @@ try{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage88-active-icon-mic-dock-20260502-1
+   Version: stage89-glass-chat-dock-20260502-1
 
    Keep Stage80 layout. Put mic back into the bottom dock next to sources and
    fullscreen, keep chat hidden, and mirror voice state on the dock button.
@@ -2569,7 +2569,7 @@ try{
    inside the YouTube/VK iframe cannot show external DOM controls.
    ========================================================= */
 (function(){
-  const BUILD = 'stage88-active-icon-mic-dock-20260502-1';
+  const BUILD = 'stage89-glass-chat-dock-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2732,6 +2732,36 @@ try{
       overlayHidden: !!document.getElementById('jc82PlayerMic')?.hidden,
       fullscreen: !!fs,
       fullscreenElement: fs?.className || fs?.id || fs?.tagName || ''
+    };
+  };
+})();
+
+/* =========================================================
+   JustClover Stage 89 — Glass Chat + Dock Transparency
+   Version: stage89-glass-chat-dock-20260502-1
+   Small runtime marker/debug only; no layout JS hacks added.
+   ========================================================= */
+(()=>{
+  const BUILD = 'stage89-glass-chat-dock-20260502-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+  window.jc89GlassDebug = function(){
+    const dock = document.getElementById('jc80Dock');
+    const sidebar = document.querySelector('.watch-sidebar');
+    const chat = document.querySelector('.chat-card');
+    const css = el => el ? getComputedStyle(el) : null;
+    const pick = s => s ? {
+      backgroundColor: s.backgroundColor,
+      backgroundImage: s.backgroundImage,
+      backdropFilter: s.backdropFilter || s.webkitBackdropFilter || '',
+      borderColor: s.borderColor,
+      opacity: s.opacity
+    } : null;
+    return {
+      build: BUILD,
+      dock: pick(css(dock)),
+      sidebar: pick(css(sidebar)),
+      chat: pick(css(chat)),
+      bodyClass: document.body?.className || ''
     };
   };
 })();
