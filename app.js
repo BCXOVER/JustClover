@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 43 — Active View Docked Controls
-   Version: stage43-active-view-docked-controls-20260502-1
+   JustClover Stage 44 — Active View Clean Player Dock
+   Version: stage44-active-view-clean-player-dock-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage43-active-view-docked-controls-20260502-1";
+const JC40_BUILD = "stage44-active-view-clean-player-dock-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 43 ACTIVE loader:", JC40_BUILD);
+console.log("JustClover Stage 44 ACTIVE loader:", JC40_BUILD);
 
 try {
-  await import(JC40_BASE_APP + `?base=stage37&stage43=${Date.now()}`);
+  await import(JC40_BASE_APP + `?base=stage37&stage44=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 43: base app import failed", e);
+  console.error("JustClover Stage 44: base app import failed", e);
   throw e;
 }
 
@@ -528,12 +528,12 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 43 — Active View Docked Controls
-   Version: stage43-active-view-docked-controls-20260502-1
+   JustClover Stage 44 — Active View Clean Player Dock
+   Version: stage44-active-view-clean-player-dock-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage43-active-view-docked-controls-20260502-1";
-  const STORE_KEY = "jc43ActiveViewMode";
+  const BUILD = "stage44-active-view-clean-player-dock-20260502-1";
+  const STORE_KEY = "jc44ActiveViewMode";
   let desired = false;
 
   try { desired = localStorage.getItem(STORE_KEY) === "1"; } catch(_) {}
@@ -584,16 +584,52 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   }
 
   function ensureDock(){
+    const stage = document.querySelector('.watch-stage');
     const main = document.querySelector('.watch-main');
-    if(!main) return null;
-    let dock = document.getElementById('jc43ActiveDock');
+    const playerCard =
+      document.querySelector('.player-card-redesign') ||
+      document.querySelector('.player-card') ||
+      document.querySelector('.player-shell')?.closest?.('.player-card,.player-card-redesign') ||
+      document.querySelector('.player-frame')?.closest?.('.player-card,.player-card-redesign,.player-shell');
+
+    if(!stage || !playerCard) return null;
+
+    let oldDock = document.getElementById('jc43ActiveDock');
+    if(oldDock) oldDock.id = 'jc44ActiveDock';
+
+    let dock = document.getElementById('jc44ActiveDock');
     if(!dock){
       dock = document.createElement('div');
-      dock.id = 'jc43ActiveDock';
+      dock.id = 'jc44ActiveDock';
     }
-    if(!main.contains(dock)) main.appendChild(dock);
-    main.id = 'jc43ActiveFullscreenTarget';
+
+    if(dock.parentNode !== stage || dock.previousElementSibling !== playerCard){
+      playerCard.insertAdjacentElement('afterend', dock);
+    }
+
+    stage.id = 'jc44ActiveFullscreenTarget';
+    if(main && main.id === 'jc44ActiveFullscreenTarget') main.removeAttribute('id');
     return dock;
+  }
+
+  function markActiveHiddenPanels(on){
+    document.querySelectorAll('.jc44-active-hidden-panel').forEach(el => {
+      if(!on) el.classList.remove('jc44-active-hidden-panel');
+    });
+    if(!on) return;
+
+    const stage = document.querySelector('.watch-stage');
+    if(!stage) return;
+    const badText = /История источников|Очередь видео/i;
+
+    stage.querySelectorAll('h1,h2,h3,h4,strong,b,span,div').forEach(el => {
+      if(!badText.test(el.textContent || '')) return;
+      if(el.closest('.player-frame,#jc44ActiveDock,#jc41RaveFloating')) return;
+      const panel = el.closest('.panel,.card,[class*="panel"],[class*="history"],[class*="queue"]') || el.parentElement || el;
+      if(panel && !panel.closest('.player-frame,#jc44ActiveDock,#jc41RaveFloating')){
+        panel.classList.add('jc44-active-hidden-panel');
+      }
+    });
   }
 
   async function togglePlayerFullscreen(){
@@ -603,12 +639,12 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       return;
     }
 
-    const fullscreenTarget = document.getElementById('jc43ActiveFullscreenTarget') || document.querySelector('.watch-main') || document.querySelector('.player-shell') || document.querySelector('.player-card') || document.querySelector('.player-frame');
+    const fullscreenTarget = document.getElementById('jc44ActiveFullscreenTarget') || document.querySelector('.watch-stage') || document.querySelector('.watch-main') || document.querySelector('.player-shell') || document.querySelector('.player-card') || document.querySelector('.player-frame');
     if(await requestFullOn(fullscreenTarget || document.documentElement)){
       syncFullscreenButtons();
       return;
     }
-    console.warn('[JC43] browser blocked fullscreen request');
+    console.warn('[JC44] browser blocked fullscreen request');
   }
 
   function syncFullscreenButtons(){
@@ -686,13 +722,15 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       document.body.style.width = '';
       const dock = ensureDock();
       if(dock && floating.parentNode !== dock) dock.appendChild(floating);
+      markActiveHiddenPanels(true);
       hardTop();
     } else {
-      const dock = document.getElementById('jc43ActiveDock');
-      const main = document.getElementById('jc43ActiveFullscreenTarget');
+      const dock = document.getElementById('jc44ActiveDock') || document.getElementById('jc43ActiveDock');
+      const target = document.getElementById('jc44ActiveFullscreenTarget') || document.getElementById('jc43ActiveFullscreenTarget');
       if(floating && floating.parentNode !== document.body) document.body.appendChild(floating);
+      markActiveHiddenPanels(false);
       if(dock) dock.remove();
-      if(main) main.removeAttribute('id');
+      if(target) target.removeAttribute('id');
     }
   }
 
@@ -744,9 +782,9 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       hasToggle: !!document.getElementById('jc41RaveToggle'),
       hasFloating: !!document.getElementById('jc41RaveFloating'),
       hasFullscreenButton: !!document.querySelector('[data-jc41-full]'),
-      hasDock: !!document.getElementById('jc43ActiveDock'),
+      hasDock: !!document.getElementById('jc44ActiveDock'),
       fullscreenElement: document.fullscreenElement?.id || document.fullscreenElement?.tagName || '',
-      fullscreenTarget: document.getElementById('jc43ActiveFullscreenTarget')?.id || '',
+      fullscreenTarget: document.getElementById('jc44ActiveFullscreenTarget')?.id || '',
       playerHeight: document.querySelector('.player-frame')?.getBoundingClientRect?.().height || 0,
       sidebarWidth: document.querySelector('.watch-sidebar')?.getBoundingClientRect?.().width || 0
     };
@@ -755,7 +793,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   setInterval(apply, 180);
   setTimeout(function(){
     apply();
-    console.log('[JC43 active view] ready', window.jc41RaveDebug());
+    console.log('[JC44 active view] ready', window.jc41RaveDebug());
   }, 500);
 })();
 
@@ -768,10 +806,19 @@ try {
 } catch(_) {}
 
 
-// Stage 43 public aliases.
+// Stage 44 public aliases.
 try {
-  window.jc43ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
-  window.jc43ToggleActiveView = window.jc42ToggleActiveView || window.jc41ToggleRaveMode;
-  window.jc43SetActiveView = window.jc42SetActiveView || window.jc41SetRaveMode;
-  window.jc43ToggleFullscreen = window.jc42ToggleFullscreen;
+  window.jc44ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc44ToggleActiveView = window.jc42ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc44SetActiveView = window.jc42SetActiveView || window.jc41SetRaveMode;
+  window.jc44ToggleFullscreen = window.jc42ToggleFullscreen;
+} catch(_) {}
+
+
+// Stage 44 public aliases.
+try {
+  window.jc44ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc44ToggleActiveView = window.jc42ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc44SetActiveView = window.jc42SetActiveView || window.jc41SetRaveMode;
+  window.jc44ToggleFullscreen = window.jc42ToggleFullscreen;
 } catch(_) {}

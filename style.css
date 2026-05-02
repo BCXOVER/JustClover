@@ -1,12 +1,12 @@
 @import url("https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@f658b5bfad3fade4eb7f9c4d82865452cdc19f00/style.css");
 
 /* =========================================================
-   JustClover Stage 43 — Active View Docked Controls CSS
-   Version: stage43-active-view-docked-controls-20260502-1
+   JustClover Stage 44 — Active View Clean Player Dock CSS
+   Version: stage44-active-view-clean-player-dock-20260502-1
    ========================================================= */
 
 html::after{
-  content:'43 ACTIVE'!important;
+  content:'44 ACTIVE'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -351,7 +351,7 @@ body.jc40-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
 
 
 /* =========================================================
-   JustClover Stage 43 — Active View Docked Controls
+   JustClover Stage 44 — Active View Clean Player Dock
    В просмотре больше нет page scroll: колесо работает только внутри чата/списков/каталога.
    ========================================================= */
 
@@ -560,12 +560,12 @@ body.jc40-watch-mode [class*="queue"]{
 }
 
 /* =========================================================
-   JustClover Stage 43 — Active View Docked Controls
+   JustClover Stage 44 — Active View Clean Player Dock
    Большой плеер + чат + микрофон, без лишних полос над плеером.
    ========================================================= */
 
 html::after{
-  content:'43 ACTIVE'!important;
+  content:'44 ACTIVE'!important;
   background:rgba(34,197,94,.94)!important;
 }
 
@@ -648,7 +648,7 @@ body.jc41-rave-focus #jc41RaveFloating{
   justify-content:flex-start!important;
 }
 
-body.jc41-rave-focus #jc43ActiveDock{
+body.jc41-rave-focus #jc44ActiveDock{
   flex:0 0 auto!important;
   display:block!important;
   width:100%!important;
@@ -908,7 +908,7 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
     max-width:calc(100vw - 16px)!important;
     overflow-x:auto!important;
   }
-  body.jc41-rave-focus #jc43ActiveDock{
+  body.jc41-rave-focus #jc44ActiveDock{
     padding:10px 10px 12px!important;
   }
   #jc41RaveFloating button{
@@ -918,21 +918,118 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
 
 
 /* Stage 43: fullscreen target is the whole left player column, so the exit button stays visible. */
-#jc43ActiveFullscreenTarget:fullscreen,
-#jc43ActiveFullscreenTarget:-webkit-full-screen{
+#jc44ActiveFullscreenTarget:fullscreen,
+#jc44ActiveFullscreenTarget:-webkit-full-screen{
   width:100vw!important;
   height:100vh!important;
   background:#000!important;
 }
 
-#jc43ActiveFullscreenTarget:fullscreen .watch-sidebar,
-#jc43ActiveFullscreenTarget:-webkit-full-screen .watch-sidebar{
+#jc44ActiveFullscreenTarget:fullscreen .watch-sidebar,
+#jc44ActiveFullscreenTarget:-webkit-full-screen .watch-sidebar{
   display:none!important;
 }
 
-#jc43ActiveFullscreenTarget:fullscreen #jc43ActiveDock,
-#jc43ActiveFullscreenTarget:-webkit-full-screen #jc43ActiveDock{
+#jc44ActiveFullscreenTarget:fullscreen #jc44ActiveDock,
+#jc44ActiveFullscreenTarget:-webkit-full-screen #jc44ActiveDock{
   position:relative!important;
   z-index:2!important;
   background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.85))!important;
+}
+
+
+/* =========================================================
+   JustClover Stage 44 — Active View Clean Player Dock OVERRIDES
+   Панель сразу под плеером; история/очередь скрыты в активном просмотре.
+   ========================================================= */
+
+html::after{
+  content:'44 ACTIVE'!important;
+}
+
+body.jc41-rave-focus .watch-stage{
+  display:flex!important;
+  flex-direction:column!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+/* В активном просмотре оставляем только плеер и dock. Всё остальное внутри stage прячем. */
+body.jc41-rave-focus .watch-stage > :not(.player-card):not(.player-card-redesign):not(#jc44ActiveDock){
+  display:none!important;
+}
+
+body.jc41-rave-focus .jc44-active-hidden-panel{
+  display:none!important;
+}
+
+body.jc41-rave-focus .player-card-redesign,
+body.jc41-rave-focus .player-card{
+  order:1!important;
+  flex:1 1 auto!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+}
+
+body.jc41-rave-focus #jc44ActiveDock{
+  order:2!important;
+  flex:0 0 auto!important;
+  display:block!important;
+  width:100%!important;
+  min-height:56px!important;
+  padding:10px 18px 12px!important;
+  background:#03040a!important;
+  border-top:1px solid rgba(255,255,255,.10)!important;
+  z-index:6!important;
+}
+
+body.jc41-rave-focus #jc44ActiveDock #jc41RaveFloating{
+  position:relative!important;
+  left:auto!important;
+  top:auto!important;
+  z-index:7!important;
+  display:flex!important;
+  width:100%!important;
+  max-width:none!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+}
+
+/* Fullscreen открывается на watch-stage, поэтому кнопка Выйти остаётся видимой под плеером. */
+#jc44ActiveFullscreenTarget:fullscreen,
+#jc44ActiveFullscreenTarget:-webkit-full-screen{
+  width:100vw!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  display:flex!important;
+  flex-direction:column!important;
+  background:#000!important;
+  overflow:hidden!important;
+}
+
+#jc44ActiveFullscreenTarget:fullscreen > :not(.player-card):not(.player-card-redesign):not(#jc44ActiveDock),
+#jc44ActiveFullscreenTarget:-webkit-full-screen > :not(.player-card):not(.player-card-redesign):not(#jc44ActiveDock){
+  display:none!important;
+}
+
+#jc44ActiveFullscreenTarget:fullscreen .player-card,
+#jc44ActiveFullscreenTarget:fullscreen .player-card-redesign,
+#jc44ActiveFullscreenTarget:-webkit-full-screen .player-card,
+#jc44ActiveFullscreenTarget:-webkit-full-screen .player-card-redesign{
+  flex:1 1 auto!important;
+  min-height:0!important;
+}
+
+#jc44ActiveFullscreenTarget:fullscreen #jc44ActiveDock,
+#jc44ActiveFullscreenTarget:-webkit-full-screen #jc44ActiveDock{
+  flex:0 0 auto!important;
+  min-height:56px!important;
+  background:linear-gradient(180deg,rgba(0,0,0,.20),rgba(0,0,0,.90))!important;
 }
