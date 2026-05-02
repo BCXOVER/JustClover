@@ -6,7 +6,7 @@
    ========================================================= */
 
 html::after{
-  content:'55 CHATUP'!important;
+  content:'56 SIDEBARFIX'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -565,7 +565,7 @@ body.jc40-watch-mode [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'55 CHATUP'!important;
+  content:'56 SIDEBARFIX'!important;
   background:rgba(34,197,94,.94)!important;
 }
 
@@ -943,7 +943,7 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'55 CHATUP'!important;
+  content:'56 SIDEBARFIX'!important;
 }
 
 body.jc41-rave-focus .watch-stage{
@@ -1040,7 +1040,7 @@ body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
    ========================================================= */
 
 html::after{
-  content:'55 CHATUP'!important;
+  content:'56 SIDEBARFIX'!important;
 }
 
 body.jc41-rave-focus .watch-main,
@@ -1133,7 +1133,7 @@ body.jc41-rave-focus #jc45ActiveDock{
    ========================================================= */
 
 html::after{
-  content:'55 CHATUP'!important;
+  content:'56 SIDEBARFIX'!important;
 }
 
 body.jc41-rave-focus .watch-layout{
@@ -1239,7 +1239,7 @@ body.jc41-rave-focus #jc45ActiveDock::after{
    верхняя плашка источника скрывается, снизу — только компактные кнопки.
    ========================================================= */
 
-html::after{ content:'55 CHATUP'!important; }
+html::after{ content:'56 SIDEBARFIX'!important; }
 
 body.jc41-rave-focus .watch-layout{
   width:min(100vw,1540px)!important;
@@ -1406,7 +1406,7 @@ body.jc41-rave-focus .chat-card{
    плеер 16:9 без лишней чёрной шапки от растянутого контейнера.
    ========================================================= */
 
-html::after{ content:'55 CHATUP'!important; }
+html::after{ content:'56 SIDEBARFIX'!important; }
 
 html.jc41-rave-focus,
 body.jc41-rave-focus{
@@ -1682,7 +1682,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'55 CHATUP'!important;
+  content:'56 SIDEBARFIX'!important;
 }
 
 html.jc41-rave-focus,
@@ -1983,7 +1983,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'55 CHATUP'!important;
+  content:'56 SIDEBARFIX'!important;
 }
 
 body.jc41-rave-focus{
@@ -2350,7 +2350,7 @@ body.jc41-rave-focus #jc41RaveFloating button{
    ========================================================= */
 
 html::after{
-  content:'55 CHATUP'!important;
+  content:'56 SIDEBARFIX'!important;
 }
 
 body.jc41-rave-focus{
@@ -2591,7 +2591,7 @@ html:-webkit-full-screen body.jc41-rave-focus #jc51RaveTopbar{
 
 
 /* Stage 53 — remove top-right mic/chat/fullscreen icons and rebalance topbar */
-html::after{ content:'55 CHATUP'!important; }
+html::after{ content:'56 SIDEBARFIX'!important; }
 body.jc41-rave-focus #jc51RaveTopbar{
   grid-template-columns:minmax(260px,1fr) auto minmax(120px,1fr)!important;
 }
@@ -2615,7 +2615,7 @@ body.jc41-rave-focus #jc51RaveTopbar [data-jc51-full]{
 
 
 /* Stage 54 — Rave Polish: remove top black strip feel, darken chat, tighten proportions. */
-html::after{ content:'55 CHATUP'!important; }
+html::after{ content:'56 SIDEBARFIX'!important; }
 body.jc41-rave-focus{
   --jc54-chat:clamp(292px,17.2vw,330px)!important;
 }
@@ -2675,7 +2675,7 @@ body.jc41-rave-focus .chat-card .message-form{
 
 
 /* Stage 55 — raise chat to the top edge and remove cinema button visuals. */
-html::after{ content:'55 CHATUP'!important; }
+html::after{ content:'56 SIDEBARFIX'!important; }
 body.jc41-rave-focus .watch-sidebar{
   position:relative!important;
   display:block!important;
@@ -2706,5 +2706,69 @@ body.jc41-rave-focus .chat-card .side-card-head h3{
 }
 body.jc41-rave-focus [data-jc55-hidden-cinema='1'],
 body.jc41-rave-focus .jc48-actions-slot button[data-jc55-hidden-cinema='1']{
+  display:none!important;
+}
+
+
+/* Stage 56 — fully pin chat to sidebar bounds and remove dead space above it. */
+html::after{ content:'56 SIDEBARFIX'!important; }
+body.jc41-rave-focus .watch-layout{
+  align-items:stretch!important;
+}
+body.jc41-rave-focus .watch-sidebar{
+  position:relative!important;
+  align-self:stretch!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-start!important;
+  align-items:stretch!important;
+  gap:0!important;
+  padding:0!important;
+  margin:0!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+body.jc41-rave-focus .watch-sidebar > *{
+  margin-top:0!important;
+}
+body.jc41-rave-focus .watch-sidebar > :not(.chat-card),
+body.jc41-rave-focus [data-jc56-hidden-side='1']{
+  display:none!important;
+}
+body.jc41-rave-focus .watch-sidebar .chat-card,
+body.jc41-rave-focus .chat-card[data-jc56-chat-shell='1']{
+  position:relative!important;
+  inset:auto!important;
+  flex:1 1 auto!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:8px 10px 8px!important;
+  border-radius:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-start!important;
+}
+body.jc41-rave-focus .chat-card [data-jc56-chat-head='1'],
+body.jc41-rave-focus .chat-card .side-card-head{
+  flex:0 0 auto!important;
+  margin:0 0 4px!important;
+}
+body.jc41-rave-focus .chat-card [data-jc56-chat-messages='1'],
+body.jc41-rave-focus .chat-card #chatMessages,
+body.jc41-rave-focus .chat-card .messages{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+}
+body.jc41-rave-focus .chat-card [data-jc56-chat-form='1'],
+body.jc41-rave-focus .chat-card #chatForm,
+body.jc41-rave-focus .chat-card .message-form{
+  flex:0 0 auto!important;
+  margin:6px 0 0!important;
+}
+body.jc41-rave-focus [data-jc56-hidden-cinema='1']{
   display:none!important;
 }
