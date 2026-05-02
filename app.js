@@ -1,17 +1,17 @@
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage78-no-jitter-player-dock-20260502-1
+   Version: stage79-stable-player-dock-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage78-no-jitter-player-dock-20260502-1";
+const JC40_BUILD = "stage79-stable-player-dock-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 78 NOJITTER loader:", JC40_BUILD);
+console.log("JustClover Stage 79 STABLEDOCK loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
@@ -626,10 +626,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage78-no-jitter-player-dock-20260502-1
+   Version: stage79-stable-player-dock-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage78-no-jitter-player-dock-20260502-1";
+  const BUILD = "stage79-stable-player-dock-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1120,7 +1120,7 @@ try {
 } catch(_) {}
 
 
-// Stage 78 public aliases — clean Rave-like shell.
+// Stage 79 public aliases — clean Rave-like shell.
 try {
   window.jc52ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
   window.jc52ToggleActiveView = window.jc51ToggleActiveView || window.jc50ToggleActiveView || window.jc49ToggleActiveView || window.jc48ToggleActiveView || window.jc41ToggleRaveMode;
@@ -1156,7 +1156,7 @@ try{
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage78-no-jitter-player-dock-20260502-1";
+  const BUILD = "stage79-stable-player-dock-20260502-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1393,7 +1393,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage78-no-jitter-player-dock-20260502-1";
+  const BUILD = "stage79-stable-player-dock-20260502-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1691,7 +1691,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage78-no-jitter-player-dock-20260502-1';
+  const BUILD = 'stage79-stable-player-dock-20260502-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1872,7 +1872,7 @@ try{
    когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
    ========================================================= */
 (function(){
-  const BUILD = "stage78-no-jitter-player-dock-20260502-1";
+  const BUILD = "stage79-stable-player-dock-20260502-1";
   const CHECK_EVERY_MS = 15000;
   const FIRST_CHECK_MS = 4500;
   const RELOAD_DELAY_MS = 1800;
@@ -1981,90 +1981,44 @@ try{
 
 
 /* =========================================================
-   JustClover Stage 78 — No-Jitter Player Dock
-   Version: stage78-no-jitter-player-dock-20260502-1
+   JustClover Stage 79 — Stable Player Dock
+   Version: stage79-stable-player-dock-20260502-1
 
-   Scope:
-   - no JS player resizing / no cover-fit loops;
-   - stable top-aligned video area;
-   - bottom dock sits in the free strip under the video;
-   - auth/chat/catalog/source logic stays untouched.
+   Final fix for the current player task:
+   - no JS fit/resize loop for video geometry;
+   - no fixed/cover player frame;
+   - dock is a real strip under the player, not overlaying content;
+   - auth/chat/source logic stays intact.
    ========================================================= */
 (function(){
-  const BUILD = 'stage78-no-jitter-player-dock-20260502-1';
+  const BUILD = 'stage79-stable-player-dock-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let raf = 0;
   let bodyObserver = null;
   let watchObserver = null;
+  let stageObserver = null;
 
   function isAuth(){
     try { return !!window.__jc62IsAuthScreen?.(); } catch(_) { return false; }
   }
-
   function appOpen(){
     const app = document.getElementById('appView');
     return !!(app && !app.classList.contains('hidden'));
   }
-
   function watchActive(){
     const watch = document.getElementById('watchSection');
     return !!(watch && watch.classList.contains('active'));
   }
-
-  function activeRoomView(){
-    if(isAuth() || !appOpen() || !watchActive()) return false;
-    const b = document.body;
-    return !!(b && (
-      b.classList.contains('jc64-active-first') ||
-      b.classList.contains('jc41-rave-focus') ||
-      b.classList.contains('jc40-watch-mode')
-    ));
+  function activeRoom(){
+    return !isAuth() && appOpen() && watchActive() && !!document.body;
   }
-
-  function main(){ return document.querySelector('.watch-main'); }
-  function frame(){ return document.querySelector('.player-frame'); }
-
-  function ensureDock(){
-    let dock = document.getElementById('jc78PlayerDock');
-    if(!dock){
-      dock = document.createElement('div');
-      dock.id = 'jc78PlayerDock';
-      dock.setAttribute('aria-label','Панель управления комнатой');
-      dock.innerHTML = `
-        <div class="jc78-dock-inner">
-          <button type="button" data-jc78-mic title="Микрофон" aria-label="Микрофон">🎙 Микро</button>
-          <button type="button" data-jc78-chat title="Чат" aria-label="Чат">💬 Чат</button>
-          <button type="button" data-jc78-source title="Источники" aria-label="Источники">▦ Источники</button>
-          <button type="button" data-jc78-full title="Fullscreen" aria-label="Fullscreen">⛶ Экран</button>
-        </div>`;
-      dock.addEventListener('click', function(e){
-        const btn = e.target.closest('button');
-        if(!btn) return;
-        e.preventDefault();
-        e.stopPropagation();
-        if(btn.hasAttribute('data-jc78-mic')) toggleMic();
-        if(btn.hasAttribute('data-jc78-chat')) focusChat();
-        if(btn.hasAttribute('data-jc78-source')) openSources();
-        if(btn.hasAttribute('data-jc78-full')) toggleFullscreen();
-      });
-    }
-    const host = main() || document.body;
-    if(dock.parentNode !== host) host.appendChild(dock);
-    return dock;
+  function qs(sel, root=document){ return root.querySelector(sel); }
+  function stage(){ return qs('.watch-stage'); }
+  function playerCard(){
+    return qs('.player-card-redesign') || qs('.player-card') || qs('.player-shell')?.closest?.('.player-card,.player-card-redesign') || qs('.player-frame')?.closest?.('.player-card,.player-card-redesign,.player-shell');
   }
-
-  function toggleMic(){
-    document.getElementById('voiceBtn')?.click?.();
-  }
-
-  function focusChat(){
-    const input = document.getElementById('chatInput');
-    if(input){
-      try { input.focus({preventScroll:true}); }
-      catch(_) { input.focus(); }
-    }
-  }
+  function frame(){ return qs('.player-frame'); }
 
   function openSources(){
     try{
@@ -2072,8 +2026,14 @@ try{
       if(typeof fn === 'function') return fn('youtube');
     }catch(_){ }
     const candidates = Array.from(document.querySelectorAll('button,.btn,[role="button"],a'));
-    const b = candidates.find(el => /каталог|источники|sources?/i.test((el.textContent || el.title || el.getAttribute('aria-label') || '').trim()) && !el.closest('#jc78PlayerDock'));
+    const b = candidates.find(el => /каталог|источники|sources?/i.test((el.textContent || el.title || el.getAttribute('aria-label') || '').trim()) && !el.closest('#jc45ActiveDock,#jc79StableDock'));
     b?.click?.();
+  }
+
+  function toggleMic(){ document.getElementById('voiceBtn')?.click?.(); }
+  function focusChat(){
+    const input = document.getElementById('chatInput');
+    if(input){ try{ input.focus({preventScroll:true}); }catch(_){ input.focus(); } }
   }
 
   async function toggleFullscreen(){
@@ -2084,48 +2044,142 @@ try{
         if(document.webkitExitFullscreen) return document.webkitExitFullscreen();
         if(document.msExitFullscreen) return document.msExitFullscreen();
       }
-      const target = frame() || document.getElementById('jc45ActiveFullscreenTarget') || document.querySelector('.watch-stage') || document.documentElement;
+      const target = frame() || stage() || document.documentElement;
       if(target.requestFullscreen) return await target.requestFullscreen({navigationUI:'hide'});
       if(target.webkitRequestFullscreen) return target.webkitRequestFullscreen();
       if(target.msRequestFullscreen) return target.msRequestFullscreen();
     }catch(_){ }
   }
 
-  function syncFullscreenText(){
+  function syncFullscreenLabel(){
     const on = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
-    const btn = document.querySelector('#jc78PlayerDock [data-jc78-full]');
-    if(btn){
-      btn.textContent = on ? '× Выйти' : '⛶ Экран';
+    document.querySelectorAll('[data-jc41-full],[data-jc79-full]').forEach(btn => {
+      btn.textContent = on ? 'Выйти' : 'Экран';
       btn.title = on ? 'Выйти из fullscreen' : 'Fullscreen';
       btn.setAttribute('aria-label', btn.title);
-    }
+    });
   }
 
-  function clearBadFitFlags(){
-    document.body?.classList?.remove('jc73-player-cover','jc74-fixed-player');
-    const fr = frame();
-    if(fr){
-      fr.removeAttribute('data-jc73-player-frame');
-      fr.removeAttribute('data-jc74-fixed-frame');
-      fr.removeAttribute('data-jc74-fit');
-      fr.setAttribute('data-jc78-frame','top-aligned-no-js-fit');
+  function ensureFloating(){
+    let f = document.getElementById('jc41RaveFloating');
+    if(!f){
+      f = document.createElement('div');
+      f.id = 'jc41RaveFloating';
+      f.innerHTML = `
+        <button type="button" data-jc41-mic>Микро</button>
+        <button type="button" data-jc41-chat>Чат</button>
+        <button type="button" data-jc41-catalog>Источники</button>
+        <button type="button" data-jc41-full title="Fullscreen" aria-label="Fullscreen">Экран</button>
+      `;
+      f.addEventListener('click', function(e){
+        const b = e.target.closest('button');
+        if(!b) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if(b.hasAttribute('data-jc41-mic')) toggleMic();
+        if(b.hasAttribute('data-jc41-chat')) focusChat();
+        if(b.hasAttribute('data-jc41-catalog')) openSources();
+        if(b.hasAttribute('data-jc41-full')) toggleFullscreen();
+      });
     }
-    document.querySelectorAll('[data-jc73-fit],[data-jc73-fit-mode],[data-jc74-fit]').forEach(el => {
+
+    f.querySelector('[data-jc41-exit]')?.remove?.();
+
+    let mic = f.querySelector('[data-jc41-mic]');
+    if(!mic){
+      mic = document.createElement('button');
+      mic.type = 'button';
+      mic.setAttribute('data-jc41-mic','');
+      mic.textContent = 'Микро';
+      f.prepend(mic);
+    }
+    let chat = f.querySelector('[data-jc41-chat]');
+    if(!chat){
+      chat = document.createElement('button');
+      chat.type = 'button';
+      chat.setAttribute('data-jc41-chat','');
+      chat.textContent = 'Чат';
+      mic.insertAdjacentElement('afterend', chat);
+    }
+    let cat = f.querySelector('[data-jc41-catalog]');
+    if(!cat){
+      cat = document.createElement('button');
+      cat.type = 'button';
+      cat.setAttribute('data-jc41-catalog','');
+      cat.textContent = 'Источники';
+      chat.insertAdjacentElement('afterend', cat);
+    }
+    let full = f.querySelector('[data-jc41-full]');
+    if(!full){
+      full = document.createElement('button');
+      full.type = 'button';
+      full.setAttribute('data-jc41-full','');
+      full.textContent = 'Экран';
+      f.appendChild(full);
+    }
+    return f;
+  }
+
+  function ensureDock(){
+    const st = stage();
+    const pc = playerCard();
+    if(!st || !pc) return null;
+
+    let dock = document.getElementById('jc45ActiveDock') || document.getElementById('jc43ActiveDock') || document.getElementById('jc79StableDock');
+    if(!dock){
+      dock = document.createElement('div');
+      dock.id = 'jc45ActiveDock';
+    }else if(dock.id !== 'jc45ActiveDock'){
+      dock.id = 'jc45ActiveDock';
+    }
+    dock.classList.add('jc79-stable-dock');
+
+    let inner = dock.querySelector('.jc48-dock-inner');
+    if(!inner){
+      inner = document.createElement('div');
+      inner.className = 'jc48-dock-inner';
+      dock.appendChild(inner);
+    }
+    let actions = inner.querySelector('.jc48-actions-slot');
+    if(!actions){
+      actions = document.createElement('div');
+      actions.className = 'jc48-actions-slot';
+      inner.appendChild(actions);
+    }
+
+    const floating = ensureFloating();
+    if(floating.parentNode !== actions) actions.appendChild(floating);
+
+    if(dock.parentNode !== st) st.appendChild(dock);
+    if(pc.nextElementSibling !== dock) pc.insertAdjacentElement('afterend', dock);
+    return dock;
+  }
+
+  function cleanOldPlayerFit(){
+    document.body?.classList?.remove('jc74-fixed-player','jc73-player-cover','jc75-player-scale-only','jc76-dock-restore','jc77-player-strip-dock');
+    const fr = frame();
+    if(!fr) return;
+    ['data-jc74-fixed-frame','data-jc74-fit','data-jc73-player-frame','data-jc73-ro','data-jc75-scale-frame','data-jc77-strip-frame'].forEach(a => fr.removeAttribute(a));
+    fr.querySelectorAll('[data-jc73-fit],[data-jc73-fit-mode],[data-jc74-fit],[data-jc75-fit],[data-jc77-fit]').forEach(el => {
       el.removeAttribute('data-jc73-fit');
       el.removeAttribute('data-jc73-fit-mode');
       el.removeAttribute('data-jc74-fit');
+      el.removeAttribute('data-jc75-fit');
+      el.removeAttribute('data-jc77-fit');
     });
+    fr.setAttribute('data-jc79-stable-frame','1');
   }
 
   function sync(){
     raf = 0;
-    const on = activeRoomView();
-    const dock = ensureDock();
-    document.body?.classList?.toggle('jc78-no-jitter-player', on);
-    dock.hidden = !on;
-    dock.setAttribute('aria-hidden', on ? 'false' : 'true');
-    if(on) clearBadFitFlags();
-    syncFullscreenText();
+    const on = activeRoom();
+    document.documentElement.classList.toggle('jc79-stable-player', on);
+    document.body?.classList?.toggle('jc79-stable-player', on);
+    if(on){
+      ensureDock();
+      cleanOldPlayerFit();
+    }
+    syncFullscreenLabel();
     attachObservers();
   }
 
@@ -2144,6 +2198,11 @@ try{
       watchObserver = new MutationObserver(schedule);
       watchObserver.observe(watch, {attributes:true, attributeFilter:['class']});
     }
+    const st = stage();
+    if(st && !stageObserver){
+      stageObserver = new MutationObserver(schedule);
+      stageObserver.observe(st, {childList:true});
+    }
   }
 
   document.addEventListener('fullscreenchange', schedule, true);
@@ -2151,30 +2210,26 @@ try{
   document.addEventListener('click', function(){ setTimeout(schedule, 30); }, true);
   window.addEventListener('resize', schedule, {passive:true});
   window.addEventListener('orientationchange', schedule, {passive:true});
-
   [0,80,260,700,1400].forEach(ms => setTimeout(schedule, ms));
 
-  window.jc78PlayerDebug = function(){
-    const dock = document.getElementById('jc78PlayerDock');
-    const dr = dock?.getBoundingClientRect?.();
+  window.jc79PlayerDebug = function(){
     const fr = frame();
+    const dr = document.getElementById('jc45ActiveDock')?.getBoundingClientRect?.();
     const rr = fr?.getBoundingClientRect?.();
-    const player = document.getElementById('jc65DirectPlayer') || document.querySelector('.player-frame .jc67-main-player,#youtubePlayer,#iframePlayer,#videoPlayer');
-    const pr = player?.getBoundingClientRect?.();
     return {
       build: BUILD,
-      activeRoomView: activeRoomView(),
-      classOn: document.body?.classList?.contains('jc78-no-jitter-player'),
-      bodyHasOldFit: document.body?.classList?.contains('jc73-player-cover') || document.body?.classList?.contains('jc74-fixed-player'),
-      dockExists: !!dock,
-      dockHidden: !!dock?.hidden,
-      dockParent: dock?.parentElement?.className || dock?.parentElement?.id || '',
-      dockRect: dr ? {x:Math.round(dr.x), y:Math.round(dr.y), w:Math.round(dr.width), h:Math.round(dr.height)} : null,
-      frameAttr: fr?.getAttribute('data-jc78-frame') || '',
+      activeRoom: activeRoom(),
+      classOn: document.body?.classList?.contains('jc79-stable-player'),
+      oldFixedClass: document.body?.classList?.contains('jc74-fixed-player'),
+      oldCoverClass: document.body?.classList?.contains('jc73-player-cover'),
+      frameAttr: fr?.getAttribute?.('data-jc79-stable-frame') || '',
       frame: rr ? {x:Math.round(rr.x), y:Math.round(rr.y), w:Math.round(rr.width), h:Math.round(rr.height)} : null,
-      player: pr ? {x:Math.round(pr.x), y:Math.round(pr.y), w:Math.round(pr.width), h:Math.round(pr.height)} : null,
-      hasVoiceBtn: !!document.getElementById('voiceBtn'),
-      hasChatInput: !!document.getElementById('chatInput')
+      dock: dr ? {x:Math.round(dr.x), y:Math.round(dr.y), w:Math.round(dr.width), h:Math.round(dr.height)} : null,
+      dockInFlow: document.getElementById('jc45ActiveDock')?.parentElement?.className || '',
+      hasMic: !!document.querySelector('#jc41RaveFloating [data-jc41-mic]'),
+      hasChat: !!document.querySelector('#jc41RaveFloating [data-jc41-chat]'),
+      hasSource: !!document.querySelector('#jc41RaveFloating [data-jc41-catalog]'),
+      hasFull: !!document.querySelector('#jc41RaveFloating [data-jc41-full]')
     };
   };
 })();
