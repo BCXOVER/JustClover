@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 71 — Stable Persistent Player
-   Version: stage71-stable-persistent-player-20260502-1
+   JustClover Stage 73 — Player Auto Cover
+   Version: stage73-player-auto-cover-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage71-stable-persistent-player-20260502-1";
+const JC40_BUILD = "stage73-player-auto-cover-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 71 STABLEPLAYER loader:", JC40_BUILD);
+console.log("JustClover Stage 73 PLAYERAUTO loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 71: base app import failed", e);
+  console.error("JustClover Stage 73: base app import failed", e);
   throw e;
 }
 
@@ -625,11 +625,11 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 71 — Stable Persistent Player
-   Version: stage71-stable-persistent-player-20260502-1
+   JustClover Stage 73 — Player Auto Cover
+   Version: stage73-player-auto-cover-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage71-stable-persistent-player-20260502-1";
+  const BUILD = "stage73-player-auto-cover-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1151,12 +1151,12 @@ try{
 }catch(_){}
 
 /* =========================================================
-   JustClover Stage 71 — Stable Persistent Player
+   JustClover Stage 73 — Player Auto Cover
    Главная идея: после входа в комнату показываем только active-view.
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage71-stable-persistent-player-20260502-1";
+  const BUILD = "stage73-player-auto-cover-20260502-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1393,7 +1393,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage71-stable-persistent-player-20260502-1";
+  const BUILD = "stage73-player-auto-cover-20260502-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1691,7 +1691,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage71-stable-persistent-player-20260502-1';
+  const BUILD = 'stage73-player-auto-cover-20260502-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1861,6 +1861,289 @@ try{
       frame: frR ? {x:Math.round(frR.x), y:Math.round(frR.y), w:Math.round(frR.width), h:Math.round(frR.height)} : null,
       player: elR ? {x:Math.round(elR.x), y:Math.round(elR.y), w:Math.round(elR.width), h:Math.round(elR.height)} : null,
       attempts: restoreAttempts
+    };
+  };
+})();
+
+
+/* =========================================================
+   Stage 72 — Auto Update.
+   Проверяет app.js на GitHub Pages без cache и сам перезагружает сайт,
+   когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
+   ========================================================= */
+(function(){
+  const BUILD = "stage73-player-auto-cover-20260502-1";
+  const CHECK_EVERY_MS = 15000;
+  const FIRST_CHECK_MS = 4500;
+  const RELOAD_DELAY_MS = 1800;
+  let checking = false;
+  let updateFound = false;
+  let lastRemoteBuild = '';
+
+  function parseBuild(jsText){
+    const text = String(jsText || '');
+    return (
+      text.match(/const\s+JC40_BUILD\s*=\s*["']([^"']+)["']/)?.[1] ||
+      text.match(/window\.JUSTCLOVER_BUILD\s*=\s*["']([^"']+)["']/)?.[1] ||
+      text.match(/Version:\s*([a-z0-9._-]+)/i)?.[1] ||
+      ''
+    ).trim();
+  }
+
+  function currentBuild(){
+    return String(window.JUSTCLOVER_BUILD || BUILD || '').trim();
+  }
+
+  function isNewBuild(remote){
+    const current = currentBuild();
+    return !!remote && !!current && remote !== current;
+  }
+
+  function updateUrlBuild(remoteBuild){
+    try{
+      const u = new URL(location.href);
+      u.searchParams.set('v', remoteBuild);
+      u.searchParams.set('t', String(Date.now()));
+      return u.toString();
+    }catch(_){
+      return location.href;
+    }
+  }
+
+  function showUpdateNotice(remoteBuild){
+    let el = document.getElementById('jc72UpdateNotice');
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'jc72UpdateNotice';
+      el.setAttribute('role','status');
+      el.innerHTML = '<b>Обновление JustClover</b><span></span>';
+      document.body.appendChild(el);
+    }
+    const span = el.querySelector('span');
+    if(span) span.textContent = `Найден ${remoteBuild}. Сейчас обновлю страницу…`;
+    el.classList.add('show');
+  }
+
+  async function checkForUpdate(force=false){
+    if(checking || updateFound) return { checking, updateFound, remoteBuild:lastRemoteBuild };
+    checking = true;
+    try{
+      const url = new URL('app.js', location.href);
+      url.searchParams.set('jcAutoUpdate', String(Date.now()));
+      const res = await fetch(url.toString(), {
+        cache:'no-store',
+        headers:{ 'Cache-Control':'no-cache', 'Pragma':'no-cache' }
+      });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const remoteText = await res.text();
+      const remoteBuild = parseBuild(remoteText);
+      lastRemoteBuild = remoteBuild;
+
+      if(isNewBuild(remoteBuild)){
+        updateFound = true;
+        try{ sessionStorage.setItem('jc72ApplyingBuild', remoteBuild); }catch(_){}
+        showUpdateNotice(remoteBuild);
+        setTimeout(() => {
+          location.replace(updateUrlBuild(remoteBuild));
+        }, force ? 300 : RELOAD_DELAY_MS);
+      }
+
+      return { checking:false, updateFound, remoteBuild, currentBuild:currentBuild() };
+    }catch(e){
+      return { checking:false, updateFound:false, error:String(e?.message || e), remoteBuild:lastRemoteBuild, currentBuild:currentBuild() };
+    }finally{
+      checking = false;
+    }
+  }
+
+  function clearAppliedMarker(){
+    try{
+      const applying = sessionStorage.getItem('jc72ApplyingBuild');
+      if(applying && applying === currentBuild()) sessionStorage.removeItem('jc72ApplyingBuild');
+    }catch(_){}
+  }
+
+  clearAppliedMarker();
+  setTimeout(() => checkForUpdate(false), FIRST_CHECK_MS);
+  setInterval(() => checkForUpdate(false), CHECK_EVERY_MS);
+
+  window.jc72CheckForUpdate = checkForUpdate;
+  window.jc72UpdateDebug = function(){
+    return {
+      build: currentBuild(),
+      updateFound,
+      lastRemoteBuild,
+      applying: (()=>{ try{return sessionStorage.getItem('jc72ApplyingBuild') || ''}catch(_){return ''} })(),
+      checkEveryMs: CHECK_EVERY_MS
+    };
+  };
+})();
+
+
+/* =========================================================
+   Stage 73 — Stable player cover-fit + Stage72 auto update.
+   Цель: оставить рабочий persistent direct-player, но посадить iframe как
+   Rave-like player: без серых/белых полей и без постоянных дерганий.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage73-player-auto-cover-20260502-1';
+  const ASPECT = 16 / 9;
+  const OVERSCAN = 1.018; // небольшой запас убирает тонкие полосы по краям
+  let lastFitKey = '';
+  let fitTimer = 0;
+
+  function isAuth(){ return !!window.__jc62IsAuthScreen?.(); }
+  function isActive(){ return !isAuth() && document.body?.classList?.contains('jc64-active-first'); }
+  function frame(){ return document.querySelector('.player-frame'); }
+  function player(){ return document.getElementById('jc65DirectPlayer') || document.querySelector('.player-frame .jc67-main-player'); }
+  function kind(el){
+    const k = String(el?.getAttribute?.('data-jc65-kind') || '').toLowerCase();
+    const s = String(el?.src || '').toLowerCase();
+    if(k) return k;
+    if(s.includes('youtube') || s.includes('youtu.be')) return 'youtube';
+    if(s.includes('vk.com') || s.includes('vkvideo')) return 'vk';
+    if(el?.tagName === 'VIDEO') return 'video';
+    return 'embed';
+  }
+
+  function fitPlayer(){
+    if(!isActive()) return false;
+    const fr = frame();
+    const el = player();
+    if(!fr || !el) return false;
+    const r = fr.getBoundingClientRect();
+    if(r.width < 10 || r.height < 10) return false;
+
+    const k = `${String(el.src || el.getAttribute('data-jc65-url') || '')}|${Math.round(r.width)}x${Math.round(r.height)}|${kind(el)}`;
+    if(k === lastFitKey && el.getAttribute('data-jc73-fit') === '1') return true;
+    lastFitKey = k;
+
+    fr.style.setProperty('position','relative','important');
+    fr.style.setProperty('overflow','hidden','important');
+    fr.style.setProperty('background','#000','important');
+    fr.style.setProperty('contain','layout paint','important');
+    fr.setAttribute('data-jc73-player-frame','1');
+
+    el.style.setProperty('position','absolute','important');
+    el.style.setProperty('right','auto','important');
+    el.style.setProperty('bottom','auto','important');
+    el.style.setProperty('max-width','none','important');
+    el.style.setProperty('max-height','none','important');
+    el.style.setProperty('min-width','0','important');
+    el.style.setProperty('min-height','0','important');
+    el.style.setProperty('transform','none','important');
+    el.style.setProperty('border','0','important');
+    el.style.setProperty('background','#000','important');
+    el.style.setProperty('z-index','30','important');
+    el.style.setProperty('opacity','1','important');
+    el.style.setProperty('visibility','visible','important');
+    el.style.setProperty('pointer-events','auto','important');
+
+    const knd = kind(el);
+    if(knd === 'video'){
+      el.style.setProperty('inset','0','important');
+      el.style.setProperty('width','100%','important');
+      el.style.setProperty('height','100%','important');
+      el.style.setProperty('object-fit','contain','important');
+      el.setAttribute('data-jc73-fit','1');
+      el.setAttribute('data-jc73-fit-mode','contain');
+      return true;
+    }
+
+    // iframe не умеет object-fit. Поэтому считаем cover-геометрию сами,
+    // но только при изменении размера/source, без постоянного reflow-loop.
+    let w = r.width;
+    let h = w / ASPECT;
+    if(h < r.height){
+      h = r.height;
+      w = h * ASPECT;
+    }
+    w *= OVERSCAN;
+    h *= OVERSCAN;
+    const left = (r.width - w) / 2;
+    const top = (r.height - h) / 2;
+
+    el.style.setProperty('left', `${Math.round(left)}px`, 'important');
+    el.style.setProperty('top', `${Math.round(top)}px`, 'important');
+    el.style.setProperty('width', `${Math.round(w)}px`, 'important');
+    el.style.setProperty('height', `${Math.round(h)}px`, 'important');
+    el.removeAttribute('style-inset');
+    el.setAttribute('data-jc73-fit','1');
+    el.setAttribute('data-jc73-fit-mode','cover');
+    document.body.classList.add('jc73-player-cover');
+    return true;
+  }
+
+  function scheduleFit(delay=80){
+    clearTimeout(fitTimer);
+    fitTimer = setTimeout(()=>{
+      try{ fitPlayer(); }catch(_){}
+    }, delay);
+  }
+
+  // Перехватываем renderer, но не меняем источник и не создаём новый плеер.
+  const prev65 = window.jc65RenderSource;
+  if(typeof prev65 === 'function' && !prev65.__jc73Wrapped){
+    const wrapped = function(){
+      const out = prev65.apply(this, arguments);
+      scheduleFit(80);
+      setTimeout(fitPlayer, 320);
+      setTimeout(fitPlayer, 900);
+      return out;
+    };
+    wrapped.__jc73Wrapped = true;
+    window.jc65RenderSource = wrapped;
+    window.jc67RenderSource = wrapped;
+  }
+
+  const ro = window.ResizeObserver ? new ResizeObserver(()=>scheduleFit(80)) : null;
+  function attachResizeObserver(){
+    const fr = frame();
+    if(fr && ro && fr.getAttribute('data-jc73-ro') !== '1'){
+      fr.setAttribute('data-jc73-ro','1');
+      try{ ro.observe(fr); }catch(_){}
+    }
+  }
+
+  const mo = new MutationObserver((mutations)=>{
+    let relevant = false;
+    for(const m of mutations){
+      if(m.type === 'childList'){
+        for(const n of [...m.addedNodes]){
+          if(n?.id === 'jc65DirectPlayer' || n?.querySelector?.('#jc65DirectPlayer')) relevant = true;
+        }
+      }
+      if(m.type === 'attributes' && (m.target?.id === 'jc65DirectPlayer' || m.attributeName === 'src')) relevant = true;
+    }
+    if(relevant){ attachResizeObserver(); scheduleFit(70); setTimeout(fitPlayer, 300); }
+  });
+  mo.observe(document.documentElement || document.body, {subtree:true, childList:true, attributes:true, attributeFilter:['src','class','data-jc65-kind','data-jc65-url']});
+
+  window.addEventListener('resize', ()=>{ lastFitKey=''; scheduleFit(120); }, {passive:true});
+  window.addEventListener('orientationchange', ()=>{ lastFitKey=''; scheduleFit(220); }, {passive:true});
+  document.addEventListener('fullscreenchange', ()=>{ lastFitKey=''; scheduleFit(120); }, true);
+  document.addEventListener('webkitfullscreenchange', ()=>{ lastFitKey=''; scheduleFit(120); }, true);
+
+  attachResizeObserver();
+  [120,450,1200,2600,5200].forEach(ms=>setTimeout(()=>{ attachResizeObserver(); fitPlayer(); }, ms));
+
+  window.jc73FitPlayer = function(){ lastFitKey=''; return fitPlayer(); };
+  window.jc73PlayerDebug = function(){
+    const fr = frame();
+    const el = player();
+    const rr = fr?.getBoundingClientRect?.();
+    const er = el?.getBoundingClientRect?.();
+    return {
+      build: BUILD,
+      active: isActive(),
+      hasFrame: !!fr,
+      hasPlayer: !!el,
+      kind: kind(el),
+      frame: rr ? {x:Math.round(rr.x), y:Math.round(rr.y), w:Math.round(rr.width), h:Math.round(rr.height)} : null,
+      player: er ? {x:Math.round(er.x), y:Math.round(er.y), w:Math.round(er.width), h:Math.round(er.height)} : null,
+      mode: el?.getAttribute?.('data-jc73-fit-mode') || '',
+      src: el?.src || '',
+      lastFitKey
     };
   };
 })();

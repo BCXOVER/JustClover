@@ -6,7 +6,7 @@
    ========================================================= */
 
 html::after{
-  content:'71 STABLEPLAYER'!important;
+  content:'73 PLAYERAUTO'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -565,7 +565,7 @@ body.jc40-watch-mode [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'71 STABLEPLAYER'!important;
+  content:'73 PLAYERAUTO'!important;
   background:rgba(34,197,94,.94)!important;
 }
 
@@ -943,7 +943,7 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'71 STABLEPLAYER'!important;
+  content:'73 PLAYERAUTO'!important;
 }
 
 body.jc41-rave-focus .watch-stage{
@@ -1040,7 +1040,7 @@ body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
    ========================================================= */
 
 html::after{
-  content:'71 STABLEPLAYER'!important;
+  content:'73 PLAYERAUTO'!important;
 }
 
 body.jc41-rave-focus .watch-main,
@@ -1133,7 +1133,7 @@ body.jc41-rave-focus #jc45ActiveDock{
    ========================================================= */
 
 html::after{
-  content:'71 STABLEPLAYER'!important;
+  content:'73 PLAYERAUTO'!important;
 }
 
 body.jc41-rave-focus .watch-layout{
@@ -1239,7 +1239,7 @@ body.jc41-rave-focus #jc45ActiveDock::after{
    верхняя плашка источника скрывается, снизу — только компактные кнопки.
    ========================================================= */
 
-html::after{ content:'71 STABLEPLAYER'!important; }
+html::after{ content:'73 PLAYERAUTO'!important; }
 
 body.jc41-rave-focus .watch-layout{
   width:min(100vw,1540px)!important;
@@ -1406,7 +1406,7 @@ body.jc41-rave-focus .chat-card{
    плеер 16:9 без лишней чёрной шапки от растянутого контейнера.
    ========================================================= */
 
-html::after{ content:'71 STABLEPLAYER'!important; }
+html::after{ content:'73 PLAYERAUTO'!important; }
 
 html.jc41-rave-focus,
 body.jc41-rave-focus{
@@ -1682,7 +1682,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'71 STABLEPLAYER'!important;
+  content:'73 PLAYERAUTO'!important;
 }
 
 html.jc41-rave-focus,
@@ -1983,7 +1983,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'71 STABLEPLAYER'!important;
+  content:'73 PLAYERAUTO'!important;
 }
 
 body.jc41-rave-focus{
@@ -2350,7 +2350,7 @@ body.jc41-rave-focus #jc41RaveFloating button{
    ========================================================= */
 
 html::after{
-  content:'71 STABLEPLAYER'!important;
+  content:'73 PLAYERAUTO'!important;
 }
 
 body.jc41-rave-focus{
@@ -2591,7 +2591,7 @@ html:-webkit-full-screen body.jc41-rave-focus #jc51RaveTopbar{
 
 
 /* Stage 53 — remove top-right mic/chat/fullscreen icons and rebalance topbar */
-html::after{ content:'71 STABLEPLAYER'!important; }
+html::after{ content:'73 PLAYERAUTO'!important; }
 body.jc41-rave-focus #jc51RaveTopbar{
   grid-template-columns:minmax(260px,1fr) auto minmax(120px,1fr)!important;
 }
@@ -2615,7 +2615,7 @@ body.jc41-rave-focus #jc51RaveTopbar [data-jc51-full]{
 
 
 /* Stage 54 — Rave Polish: remove top black strip feel, darken chat, tighten proportions. */
-html::after{ content:'71 STABLEPLAYER'!important; }
+html::after{ content:'73 PLAYERAUTO'!important; }
 body.jc41-rave-focus{
   --jc54-chat:clamp(292px,17.2vw,330px)!important;
 }
@@ -2697,7 +2697,7 @@ body:not(.jc40-watch-mode):not(.jc41-rave-focus) .jc-catalog-layer.open{
    ========================================================= */
 
 html::after{
-  content:'71 STABLEPLAYER'!important;
+  content:'73 PLAYERAUTO'!important;
   background:rgba(56,189,248,.96)!important;
   color:#02150d!important;
 }
@@ -3115,7 +3115,7 @@ body.jc64-active-first:fullscreen{
    for YouTube/VK when active-first hides the old UI.
    ========================================================= */
 html::after{
-  content:'71 STABLEPLAYER'!important;
+  content:'73 PLAYERAUTO'!important;
   background:rgba(56,189,248,.96)!important;
   color:#031018!important;
 }
@@ -3189,7 +3189,7 @@ body.jc64-active-first{
 /* Stage 71 — stable persistent player.
    Direct iframe/video is the active-view player, not a hidden fallback. Native source form remains offscreen for app state. */
 html::after{
-  content:'71 STABLEPLAYER'!important;
+  content:'73 PLAYERAUTO'!important;
   background:rgba(34,211,238,.96)!important;
   color:#02131a!important;
 }
@@ -3246,7 +3246,7 @@ body.jc64-active-first{
 
 /* Stage 71 — stable player. No JS geometry loop, no repeated iframe reflow. */
 html::after{
-  content:'71 STABLEPLAYER'!important;
+  content:'73 PLAYERAUTO'!important;
   background:rgba(20,184,166,.96)!important;
   color:#031513!important;
 }
@@ -3291,4 +3291,91 @@ body.jc64-active-first .player-frame .message,
 body.jc64-active-first .player-frame .chat-message,
 body.jc64-active-first .player-frame [data-chat-message]{
   display:none!important;
+}
+
+
+/* Stage 72 — small auto-update notice. */
+html::after{
+  content:'73 PLAYERAUTO'!important;
+  background:rgba(168,85,247,.96)!important;
+  color:#fff!important;
+}
+
+#jc72UpdateNotice{
+  position:fixed!important;
+  left:50%!important;
+  top:74px!important;
+  transform:translateX(-50%) translateY(-14px)!important;
+  z-index:2147483600!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:3px!important;
+  min-width:min(440px,calc(100vw - 28px))!important;
+  max-width:calc(100vw - 28px)!important;
+  padding:12px 16px!important;
+  border-radius:18px!important;
+  background:rgba(12,10,18,.92)!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  box-shadow:0 18px 70px rgba(0,0,0,.42)!important;
+  color:#fff!important;
+  font:600 14px/1.25 Inter,Segoe UI,Arial,sans-serif!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  transition:opacity .18s ease, transform .18s ease!important;
+}
+#jc72UpdateNotice span{
+  color:rgba(235,230,255,.78)!important;
+  font-weight:500!important;
+  font-size:12px!important;
+}
+#jc72UpdateNotice.show{
+  opacity:1!important;
+  transform:translateX(-50%) translateY(0)!important;
+}
+
+
+/* Stage 73 — player cover-fit + auto-update. */
+html::after{
+  content:'73 PLAYERAUTO'!important;
+  background:rgba(99,102,241,.96)!important;
+  color:#fff!important;
+}
+
+body.jc64-active-first .player-frame[data-jc73-player-frame='1']{
+  position:relative!important;
+  overflow:hidden!important;
+  background:#000!important;
+  contain:layout paint!important;
+}
+
+body.jc64-active-first #jc65DirectPlayer[data-jc73-fit='1'],
+body.jc64-active-first .jc67-main-player[data-jc73-fit='1']{
+  position:absolute!important;
+  right:auto!important;
+  bottom:auto!important;
+  max-width:none!important;
+  max-height:none!important;
+  min-width:0!important;
+  min-height:0!important;
+  transform:none!important;
+  border:0!important;
+  background:#000!important;
+  opacity:1!important;
+  visibility:visible!important;
+  z-index:30!important;
+  pointer-events:auto!important;
+}
+
+body.jc64-active-first #jc65DirectPlayer[data-jc73-fit-mode='contain']{
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+}
+
+/* Old/native layer should not glow behind the main player. */
+body.jc64-active-first.jc67-main-player-active .player-frame > :not(#jc65DirectPlayer):not(.jc65-direct-player):not(.jc67-main-player){
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
 }
