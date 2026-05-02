@@ -6,7 +6,7 @@
    ========================================================= */
 
 html::after{
-  content:'81 MICPLAYER'!important;
+  content:'82 FULLMIC'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -565,7 +565,7 @@ body.jc40-watch-mode [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'81 MICPLAYER'!important;
+  content:'82 FULLMIC'!important;
   background:rgba(34,197,94,.94)!important;
 }
 
@@ -943,7 +943,7 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'81 MICPLAYER'!important;
+  content:'82 FULLMIC'!important;
 }
 
 body.jc41-rave-focus .watch-stage{
@@ -1040,7 +1040,7 @@ body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
    ========================================================= */
 
 html::after{
-  content:'81 MICPLAYER'!important;
+  content:'82 FULLMIC'!important;
 }
 
 body.jc41-rave-focus .watch-main,
@@ -1133,7 +1133,7 @@ body.jc41-rave-focus #jc45ActiveDock{
    ========================================================= */
 
 html::after{
-  content:'81 MICPLAYER'!important;
+  content:'82 FULLMIC'!important;
 }
 
 body.jc41-rave-focus .watch-layout{
@@ -1239,7 +1239,7 @@ body.jc41-rave-focus #jc45ActiveDock::after{
    верхняя плашка источника скрывается, снизу — только компактные кнопки.
    ========================================================= */
 
-html::after{ content:'81 MICPLAYER'!important; }
+html::after{ content:'82 FULLMIC'!important; }
 
 body.jc41-rave-focus .watch-layout{
   width:min(100vw,1540px)!important;
@@ -1406,7 +1406,7 @@ body.jc41-rave-focus .chat-card{
    плеер 16:9 без лишней чёрной шапки от растянутого контейнера.
    ========================================================= */
 
-html::after{ content:'81 MICPLAYER'!important; }
+html::after{ content:'82 FULLMIC'!important; }
 
 html.jc41-rave-focus,
 body.jc41-rave-focus{
@@ -1682,7 +1682,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'81 MICPLAYER'!important;
+  content:'82 FULLMIC'!important;
 }
 
 html.jc41-rave-focus,
@@ -1983,7 +1983,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'81 MICPLAYER'!important;
+  content:'82 FULLMIC'!important;
 }
 
 body.jc41-rave-focus{
@@ -2350,7 +2350,7 @@ body.jc41-rave-focus #jc41RaveFloating button{
    ========================================================= */
 
 html::after{
-  content:'81 MICPLAYER'!important;
+  content:'82 FULLMIC'!important;
 }
 
 body.jc41-rave-focus{
@@ -2591,7 +2591,7 @@ html:-webkit-full-screen body.jc41-rave-focus #jc51RaveTopbar{
 
 
 /* Stage 53 — remove top-right mic/chat/fullscreen icons and rebalance topbar */
-html::after{ content:'81 MICPLAYER'!important; }
+html::after{ content:'82 FULLMIC'!important; }
 body.jc41-rave-focus #jc51RaveTopbar{
   grid-template-columns:minmax(260px,1fr) auto minmax(120px,1fr)!important;
 }
@@ -2615,7 +2615,7 @@ body.jc41-rave-focus #jc51RaveTopbar [data-jc51-full]{
 
 
 /* Stage 54 — Rave Polish: remove top black strip feel, darken chat, tighten proportions. */
-html::after{ content:'81 MICPLAYER'!important; }
+html::after{ content:'82 FULLMIC'!important; }
 body.jc41-rave-focus{
   --jc54-chat:clamp(292px,17.2vw,330px)!important;
 }
@@ -2697,7 +2697,7 @@ body:not(.jc40-watch-mode):not(.jc41-rave-focus) .jc-catalog-layer.open{
    ========================================================= */
 
 html::after{
-  content:'81 MICPLAYER'!important;
+  content:'82 FULLMIC'!important;
   background:rgba(56,189,248,.96)!important;
   color:#02150d!important;
 }
@@ -3115,7 +3115,7 @@ body.jc64-active-first:fullscreen{
    for YouTube/VK when active-first hides the old UI.
    ========================================================= */
 html::after{
-  content:'81 MICPLAYER'!important;
+  content:'82 FULLMIC'!important;
   background:rgba(56,189,248,.96)!important;
   color:#031018!important;
 }
@@ -3189,7 +3189,7 @@ body.jc64-active-first{
 /* Stage 71 — stable persistent player.
    Direct iframe/video is the active-view player, not a hidden fallback. Native source form remains offscreen for app state. */
 html::after{
-  content:'81 MICPLAYER'!important;
+  content:'82 FULLMIC'!important;
   background:rgba(34,211,238,.96)!important;
   color:#02131a!important;
 }
@@ -3246,7 +3246,7 @@ body.jc64-active-first{
 
 /* Stage 71 — stable player. No JS geometry loop, no repeated iframe reflow. */
 html::after{
-  content:'81 MICPLAYER'!important;
+  content:'82 FULLMIC'!important;
   background:rgba(20,184,166,.96)!important;
   color:#031513!important;
 }
@@ -3296,7 +3296,7 @@ body.jc64-active-first .player-frame [data-chat-message]{
 
 /* Stage 72 — small auto-update notice. */
 html::after{
-  content:'81 MICPLAYER'!important;
+  content:'82 FULLMIC'!important;
   background:rgba(168,85,247,.96)!important;
   color:#fff!important;
 }
@@ -3337,7 +3337,7 @@ html::after{
 
 /* =========================================================
    JustClover Stage 81 — Real Stable Player Dock
-   Version: stage81-player-mic-overlay-20260502-1
+   Version: stage82-fullscreen-mic-20260502-1
 
    One stable active-room layout:
    topbar / player / real bottom controls / chat.
@@ -3345,7 +3345,7 @@ html::after{
    ========================================================= */
 
 html::after{
-  content:'81 MICPLAYER'!important;
+  content:'82 FULLMIC'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -3746,14 +3746,14 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
 
 /* =========================================================
    JustClover Stage 81 — Player Mic Overlay
-   Version: stage81-player-mic-overlay-20260502-1
+   Version: stage82-fullscreen-mic-20260502-1
 
    Keep Stage80 stable layout. Remove chat button from the lower dock and move
    mic control inside the player so it remains available in fullscreen.
    ========================================================= */
 
 html::after{
-  content:'81 MICPLAYER'!important;
+  content:'82 FULLMIC'!important;
   background:rgba(34,197,94,.96)!important;
   color:#03130a!important;
 }
@@ -3886,6 +3886,179 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc81PlayerMic{
     bottom:56px!important;
   }
   #jc81PlayerMic button{
+    min-height:36px!important;
+    height:36px!important;
+    font-size:12px!important;
+  }
+}
+
+
+/* =========================================================
+   JustClover Stage 82 — Fullscreen Mic Fix
+   Version: stage82-fullscreen-mic-20260502-1
+
+   Keep Stage80 layout. Mic is mounted on .watch-main, not inside the iframe
+   and not hidden by old jc67 player-child rules, so it remains visible in
+   site fullscreen opened by the JustClover "Экран" control.
+   ========================================================= */
+
+html::after{
+  content:'82 FULLMIC'!important;
+  background:rgba(34,197,94,.96)!important;
+  color:#03130a!important;
+}
+
+/* Stage81 mic was inserted as a child of .player-frame and could be hidden by old jc67 rules. */
+#jc81PlayerMic{
+  display:none!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+
+/* Bottom dock stays clean: only source + fullscreen. */
+body.jc80-real-dock #jc80Dock [data-jc80-mic],
+body.jc80-real-dock #jc80Dock [data-jc80-chat]{
+  display:none!important;
+}
+
+body.jc80-real-dock #jc80Dock .jc80-dock-inner{
+  gap:10px!important;
+  padding:6px 8px!important;
+}
+
+body.jc80-real-dock #jc80Dock button{
+  min-width:110px!important;
+}
+
+#jc82PlayerMic{
+  position:absolute!important;
+  left:24px!important;
+  bottom:calc(var(--jc80-dock-h, 62px) + var(--jc80-safe-bottom, 0px) + 18px)!important;
+  z-index:2147483600!important;
+  display:none!important;
+  align-items:center!important;
+  justify-content:center!important;
+  pointer-events:none!important;
+  max-width:calc(100% - 48px)!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+
+body.jc80-real-dock #jc82PlayerMic{
+  display:flex!important;
+}
+
+#jc82PlayerMic button{
+  pointer-events:auto!important;
+  min-width:132px!important;
+  min-height:42px!important;
+  height:42px!important;
+  padding:0 14px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  border-radius:999px!important;
+  border:1px solid rgba(255,255,255,.18)!important;
+  background:rgba(12,14,24,.82)!important;
+  color:#fff!important;
+  box-shadow:0 14px 36px rgba(0,0,0,.48),0 0 0 1px rgba(255,255,255,.035) inset!important;
+  backdrop-filter:blur(18px)!important;
+  font:900 13px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  cursor:pointer!important;
+  white-space:nowrap!important;
+  user-select:none!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+
+#jc82PlayerMic button:hover{
+  background:rgba(255,255,255,.15)!important;
+  transform:translateY(-1px)!important;
+}
+
+#jc82PlayerMic button::before{
+  content:''!important;
+  width:9px!important;
+  height:9px!important;
+  border-radius:999px!important;
+  flex:0 0 auto!important;
+  background:#fb7185!important;
+  box-shadow:0 0 0 4px rgba(251,113,133,.14),0 0 18px rgba(251,113,133,.38)!important;
+}
+
+#jc82PlayerMic[data-state='on'] button{
+  border-color:rgba(52,211,153,.50)!important;
+  background:linear-gradient(135deg,rgba(34,197,94,.94),rgba(45,212,191,.88))!important;
+  color:#03130a!important;
+}
+
+#jc82PlayerMic[data-state='on'] button::before{
+  background:#052e16!important;
+  box-shadow:0 0 0 4px rgba(3,19,10,.12),0 0 18px rgba(34,197,94,.46)!important;
+}
+
+#jc82PlayerMic[data-state='pending'] button{
+  border-color:rgba(251,191,36,.48)!important;
+  background:linear-gradient(135deg,rgba(251,191,36,.94),rgba(251,113,133,.76))!important;
+  color:#150c03!important;
+}
+
+#jc82PlayerMic[data-state='pending'] button::before{
+  background:#78350f!important;
+  box-shadow:0 0 0 4px rgba(251,191,36,.18),0 0 18px rgba(251,191,36,.44)!important;
+}
+
+#jc82PlayerMic[data-state='error'] button{
+  border-color:rgba(248,113,113,.58)!important;
+  background:linear-gradient(135deg,rgba(239,68,68,.94),rgba(190,18,60,.88))!important;
+  color:#fff!important;
+}
+
+/* When JustClover fullscreen is used, .watch-main is the fullscreen element and the mic stays visible. */
+body.jc80-real-dock .watch-main:fullscreen #jc82PlayerMic,
+body.jc80-real-dock .watch-main:-webkit-full-screen #jc82PlayerMic{
+  display:flex!important;
+  left:24px!important;
+  bottom:calc(var(--jc80-dock-h, 62px) + var(--jc80-safe-bottom, 0px) + 20px)!important;
+  z-index:2147483600!important;
+}
+
+/* Strong override against old Stage67 direct-player child hiding. */
+body.jc64-active-first.jc67-main-player-active .watch-main #jc82PlayerMic,
+body.jc64-active-first.jc67-main-player-active .watch-main #jc82PlayerMic *,
+body.jc80-real-dock .watch-main #jc82PlayerMic,
+body.jc80-real-dock .watch-main #jc82PlayerMic *{
+  opacity:1!important;
+  visibility:visible!important;
+}
+
+body.jc80-real-dock .watch-main #jc82PlayerMic[hidden]{
+  display:none!important;
+}
+
+@media(max-width:980px){
+  #jc82PlayerMic{
+    left:12px!important;
+    bottom:calc(var(--jc80-dock-h, 58px) + var(--jc80-safe-bottom, 0px) + 12px)!important;
+  }
+  #jc82PlayerMic button{
+    min-width:118px!important;
+    min-height:38px!important;
+    height:38px!important;
+    padding:0 12px!important;
+    font-size:12px!important;
+  }
+  body.jc80-real-dock #jc80Dock button{
+    min-width:96px!important;
+  }
+}
+
+@media(max-height:760px){
+  #jc82PlayerMic{
+    bottom:calc(var(--jc80-dock-h, 56px) + var(--jc80-safe-bottom, 0px) + 10px)!important;
+  }
+  #jc82PlayerMic button{
     min-height:36px!important;
     height:36px!important;
     font-size:12px!important;

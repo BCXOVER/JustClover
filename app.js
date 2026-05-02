@@ -1,12 +1,12 @@
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage81-player-mic-overlay-20260502-1
+   Version: stage82-fullscreen-mic-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage81-player-mic-overlay-20260502-1";
+const JC40_BUILD = "stage82-fullscreen-mic-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
@@ -626,10 +626,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage81-player-mic-overlay-20260502-1
+   Version: stage82-fullscreen-mic-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage81-player-mic-overlay-20260502-1";
+  const BUILD = "stage82-fullscreen-mic-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1156,7 +1156,7 @@ try{
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage81-player-mic-overlay-20260502-1";
+  const BUILD = "stage82-fullscreen-mic-20260502-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1393,7 +1393,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage81-player-mic-overlay-20260502-1";
+  const BUILD = "stage82-fullscreen-mic-20260502-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1691,7 +1691,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage81-player-mic-overlay-20260502-1';
+  const BUILD = 'stage82-fullscreen-mic-20260502-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1872,7 +1872,7 @@ try{
    когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
    ========================================================= */
 (function(){
-  const BUILD = "stage81-player-mic-overlay-20260502-1";
+  const BUILD = "stage82-fullscreen-mic-20260502-1";
   const CHECK_EVERY_MS = 15000;
   const FIRST_CHECK_MS = 4500;
   const RELOAD_DELAY_MS = 1800;
@@ -1985,13 +1985,13 @@ try{
 
 /* =========================================================
    JustClover Stage 81 — Real Stable Player Dock
-   Version: stage81-player-mic-overlay-20260502-1
+   Version: stage82-fullscreen-mic-20260502-1
 
    No player resize loop. No fixed/cover iframe fighting.
    JS only creates bottom buttons and toggles the stable CSS class.
    ========================================================= */
 (function(){
-  const BUILD = 'stage81-player-mic-overlay-20260502-1';
+  const BUILD = 'stage82-fullscreen-mic-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2189,13 +2189,13 @@ try{
 
 /* =========================================================
    JustClover Stage 81 — Player Mic Overlay
-   Version: stage81-player-mic-overlay-20260502-1
+   Version: stage82-fullscreen-mic-20260502-1
 
    Adds a clear mic toggle inside the player and removes the chat action from
    the bottom dock. Does not change auth, chat DOM, source logic, or player fit.
    ========================================================= */
 (function(){
-  const BUILD = 'stage81-player-mic-overlay-20260502-1';
+  const BUILD = 'stage82-fullscreen-mic-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2353,6 +2353,206 @@ try{
       voiceText: voiceBtn()?.textContent || '',
       voiceStatus: voiceStatus()?.textContent || '',
       fullscreen: !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement)
+    };
+  };
+})();
+
+
+/* =========================================================
+   JustClover Stage 82 — Fullscreen Mic Fix
+   Version: stage82-fullscreen-mic-20260502-1
+
+   Adds a robust mic control mounted on .watch-main. It is not a child of the
+   YouTube iframe/player element and therefore remains visible in JustClover
+   site fullscreen. No player scale/fit logic is changed.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage82-fullscreen-mic-20260502-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+
+  let scheduled = false;
+  let bodyObserver = null;
+  let appObserver = null;
+  let watchObserver = null;
+  let voiceObserver = null;
+  let statusObserver = null;
+
+  function isAuth(){
+    try { return !!window.__jc62IsAuthScreen?.(); } catch(_) { return false; }
+  }
+
+  function appOpen(){
+    const app = document.getElementById('appView');
+    return !!(app && !app.classList.contains('hidden'));
+  }
+
+  function watchActive(){
+    const watch = document.getElementById('watchSection');
+    return !!(watch && watch.classList.contains('active'));
+  }
+
+  function activeRoomView(){
+    return !isAuth() && appOpen() && watchActive();
+  }
+
+  function main(){
+    return document.querySelector('.watch-main') || document.getElementById('watchSection');
+  }
+
+  function voiceBtn(){
+    return document.getElementById('voiceBtn');
+  }
+
+  function voiceStatus(){
+    return document.getElementById('voiceStatus');
+  }
+
+  function readVoiceState(){
+    const b = voiceBtn();
+    const s = voiceStatus();
+    const text = `${b?.textContent || ''} ${s?.textContent || ''} ${b?.getAttribute('aria-pressed') || ''}`.toLowerCase();
+
+    if(/ошибка|недоступ|запрещ|denied|error|failed/.test(text)) return 'error';
+    if(/выключить|включ[её]н|enabled|on|true/.test(text)) return 'on';
+    if(/загрузка|подключ|разреш|ожидан|pending|loading/.test(text)) return 'pending';
+    return 'off';
+  }
+
+  function label(state){
+    if(state === 'on') return '🎙 Микро вкл';
+    if(state === 'pending') return '🎙 Микро…';
+    if(state === 'error') return '🎙 Ошибка';
+    return '🎙 Микро выкл';
+  }
+
+  function ensureMic(){
+    let wrap = document.getElementById('jc82PlayerMic');
+    if(!wrap){
+      wrap = document.createElement('div');
+      wrap.id = 'jc82PlayerMic';
+      wrap.setAttribute('aria-label','Микрофон в плеере');
+      wrap.innerHTML = '<button type="button" data-jc82-player-mic aria-label="Переключить микрофон">🎙 Микро выкл</button>';
+      wrap.addEventListener('click', function(e){
+        const btn = e.target.closest('button');
+        if(!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        wrap.dataset.state = 'pending';
+        btn.textContent = label('pending');
+        voiceBtn()?.click?.();
+        setTimeout(updateMic, 80);
+        setTimeout(updateMic, 450);
+        setTimeout(updateMic, 1200);
+      }, true);
+    }
+
+    const host = main();
+    if(host && wrap.parentNode !== host) host.appendChild(wrap);
+    return wrap;
+  }
+
+  function updateMic(){
+    const wrap = document.getElementById('jc82PlayerMic');
+    if(!wrap) return;
+    const state = readVoiceState();
+    const btn = wrap.querySelector('button');
+    wrap.dataset.state = state;
+    if(btn){
+      btn.textContent = label(state);
+      btn.title = state === 'on' ? 'Микрофон включён — нажми, чтобы выключить' : 'Микрофон выключен — нажми, чтобы включить';
+      btn.setAttribute('aria-label', btn.title);
+      btn.setAttribute('aria-pressed', state === 'on' ? 'true' : 'false');
+    }
+  }
+
+  function cleanOldButtons(){
+    document.querySelectorAll('#jc80Dock [data-jc80-mic], #jc80Dock [data-jc80-chat]').forEach(el => {
+      el.hidden = true;
+      el.setAttribute('aria-hidden','true');
+      el.tabIndex = -1;
+    });
+    const old = document.getElementById('jc81PlayerMic');
+    if(old){
+      old.hidden = true;
+      old.setAttribute('aria-hidden','true');
+    }
+  }
+
+  function attachObservers(){
+    if(document.body && !bodyObserver){
+      bodyObserver = new MutationObserver(schedule);
+      bodyObserver.observe(document.body, {attributes:true, attributeFilter:['class']});
+    }
+    const app = document.getElementById('appView');
+    if(app && !appObserver){
+      appObserver = new MutationObserver(schedule);
+      appObserver.observe(app, {attributes:true, attributeFilter:['class']});
+    }
+    const watch = document.getElementById('watchSection');
+    if(watch && !watchObserver){
+      watchObserver = new MutationObserver(schedule);
+      watchObserver.observe(watch, {attributes:true, attributeFilter:['class']});
+    }
+    const b = voiceBtn();
+    if(b && !voiceObserver){
+      voiceObserver = new MutationObserver(schedule);
+      voiceObserver.observe(b, {childList:true, subtree:true, attributes:true, attributeFilter:['class','aria-pressed','disabled']});
+    }
+    const s = voiceStatus();
+    if(s && !statusObserver){
+      statusObserver = new MutationObserver(schedule);
+      statusObserver.observe(s, {childList:true, subtree:true, characterData:true});
+    }
+  }
+
+  function sync(){
+    scheduled = false;
+    const on = activeRoomView();
+    document.documentElement.classList.toggle('jc82-fullscreen-mic', on);
+    document.body?.classList?.toggle('jc82-fullscreen-mic', on);
+
+    const mic = ensureMic();
+    mic.hidden = !on;
+    mic.setAttribute('aria-hidden', on ? 'false' : 'true');
+    cleanOldButtons();
+    updateMic();
+    attachObservers();
+  }
+
+  function schedule(){
+    if(scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(sync);
+  }
+
+  document.addEventListener('click', function(){ setTimeout(schedule, 20); }, true);
+  document.addEventListener('fullscreenchange', schedule, true);
+  document.addEventListener('webkitfullscreenchange', schedule, true);
+  window.addEventListener('resize', schedule, {passive:true});
+  window.addEventListener('orientationchange', schedule, {passive:true});
+  [0,80,250,700,1400].forEach(ms => setTimeout(schedule, ms));
+
+  window.jc82MicDebug = function(){
+    const wrap = document.getElementById('jc82PlayerMic');
+    const r = wrap?.getBoundingClientRect?.();
+    const fs = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+    return {
+      build: BUILD,
+      activeRoomView: activeRoomView(),
+      classOn: document.body?.classList?.contains('jc82-fullscreen-mic'),
+      state: wrap?.dataset.state || '',
+      micExists: !!wrap,
+      micHidden: !!wrap?.hidden,
+      micParent: wrap?.parentElement?.className || wrap?.parentElement?.id || '',
+      micRect: r ? {x:Math.round(r.x), y:Math.round(r.y), w:Math.round(r.width), h:Math.round(r.height)} : null,
+      dockHasChatVisible: !!Array.from(document.querySelectorAll('#jc80Dock [data-jc80-chat]')).find(el => !el.hidden && getComputedStyle(el).display !== 'none'),
+      dockHasMicVisible: !!Array.from(document.querySelectorAll('#jc80Dock [data-jc80-mic]')).find(el => !el.hidden && getComputedStyle(el).display !== 'none'),
+      oldMicExists: !!document.getElementById('jc81PlayerMic'),
+      voiceText: voiceBtn()?.textContent || '',
+      voiceStatus: voiceStatus()?.textContent || '',
+      fullscreen: !!fs,
+      fullscreenElement: fs?.className || fs?.id || fs?.tagName || ''
     };
   };
 })();
