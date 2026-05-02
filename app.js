@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 57 — Chat Shell Hardfix
-   Version: stage57-chat-shell-hardfix-20260502-1
+   JustClover Stage 58 — Stable Sidebar Geometry
+   Version: stage58-stable-sidebar-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage57-chat-shell-hardfix-20260502-1";
+const JC40_BUILD = "stage58-stable-sidebar-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 57 CHATSHELL loader:", JC40_BUILD);
+console.log("JustClover Stage 58 STABLE loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 57: base app import failed", e);
+  console.error("JustClover Stage 58: base app import failed", e);
   throw e;
 }
 
@@ -528,15 +528,15 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 57 — Chat Shell Hardfix
-   Version: stage57-chat-shell-hardfix-20260502-1
+   JustClover Stage 58 — Stable Sidebar Geometry
+   Version: stage58-stable-sidebar-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage57-chat-shell-hardfix-20260502-1";
-  const STORE_KEY = "jc55ActiveViewMode";
+  const BUILD = "stage58-stable-sidebar-20260502-1";
+  const STORE_KEY = "jc58ActiveViewMode";
   let desired = false;
 
-  try { desired = localStorage.getItem(STORE_KEY) === "1" || localStorage.getItem("jc51ActiveViewMode") === "1" || localStorage.getItem("jc50ActiveViewMode") === "1" || localStorage.getItem("jc49ActiveViewMode") === "1" || localStorage.getItem("jc48ActiveViewMode") === "1" || localStorage.getItem("jc47ActiveViewMode") === "1" || localStorage.getItem("jc46ActiveViewMode") === "1" || localStorage.getItem("jc45ActiveViewMode") === "1" || localStorage.getItem("jc44ActiveViewMode") === "1" || localStorage.getItem("jc43ActiveViewMode") === "1"; } catch(_) {}
+  try { desired = localStorage.getItem(STORE_KEY) === "1" || localStorage.getItem("jc54ActiveViewMode") === "1" || localStorage.getItem("jc53ActiveViewMode") === "1" || localStorage.getItem("jc52ActiveViewMode") === "1" || localStorage.getItem("jc51ActiveViewMode") === "1" || localStorage.getItem("jc50ActiveViewMode") === "1" || localStorage.getItem("jc49ActiveViewMode") === "1" || localStorage.getItem("jc48ActiveViewMode") === "1" || localStorage.getItem("jc47ActiveViewMode") === "1" || localStorage.getItem("jc46ActiveViewMode") === "1" || localStorage.getItem("jc45ActiveViewMode") === "1" || localStorage.getItem("jc44ActiveViewMode") === "1" || localStorage.getItem("jc43ActiveViewMode") === "1"; } catch(_) {}
 
   function isWatchMode(){
     const app = document.getElementById('appView');
@@ -1046,191 +1046,54 @@ try{
 }catch(_){ }
 
 
-// Stage 55 — hide useless cinema button and keep chat flush to top.
+// Stage 58 — stable sidebar geometry: no chat DOM moves, no clones.
 (function(){
+  const BUILD = "stage58-stable-sidebar-20260502-1";
+
   function hideCinemaButtons(root=document){
     const nodes = Array.from(root.querySelectorAll('button,a,[role="button"],.chip,.pill,.segmented button'));
-    nodes.forEach((el)=>{
-      const txt = String(el.textContent||'').trim().toLowerCase();
-      const meta = ((el.getAttribute('aria-label')||'') + ' ' + (el.getAttribute('title')||'')).toLowerCase();
-      const hay = (txt + ' ' + meta).replace(/\s+/g,' ');
+    for(const el of nodes){
+      const hay = String((el.textContent||'') + ' ' + (el.getAttribute('aria-label')||'') + ' ' + (el.getAttribute('title')||'')).replace(/\s+/g,' ').trim().toLowerCase();
       if(/(^|\s)кино($|\s)/i.test(hay) || /(^|\s)(cinema|movie)($|\s)/i.test(hay)){
+        el.setAttribute('data-jc58-hidden-cinema','1');
         el.style.setProperty('display','none','important');
-        el.setAttribute('data-jc55-hidden-cinema','1');
       }
-    });
-  }
-  try{ hideCinemaButtons(document); }catch(_){}
-  const mo = new MutationObserver(()=>{ try{ hideCinemaButtons(document); }catch(_){} });
-  mo.observe(document.documentElement || document.body, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:['class','title','aria-label']});
-  window.jc55HideCinema = function(){ hideCinemaButtons(document); return true; };
-  window.jc55ActiveViewDebug = function(){
-    return {
-      build: window.JUSTCLOVER_BUILD,
-      hiddenCinema: document.querySelectorAll('[data-jc55-hidden-cinema]').length,
-      chatCard: !!document.querySelector('.chat-card'),
-      raveFocus: document.body.classList.contains('jc41-rave-focus')
-    };
-  };
-})();
-
-
-// Stage 56 — force chat card to occupy the whole sidebar top-to-bottom.
-(function(){
-  function normalizeSidebar(){
-    if(!document.body.classList.contains('jc41-rave-focus')) return false;
-    const sidebar = document.querySelector('.watch-sidebar');
-    const chat = document.querySelector('.watch-sidebar .chat-card, .chat-card');
-    if(!sidebar || !chat) return false;
-
-    // Move chat to be the direct first child of sidebar so hidden legacy blocks cannot reserve height above it.
-    if(chat.parentElement !== sidebar){
-      try{ sidebar.prepend(chat); }catch(_){ try{ sidebar.appendChild(chat); }catch(__){} }
-    } else if(sidebar.firstElementChild !== chat){
-      try{ sidebar.prepend(chat); }catch(_){}
     }
-
-    Array.from(sidebar.children).forEach((el)=>{
-      if(el !== chat){
-        el.style.setProperty('display','none','important');
-        el.setAttribute('data-jc56-hidden-side','1');
-      }
-    });
-
-    ['padding','margin','top','bottom','height','min-height','max-height','transform'].forEach((prop)=>{
-      try{ chat.style.removeProperty(prop); }catch(_){}
-    });
-    chat.setAttribute('data-jc56-chat-shell','1');
-
-    const head = chat.querySelector('.side-card-head');
-    const messages = chat.querySelector('#chatMessages, .messages');
-    const form = chat.querySelector('#chatForm, .message-form, form');
-    if(head) head.setAttribute('data-jc56-chat-head','1');
-    if(messages) messages.setAttribute('data-jc56-chat-messages','1');
-    if(form) form.setAttribute('data-jc56-chat-form','1');
-    return true;
   }
 
-  function hideCinemaButtons(root=document){
-    const nodes = Array.from(root.querySelectorAll('button,a,[role="button"],.chip,.pill,.segmented button'));
-    nodes.forEach((el)=>{
-      const txt = String(el.textContent||'').trim().toLowerCase();
-      const meta = ((el.getAttribute('aria-label')||'') + ' ' + (el.getAttribute('title')||'')).toLowerCase();
-      const hay = (txt + ' ' + meta).replace(/\s+/g,' ');
-      if(/(^|\s)кино($|\s)/i.test(hay) || /(^|\s)(cinema|movie)($|\s)/i.test(hay)){
-        el.style.setProperty('display','none','important');
-        el.setAttribute('data-jc56-hidden-cinema','1');
-      }
-    });
+  function applyStableSidebarMarks(){
+    const chat = document.querySelector('.watch-sidebar .chat-card') || document.querySelector('.chat-card');
+    const sidebar = document.querySelector('.watch-sidebar');
+    if(chat) chat.setAttribute('data-jc58-chat','1');
+    if(sidebar) sidebar.setAttribute('data-jc58-sidebar','1');
+    return !!(chat && sidebar);
   }
 
   function tick(){
-    try{ normalizeSidebar(); }catch(_){}
-    try{ hideCinemaButtons(document); }catch(_){}
-  }
-  tick();
-  window.addEventListener('load', tick, {once:false});
-  document.addEventListener('click', ()=>setTimeout(tick, 30), true);
-  const mo = new MutationObserver(()=>{ setTimeout(tick, 0); });
-  mo.observe(document.documentElement || document.body, {subtree:true, childList:true, attributes:true, characterData:true});
-
-  window.jc56NormalizeSidebar = function(){ return normalizeSidebar(); };
-  window.jc56ActiveViewDebug = function(){
-    const sidebar = document.querySelector('.watch-sidebar');
-    const chat = document.querySelector('.watch-sidebar .chat-card');
-    return {
-      build: window.JUSTCLOVER_BUILD,
-      raveFocus: document.body.classList.contains('jc41-rave-focus'),
-      sidebarChildren: sidebar ? sidebar.children.length : 0,
-      chatIsDirectChild: !!(sidebar && chat && chat.parentElement === sidebar),
-      hiddenSide: document.querySelectorAll('[data-jc56-hidden-side]').length,
-      hiddenCinema: document.querySelectorAll('[data-jc56-hidden-cinema]').length
-    };
-  };
-})();
-
-
-// Stage 57 — hard chat shell rebuild for active view.
-(function(){
-  function ensureChatShell(){
-    if(!document.body.classList.contains('jc41-rave-focus')) return false;
-    const layout = document.querySelector('.watch-layout');
-    const sidebar = document.querySelector('.watch-sidebar');
-    const chat = document.querySelector('.chat-card');
-    if(!layout || !sidebar || !chat) return false;
-
-    let shell = document.getElementById('jc57ChatShell');
-    if(!shell){
-      shell = document.createElement('div');
-      shell.id = 'jc57ChatShell';
-      shell.className = 'jc57-chat-shell';
-    }
-
-    // Keep shell inside sidebar so column sizing stays intact, but detach chat from any hidden wrappers.
-    if(shell.parentElement !== sidebar){
-      try{ sidebar.prepend(shell); }catch(_){ sidebar.appendChild(shell); }
-    }
-    if(chat.parentElement !== shell){
-      try{ shell.appendChild(chat); }catch(_){}
-    }
-
-    Array.from(sidebar.children).forEach((el)=>{
-      if(el !== shell){
-        el.style.setProperty('display','none','important');
-        el.setAttribute('data-jc57-hidden-side','1');
-      }
-    });
-
-    shell.setAttribute('data-jc57-shell','1');
-    chat.setAttribute('data-jc57-chat-shell','1');
-
-    const head = chat.querySelector('.side-card-head');
-    const messages = chat.querySelector('#chatMessages, .messages');
-    const form = chat.querySelector('#chatForm, .message-form, form');
-    if(head) head.setAttribute('data-jc57-chat-head','1');
-    if(messages) messages.setAttribute('data-jc57-chat-messages','1');
-    if(form) form.setAttribute('data-jc57-chat-form','1');
-
-    return true;
-  }
-
-  function hideCinemaButtons(root=document){
-    const nodes = Array.from(root.querySelectorAll('button,a,[role="button"],.chip,.pill,.segmented button'));
-    nodes.forEach((el)=>{
-      const txt = String(el.textContent||'').trim().toLowerCase();
-      const meta = ((el.getAttribute('aria-label')||'') + ' ' + (el.getAttribute('title')||'')).toLowerCase();
-      const hay = (txt + ' ' + meta).replace(/\s+/g,' ');
-      if(/(^|\s)кино($|\s)/i.test(hay) || /(^|\s)(cinema|movie)($|\s)/i.test(hay)){
-        el.style.setProperty('display','none','important');
-        el.setAttribute('data-jc57-hidden-cinema','1');
-      }
-    });
-  }
-
-  function tick(){
-    try{ ensureChatShell(); }catch(_){}
-    try{ hideCinemaButtons(document); }catch(_){}
+    try { hideCinemaButtons(document); } catch(_){ }
+    try { applyStableSidebarMarks(); } catch(_){ }
   }
 
   tick();
-  window.addEventListener('load', ()=>setTimeout(tick, 0), {once:false});
-  document.addEventListener('click', ()=>setTimeout(tick, 30), true);
-  const mo = new MutationObserver(()=>{ setTimeout(tick, 0); });
+  setInterval(tick, 700);
+  const mo = new MutationObserver(tick);
   mo.observe(document.documentElement || document.body, {subtree:true, childList:true, attributes:true, characterData:true});
 
-  window.jc57EnsureChatShell = function(){ return ensureChatShell(); };
-  window.jc57ActiveViewDebug = function(){
-    const sidebar = document.querySelector('.watch-sidebar');
-    const shell = document.getElementById('jc57ChatShell');
-    const chat = document.querySelector('#jc57ChatShell .chat-card');
+  window.jc58HideCinema = function(){ hideCinemaButtons(document); return document.querySelectorAll('[data-jc58-hidden-cinema]').length; };
+  window.jc58ActiveViewDebug = function(){
+    const chat = document.querySelector('[data-jc58-chat], .watch-sidebar .chat-card, .chat-card');
+    const sidebar = document.querySelector('[data-jc58-sidebar], .watch-sidebar');
+    const cr = chat?.getBoundingClientRect?.();
+    const sr = sidebar?.getBoundingClientRect?.();
     return {
-      build: window.JUSTCLOVER_BUILD,
-      raveFocus: document.body.classList.contains('jc41-rave-focus'),
-      sidebarChildren: sidebar ? sidebar.children.length : 0,
-      shellInSidebar: !!(sidebar && shell && shell.parentElement===sidebar),
-      chatInShell: !!(shell && chat && chat.parentElement===shell),
-      hiddenSide: document.querySelectorAll('[data-jc57-hidden-side]').length,
-      hiddenCinema: document.querySelectorAll('[data-jc57-hidden-cinema]').length
+      build: BUILD,
+      justCloverBuild: window.JUSTCLOVER_BUILD,
+      active: document.body.classList.contains('jc41-rave-focus'),
+      chatRect: cr ? {top:cr.top, left:cr.left, width:cr.width, height:cr.height} : null,
+      sidebarRect: sr ? {top:sr.top, left:sr.left, width:sr.width, height:sr.height} : null,
+      hiddenCinema: document.querySelectorAll('[data-jc58-hidden-cinema]').length,
+      chatDomMoved: false
     };
   };
+  window.jc58ToggleFullscreen = window.jc54ToggleFullscreen || window.jc53ToggleFullscreen || window.jc52ToggleFullscreen || window.jc51ToggleFullscreen || window.jc42ToggleFullscreen;
 })();
