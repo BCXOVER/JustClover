@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 73 — Player Auto Cover
-   Version: stage73-player-auto-cover-20260502-1
+   JustClover Stage 74 — Fixed Viewport Player
+   Version: stage74-fixed-viewport-player-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage73-player-auto-cover-20260502-1";
+const JC40_BUILD = "stage74-fixed-viewport-player-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 73 PLAYERAUTO loader:", JC40_BUILD);
+console.log("JustClover Stage 74 FIXEDPLAYER loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 73: base app import failed", e);
+  console.error("JustClover Stage 74: base app import failed", e);
   throw e;
 }
 
@@ -625,11 +625,11 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 73 — Player Auto Cover
-   Version: stage73-player-auto-cover-20260502-1
+   JustClover Stage 74 — Fixed Viewport Player
+   Version: stage74-fixed-viewport-player-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage73-player-auto-cover-20260502-1";
+  const BUILD = "stage74-fixed-viewport-player-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1151,12 +1151,12 @@ try{
 }catch(_){}
 
 /* =========================================================
-   JustClover Stage 73 — Player Auto Cover
+   JustClover Stage 74 — Fixed Viewport Player
    Главная идея: после входа в комнату показываем только active-view.
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage73-player-auto-cover-20260502-1";
+  const BUILD = "stage74-fixed-viewport-player-20260502-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1393,7 +1393,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage73-player-auto-cover-20260502-1";
+  const BUILD = "stage74-fixed-viewport-player-20260502-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1691,7 +1691,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage73-player-auto-cover-20260502-1';
+  const BUILD = 'stage74-fixed-viewport-player-20260502-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1872,7 +1872,7 @@ try{
    когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
    ========================================================= */
 (function(){
-  const BUILD = "stage73-player-auto-cover-20260502-1";
+  const BUILD = "stage74-fixed-viewport-player-20260502-1";
   const CHECK_EVERY_MS = 15000;
   const FIRST_CHECK_MS = 4500;
   const RELOAD_DELAY_MS = 1800;
@@ -1986,7 +1986,7 @@ try{
    Rave-like player: без серых/белых полей и без постоянных дерганий.
    ========================================================= */
 (function(){
-  const BUILD = 'stage73-player-auto-cover-20260502-1';
+  const BUILD = 'stage74-fixed-viewport-player-20260502-1';
   const ASPECT = 16 / 9;
   const OVERSCAN = 1.018; // небольшой запас убирает тонкие полосы по краям
   let lastFitKey = '';
@@ -2144,6 +2144,246 @@ try{
       mode: el?.getAttribute?.('data-jc73-fit-mode') || '',
       src: el?.src || '',
       lastFitKey
+    };
+  };
+})();
+
+
+/* =========================================================
+   Stage 74 — Fixed Viewport Player.
+   Fixes the real issue: old player containers/padding and native YouTube iframe
+   were still deciding the geometry. The player slot is now fixed to the whole
+   left viewport area, and every visible iframe inside it is cover-fitted once.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage74-fixed-viewport-player-20260502-1';
+  const ASPECT = 16 / 9;
+  const OVERSCAN = 1.025;
+  let lastKey = '';
+  let timer = 0;
+
+  function isAuth(){ return !!window.__jc62IsAuthScreen?.(); }
+  function isActive(){ return !isAuth() && document.body?.classList?.contains('jc64-active-first'); }
+  function chatWidth(){
+    const raw = getComputedStyle(document.body).getPropertyValue('--jc64-chat-w').trim();
+    return raw || '330px';
+  }
+
+  function frame(){
+    return document.querySelector('.player-frame');
+  }
+
+  function candidates(){
+    const fr = frame();
+    if(!fr) return [];
+    const list = [
+      document.getElementById('jc65DirectPlayer'),
+      fr.querySelector('#jc65DirectPlayer'),
+      fr.querySelector('#youtubePlayer iframe'),
+      fr.querySelector('iframe[src*="youtube"]'),
+      fr.querySelector('iframe[src*="youtu.be"]'),
+      fr.querySelector('iframe[src*="youtube-nocookie"]'),
+      fr.querySelector('#iframePlayer'),
+      fr.querySelector('iframe[src*="vk.com"]'),
+      fr.querySelector('iframe[src*="vkvideo"]'),
+      fr.querySelector('video')
+    ].filter(Boolean);
+
+    // de-dupe
+    return [...new Set(list)].filter(el => {
+      const r = el.getBoundingClientRect?.();
+      return !r || (r.width >= 1 && r.height >= 1);
+    });
+  }
+
+  function kind(el){
+    const k = String(el?.getAttribute?.('data-jc65-kind') || '').toLowerCase();
+    const s = String(el?.src || '').toLowerCase();
+    if(k) return k;
+    if(el?.tagName === 'VIDEO') return 'video';
+    if(s.includes('youtube') || s.includes('youtu.be')) return 'youtube';
+    if(s.includes('vk.com') || s.includes('vkvideo')) return 'vk';
+    return 'iframe';
+  }
+
+  function hideEmptyLayers(){
+    const fr = frame();
+    if(!fr) return;
+    fr.querySelectorAll('#emptyPlayer,.empty-player,.placeholder,.player-empty').forEach(el=>{
+      el.style.setProperty('display','none','important');
+      el.style.setProperty('visibility','hidden','important');
+      el.style.setProperty('opacity','0','important');
+    });
+  }
+
+  function forceViewportSlot(){
+    if(!isActive()) return false;
+    const fr = frame();
+    if(!fr) return false;
+
+    document.body.classList.add('jc74-fixed-player');
+
+    // The frame itself owns the left area. This bypasses old card padding/margins.
+    fr.style.setProperty('position','fixed','important');
+    fr.style.setProperty('left','0','important');
+    fr.style.setProperty('top','var(--jc64-topbar-h)','important');
+    fr.style.setProperty('right','var(--jc64-chat-w)','important');
+    fr.style.setProperty('bottom','0','important');
+    fr.style.setProperty('width','auto','important');
+    fr.style.setProperty('height','auto','important');
+    fr.style.setProperty('min-width','0','important');
+    fr.style.setProperty('min-height','0','important');
+    fr.style.setProperty('max-width','none','important');
+    fr.style.setProperty('max-height','none','important');
+    fr.style.setProperty('margin','0','important');
+    fr.style.setProperty('padding','0','important');
+    fr.style.setProperty('border','0','important');
+    fr.style.setProperty('border-radius','0','important');
+    fr.style.setProperty('background','#000','important');
+    fr.style.setProperty('overflow','hidden','important');
+    fr.style.setProperty('z-index','10','important');
+    fr.setAttribute('data-jc74-fixed-frame','1');
+
+    return true;
+  }
+
+  function fitOne(el, r){
+    const k = kind(el);
+    el.style.setProperty('position','absolute','important');
+    el.style.setProperty('right','auto','important');
+    el.style.setProperty('bottom','auto','important');
+    el.style.setProperty('max-width','none','important');
+    el.style.setProperty('max-height','none','important');
+    el.style.setProperty('min-width','0','important');
+    el.style.setProperty('min-height','0','important');
+    el.style.setProperty('border','0','important');
+    el.style.setProperty('background','#000','important');
+    el.style.setProperty('opacity','1','important');
+    el.style.setProperty('visibility','visible','important');
+    el.style.setProperty('pointer-events','auto','important');
+    el.style.setProperty('z-index','30','important');
+
+    if(k === 'video'){
+      el.style.setProperty('inset','0','important');
+      el.style.setProperty('width','100%','important');
+      el.style.setProperty('height','100%','important');
+      el.style.setProperty('object-fit','contain','important');
+      el.setAttribute('data-jc74-fit','video-contain');
+      return;
+    }
+
+    // Cover-fit the whole embed iframe. This removes top/left black "dead zones"
+    // caused by non-16:9 containers, while keeping the UI stable.
+    let w = r.width;
+    let h = w / ASPECT;
+    if(h < r.height){
+      h = r.height;
+      w = h * ASPECT;
+    }
+    w *= OVERSCAN;
+    h *= OVERSCAN;
+
+    const left = Math.floor((r.width - w) / 2);
+    const top = Math.floor((r.height - h) / 2);
+
+    el.style.setProperty('left', left + 'px', 'important');
+    el.style.setProperty('top', top + 'px', 'important');
+    el.style.setProperty('width', Math.ceil(w) + 'px', 'important');
+    el.style.setProperty('height', Math.ceil(h) + 'px', 'important');
+    el.style.setProperty('transform','none','important');
+    el.setAttribute('data-jc74-fit','iframe-cover');
+  }
+
+  function fitPlayer(){
+    if(!forceViewportSlot()) return false;
+    hideEmptyLayers();
+
+    const fr = frame();
+    if(!fr) return false;
+    const r = fr.getBoundingClientRect();
+    if(r.width < 40 || r.height < 40) return false;
+
+    const els = candidates();
+    if(!els.length) return false;
+
+    const srcKey = els.map(el => `${el.tagName}:${el.id}:${el.src || el.getAttribute('data-jc65-url') || ''}`).join('|');
+    const key = `${Math.round(r.width)}x${Math.round(r.height)}|${srcKey}`;
+    if(key === lastKey && fr.getAttribute('data-jc74-fit') === '1') return true;
+    lastKey = key;
+
+    els.forEach(el => fitOne(el, r));
+    fr.setAttribute('data-jc74-fit','1');
+    return true;
+  }
+
+  function schedule(delay=80){
+    clearTimeout(timer);
+    timer = setTimeout(()=>{ try{ fitPlayer(); }catch(_){} }, delay);
+  }
+
+  const prev65 = window.jc65RenderSource;
+  if(typeof prev65 === 'function' && !prev65.__jc74Wrapped){
+    const wrapped = function(){
+      const out = prev65.apply(this, arguments);
+      lastKey = '';
+      schedule(80);
+      setTimeout(()=>{ lastKey=''; fitPlayer(); }, 350);
+      setTimeout(()=>{ lastKey=''; fitPlayer(); }, 1200);
+      return out;
+    };
+    wrapped.__jc74Wrapped = true;
+    window.jc65RenderSource = wrapped;
+    window.jc67RenderSource = wrapped;
+  }
+
+  const mo = new MutationObserver((mutations)=>{
+    let relevant = false;
+    for(const m of mutations){
+      if(m.type === 'childList'){
+        for(const n of m.addedNodes){
+          if(n?.id === 'jc65DirectPlayer' || n?.id === 'youtubePlayer' || n?.id === 'iframePlayer' || n?.tagName === 'IFRAME' || n?.tagName === 'VIDEO' || n?.querySelector?.('iframe,video,#jc65DirectPlayer,#youtubePlayer,#iframePlayer')) relevant = true;
+        }
+      }
+      if(m.type === 'attributes' && (m.attributeName === 'src' || m.attributeName === 'class')) relevant = true;
+    }
+    if(relevant){ lastKey=''; schedule(100); }
+  });
+
+  mo.observe(document.documentElement || document.body, {
+    subtree:true,
+    childList:true,
+    attributes:true,
+    attributeFilter:['src','class','style','data-jc65-kind','data-jc65-url']
+  });
+
+  window.addEventListener('resize', ()=>{ lastKey=''; schedule(120); }, {passive:true});
+  window.addEventListener('orientationchange', ()=>{ lastKey=''; schedule(220); }, {passive:true});
+  document.addEventListener('fullscreenchange', ()=>{ lastKey=''; schedule(120); }, true);
+
+  [100,350,900,1800,3600].forEach(ms => setTimeout(()=>{ lastKey=''; fitPlayer(); }, ms));
+
+  window.jc74FitPlayer = function(){ lastKey=''; return fitPlayer(); };
+  window.jc74PlayerDebug = function(){
+    const fr = frame();
+    const rr = fr?.getBoundingClientRect?.();
+    return {
+      build: BUILD,
+      active: isActive(),
+      fixedFrame: fr?.getAttribute?.('data-jc74-fixed-frame') === '1',
+      fitted: fr?.getAttribute?.('data-jc74-fit') === '1',
+      frame: rr ? {x:Math.round(rr.x), y:Math.round(rr.y), w:Math.round(rr.width), h:Math.round(rr.height)} : null,
+      candidates: candidates().map(el=>{
+        const r = el.getBoundingClientRect?.();
+        return {
+          tag:el.tagName,
+          id:el.id || '',
+          kind:kind(el),
+          fit:el.getAttribute('data-jc74-fit') || '',
+          rect:r ? {x:Math.round(r.x), y:Math.round(r.y), w:Math.round(r.width), h:Math.round(r.height)} : null,
+          src:el.src || ''
+        };
+      }).slice(0,8),
+      lastKey
     };
   };
 })();
