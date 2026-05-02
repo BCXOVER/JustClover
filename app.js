@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 62 — Auth Reset Stable
-   Version: stage62-auth-reset-stable-20260502-1
+   JustClover Stage 64 — Active First Stable
+   Version: stage64-active-first-stable-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage62-auth-reset-stable-20260502-1";
+const JC40_BUILD = "stage64-active-first-stable-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 62 AUTHRESET loader:", JC40_BUILD);
+console.log("JustClover Stage 64 ACTIVEFIRST loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 62: base app import failed", e);
+  console.error("JustClover Stage 64: base app import failed", e);
   throw e;
 }
 
@@ -625,11 +625,11 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 62 — Auth Reset Stable
-   Version: stage62-auth-reset-stable-20260502-1
+   JustClover Stage 64 — Active First Stable
+   Version: stage64-active-first-stable-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage62-auth-reset-stable-20260502-1";
+  const BUILD = "stage64-active-first-stable-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1149,3 +1149,237 @@ try{
 try{
   window.jc62ActiveViewDebug = window.jc54ActiveViewDebug || function(){ return { build: window.JUSTCLOVER_BUILD }; };
 }catch(_){}
+
+/* =========================================================
+   JustClover Stage 64 — Active First Stable
+   Главная идея: после входа в комнату показываем только active-view.
+   Auth/guest/login не трогаем. Чат не переносим в DOM.
+   ========================================================= */
+(function(){
+  const BUILD = "stage64-active-first-stable-20260502-1";
+  const ACTIVE_KEYS = [
+    'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
+    'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
+    'jc50ActiveViewMode','jc49ActiveViewMode','jc48ActiveViewMode','jc47ActiveViewMode','jc46ActiveViewMode',
+    'jc45ActiveViewMode','jc44ActiveViewMode','jc43ActiveViewMode','jc41ActiveViewMode'
+  ];
+
+  function isAuthScreen(){
+    return !!(window.__jc62IsAuthScreen ? window.__jc62IsAuthScreen() :
+      (document.getElementById('appView')?.classList.contains('hidden')));
+  }
+
+  function isWatchMode(){
+    const app = document.getElementById('appView');
+    const watch = document.getElementById('watchSection');
+    return !!(watch && watch.classList.contains('active') && !app?.classList.contains('hidden') && !isAuthScreen());
+  }
+
+  function hardTop(){
+    try { document.documentElement.scrollTop = 0; } catch(_) {}
+    try { document.body.scrollTop = 0; } catch(_) {}
+  }
+
+  function makeActivePersistent(){
+    ACTIVE_KEYS.forEach(k => { try { localStorage.setItem(k, '1'); } catch(_) {} });
+  }
+
+  function hideCinemaButtons(root=document){
+    const nodes = Array.from(root.querySelectorAll('button,a,[role="button"],.chip,.pill,.toolbar-chip'));
+    nodes.forEach((el)=>{
+      const text = String(el.textContent || '').trim().toLowerCase();
+      const meta = ((el.getAttribute('aria-label') || '') + ' ' + (el.getAttribute('title') || '')).toLowerCase();
+      const hay = (text + ' ' + meta).replace(/\s+/g,' ');
+      if(/(^|\s)кино($|\s)/i.test(hay) || /(^|\s)(cinema|movie)($|\s)/i.test(hay)){
+        el.style.setProperty('display','none','important');
+        el.setAttribute('data-jc64-hidden-cinema','1');
+      }
+    });
+  }
+
+  function normalizeTopbar(){
+    const bar = document.getElementById('jc51RaveTopbar');
+    if(!bar) return false;
+
+    const exit = bar.querySelector('[data-jc51-exit]');
+    if(exit){
+      exit.setAttribute('title','Комнаты');
+      exit.setAttribute('aria-label','Комнаты');
+      // Не открываем старый "обычный режим"; главный интерфейс теперь active-first.
+      exit.onclick = function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        // Мягкая попытка вернуться к комнатам через родную навигацию, если такая кнопка есть.
+        const candidates = Array.from(document.querySelectorAll('button,a,[role="button"]'));
+        const rooms = candidates.find(b => /комнаты|создать комнату|rooms/i.test((b.textContent || b.title || b.getAttribute('aria-label') || '').trim()));
+        if(rooms && !rooms.closest('#jc51RaveTopbar')) rooms.click();
+      };
+    }
+
+    // Верхняя панель — навигация и каталог, без дублей микро/чата/fullscreen.
+    bar.querySelectorAll('[data-jc51-mic],[data-jc51-chat],[data-jc51-full]').forEach(el => el.remove());
+    return true;
+  }
+
+  function normalizeDock(){
+    const dock = document.getElementById('jc45ActiveDock') || document.getElementById('jc43ActiveDock');
+    if(!dock) return false;
+    dock.classList.add('jc64-main-dock');
+
+    const floating = document.getElementById('jc41RaveFloating');
+    if(floating){
+      floating.querySelector('[data-jc41-exit]')?.remove?.();
+      floating.querySelector('[data-jc41-catalog]')?.setAttribute('title','Источники');
+      const full = floating.querySelector('[data-jc41-full]');
+      if(full){
+        full.textContent = document.fullscreenElement ? 'Выйти' : 'Экран';
+      }
+      // Убираем кино, если старые stages где-то его добавили.
+      hideCinemaButtons(floating);
+    }
+    return true;
+  }
+
+  function extractYouTubeId(url){
+    const raw = String(url || '').trim();
+    if(!raw) return '';
+    try{
+      const u = new URL(raw, location.href);
+      const h = u.hostname.replace(/^www\./,'').toLowerCase();
+      if(h === 'youtu.be') return u.pathname.split('/').filter(Boolean)[0] || '';
+      if(h.endsWith('youtube.com') || h.endsWith('youtube-nocookie.com')){
+        if(u.searchParams.get('v')) return u.searchParams.get('v') || '';
+        const parts = u.pathname.split('/').filter(Boolean);
+        const keys = ['embed','shorts','live','v'];
+        for(let i=0;i<parts.length-1;i++){
+          if(keys.includes(parts[i])) return parts[i+1] || '';
+        }
+      }
+    }catch(_){
+      const m = raw.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{8,})/);
+      return m ? m[1] : '';
+    }
+    return '';
+  }
+
+  function currentSourceUrl(){
+    const fields = [
+      document.getElementById('sourceUrl'),
+      document.querySelector('input[name="sourceUrl"]'),
+      document.querySelector('[data-current-source-url]'),
+      document.querySelector('[data-source-url]')
+    ];
+    for(const f of fields){
+      const v = (f?.value || f?.dataset?.currentSourceUrl || f?.dataset?.sourceUrl || '').trim();
+      if(v) return v;
+    }
+    const text = Array.from(document.querySelectorAll('.source-history,.queue-card,.player-card,.player-card-redesign'))
+      .map(el => el.textContent || '').join(' ');
+    const m = text.match(/https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s"')]+/i);
+    return m ? m[0] : '';
+  }
+
+  function ensureYouTubeVisible(){
+    if(!isWatchMode()) return false;
+    const url = currentSourceUrl();
+    const id = extractYouTubeId(url);
+    if(!id) return false;
+
+    const frame = document.querySelector('.player-frame');
+    if(!frame) return false;
+
+    // Если VK/local уже реально отображается, не трогаем.
+    const vk = frame.querySelector('iframe[src*="vk.com"],iframe[src*="vkvideo"],video[src],video:not([src=""])');
+    if(vk && vk.getBoundingClientRect().width > 20 && vk.getBoundingClientRect().height > 20) return false;
+
+    // Если родной YouTube iframe есть и не схлопнут — просто оставляем.
+    const nativeYt = frame.querySelector('iframe[src*="youtube.com"],iframe[src*="youtube-nocookie.com"],#youtubePlayer iframe');
+    if(nativeYt){
+      nativeYt.style.setProperty('display','block','important');
+      nativeYt.style.setProperty('width','100%','important');
+      nativeYt.style.setProperty('height','100%','important');
+      nativeYt.style.setProperty('opacity','1','important');
+      nativeYt.style.setProperty('visibility','visible','important');
+      return true;
+    }
+
+    // Fallback без вмешательства в синхронизацию: показывает ролик, если родной iframe не появился.
+    let fb = document.getElementById('jc64YouTubeFallback');
+    if(!fb){
+      fb = document.createElement('iframe');
+      fb.id = 'jc64YouTubeFallback';
+      fb.className = 'jc64-youtube-fallback';
+      fb.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      fb.allowFullscreen = true;
+      fb.referrerPolicy = 'strict-origin-when-cross-origin';
+      frame.appendChild(fb);
+    }
+    const src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=0&playsinline=1&rel=0&modestbranding=1`;
+    if(fb.src !== src) fb.src = src;
+    return true;
+  }
+
+  function forceActiveFirst(){
+    if(isAuthScreen()){
+      document.documentElement.classList.remove('jc64-active-first','jc41-rave-focus');
+      document.body?.classList?.remove('jc64-active-first','jc41-rave-focus');
+      return false;
+    }
+
+    if(!isWatchMode()){
+      document.documentElement.classList.remove('jc64-active-first');
+      document.body?.classList?.remove('jc64-active-first');
+      return false;
+    }
+
+    makeActivePersistent();
+
+    // Используем существующий стабильный active-view Stage62, но он теперь не отдельный режим, а основной.
+    if(typeof window.jc42SetActiveView === 'function' && !document.body.classList.contains('jc41-rave-focus')){
+      try { window.jc42SetActiveView(true); } catch(_) {}
+    }
+
+    document.documentElement.classList.add('jc64-active-first','jc41-rave-focus','jc40-watch-mode');
+    document.body.classList.add('jc64-active-first','jc41-rave-focus','jc40-watch-mode');
+    document.body.classList.remove('jc35-scroll-guard','jc37-modal-lock','jc38-catalog-open','jc-catalog-open');
+
+    normalizeTopbar();
+    normalizeDock();
+    hideCinemaButtons(document);
+    ensureYouTubeVisible();
+    hardTop();
+    return true;
+  }
+
+  function tick(){
+    try { forceActiveFirst(); } catch(e) { console.warn('[JC64] active-first tick failed', e); }
+  }
+
+  tick();
+  setTimeout(tick, 80);
+  setTimeout(tick, 300);
+  setTimeout(tick, 900);
+  setInterval(tick, 700);
+
+  document.addEventListener('click', () => setTimeout(tick, 30), true);
+  document.addEventListener('fullscreenchange', () => setTimeout(tick, 30), true);
+
+  window.jc64ApplyMainView = forceActiveFirst;
+  window.jc64ActiveFirstDebug = function(){
+    const frame = document.querySelector('.player-frame');
+    const chat = document.querySelector('.chat-card');
+    return {
+      build: BUILD,
+      auth: isAuthScreen(),
+      watchMode: isWatchMode(),
+      activeFirst: document.body.classList.contains('jc64-active-first'),
+      activeView: document.body.classList.contains('jc41-rave-focus'),
+      topbar: !!document.getElementById('jc51RaveTopbar'),
+      dock: !!(document.getElementById('jc45ActiveDock') || document.getElementById('jc43ActiveDock')),
+      sourceUrl: currentSourceUrl(),
+      youtubeFallback: !!document.getElementById('jc64YouTubeFallback'),
+      playerRect: frame ? {...frame.getBoundingClientRect().toJSON?.() || {width:frame.getBoundingClientRect().width,height:frame.getBoundingClientRect().height,top:frame.getBoundingClientRect().top,left:frame.getBoundingClientRect().left}} : null,
+      chatRect: chat ? {width:chat.getBoundingClientRect().width,height:chat.getBoundingClientRect().height,top:chat.getBoundingClientRect().top,left:chat.getBoundingClientRect().left} : null
+    };
+  };
+})();
