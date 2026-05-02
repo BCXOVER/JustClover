@@ -1,17 +1,17 @@
 /* =========================================================
    JustClover Stage 76 — Player Scale + Dock Restore
-   Version: stage76-player-scale-dock-restore-20260502-1
+   Version: stage77-player-strip-dock-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage76-player-scale-dock-restore-20260502-1";
+const JC40_BUILD = "stage77-player-strip-dock-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 76 DOCKRESTORE loader:", JC40_BUILD);
+console.log("JustClover Stage 77 STRIPDOCK loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
@@ -626,10 +626,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
 /* =========================================================
    JustClover Stage 76 — Player Scale + Dock Restore
-   Version: stage76-player-scale-dock-restore-20260502-1
+   Version: stage77-player-strip-dock-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage76-player-scale-dock-restore-20260502-1";
+  const BUILD = "stage77-player-strip-dock-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1156,7 +1156,7 @@ try{
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage76-player-scale-dock-restore-20260502-1";
+  const BUILD = "stage77-player-strip-dock-20260502-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1393,7 +1393,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage76-player-scale-dock-restore-20260502-1";
+  const BUILD = "stage77-player-strip-dock-20260502-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1691,7 +1691,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage76-player-scale-dock-restore-20260502-1';
+  const BUILD = 'stage77-player-strip-dock-20260502-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1872,7 +1872,7 @@ try{
    когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
    ========================================================= */
 (function(){
-  const BUILD = "stage76-player-scale-dock-restore-20260502-1";
+  const BUILD = "stage77-player-strip-dock-20260502-1";
   const CHECK_EVERY_MS = 15000;
   const FIRST_CHECK_MS = 4500;
   const RELOAD_DELAY_MS = 1800;
@@ -1983,13 +1983,13 @@ try{
 
 /* =========================================================
    JustClover Stage 76 — Player Scale + Dock Restore Fix
-   Version: stage76-player-scale-dock-restore-20260502-1
+   Version: stage77-player-strip-dock-20260502-1
 
    Scope: only player geometry. No auth changes, no chat DOM move,
    no new room layout, no auto guest login, no interval resize loop.
    ========================================================= */
 (function(){
-  const BUILD = 'stage76-player-scale-dock-restore-20260502-1';
+  const BUILD = 'stage77-player-strip-dock-20260502-1';
   const ASPECT = 16 / 9;
   let raf = 0;
   let lastKey = '';
@@ -2244,13 +2244,13 @@ try{
 
 /* =========================================================
    JustClover Stage 76 — Bottom Dock Restore
-   Version: stage76-player-scale-dock-restore-20260502-1
+   Version: stage77-player-strip-dock-20260502-1
 
    Fixes missing bottom mic/chat/source/fullscreen dock without changing
    auth, chat DOM, room layout, source handlers, or Firebase flow.
    ========================================================= */
 (function(){
-  const BUILD = "stage76-player-scale-dock-restore-20260502-1";
+  const BUILD = "stage77-player-strip-dock-20260502-1";
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2415,4 +2415,241 @@ try{
   };
 
   [0,80,250,600,1200,2500,5000].forEach(ms => setTimeout(schedule, ms));
+})();
+
+
+/* =========================================================
+   JustClover Stage 77 — Player Strip Dock
+   Version: stage77-player-strip-dock-20260502-1
+
+   Goal: keep the dock in the free bottom strip under the player,
+   not on top of the video. Do not change auth/chat/source logic.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage77-player-strip-dock-20260502-1';
+  const DOCK_RESERVE_DESKTOP = 58;
+  const DOCK_RESERVE_MOBILE = 54;
+  let raf = 0;
+  let bodyObserver = null;
+  let watchObserver = null;
+  let resizeObserver = null;
+
+  window.JUSTCLOVER_BUILD = BUILD;
+
+  function isAuth(){
+    try { return !!window.__jc62IsAuthScreen?.(); } catch(_) { return false; }
+  }
+  function appOpen(){
+    const app = document.getElementById('appView');
+    return !!(app && !app.classList.contains('hidden'));
+  }
+  function watchActive(){
+    const watch = document.getElementById('watchSection');
+    return !!(watch && watch.classList.contains('active'));
+  }
+  function activeRoomView(){
+    if(isAuth() || !appOpen() || !watchActive()) return false;
+    const b = document.body;
+    return !!(b && (b.classList.contains('jc64-active-first') || b.classList.contains('jc41-rave-focus') || b.classList.contains('jc40-watch-mode')));
+  }
+  function main(){ return document.querySelector('.watch-main'); }
+  function chat(){ return document.querySelector('.watch-sidebar'); }
+  function frame(){ return document.querySelector('.player-frame'); }
+  function viewport(){
+    const w = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    const h = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+    return {w,h};
+  }
+  function dockReserve(){
+    const mobile = (viewport().w <= 980);
+    const dock = document.getElementById('jc76BottomDock');
+    const measured = dock?.firstElementChild?.getBoundingClientRect?.().height || dock?.getBoundingClientRect?.().height || 0;
+    const base = mobile ? DOCK_RESERVE_MOBILE : DOCK_RESERVE_DESKTOP;
+    return Math.max(base, Math.round(measured || 0) + 12);
+  }
+  function leftArea(){
+    const mn = main();
+    const rect = mn?.getBoundingClientRect?.();
+    if(rect && rect.width > 80 && rect.height > 80){
+      return {
+        w: Math.max(240, Math.round(rect.width)),
+        h: Math.max(180, Math.round(rect.height - dockReserve())),
+        x: 0,
+        y: 0,
+        reserve: dockReserve()
+      };
+    }
+    const vp = viewport();
+    const ch = chat();
+    const cr = ch?.getBoundingClientRect?.();
+    const chatW = cr && cr.width > 20 ? cr.width : 330;
+    return {
+      w: Math.max(240, vp.w - chatW),
+      h: Math.max(180, vp.h - 58 - dockReserve()),
+      x: 0,
+      y: 0,
+      reserve: dockReserve()
+    };
+  }
+  function sizeForArea(area){
+    let w = area.w;
+    let h = Math.round(w / (16/9));
+    if(h > area.h){
+      h = area.h;
+      w = Math.round(h * (16/9));
+    }
+    return { w: Math.max(240, Math.round(w)), h: Math.max(135, Math.round(h)), x: Math.max(0, Math.round(area.w - w)), y: 0 };
+  }
+  function setImportant(el, prop, value){ if(el) el.style.setProperty(prop, value, 'important'); }
+  function activePlayers(fr){
+    if(!fr) return [];
+    const list = [
+      document.getElementById('jc65DirectPlayer'), fr.querySelector('#jc65DirectPlayer'), fr.querySelector('.jc67-main-player'), fr.querySelector('#youtubePlayer'), fr.querySelector('#youtubePlayer iframe'), fr.querySelector('#iframePlayer'), fr.querySelector('#videoPlayer'), ...Array.from(fr.querySelectorAll('iframe,video'))
+    ].filter(Boolean);
+    return [...new Set(list)].filter(el => {
+      if(el.id === 'emptyPlayer') return false;
+      if(el.classList?.contains('hidden')) return false;
+      if(el.closest?.('.hidden')) return false;
+      const src = String(el.src || el.getAttribute('data-jc65-url') || '');
+      if(el.tagName === 'IFRAME' && (!src || src === 'about:blank')) return false;
+      return true;
+    });
+  }
+  function normalizePlayer(el){
+    setImportant(el, 'position', 'absolute');
+    setImportant(el, 'inset', '0');
+    setImportant(el, 'width', '100%');
+    setImportant(el, 'height', '100%');
+    setImportant(el, 'margin', '0');
+    setImportant(el, 'padding', '0');
+    setImportant(el, 'border', '0');
+    setImportant(el, 'background', '#000');
+    setImportant(el, 'opacity', '1');
+    setImportant(el, 'visibility', 'visible');
+    if(el.tagName === 'VIDEO') setImportant(el, 'object-fit', 'contain');
+    el.setAttribute('data-jc77-fit', 'top-strip-dock');
+  }
+  function ensureDock(){
+    let dock = document.getElementById('jc76BottomDock');
+    if(!dock){
+      dock = document.createElement('div');
+      dock.id = 'jc76BottomDock';
+      dock.setAttribute('aria-label','Нижняя панель комнаты');
+      dock.innerHTML = `
+        <div class="jc76-dock-inner">
+          <button type="button" data-jc76-mic title="Микрофон" aria-label="Микрофон">🎙 Микро</button>
+          <button type="button" data-jc76-chat title="Чат" aria-label="Чат">💬 Чат</button>
+          <button type="button" data-jc76-source title="Источники" aria-label="Источники">▦ Источники</button>
+          <button type="button" data-jc76-full title="Fullscreen" aria-label="Fullscreen">⛶ Экран</button>
+        </div>`;
+      dock.addEventListener('click', function(e){
+        const btn = e.target.closest('button');
+        if(!btn) return;
+        e.preventDefault(); e.stopPropagation();
+        if(btn.hasAttribute('data-jc76-mic')) document.getElementById('voiceBtn')?.click?.();
+        if(btn.hasAttribute('data-jc76-chat')) {
+          const input = document.getElementById('chatInput');
+          if(input){ try{ input.focus({preventScroll:true}); }catch(_){ input.focus(); } }
+        }
+        if(btn.hasAttribute('data-jc76-source')) {
+          const fn = window.jc40OpenCatalog || window.jc39OpenCatalog || window.jcStage8OpenCatalog;
+          if(typeof fn === 'function') fn('youtube');
+        }
+        if(btn.hasAttribute('data-jc76-full')) toggleFullscreen();
+      });
+    }
+    const host = main() || document.body;
+    if(dock.parentNode !== host) host.appendChild(dock);
+    return dock;
+  }
+  async function toggleFullscreen(){
+    const current = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+    try{
+      if(current){
+        if(document.exitFullscreen) return await document.exitFullscreen();
+        if(document.webkitExitFullscreen) return document.webkitExitFullscreen();
+        if(document.msExitFullscreen) return document.msExitFullscreen();
+      }
+      const target = document.querySelector('.player-frame') || document.getElementById('jc45ActiveFullscreenTarget') || document.querySelector('.watch-stage') || document.documentElement;
+      if(target.requestFullscreen) return await target.requestFullscreen({navigationUI:'hide'});
+      if(target.webkitRequestFullscreen) return target.webkitRequestFullscreen();
+      if(target.msRequestFullscreen) return target.msRequestFullscreen();
+    }catch(_){ }
+  }
+  function syncFullscreenText(){
+    const on = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+    const btn = document.querySelector('#jc76BottomDock [data-jc76-full]');
+    if(btn) btn.textContent = on ? '× Выйти' : '⛶ Экран';
+  }
+  function fitPlayer(){
+    const fr = frame();
+    if(!fr || !activeRoomView()) return;
+    const area = leftArea();
+    const size = sizeForArea(area);
+    setImportant(fr, 'position', 'absolute');
+    setImportant(fr, 'left', size.x + 'px');
+    setImportant(fr, 'top', '0px');
+    setImportant(fr, 'width', size.w + 'px');
+    setImportant(fr, 'height', size.h + 'px');
+    setImportant(fr, 'margin', '0');
+    setImportant(fr, 'padding', '0');
+    setImportant(fr, 'border', '0');
+    setImportant(fr, 'background', '#000');
+    setImportant(fr, 'overflow', 'hidden');
+    fr.setAttribute('data-jc77-strip-frame', '1');
+    activePlayers(fr).forEach(normalizePlayer);
+  }
+  function attachObservers(){
+    if(document.body && !bodyObserver){
+      bodyObserver = new MutationObserver(schedule);
+      bodyObserver.observe(document.body, {attributes:true, attributeFilter:['class']});
+    }
+    const watch = document.getElementById('watchSection');
+    if(watch && !watchObserver){
+      watchObserver = new MutationObserver(schedule);
+      watchObserver.observe(watch, {attributes:true, attributeFilter:['class']});
+    }
+    const mn = main();
+    if(window.ResizeObserver && mn){
+      if(resizeObserver) resizeObserver.disconnect();
+      resizeObserver = new ResizeObserver(schedule);
+      resizeObserver.observe(mn);
+    }
+  }
+  function sync(){
+    raf = 0;
+    const on = activeRoomView();
+    const dock = ensureDock();
+    document.body?.classList?.toggle('jc77-player-strip-dock', on);
+    dock.hidden = !on;
+    dock.setAttribute('aria-hidden', on ? 'false' : 'true');
+    if(on) fitPlayer();
+    syncFullscreenText();
+    attachObservers();
+  }
+  function schedule(){ if(!raf) raf = requestAnimationFrame(sync); }
+  document.addEventListener('fullscreenchange', schedule, true);
+  document.addEventListener('webkitfullscreenchange', schedule, true);
+  document.addEventListener('click', function(){ setTimeout(schedule, 30); }, true);
+  window.addEventListener('resize', schedule, {passive:true});
+  window.addEventListener('orientationchange', schedule, {passive:true});
+  [0,80,260,700,1400].forEach(ms => setTimeout(schedule, ms));
+  window.jc77DockDebug = function(){
+    const dock = document.getElementById('jc76BottomDock');
+    const dr = dock?.getBoundingClientRect?.();
+    const fr = frame();
+    const rr = fr?.getBoundingClientRect?.();
+    return {
+      build: BUILD,
+      activeRoomView: activeRoomView(),
+      classOn: document.body?.classList?.contains('jc77-player-strip-dock'),
+      reserve: dockReserve(),
+      dockParent: dock?.parentElement?.className || dock?.parentElement?.id || '',
+      dockRect: dr ? {x:Math.round(dr.x), y:Math.round(dr.y), w:Math.round(dr.width), h:Math.round(dr.height)} : null,
+      frame: rr ? {x:Math.round(rr.x), y:Math.round(rr.y), w:Math.round(rr.width), h:Math.round(rr.height)} : null,
+      area: leftArea(),
+      hasVoiceBtn: !!document.getElementById('voiceBtn'),
+      hasChatInput: !!document.getElementById('chatInput')
+    };
+  };
 })();

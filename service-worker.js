@@ -1,4 +1,4 @@
-/* JustClover cache killer stage76-player-scale-dock-restore-20260502-1 */
+/* JustClover cache killer stage77-player-strip-dock-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
