@@ -1,4 +1,4 @@
-/* JustClover cache killer stage82-fullscreen-mic-20260502-1 */
+/* JustClover cache killer stage83-dock-mic-fullscreen-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
