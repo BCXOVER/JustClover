@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 54 — Rave Polish
-   Version: stage54-rave-polish-20260502-1
+   JustClover Stage 55 — Chat Up No Cinema
+   Version: stage55-chat-up-no-cinema-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage54-rave-polish-20260502-1";
+const JC40_BUILD = "stage55-chat-up-no-cinema-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 54 RAVEPOLISH loader:", JC40_BUILD);
+console.log("JustClover Stage 55 CHATUP loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 54: base app import failed", e);
+  console.error("JustClover Stage 55: base app import failed", e);
   throw e;
 }
 
@@ -528,12 +528,12 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 54 — Rave Polish
-   Version: stage54-rave-polish-20260502-1
+   JustClover Stage 55 — Chat Up No Cinema
+   Version: stage55-chat-up-no-cinema-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage54-rave-polish-20260502-1";
-  const STORE_KEY = "jc54ActiveViewMode";
+  const BUILD = "stage55-chat-up-no-cinema-20260502-1";
+  const STORE_KEY = "jc55ActiveViewMode";
   let desired = false;
 
   try { desired = localStorage.getItem(STORE_KEY) === "1" || localStorage.getItem("jc51ActiveViewMode") === "1" || localStorage.getItem("jc50ActiveViewMode") === "1" || localStorage.getItem("jc49ActiveViewMode") === "1" || localStorage.getItem("jc48ActiveViewMode") === "1" || localStorage.getItem("jc47ActiveViewMode") === "1" || localStorage.getItem("jc46ActiveViewMode") === "1" || localStorage.getItem("jc45ActiveViewMode") === "1" || localStorage.getItem("jc44ActiveViewMode") === "1" || localStorage.getItem("jc43ActiveViewMode") === "1"; } catch(_) {}
@@ -1044,3 +1044,32 @@ try{
   window.jc54ActiveViewDebug = function(){ return (window.jc53ActiveViewDebug||window.jc52ActiveViewDebug) ? (window.jc53ActiveViewDebug||window.jc52ActiveViewDebug)() : { build: window.JUSTCLOVER_BUILD }; };
   window.jc54ToggleFullscreen = window.jc53ToggleFullscreen || window.jc52ToggleFullscreen || window.jc51ToggleFullscreen || window.jc42ToggleFullscreen;
 }catch(_){ }
+
+
+// Stage 55 — hide useless cinema button and keep chat flush to top.
+(function(){
+  function hideCinemaButtons(root=document){
+    const nodes = Array.from(root.querySelectorAll('button,a,[role="button"],.chip,.pill,.segmented button'));
+    nodes.forEach((el)=>{
+      const txt = String(el.textContent||'').trim().toLowerCase();
+      const meta = ((el.getAttribute('aria-label')||'') + ' ' + (el.getAttribute('title')||'')).toLowerCase();
+      const hay = (txt + ' ' + meta).replace(/\s+/g,' ');
+      if(/(^|\s)кино($|\s)/i.test(hay) || /(^|\s)(cinema|movie)($|\s)/i.test(hay)){
+        el.style.setProperty('display','none','important');
+        el.setAttribute('data-jc55-hidden-cinema','1');
+      }
+    });
+  }
+  try{ hideCinemaButtons(document); }catch(_){}
+  const mo = new MutationObserver(()=>{ try{ hideCinemaButtons(document); }catch(_){} });
+  mo.observe(document.documentElement || document.body, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:['class','title','aria-label']});
+  window.jc55HideCinema = function(){ hideCinemaButtons(document); return true; };
+  window.jc55ActiveViewDebug = function(){
+    return {
+      build: window.JUSTCLOVER_BUILD,
+      hiddenCinema: document.querySelectorAll('[data-jc55-hidden-cinema]').length,
+      chatCard: !!document.querySelector('.chat-card'),
+      raveFocus: document.body.classList.contains('jc41-rave-focus')
+    };
+  };
+})();
