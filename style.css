@@ -6,7 +6,7 @@
    ========================================================= */
 
 html::after{
-  content:'79 STABLEDOCK'!important;
+  content:'80 REALDOCK'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -565,7 +565,7 @@ body.jc40-watch-mode [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'79 STABLEDOCK'!important;
+  content:'80 REALDOCK'!important;
   background:rgba(34,197,94,.94)!important;
 }
 
@@ -943,7 +943,7 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'79 STABLEDOCK'!important;
+  content:'80 REALDOCK'!important;
 }
 
 body.jc41-rave-focus .watch-stage{
@@ -1040,7 +1040,7 @@ body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
    ========================================================= */
 
 html::after{
-  content:'79 STABLEDOCK'!important;
+  content:'80 REALDOCK'!important;
 }
 
 body.jc41-rave-focus .watch-main,
@@ -1133,7 +1133,7 @@ body.jc41-rave-focus #jc45ActiveDock{
    ========================================================= */
 
 html::after{
-  content:'79 STABLEDOCK'!important;
+  content:'80 REALDOCK'!important;
 }
 
 body.jc41-rave-focus .watch-layout{
@@ -1239,7 +1239,7 @@ body.jc41-rave-focus #jc45ActiveDock::after{
    верхняя плашка источника скрывается, снизу — только компактные кнопки.
    ========================================================= */
 
-html::after{ content:'79 STABLEDOCK'!important; }
+html::after{ content:'80 REALDOCK'!important; }
 
 body.jc41-rave-focus .watch-layout{
   width:min(100vw,1540px)!important;
@@ -1406,7 +1406,7 @@ body.jc41-rave-focus .chat-card{
    плеер 16:9 без лишней чёрной шапки от растянутого контейнера.
    ========================================================= */
 
-html::after{ content:'79 STABLEDOCK'!important; }
+html::after{ content:'80 REALDOCK'!important; }
 
 html.jc41-rave-focus,
 body.jc41-rave-focus{
@@ -1682,7 +1682,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'79 STABLEDOCK'!important;
+  content:'80 REALDOCK'!important;
 }
 
 html.jc41-rave-focus,
@@ -1977,13 +1977,13 @@ body.jc41-rave-focus .player-shell > nav{
 
 
 /* =========================================================
-   JustClover Stage 79 — Rave Clean Shell
+   JustClover Stage 52 — Rave Clean Shell
    Берём не код Rave, а саму проверенную схему: верхняя панель,
    слева большой плеер, справа узкий чат, без дыр и декоративных полей.
    ========================================================= */
 
 html::after{
-  content:'79 STABLEDOCK'!important;
+  content:'80 REALDOCK'!important;
 }
 
 body.jc41-rave-focus{
@@ -2344,13 +2344,13 @@ body.jc41-rave-focus #jc41RaveFloating button{
 
 
 /* =========================================================
-   JustClover Stage 79 — Rave Clean Shell
+   JustClover Stage 52 — Rave Clean Shell
    Не изобретаем велосипед: оставляем схему Rave — topbar + видео слева + чат справа.
    Убираем нижний дубль-контролы и насильно прибиваем чат/плеер без промежутков.
    ========================================================= */
 
 html::after{
-  content:'79 STABLEDOCK'!important;
+  content:'80 REALDOCK'!important;
 }
 
 body.jc41-rave-focus{
@@ -2591,7 +2591,7 @@ html:-webkit-full-screen body.jc41-rave-focus #jc51RaveTopbar{
 
 
 /* Stage 53 — remove top-right mic/chat/fullscreen icons and rebalance topbar */
-html::after{ content:'79 STABLEDOCK'!important; }
+html::after{ content:'80 REALDOCK'!important; }
 body.jc41-rave-focus #jc51RaveTopbar{
   grid-template-columns:minmax(260px,1fr) auto minmax(120px,1fr)!important;
 }
@@ -2615,7 +2615,7 @@ body.jc41-rave-focus #jc51RaveTopbar [data-jc51-full]{
 
 
 /* Stage 54 — Rave Polish: remove top black strip feel, darken chat, tighten proportions. */
-html::after{ content:'79 STABLEDOCK'!important; }
+html::after{ content:'80 REALDOCK'!important; }
 body.jc41-rave-focus{
   --jc54-chat:clamp(292px,17.2vw,330px)!important;
 }
@@ -2697,7 +2697,7 @@ body:not(.jc40-watch-mode):not(.jc41-rave-focus) .jc-catalog-layer.open{
    ========================================================= */
 
 html::after{
-  content:'79 STABLEDOCK'!important;
+  content:'80 REALDOCK'!important;
   background:rgba(56,189,248,.96)!important;
   color:#02150d!important;
 }
@@ -3115,7 +3115,7 @@ body.jc64-active-first:fullscreen{
    for YouTube/VK when active-first hides the old UI.
    ========================================================= */
 html::after{
-  content:'79 STABLEDOCK'!important;
+  content:'80 REALDOCK'!important;
   background:rgba(56,189,248,.96)!important;
   color:#031018!important;
 }
@@ -3189,7 +3189,7 @@ body.jc64-active-first{
 /* Stage 71 — stable persistent player.
    Direct iframe/video is the active-view player, not a hidden fallback. Native source form remains offscreen for app state. */
 html::after{
-  content:'79 STABLEDOCK'!important;
+  content:'80 REALDOCK'!important;
   background:rgba(34,211,238,.96)!important;
   color:#02131a!important;
 }
@@ -3246,7 +3246,7 @@ body.jc64-active-first{
 
 /* Stage 71 — stable player. No JS geometry loop, no repeated iframe reflow. */
 html::after{
-  content:'79 STABLEDOCK'!important;
+  content:'80 REALDOCK'!important;
   background:rgba(20,184,166,.96)!important;
   color:#031513!important;
 }
@@ -3296,7 +3296,7 @@ body.jc64-active-first .player-frame [data-chat-message]{
 
 /* Stage 72 — small auto-update notice. */
 html::after{
-  content:'79 STABLEDOCK'!important;
+  content:'80 REALDOCK'!important;
   background:rgba(168,85,247,.96)!important;
   color:#fff!important;
 }
@@ -3334,64 +3334,151 @@ html::after{
 }
 
 
-/* =========================================================
-   JustClover Stage 79 — Stable Player Dock
-   Version: stage79-stable-player-dock-20260502-1
 
-   Stable CSS-only geometry: no fixed player, no JS-fit, no overlay dock.
+/* =========================================================
+   JustClover Stage 80 — Real Stable Player Dock
+   Version: stage80-real-stable-player-dock-20260502-1
+
+   One stable active-room layout:
+   topbar / player / real bottom controls / chat.
+   No JS resize, no fixed player cover-fit, no overlay dock on video.
    ========================================================= */
 
 html::after{
-  content:'79 STABLEDOCK'!important;
+  content:'80 REALDOCK'!important;
+  position:fixed!important;
+  left:8px!important;
+  bottom:8px!important;
+  z-index:2147483647!important;
+  padding:6px 10px!important;
+  border-radius:999px!important;
   background:rgba(34,197,94,.96)!important;
   color:#03130a!important;
+  font:900 12px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  letter-spacing:.02em!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.32)!important;
+  pointer-events:none!important;
 }
 
-html.jc79-stable-player,
-body.jc79-stable-player{
-  --jc79-dock-h:58px;
-  --jc79-bottom-pad:max(8px, env(safe-area-inset-bottom, 0px));
+/* Kill only old player-geometry/dock experiments. */
+body.jc80-real-dock #jc45ActiveDock,
+body.jc80-real-dock #jc43ActiveDock,
+body.jc80-real-dock #jc41RaveFloating{
+  display:none!important;
+}
+
+body.jc80-real-dock.jc73-player-cover,
+body.jc80-real-dock.jc74-fixed-player{
+  position:static!important;
+}
+
+/* Active room shell: no page scroll, no player overlays. */
+html.jc80-real-dock,
+body.jc80-real-dock{
+  height:100dvh!important;
+  max-height:100dvh!important;
   overflow:hidden!important;
-  background:#000!important;
+  background:#03040a!important;
 }
 
-body.jc64-active-first.jc79-stable-player .watch-main{
-  grid-column:1!important;
-  padding-top:var(--jc64-topbar-h)!important;
+body.jc80-real-dock{
+  --jc80-topbar-h:var(--jc64-topbar-h,58px);
+  --jc80-chat-w:var(--jc64-chat-w,clamp(320px,18vw,360px));
+  --jc80-dock-h:64px;
+  --jc80-safe-bottom:max(10px, env(safe-area-inset-bottom, 0px));
+}
+
+/* Keep the native topbar exactly where the chosen design has it. */
+body.jc80-real-dock .topbar,
+body.jc80-real-dock #jc51RaveTopbar{
+  height:var(--jc80-topbar-h)!important;
+}
+
+/* Left column is a real two-row grid: video, then controls. */
+body.jc80-real-dock #appView.app,
+body.jc80-real-dock .content,
+body.jc80-real-dock #watchSection,
+body.jc80-real-dock .watch-layout{
   height:100dvh!important;
   max-height:100dvh!important;
   min-height:0!important;
-  display:block!important;
   overflow:hidden!important;
-  background:#000!important;
 }
 
-body.jc64-active-first.jc79-stable-player .watch-stage{
-  position:relative!important;
-  width:100%!important;
-  height:calc(100dvh - var(--jc64-topbar-h))!important;
-  max-height:calc(100dvh - var(--jc64-topbar-h))!important;
+body.jc80-real-dock .watch-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,calc(100vw - var(--jc80-chat-w))) var(--jc80-chat-w)!important;
+  grid-template-rows:100dvh!important;
+  gap:0!important;
+  align-items:stretch!important;
+  background:#03040a!important;
+}
+
+body.jc80-real-dock .watch-main{
+  position:fixed!important;
+  left:0!important;
+  right:var(--jc80-chat-w)!important;
+  top:var(--jc80-topbar-h)!important;
+  bottom:0!important;
+  width:auto!important;
+  height:auto!important;
+  max-height:none!important;
   min-height:0!important;
   display:grid!important;
-  grid-template-rows:minmax(0,1fr) var(--jc79-dock-h)!important;
-  grid-template-columns:minmax(0,1fr)!important;
-  gap:0!important;
-  margin:0!important;
+  grid-template-rows:minmax(0,1fr) calc(var(--jc80-dock-h) + var(--jc80-safe-bottom))!important;
   padding:0!important;
-  border:0!important;
-  border-radius:0!important;
-  box-shadow:none!important;
-  background:#000!important;
+  margin:0!important;
   overflow:hidden!important;
+  background:#000!important;
 }
 
-body.jc64-active-first.jc79-stable-player .player-card-redesign,
-body.jc64-active-first.jc79-stable-player .player-card,
-body.jc64-active-first.jc79-stable-player .player-shell{
+/* Only the player stays visible in the video row. */
+body.jc80-real-dock .watch-stage{
   grid-row:1!important;
-  grid-column:1!important;
   position:relative!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-height:none!important;
   display:block!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  overflow:hidden!important;
+  background:#000!important;
+  box-shadow:none!important;
+}
+
+body.jc80-real-dock .watch-brandbar,
+body.jc80-real-dock .watch-header,
+body.jc80-real-dock .source-strip,
+body.jc80-real-dock .reactions-dock,
+body.jc80-real-dock .watch-footer-meta,
+body.jc80-real-dock .members-card{
+  display:none!important;
+}
+
+/* Source form remains alive offscreen; do not display:none it. */
+body.jc80-real-dock .source-panel-embedded{
+  display:block!important;
+  position:absolute!important;
+  left:-9999px!important;
+  top:0!important;
+  width:1px!important;
+  height:1px!important;
+  min-width:1px!important;
+  min-height:1px!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  overflow:hidden!important;
+}
+
+body.jc80-real-dock .player-card-redesign,
+body.jc80-real-dock .player-card,
+body.jc80-real-dock .player-shell{
+  position:absolute!important;
+  inset:0!important;
   width:100%!important;
   height:100%!important;
   min-width:0!important;
@@ -3407,54 +3494,14 @@ body.jc64-active-first.jc79-stable-player .player-shell{
   overflow:hidden!important;
 }
 
-body.jc64-active-first.jc79-stable-player .player-frame,
-body.jc64-active-first.jc79-stable-player .player-frame[data-jc79-stable-frame='1']{
-  position:relative!important;
-  inset:auto!important;
-  left:auto!important;
-  top:auto!important;
-  right:auto!important;
-  bottom:auto!important;
-  display:block!important;
-  width:100%!important;
-  height:100%!important;
-  min-width:0!important;
-  min-height:0!important;
-  max-width:none!important;
-  max-height:none!important;
-  margin:0!important;
-  padding:0!important;
-  border:0!important;
-  border-radius:0!important;
-  background:#000!important;
-  overflow:hidden!important;
-  aspect-ratio:auto!important;
-  contain:layout paint!important;
-  isolation:isolate!important;
-  transform:none!important;
-}
-
-body.jc64-active-first.jc79-stable-player .player-frame iframe,
-body.jc64-active-first.jc79-stable-player .player-frame video,
-body.jc64-active-first.jc79-stable-player .player-frame .embed-box,
-body.jc64-active-first.jc79-stable-player .player-frame #youtubePlayer,
-body.jc64-active-first.jc79-stable-player .player-frame #youtubePlayer iframe,
-body.jc64-active-first.jc79-stable-player .player-frame #iframePlayer,
-body.jc64-active-first.jc79-stable-player .player-frame #videoPlayer,
-body.jc64-active-first.jc79-stable-player .player-frame #jc65DirectPlayer,
-body.jc64-active-first.jc79-stable-player .player-frame .jc67-main-player,
-body.jc64-active-first.jc79-stable-player #youtubePlayer,
-body.jc64-active-first.jc79-stable-player #youtubePlayer iframe,
-body.jc64-active-first.jc79-stable-player #iframePlayer,
-body.jc64-active-first.jc79-stable-player #videoPlayer,
-body.jc64-active-first.jc79-stable-player #jc65DirectPlayer{
+/* Important: full left width and full video row height. No 16:9 JS slot, no left black gutter caused by our CSS. */
+body.jc80-real-dock .player-frame{
   position:absolute!important;
   inset:0!important;
   left:0!important;
   top:0!important;
-  right:auto!important;
-  bottom:auto!important;
-  display:block!important;
+  right:0!important;
+  bottom:0!important;
   width:100%!important;
   height:100%!important;
   min-width:0!important;
@@ -3465,176 +3512,233 @@ body.jc64-active-first.jc79-stable-player #jc65DirectPlayer{
   padding:0!important;
   border:0!important;
   border-radius:0!important;
-  transform:none!important;
+  aspect-ratio:auto!important;
   background:#000!important;
-  opacity:1!important;
-  visibility:visible!important;
-  object-fit:contain!important;
-  z-index:30!important;
+  overflow:hidden!important;
+  transform:none!important;
+  contain:layout paint!important;
 }
 
-body.jc64-active-first.jc79-stable-player.jc67-main-player-active .player-frame > :not(#jc65DirectPlayer):not(.jc65-direct-player):not(.jc67-main-player):not(#emptyPlayer):not(.empty-player):not(.placeholder):not(.player-empty){
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-}
-
-body.jc64-active-first.jc79-stable-player .player-frame #emptyPlayer,
-body.jc64-active-first.jc79-stable-player .player-frame .empty-player,
-body.jc64-active-first.jc79-stable-player .player-frame .placeholder,
-body.jc64-active-first.jc79-stable-player .player-frame .player-empty{
+body.jc80-real-dock .player-frame iframe,
+body.jc80-real-dock .player-frame video,
+body.jc80-real-dock .player-frame .embed-box,
+body.jc80-real-dock .player-frame #youtubePlayer,
+body.jc80-real-dock .player-frame #youtubePlayer iframe,
+body.jc80-real-dock .player-frame #iframePlayer,
+body.jc80-real-dock .player-frame #videoPlayer,
+body.jc80-real-dock .player-frame #jc65DirectPlayer,
+body.jc80-real-dock .player-frame .jc65-direct-player,
+body.jc80-real-dock .player-frame .jc67-main-player{
   position:absolute!important;
   inset:0!important;
-  display:grid!important;
-  place-items:center!important;
+  left:0!important;
+  top:0!important;
+  right:0!important;
+  bottom:0!important;
   width:100%!important;
   height:100%!important;
-}
-
-/* The control panel is a real bottom strip below the player, not an overlay. */
-body.jc64-active-first.jc79-stable-player #jc45ActiveDock,
-body.jc64-active-first.jc79-stable-player #jc43ActiveDock,
-body.jc64-active-first.jc79-stable-player #jc79StableDock{
-  grid-row:2!important;
-  grid-column:1!important;
-  position:relative!important;
-  left:auto!important;
-  right:auto!important;
-  top:auto!important;
-  bottom:auto!important;
-  width:100%!important;
-  height:var(--jc79-dock-h)!important;
-  min-height:var(--jc79-dock-h)!important;
-  max-height:var(--jc79-dock-h)!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  margin:0!important;
-  padding:8px 12px calc(8px + var(--jc79-bottom-pad))!important;
-  border:0!important;
-  border-top:1px solid rgba(255,255,255,.10)!important;
-  border-radius:0!important;
-  background:#03040a!important;
-  box-shadow:none!important;
-  z-index:60!important;
-  pointer-events:none!important;
-  overflow:hidden!important;
-}
-
-body.jc64-active-first.jc79-stable-player #jc45ActiveDock .jc48-dock-inner,
-body.jc64-active-first.jc79-stable-player #jc43ActiveDock .jc48-dock-inner,
-body.jc64-active-first.jc79-stable-player #jc79StableDock .jc48-dock-inner{
-  width:auto!important;
-  max-width:calc(100% - 20px)!important;
-  margin:0 auto!important;
-  padding:6px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  border-radius:999px!important;
-  background:rgba(8,10,18,.78)!important;
-  border:1px solid rgba(255,255,255,.14)!important;
-  box-shadow:0 12px 36px rgba(0,0,0,.34),0 0 0 1px rgba(255,255,255,.035) inset!important;
-  backdrop-filter:blur(16px)!important;
-  pointer-events:auto!important;
-}
-
-body.jc64-active-first.jc79-stable-player #jc45ActiveDock .jc48-actions-slot,
-body.jc64-active-first.jc79-stable-player #jc43ActiveDock .jc48-actions-slot{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
   min-width:0!important;
-}
-
-body.jc64-active-first.jc79-stable-player #jc41RaveFloating{
-  position:relative!important;
-  left:auto!important;
-  right:auto!important;
-  top:auto!important;
-  bottom:auto!important;
-  z-index:auto!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  flex-wrap:nowrap!important;
-  gap:8px!important;
-  width:auto!important;
+  min-height:0!important;
   max-width:none!important;
+  max-height:none!important;
   margin:0!important;
   padding:0!important;
   border:0!important;
   border-radius:0!important;
-  background:transparent!important;
-  box-shadow:none!important;
-  backdrop-filter:none!important;
+  background:#000!important;
+  transform:none!important;
+  opacity:1!important;
+  visibility:visible!important;
 }
 
-body.jc64-active-first.jc79-stable-player #jc41RaveFloating [data-jc41-exit]{
+body.jc80-real-dock .player-frame video{
+  object-fit:contain!important;
+}
+
+/* Real bottom row, not overlay. */
+#jc80Dock{
+  grid-row:2!important;
+  position:relative!important;
+  z-index:80!important;
+  width:100%!important;
+  height:calc(var(--jc80-dock-h) + var(--jc80-safe-bottom))!important;
+  min-height:calc(var(--jc80-dock-h) + var(--jc80-safe-bottom))!important;
   display:none!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:8px 14px calc(8px + var(--jc80-safe-bottom))!important;
+  box-sizing:border-box!important;
+  background:#03040a!important;
+  border-top:1px solid rgba(255,255,255,.10)!important;
+  pointer-events:auto!important;
 }
 
-body.jc64-active-first.jc79-stable-player #jc41RaveFloating button,
-body.jc64-active-first.jc79-stable-player #jc45ActiveDock button,
-body.jc64-active-first.jc79-stable-player #jc43ActiveDock button{
-  flex:0 0 auto!important;
-  min-width:0!important;
-  min-height:34px!important;
-  height:34px!important;
+body.jc80-real-dock #jc80Dock{
+  display:flex!important;
+}
+
+#jc80Dock .jc80-dock-inner{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  max-width:calc(100% - 20px)!important;
+  padding:6px!important;
+  border-radius:999px!important;
+  background:rgba(12,14,24,.82)!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  box-shadow:0 14px 34px rgba(0,0,0,.38)!important;
+  backdrop-filter:blur(18px)!important;
+}
+
+#jc80Dock button{
+  min-height:36px!important;
+  height:36px!important;
   padding:0 13px!important;
   border-radius:999px!important;
   border:1px solid rgba(255,255,255,.14)!important;
   background:rgba(255,255,255,.08)!important;
   color:#fff!important;
-  font:900 12px/1 Inter,Segoe UI,Arial,sans-serif!important;
-  letter-spacing:.01em!important;
-  white-space:nowrap!important;
+  font:900 13px/1 Inter,Segoe UI,Arial,sans-serif!important;
   cursor:pointer!important;
-  user-select:none!important;
-  -webkit-tap-highlight-color:transparent!important;
-  box-shadow:none!important;
-  transform:none!important;
+  white-space:nowrap!important;
 }
 
-body.jc64-active-first.jc79-stable-player #jc41RaveFloating button:hover,
-body.jc64-active-first.jc79-stable-player #jc45ActiveDock button:hover{
+#jc80Dock button:hover{
   background:rgba(255,255,255,.15)!important;
-  transform:translateY(-1px)!important;
 }
 
-body.jc64-active-first.jc79-stable-player #jc41RaveFloating [data-jc41-catalog]{
-  background:linear-gradient(135deg,rgba(239,111,135,.86),rgba(168,85,247,.86))!important;
+#jc80Dock [data-jc80-source]{
+  background:linear-gradient(135deg,rgba(239,111,135,.92),rgba(168,85,247,.92))!important;
   border-color:transparent!important;
 }
 
-body.jc64-active-first.jc79-stable-player #jc41RaveFloating [data-jc41-full]{
-  background:linear-gradient(135deg,rgba(34,211,238,.90),rgba(52,211,153,.90))!important;
+#jc80Dock [data-jc80-full]{
+  background:linear-gradient(135deg,rgba(34,211,238,.92),rgba(52,211,153,.92))!important;
   color:#03130a!important;
   border-color:transparent!important;
 }
 
-body.jc64-active-first.jc79-stable-player .jc48-source-row{
+/* Chat column stable and composer safe. */
+body.jc80-real-dock .watch-sidebar{
+  position:fixed!important;
+  top:var(--jc80-topbar-h)!important;
+  right:0!important;
+  bottom:0!important;
+  width:var(--jc80-chat-w)!important;
+  height:calc(100dvh - var(--jc80-topbar-h))!important;
+  max-height:calc(100dvh - var(--jc80-topbar-h))!important;
+  display:grid!important;
+  grid-template-rows:minmax(0,1fr)!important;
+  gap:0!important;
+  padding:12px 10px calc(var(--jc80-safe-bottom) + 10px)!important;
+  margin:0!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(circle at top right,rgba(251,113,133,.16),transparent 42%),
+    linear-gradient(180deg,rgba(20,16,30,.94),rgba(9,9,18,.98))!important;
+  border-left:1px solid rgba(255,255,255,.12)!important;
+}
+
+body.jc80-real-dock .voice-card{
   display:none!important;
 }
 
+body.jc80-real-dock .chat-card{
+  height:100%!important;
+  max-height:100%!important;
+  min-height:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+  padding:12px!important;
+  border-radius:20px!important;
+}
+
+body.jc80-real-dock #chatMessages,
+body.jc80-real-dock .chat-card .messages{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+}
+
+body.jc80-real-dock #chatForm,
+body.jc80-real-dock .chat-card .message-form{
+  flex:0 0 auto!important;
+  margin-top:10px!important;
+  padding-bottom:0!important;
+}
+
+/* Fullscreen the left column with dock still below video. */
+body.jc80-real-dock .watch-main:fullscreen,
+body.jc80-real-dock .watch-main:-webkit-full-screen{
+  top:0!important;
+  right:0!important;
+  width:100vw!important;
+  height:100vh!important;
+  display:grid!important;
+  grid-template-rows:minmax(0,1fr) calc(var(--jc80-dock-h) + var(--jc80-safe-bottom))!important;
+  background:#000!important;
+}
+
+body.jc80-real-dock .watch-main:fullscreen #jc80Dock,
+body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
+  display:flex!important;
+}
+
 @media(max-width:980px){
-  html.jc79-stable-player,
-  body.jc79-stable-player{
-    --jc79-dock-h:56px;
+  body.jc80-real-dock{
+    --jc80-chat-w:100vw;
+    --jc80-topbar-h:52px;
+    --jc80-dock-h:58px;
   }
-  body.jc64-active-first.jc79-stable-player .watch-stage{
-    grid-template-rows:minmax(0,1fr) var(--jc79-dock-h)!important;
+
+  body.jc80-real-dock .watch-layout{
+    grid-template-columns:1fr!important;
+    grid-template-rows:62dvh 38dvh!important;
   }
-  body.jc64-active-first.jc79-stable-player #jc45ActiveDock .jc48-dock-inner,
-  body.jc64-active-first.jc79-stable-player #jc43ActiveDock .jc48-dock-inner{
-    max-width:calc(100% - 12px)!important;
+
+  body.jc80-real-dock .watch-main{
+    right:0!important;
+    bottom:38dvh!important;
+  }
+
+  body.jc80-real-dock .watch-sidebar{
+    top:auto!important;
+    left:0!important;
+    width:100vw!important;
+    height:38dvh!important;
+    max-height:38dvh!important;
+    border-left:0!important;
+    border-top:1px solid rgba(255,255,255,.12)!important;
+  }
+
+  #jc80Dock .jc80-dock-inner{
     overflow-x:auto!important;
     justify-content:flex-start!important;
   }
-  body.jc64-active-first.jc79-stable-player #jc41RaveFloating button,
-  body.jc64-active-first.jc79-stable-player #jc45ActiveDock button{
+
+  #jc80Dock button{
+    min-height:34px!important;
+    height:34px!important;
+    padding:0 11px!important;
+    font-size:12px!important;
+  }
+}
+
+@media(max-height:760px){
+  body.jc80-real-dock{
+    --jc80-topbar-h:52px;
+    --jc80-dock-h:56px;
+  }
+
+  #jc80Dock button{
     min-height:32px!important;
     height:32px!important;
     padding:0 11px!important;
+    font-size:12px!important;
   }
 }
