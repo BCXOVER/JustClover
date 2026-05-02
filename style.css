@@ -6,7 +6,7 @@
    ========================================================= */
 
 html::after{
-  content:'75 PLAYERSCALE'!important;
+  content:'76 DOCKRESTORE'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -565,7 +565,7 @@ body.jc40-watch-mode [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'75 PLAYERSCALE'!important;
+  content:'76 DOCKRESTORE'!important;
   background:rgba(34,197,94,.94)!important;
 }
 
@@ -943,7 +943,7 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'75 PLAYERSCALE'!important;
+  content:'76 DOCKRESTORE'!important;
 }
 
 body.jc41-rave-focus .watch-stage{
@@ -1040,7 +1040,7 @@ body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
    ========================================================= */
 
 html::after{
-  content:'75 PLAYERSCALE'!important;
+  content:'76 DOCKRESTORE'!important;
 }
 
 body.jc41-rave-focus .watch-main,
@@ -1133,7 +1133,7 @@ body.jc41-rave-focus #jc45ActiveDock{
    ========================================================= */
 
 html::after{
-  content:'75 PLAYERSCALE'!important;
+  content:'76 DOCKRESTORE'!important;
 }
 
 body.jc41-rave-focus .watch-layout{
@@ -1239,7 +1239,7 @@ body.jc41-rave-focus #jc45ActiveDock::after{
    верхняя плашка источника скрывается, снизу — только компактные кнопки.
    ========================================================= */
 
-html::after{ content:'75 PLAYERSCALE'!important; }
+html::after{ content:'76 DOCKRESTORE'!important; }
 
 body.jc41-rave-focus .watch-layout{
   width:min(100vw,1540px)!important;
@@ -1406,7 +1406,7 @@ body.jc41-rave-focus .chat-card{
    плеер 16:9 без лишней чёрной шапки от растянутого контейнера.
    ========================================================= */
 
-html::after{ content:'75 PLAYERSCALE'!important; }
+html::after{ content:'76 DOCKRESTORE'!important; }
 
 html.jc41-rave-focus,
 body.jc41-rave-focus{
@@ -1682,7 +1682,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'75 PLAYERSCALE'!important;
+  content:'76 DOCKRESTORE'!important;
 }
 
 html.jc41-rave-focus,
@@ -1983,7 +1983,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'75 PLAYERSCALE'!important;
+  content:'76 DOCKRESTORE'!important;
 }
 
 body.jc41-rave-focus{
@@ -2350,7 +2350,7 @@ body.jc41-rave-focus #jc41RaveFloating button{
    ========================================================= */
 
 html::after{
-  content:'75 PLAYERSCALE'!important;
+  content:'76 DOCKRESTORE'!important;
 }
 
 body.jc41-rave-focus{
@@ -2591,7 +2591,7 @@ html:-webkit-full-screen body.jc41-rave-focus #jc51RaveTopbar{
 
 
 /* Stage 53 — remove top-right mic/chat/fullscreen icons and rebalance topbar */
-html::after{ content:'75 PLAYERSCALE'!important; }
+html::after{ content:'76 DOCKRESTORE'!important; }
 body.jc41-rave-focus #jc51RaveTopbar{
   grid-template-columns:minmax(260px,1fr) auto minmax(120px,1fr)!important;
 }
@@ -2615,7 +2615,7 @@ body.jc41-rave-focus #jc51RaveTopbar [data-jc51-full]{
 
 
 /* Stage 54 — Rave Polish: remove top black strip feel, darken chat, tighten proportions. */
-html::after{ content:'75 PLAYERSCALE'!important; }
+html::after{ content:'76 DOCKRESTORE'!important; }
 body.jc41-rave-focus{
   --jc54-chat:clamp(292px,17.2vw,330px)!important;
 }
@@ -2697,7 +2697,7 @@ body:not(.jc40-watch-mode):not(.jc41-rave-focus) .jc-catalog-layer.open{
    ========================================================= */
 
 html::after{
-  content:'75 PLAYERSCALE'!important;
+  content:'76 DOCKRESTORE'!important;
   background:rgba(56,189,248,.96)!important;
   color:#02150d!important;
 }
@@ -3115,7 +3115,7 @@ body.jc64-active-first:fullscreen{
    for YouTube/VK when active-first hides the old UI.
    ========================================================= */
 html::after{
-  content:'75 PLAYERSCALE'!important;
+  content:'76 DOCKRESTORE'!important;
   background:rgba(56,189,248,.96)!important;
   color:#031018!important;
 }
@@ -3189,7 +3189,7 @@ body.jc64-active-first{
 /* Stage 71 — stable persistent player.
    Direct iframe/video is the active-view player, not a hidden fallback. Native source form remains offscreen for app state. */
 html::after{
-  content:'75 PLAYERSCALE'!important;
+  content:'76 DOCKRESTORE'!important;
   background:rgba(34,211,238,.96)!important;
   color:#02131a!important;
 }
@@ -3246,7 +3246,7 @@ body.jc64-active-first{
 
 /* Stage 71 — stable player. No JS geometry loop, no repeated iframe reflow. */
 html::after{
-  content:'75 PLAYERSCALE'!important;
+  content:'76 DOCKRESTORE'!important;
   background:rgba(20,184,166,.96)!important;
   color:#031513!important;
 }
@@ -3296,7 +3296,7 @@ body.jc64-active-first .player-frame [data-chat-message]{
 
 /* Stage 72 — small auto-update notice. */
 html::after{
-  content:'75 PLAYERSCALE'!important;
+  content:'76 DOCKRESTORE'!important;
   background:rgba(168,85,247,.96)!important;
   color:#fff!important;
 }
@@ -3337,8 +3337,8 @@ html::after{
 
 
 /* =========================================================
-   JustClover Stage 75 — Player Scale Only Fix
-   Version: stage75-player-scale-only-20260502-1
+   JustClover Stage 76 — Player Scale + Dock Restore Fix
+   Version: stage76-player-scale-dock-restore-20260502-1
 
    Сохраняет дизайн Stage74/Active First. Меняет только геометрию видео:
    - больше нет fixed viewport-player slot;
@@ -3348,7 +3348,7 @@ html::after{
    ========================================================= */
 
 html::after{
-  content:'75 PLAYERSCALE'!important;
+  content:'76 DOCKRESTORE'!important;
   background:rgba(34,197,94,.96)!important;
   color:#03130a!important;
 }
@@ -3462,5 +3462,125 @@ body.jc64-active-first.jc75-player-scale-only #jc43ActiveDock{
   body.jc64-active-first.jc75-player-scale-only .player-frame[data-jc75-scale-frame='1']{
     left:0!important;
     right:auto!important;
+  }
+}
+
+
+/* =========================================================
+   JustClover Stage 76 — Bottom Dock Restore
+   Version: stage76-player-scale-dock-restore-20260502-1
+
+   Scope: only restore visible active-view bottom controls.
+   Does not change auth, chat DOM, catalog logic, or source handlers.
+   ========================================================= */
+
+html::after{
+  content:'76 DOCKRESTORE'!important;
+  background:rgba(34,197,94,.96)!important;
+  color:#03130a!important;
+}
+
+body.jc76-dock-restore #jc76BottomDock{
+  display:flex!important;
+}
+
+#jc76BottomDock{
+  position:fixed!important;
+  left:max(14px, env(safe-area-inset-left, 0px))!important;
+  right:calc(var(--jc64-chat-w, 330px) + 14px)!important;
+  bottom:calc(max(14px, env(safe-area-inset-bottom, 0px)) + 42px)!important;
+  z-index:2147483646!important;
+  display:none!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  pointer-events:none!important;
+  max-width:none!important;
+  color:#fff!important;
+}
+
+#jc76BottomDock .jc76-dock-inner{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  max-width:min(760px, calc(100vw - var(--jc64-chat-w, 330px) - 38px))!important;
+  padding:8px!important;
+  border-radius:999px!important;
+  background:rgba(8,10,18,.78)!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  box-shadow:0 16px 46px rgba(0,0,0,.42), 0 0 0 1px rgba(255,255,255,.035) inset!important;
+  backdrop-filter:blur(18px)!important;
+  pointer-events:auto!important;
+}
+
+#jc76BottomDock button{
+  flex:0 0 auto!important;
+  min-width:0!important;
+  min-height:38px!important;
+  height:38px!important;
+  padding:0 14px!important;
+  border-radius:999px!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  background:rgba(255,255,255,.08)!important;
+  color:#fff!important;
+  font:900 13px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  letter-spacing:.01em!important;
+  cursor:pointer!important;
+  user-select:none!important;
+  -webkit-tap-highlight-color:transparent!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+
+#jc76BottomDock button:hover{
+  background:rgba(255,255,255,.15)!important;
+  transform:translateY(-1px)!important;
+}
+
+#jc76BottomDock [data-jc76-source]{
+  background:linear-gradient(135deg,rgba(239,111,135,.86),rgba(168,85,247,.86))!important;
+  border-color:transparent!important;
+}
+
+#jc76BottomDock [data-jc76-full]{
+  background:linear-gradient(135deg,rgba(34,211,238,.90),rgba(52,211,153,.90))!important;
+  color:#03130a!important;
+  border-color:transparent!important;
+}
+
+body.jc76-dock-restore #jc45ActiveDock,
+body.jc76-dock-restore #jc43ActiveDock{
+  display:none!important;
+}
+
+@media(max-width:980px){
+  #jc76BottomDock{
+    left:10px!important;
+    right:10px!important;
+    bottom:calc(38dvh + max(10px, env(safe-area-inset-bottom, 0px)) + 10px)!important;
+  }
+  #jc76BottomDock .jc76-dock-inner{
+    max-width:calc(100vw - 20px)!important;
+    overflow-x:auto!important;
+    justify-content:flex-start!important;
+  }
+  #jc76BottomDock button{
+    min-height:36px!important;
+    height:36px!important;
+    padding:0 12px!important;
+    white-space:nowrap!important;
+  }
+}
+
+@media(max-height:760px){
+  #jc76BottomDock{
+    bottom:calc(max(10px, env(safe-area-inset-bottom, 0px)) + 34px)!important;
+  }
+  #jc76BottomDock button{
+    min-height:34px!important;
+    height:34px!important;
+    padding:0 12px!important;
+    font-size:12px!important;
   }
 }
