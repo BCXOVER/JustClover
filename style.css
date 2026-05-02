@@ -2,11 +2,11 @@
 
 /* =========================================================
    JustClover Stage 45 — Active View Clean Player Dock CSS
-   Version: stage50-rave-like-active-view-20260502-1
+   Version: stage51-rave-clone-layout-20260502-1
    ========================================================= */
 
 html::after{
-  content:'50 RAVEFIT'!important;
+  content:'51 RAVECLONE'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -565,7 +565,7 @@ body.jc40-watch-mode [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'50 RAVEFIT'!important;
+  content:'51 RAVECLONE'!important;
   background:rgba(34,197,94,.94)!important;
 }
 
@@ -943,7 +943,7 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'50 RAVEFIT'!important;
+  content:'51 RAVECLONE'!important;
 }
 
 body.jc41-rave-focus .watch-stage{
@@ -1040,7 +1040,7 @@ body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
    ========================================================= */
 
 html::after{
-  content:'50 RAVEFIT'!important;
+  content:'51 RAVECLONE'!important;
 }
 
 body.jc41-rave-focus .watch-main,
@@ -1133,7 +1133,7 @@ body.jc41-rave-focus #jc45ActiveDock{
    ========================================================= */
 
 html::after{
-  content:'50 RAVEFIT'!important;
+  content:'51 RAVECLONE'!important;
 }
 
 body.jc41-rave-focus .watch-layout{
@@ -1239,7 +1239,7 @@ body.jc41-rave-focus #jc45ActiveDock::after{
    верхняя плашка источника скрывается, снизу — только компактные кнопки.
    ========================================================= */
 
-html::after{ content:'50 RAVEFIT'!important; }
+html::after{ content:'51 RAVECLONE'!important; }
 
 body.jc41-rave-focus .watch-layout{
   width:min(100vw,1540px)!important;
@@ -1406,7 +1406,7 @@ body.jc41-rave-focus .chat-card{
    плеер 16:9 без лишней чёрной шапки от растянутого контейнера.
    ========================================================= */
 
-html::after{ content:'50 RAVEFIT'!important; }
+html::after{ content:'51 RAVECLONE'!important; }
 
 html.jc41-rave-focus,
 body.jc41-rave-focus{
@@ -1682,7 +1682,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'50 RAVEFIT'!important;
+  content:'51 RAVECLONE'!important;
 }
 
 html.jc41-rave-focus,
@@ -1972,5 +1972,372 @@ body.jc41-rave-focus .player-shell > nav{
     left:8px!important;
     bottom:8px!important;
     max-width:calc(100% - 16px)!important;
+  }
+}
+
+
+/* =========================================================
+   JustClover Stage 51 — Rave Clone Layout
+   Берём не код Rave, а саму проверенную схему: верхняя панель,
+   слева большой плеер, справа узкий чат, без дыр и декоративных полей.
+   ========================================================= */
+
+html::after{
+  content:'51 RAVECLONE'!important;
+}
+
+body.jc41-rave-focus{
+  --jc51-top:64px;
+  --jc51-chat:clamp(300px,17.5vw,360px);
+  background:#050506!important;
+}
+
+body.jc41-rave-focus #jc51RaveTopbar{
+  position:fixed!important;
+  left:0!important;
+  top:0!important;
+  right:0!important;
+  height:var(--jc51-top)!important;
+  z-index:2147482600!important;
+  display:grid!important;
+  grid-template-columns:minmax(260px,1fr) auto minmax(260px,1fr)!important;
+  align-items:center!important;
+  gap:12px!important;
+  padding:0 18px!important;
+  box-sizing:border-box!important;
+  color:#fff!important;
+  background:linear-gradient(180deg,rgba(76,50,43,.96),rgba(44,32,39,.92))!important;
+  border-bottom:1px solid rgba(255,255,255,.18)!important;
+  box-shadow:0 8px 30px rgba(0,0,0,.26)!important;
+  backdrop-filter:blur(14px)!important;
+}
+
+body.jc41-rave-focus #jc51RaveTopbar button{
+  width:44px!important;
+  height:44px!important;
+  min-width:44px!important;
+  min-height:44px!important;
+  border:0!important;
+  border-radius:999px!important;
+  background:transparent!important;
+  color:#fff!important;
+  display:grid!important;
+  place-items:center!important;
+  font:900 30px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  cursor:pointer!important;
+  opacity:.96!important;
+  box-shadow:none!important;
+}
+
+body.jc41-rave-focus #jc51RaveTopbar button:hover{
+  background:rgba(255,255,255,.11)!important;
+}
+
+body.jc41-rave-focus #jc51RaveTopbar [data-jc51-mic],
+body.jc41-rave-focus #jc51RaveTopbar [data-jc51-chat],
+body.jc41-rave-focus #jc51RaveTopbar [data-jc51-full]{
+  font-size:22px!important;
+}
+
+body.jc41-rave-focus .jc51-rave-left,
+body.jc41-rave-focus .jc51-rave-right{
+  display:flex!important;
+  align-items:center!important;
+  gap:clamp(18px,4vw,78px)!important;
+}
+
+body.jc41-rave-focus .jc51-rave-left{ justify-content:flex-start!important; }
+body.jc41-rave-focus .jc51-rave-right{ justify-content:flex-end!important; }
+
+body.jc41-rave-focus .jc51-rave-logo{
+  white-space:nowrap!important;
+  text-align:center!important;
+  color:#fff!important;
+  font:1000 clamp(24px,2.4vw,42px)/1 Inter,Segoe UI,Arial,sans-serif!important;
+  letter-spacing:.08em!important;
+  text-transform:uppercase!important;
+  text-shadow:0 2px 14px rgba(0,0,0,.45)!important;
+}
+
+body.jc41-rave-focus .shell,
+body.jc41-rave-focus #appView.app,
+body.jc41-rave-focus .content,
+body.jc41-rave-focus #watchSection{
+  width:100vw!important;
+  max-width:100vw!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+
+body.jc41-rave-focus .watch-layout{
+  position:fixed!important;
+  left:0!important;
+  right:0!important;
+  top:var(--jc51-top)!important;
+  bottom:0!important;
+  width:100vw!important;
+  max-width:100vw!important;
+  height:calc(100vh - var(--jc51-top))!important;
+  max-height:calc(100vh - var(--jc51-top))!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) var(--jc51-chat)!important;
+  gap:0!important;
+  margin:0!important;
+  padding:0!important;
+  background:#050506!important;
+  overflow:hidden!important;
+}
+
+body.jc41-rave-focus .watch-main,
+body.jc41-rave-focus .watch-stage{
+  position:relative!important;
+  width:100%!important;
+  height:calc(100vh - var(--jc51-top))!important;
+  max-height:calc(100vh - var(--jc51-top))!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  overflow:hidden!important;
+}
+
+/* Видео как в Rave: область слева без отступов; если источник отдаёт iframe с собственными плашками, мы не двигаем его DOM, только обрамление убрано. */
+body.jc41-rave-focus .player-card-redesign,
+body.jc41-rave-focus .player-card,
+body.jc41-rave-focus .player-shell,
+body.jc41-rave-focus .player-frame{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+  aspect-ratio:auto!important;
+}
+
+body.jc41-rave-focus .player-frame iframe,
+body.jc41-rave-focus .player-frame video,
+body.jc41-rave-focus .embed-box,
+body.jc41-rave-focus #iframePlayer,
+body.jc41-rave-focus #videoPlayer,
+body.jc41-rave-focus #youtubePlayer,
+body.jc41-rave-focus #youtubePlayer iframe{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  object-fit:cover!important;
+}
+
+/* Правая колонка как в Rave: сразу рядом с видео, без промежуточных фонов/дыр. */
+body.jc41-rave-focus .watch-sidebar{
+  position:relative!important;
+  width:var(--jc51-chat)!important;
+  min-width:var(--jc51-chat)!important;
+  height:calc(100vh - var(--jc51-top))!important;
+  max-height:calc(100vh - var(--jc51-top))!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border-left:2px solid rgba(255,255,255,.22)!important;
+  border-radius:0!important;
+  display:block!important;
+  overflow:hidden!important;
+  background:linear-gradient(180deg,rgba(112,80,67,.92),rgba(55,42,48,.95))!important;
+  box-shadow:none!important;
+}
+
+body.jc41-rave-focus .chat-card{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-height:100%!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:14px 10px 10px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:rgba(12,11,18,.24)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+  box-shadow:none!important;
+}
+
+body.jc41-rave-focus .chat-card .side-card-head{
+  min-height:36px!important;
+  margin:0 0 8px!important;
+  padding:0!important;
+  flex:0 0 auto!important;
+}
+
+body.jc41-rave-focus .chat-card .side-card-head h3{
+  color:#fff!important;
+  font:900 18px/1.1 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+body.jc41-rave-focus #chatMessages,
+body.jc41-rave-focus .chat-card .messages{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  padding:0 2px 0 0!important;
+  margin:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+}
+
+body.jc41-rave-focus #chatForm,
+body.jc41-rave-focus .chat-card .message-form{
+  flex:0 0 auto!important;
+  margin:8px 0 0!important;
+}
+
+/* Лишние панели и дубли источников не показываем в Rave-клоне. */
+body.jc41-rave-focus .watch-brandbar,
+body.jc41-rave-focus .watch-header,
+body.jc41-rave-focus .source-strip,
+body.jc41-rave-focus .source-panel-embedded,
+body.jc41-rave-focus .watch-footer-meta,
+body.jc41-rave-focus .members-card,
+body.jc41-rave-focus .voice-card,
+body.jc41-rave-focus .reactions-dock,
+body.jc41-rave-focus .jc48-top-source-hidden,
+body.jc41-rave-focus .jc45-active-hidden-panel,
+body.jc41-rave-focus .watch-main [class*="history"],
+body.jc41-rave-focus .watch-main [class*="queue"],
+body.jc41-rave-focus #jc45ActiveDock .jc48-source-row,
+body.jc41-rave-focus #jc41RaveFloating [data-jc41-exit],
+body.jc41-rave-focus #jc41RaveFloating [data-jc41-catalog]{
+  display:none!important;
+}
+
+/* Нижнее управление оставляем только микрофон/чат/экран, по центру как у Rave. */
+body.jc41-rave-focus #jc45ActiveDock{
+  position:absolute!important;
+  left:50%!important;
+  bottom:14px!important;
+  right:auto!important;
+  top:auto!important;
+  transform:translateX(-50%)!important;
+  width:auto!important;
+  max-width:calc(100% - 28px)!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  z-index:90!important;
+  pointer-events:none!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock .jc48-dock-inner,
+body.jc41-rave-focus #jc45ActiveDock .jc48-actions-slot,
+body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex-wrap:nowrap!important;
+  gap:8px!important;
+  width:auto!important;
+  max-width:100%!important;
+  margin:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  pointer-events:auto!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock .jc48-dock-inner{
+  padding:0!important;
+}
+
+body.jc41-rave-focus #jc41RaveFloating{
+  padding:6px!important;
+  border-radius:999px!important;
+  background:rgba(7,8,13,.68)!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  box-shadow:0 14px 48px rgba(0,0,0,.38)!important;
+  backdrop-filter:blur(16px)!important;
+}
+
+body.jc41-rave-focus #jc41RaveFloating button{
+  min-width:48px!important;
+  min-height:32px!important;
+  height:32px!important;
+  padding:0 12px!important;
+  border-radius:999px!important;
+  font:900 12px/1 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen,
+#jc45ActiveFullscreenTarget:-webkit-full-screen{
+  width:100vw!important;
+  height:100vh!important;
+  background:#000!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock{
+  position:absolute!important;
+  left:50%!important;
+  bottom:14px!important;
+  transform:translateX(-50%)!important;
+}
+
+@media(max-width:980px){
+  body.jc41-rave-focus{ --jc51-top:56px; --jc51-chat:34vh; }
+  body.jc41-rave-focus #jc51RaveTopbar{
+    height:var(--jc51-top)!important;
+    grid-template-columns:1fr auto 1fr!important;
+    padding:0 8px!important;
+  }
+  body.jc41-rave-focus .jc51-rave-left,
+  body.jc41-rave-focus .jc51-rave-right{ gap:4px!important; }
+  body.jc41-rave-focus #jc51RaveTopbar button{
+    width:34px!important; min-width:34px!important; height:34px!important; min-height:34px!important; font-size:22px!important;
+  }
+  body.jc41-rave-focus .jc51-rave-logo{ font-size:18px!important; letter-spacing:.05em!important; }
+  body.jc41-rave-focus .watch-layout{
+    grid-template-columns:1fr!important;
+    grid-template-rows:minmax(0,1fr) var(--jc51-chat)!important;
+  }
+  body.jc41-rave-focus .watch-main,
+  body.jc41-rave-focus .watch-stage{
+    height:calc(100vh - var(--jc51-top) - var(--jc51-chat))!important;
+    max-height:calc(100vh - var(--jc51-top) - var(--jc51-chat))!important;
+  }
+  body.jc41-rave-focus .watch-sidebar,
+  body.jc41-rave-focus .chat-card{
+    width:100vw!important;
+    min-width:0!important;
+    height:var(--jc51-chat)!important;
+    max-height:var(--jc51-chat)!important;
   }
 }

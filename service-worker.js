@@ -1,4 +1,4 @@
-/* JustClover cache killer stage50-rave-like-active-view-20260502-1 */
+/* JustClover cache killer stage51-rave-clone-layout-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));

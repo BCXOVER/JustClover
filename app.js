@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 50 — Edge-to-Edge Active View
-   Version: stage50-rave-like-active-view-20260502-1
+   JustClover Stage 51 — Rave Clone Layout
+   Version: stage51-rave-clone-layout-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage50-rave-like-active-view-20260502-1";
+const JC40_BUILD = "stage51-rave-clone-layout-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 50 ACTIVE loader:", JC40_BUILD);
+console.log("JustClover Stage 51 RAVECLONE loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 50: base app import failed", e);
+  console.error("JustClover Stage 51: base app import failed", e);
   throw e;
 }
 
@@ -528,15 +528,15 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 50 — Edge-to-Edge Active View
-   Version: stage50-rave-like-active-view-20260502-1
+   JustClover Stage 51 — Rave Clone Layout
+   Version: stage51-rave-clone-layout-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage50-rave-like-active-view-20260502-1";
-  const STORE_KEY = "jc50ActiveViewMode";
+  const BUILD = "stage51-rave-clone-layout-20260502-1";
+  const STORE_KEY = "jc51ActiveViewMode";
   let desired = false;
 
-  try { desired = localStorage.getItem(STORE_KEY) === "1" || localStorage.getItem("jc49ActiveViewMode") === "1" || localStorage.getItem("jc48ActiveViewMode") === "1" || localStorage.getItem("jc47ActiveViewMode") === "1" || localStorage.getItem("jc46ActiveViewMode") === "1" || localStorage.getItem("jc45ActiveViewMode") === "1" || localStorage.getItem("jc44ActiveViewMode") === "1" || localStorage.getItem("jc43ActiveViewMode") === "1"; } catch(_) {}
+  try { desired = localStorage.getItem(STORE_KEY) === "1" || localStorage.getItem("jc50ActiveViewMode") === "1" || localStorage.getItem("jc49ActiveViewMode") === "1" || localStorage.getItem("jc48ActiveViewMode") === "1" || localStorage.getItem("jc47ActiveViewMode") === "1" || localStorage.getItem("jc46ActiveViewMode") === "1" || localStorage.getItem("jc45ActiveViewMode") === "1" || localStorage.getItem("jc44ActiveViewMode") === "1" || localStorage.getItem("jc43ActiveViewMode") === "1"; } catch(_) {}
 
   function isWatchMode(){
     const app = document.getElementById('appView');
@@ -703,6 +703,43 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
     }catch(_){}
   }
 
+  function ensureRaveTopbar(){
+    let bar = document.getElementById('jc51RaveTopbar');
+    if(bar) return bar;
+    bar = document.createElement('div');
+    bar.id = 'jc51RaveTopbar';
+    bar.innerHTML = `
+      <div class="jc51-rave-left">
+        <button type="button" data-jc51-exit title="Обычный режим" aria-label="Обычный режим">×</button>
+        <button type="button" data-jc51-sources title="Источники" aria-label="Источники">☰</button>
+        <button type="button" data-jc51-catalog title="Каталог" aria-label="Каталог">⚙</button>
+        <button type="button" data-jc51-search title="Поиск / каталог" aria-label="Поиск / каталог">⌕</button>
+      </div>
+      <div class="jc51-rave-logo">JUST&nbsp;☘&nbsp;CLOVER</div>
+      <div class="jc51-rave-right">
+        <button type="button" data-jc51-mic title="Микро" aria-label="Микро">🎙</button>
+        <button type="button" data-jc51-chat title="Чат" aria-label="Чат">💬</button>
+        <button type="button" data-jc51-full title="На весь экран" aria-label="На весь экран">⛶</button>
+      </div>`;
+    bar.addEventListener('click', function(e){
+      const b = e.target.closest('button');
+      if(!b) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if(b.hasAttribute('data-jc51-exit')) setFocus(false);
+      if(b.hasAttribute('data-jc51-sources') || b.hasAttribute('data-jc51-catalog') || b.hasAttribute('data-jc51-search')) openCatalog();
+      if(b.hasAttribute('data-jc51-mic')) clickMic();
+      if(b.hasAttribute('data-jc51-chat')) focusChat();
+      if(b.hasAttribute('data-jc51-full')) togglePlayerFullscreen();
+    });
+    document.body.appendChild(bar);
+    return bar;
+  }
+
+  function removeRaveTopbar(){
+    document.getElementById('jc51RaveTopbar')?.remove?.();
+  }
+
   function ensureCompactDock(dock){
     if(!dock) return null;
     let inner = dock.querySelector('.jc48-dock-inner');
@@ -826,6 +863,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       document.body.style.top = '';
       document.body.style.left = '';
       document.body.style.width = '';
+      ensureRaveTopbar();
       const dock = ensureDock();
       const compact = ensureCompactDock(dock);
       if(compact?.actions && floating.parentNode !== compact.actions) compact.actions.appendChild(floating);
@@ -833,6 +871,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       markActiveHiddenPanels(true);
       hardTop();
     } else {
+      removeRaveTopbar();
       const dock = document.getElementById('jc45ActiveDock') || document.getElementById('jc43ActiveDock');
       const target = document.getElementById('jc45ActiveFullscreenTarget') || document.getElementById('jc43ActiveFullscreenTarget');
       hideTopSourceChrome(false);
@@ -977,4 +1016,13 @@ try {
   window.jc50ToggleActiveView = window.jc49ToggleActiveView || window.jc48ToggleActiveView || window.jc46ToggleActiveView || window.jc41ToggleRaveMode;
   window.jc50SetActiveView = window.jc49SetActiveView || window.jc48SetActiveView || window.jc46SetActiveView || window.jc41SetRaveMode;
   window.jc50ToggleFullscreen = window.jc49ToggleFullscreen || window.jc48ToggleFullscreen || window.jc46ToggleFullscreen || window.jc42ToggleFullscreen;
+} catch(_) {}
+
+
+// Stage 51 public aliases — Rave clone layout.
+try {
+  window.jc51ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc51ToggleActiveView = window.jc50ToggleActiveView || window.jc49ToggleActiveView || window.jc48ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc51SetActiveView = window.jc50SetActiveView || window.jc49SetActiveView || window.jc48SetActiveView || window.jc41SetRaveMode;
+  window.jc51ToggleFullscreen = window.jc50ToggleFullscreen || window.jc49ToggleFullscreen || window.jc48ToggleFullscreen || window.jc42ToggleFullscreen;
 } catch(_) {}
