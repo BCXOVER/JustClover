@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 41 — No Page Scroll Watch Mode
-   Version: stage41-rave-focus-player-chat-20260502-1
+   JustClover Stage 42 — Active View Fullscreen Button
+   Version: stage42-active-view-fullscreen-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage41-rave-focus-player-chat-20260502-1";
+const JC40_BUILD = "stage42-active-view-fullscreen-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 41 RAVE loader:", JC40_BUILD);
+console.log("JustClover Stage 42 ACTIVE loader:", JC40_BUILD);
 
 try {
-  await import(JC40_BASE_APP + `?base=stage37&stage41=${Date.now()}`);
+  await import(JC40_BASE_APP + `?base=stage37&stage42=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 41: base app import failed", e);
+  console.error("JustClover Stage 42: base app import failed", e);
   throw e;
 }
 
@@ -528,11 +528,11 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 41 — Rave Focus Player + Chat Mode
-   Version: stage41-rave-focus-player-chat-20260502-1
+   JustClover Stage 42 — Active View Fullscreen Button
+   Version: stage42-active-view-fullscreen-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage41-rave-focus-player-chat-20260502-1";
+  const BUILD = "stage42-active-view-fullscreen-20260502-1";
   const STORE_KEY = "jc41RaveFocusMode";
   let desired = false;
 
@@ -566,6 +566,61 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
     }
   }
 
+  function visible(el){
+    if(!el) return false;
+    if(el.classList?.contains('hidden')) return false;
+    const r = el.getBoundingClientRect?.();
+    return !!(!r || (r.width > 2 && r.height > 2));
+  }
+
+  async function requestFullOn(target){
+    if(!target || !target.requestFullscreen) return false;
+    try {
+      await target.requestFullscreen({ navigationUI:'hide' });
+      return true;
+    } catch(e) {
+      return false;
+    }
+  }
+
+  async function togglePlayerFullscreen(){
+    if(document.fullscreenElement){
+      try { await document.exitFullscreen(); } catch(_) {}
+      syncFullscreenButtons();
+      return;
+    }
+
+    const frame = document.querySelector('.player-frame');
+    const targets = [
+      document.querySelector('#iframePlayer:not(.hidden)'),
+      document.querySelector('#youtubePlayer iframe'),
+      document.querySelector('#videoPlayer:not(.hidden)'),
+      frame
+    ].filter(visible);
+
+    for(const t of targets){
+      if(await requestFullOn(t)){
+        syncFullscreenButtons();
+        return;
+      }
+    }
+
+    if(await requestFullOn(frame || document.documentElement)){
+      syncFullscreenButtons();
+      return;
+    }
+    console.warn('[JC42] browser blocked fullscreen request');
+  }
+
+  function syncFullscreenButtons(){
+    const on = !!document.fullscreenElement;
+    document.querySelectorAll('[data-jc41-full]').forEach(btn => {
+      btn.textContent = on ? 'Выйти' : 'Экран';
+      btn.title = on ? 'Выйти из большого экрана' : 'Открыть плеер на большой экран';
+      btn.setAttribute('aria-label', btn.title);
+    });
+  }
+
   function ensureFloating(){
     if(document.getElementById('jc41RaveFloating')) return;
     const f = document.createElement('div');
@@ -575,6 +630,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       <button type="button" data-jc41-catalog>Источники</button>
       <button type="button" data-jc41-mic>Микро</button>
       <button type="button" data-jc41-chat>Чат</button>
+      <button type="button" data-jc41-full title="Открыть плеер на большой экран" aria-label="Открыть плеер на большой экран">Экран</button>
     `;
     f.addEventListener('click', function(e){
       const b = e.target.closest('button');
@@ -585,6 +641,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       if(b.hasAttribute('data-jc41-catalog')) openCatalog();
       if(b.hasAttribute('data-jc41-mic')) clickMic();
       if(b.hasAttribute('data-jc41-chat')) focusChat();
+      if(b.hasAttribute('data-jc41-full')) togglePlayerFullscreen();
     });
     document.body.appendChild(f);
   }
@@ -606,7 +663,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       if(row.firstChild) row.insertBefore(btn, row.firstChild);
       else row.appendChild(btn);
     }
-    btn.textContent = desired ? 'Обычный' : 'Rave режим';
+    btn.textContent = desired ? 'Обычный' : 'Активный просмотр';
     btn.classList.toggle('active', desired);
     btn.title = desired ? 'Вернуть обычный интерфейс' : 'Оставить только плеер, чат и микрофон';
   }
@@ -614,6 +671,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   function apply(){
     ensureFloating();
     ensureToggle();
+    syncFullscreenButtons();
     const on = desired && isWatchMode();
     document.documentElement.classList.toggle('jc41-rave-focus', on);
     document.body.classList.toggle('jc41-rave-focus', on);
@@ -635,7 +693,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
     apply();
   }
 
-  // Не даём колесу дергать страницу в Rave-режиме; чат и каталог остаются скроллящимися.
+  // Не даём колесу дергать страницу в активный просмотре; чат и каталог остаются скроллящимися.
   function isAllowedScrollTarget(node){
     return !!node?.closest?.('#chatMessages, .chat-card .messages, #jc40CatalogRoot .jc40-scroll, .watch-sidebar, .jc41-allow-scroll');
   }
@@ -660,8 +718,13 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
     }
   }, true);
 
+  document.addEventListener('fullscreenchange', syncFullscreenButtons);
+
   window.jc41SetRaveMode = setFocus;
   window.jc41ToggleRaveMode = function(){ setFocus(!desired); };
+  window.jc42SetActiveView = setFocus;
+  window.jc42ToggleActiveView = function(){ setFocus(!desired); };
+  window.jc42ToggleFullscreen = togglePlayerFullscreen;
   window.jc41RaveDebug = function(){
     return {
       build: BUILD,
@@ -671,6 +734,8 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       scrollY: window.scrollY || document.documentElement.scrollTop || 0,
       hasToggle: !!document.getElementById('jc41RaveToggle'),
       hasFloating: !!document.getElementById('jc41RaveFloating'),
+      hasFullscreenButton: !!document.querySelector('[data-jc41-full]'),
+      fullscreenElement: document.fullscreenElement?.id || document.fullscreenElement?.tagName || '',
       playerHeight: document.querySelector('.player-frame')?.getBoundingClientRect?.().height || 0,
       sidebarWidth: document.querySelector('.watch-sidebar')?.getBoundingClientRect?.().width || 0
     };
@@ -679,6 +744,14 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   setInterval(apply, 180);
   setTimeout(function(){
     apply();
-    console.log('[JC41 rave focus] ready', window.jc41RaveDebug());
+    console.log('[JC41 active view] ready', window.jc41RaveDebug());
   }, 500);
 })();
+
+
+// Stage 42 public aliases with the new name.
+try {
+  window.jc42ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc42ToggleActiveView = window.jc42ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc42SetActiveView = window.jc42SetActiveView || window.jc41SetRaveMode;
+} catch(_) {}

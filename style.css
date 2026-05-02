@@ -1,12 +1,12 @@
 @import url("https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@f658b5bfad3fade4eb7f9c4d82865452cdc19f00/style.css");
 
 /* =========================================================
-   JustClover Stage 41 — No Page Scroll Watch Mode CSS
-   Version: stage41-rave-focus-player-chat-20260502-1
+   JustClover Stage 42 — Active View Fullscreen Button CSS
+   Version: stage42-active-view-fullscreen-20260502-1
    ========================================================= */
 
 html::after{
-  content:'41 RAVE'!important;
+  content:'42 ACTIVE'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -351,7 +351,7 @@ body.jc40-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
 
 
 /* =========================================================
-   JustClover Stage 41 — No Page Scroll Watch Mode
+   JustClover Stage 42 — Active View Fullscreen Button
    В просмотре больше нет page scroll: колесо работает только внутри чата/списков/каталога.
    ========================================================= */
 
@@ -560,12 +560,12 @@ body.jc40-watch-mode [class*="queue"]{
 }
 
 /* =========================================================
-   JustClover Stage 41 — Rave Focus Player + Chat Mode
+   JustClover Stage 42 — Active View Fullscreen Button
    Большой плеер + чат + микрофон, без лишних полос над плеером.
    ========================================================= */
 
 html::after{
-  content:'41 RAVE'!important;
+  content:'42 ACTIVE'!important;
   background:rgba(34,197,94,.94)!important;
 }
 
@@ -589,6 +589,8 @@ html::after{
   display:none!important;
   align-items:center!important;
   gap:8px!important;
+  flex-wrap:wrap!important;
+  max-width:min(620px,calc(100vw - 24px))!important;
   padding:8px!important;
   border-radius:22px!important;
   background:rgba(5,7,14,.62)!important;
@@ -618,11 +620,18 @@ html::after{
   border-color:transparent!important;
 }
 
+#jc41RaveFloating [data-jc41-full]{
+  background:linear-gradient(135deg,#22d3ee,#34d399)!important;
+  border-color:transparent!important;
+  color:#03130a!important;
+  min-width:70px!important;
+}
+
 body.jc41-rave-focus #jc41RaveFloating{
   display:flex!important;
 }
 
-/* Главный Rave-режим: только плеер слева и чат/микрофон справа. */
+/* Главный активный просмотр: только плеер слева и чат/микрофон справа. */
 html.jc41-rave-focus,
 body.jc41-rave-focus{
   height:100%!important;
