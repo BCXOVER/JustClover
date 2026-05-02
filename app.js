@@ -4951,8 +4951,8 @@ setTimeout(jc251Patch, 1000);
    JustClover Stage 28 CLEAN — player/cinema JS
    Version: stage28-clean-cinema-player-20260502-1
    ========================================================= */
-console.log("JustClover Stage 30.2 CLEAN loaded:", "stage30-2-remove-ad-labels-20260502-1");
-window.JUSTCLOVER_BUILD = "stage30-2-remove-ad-labels-20260502-1";
+console.log("JustClover Stage 30.3 CLEAN loaded:", "stage30-3-remove-rave-card-20260502-1");
+window.JUSTCLOVER_BUILD = "stage30-3-remove-rave-card-20260502-1";
 
 try{
   if(localStorage.getItem('jc28LastBuild') !== window.JUSTCLOVER_BUILD){
@@ -4965,7 +4965,7 @@ try{
 
 
 (function(){
-  const BUILD = "stage30-2-remove-ad-labels-20260502-1";
+  const BUILD = "stage30-3-remove-rave-card-20260502-1";
   let zoom = Number(localStorage.getItem('jc28CinemaZoomV4') || '0') || 0;
 
   function svg(name){
@@ -5415,10 +5415,10 @@ try{
 
 /* =========================================================
    JustClover Stage 30 — Rave-like clean sources JS
-   Version: stage30-2-remove-ad-labels-20260502-1
+   Version: stage30-3-remove-rave-card-20260502-1
    ========================================================= */
-console.log("JustClover Stage 30.2 CLEAN loaded:", "stage30-2-remove-ad-labels-20260502-1");
-window.JUSTCLOVER_BUILD = "stage30-2-remove-ad-labels-20260502-1";
+console.log("JustClover Stage 30.3 CLEAN loaded:", "stage30-3-remove-rave-card-20260502-1");
+window.JUSTCLOVER_BUILD = "stage30-3-remove-rave-card-20260502-1";
 
 (function(){
   function sourceLabel(type){
@@ -5621,7 +5621,7 @@ window.JUSTCLOVER_BUILD = "stage30-2-remove-ad-labels-20260502-1";
 
 /* =========================================================
    JustClover Stage 30.1 — YouTube/VK source reload + sync bounce fix
-   Version: stage30-2-remove-ad-labels-20260502-1
+   Version: stage30-3-remove-rave-card-20260502-1
 
    Причина бага:
    renderRoom() вызывается на КАЖДОЕ изменение rooms/{id}, включая playback.
@@ -5629,8 +5629,8 @@ window.JUSTCLOVER_BUILD = "stage30-2-remove-ad-labels-20260502-1";
    Для YouTube это вызывало ytPlayer.loadVideoById(...) снова и снова,
    поэтому видео бесконечно ставилось на паузу/включалось.
    ========================================================= */
-console.log("JustClover Stage 30.2 CLEAN loaded:", "stage30-2-remove-ad-labels-20260502-1");
-window.JUSTCLOVER_BUILD = "stage30-2-remove-ad-labels-20260502-1";
+console.log("JustClover Stage 30.3 CLEAN loaded:", "stage30-3-remove-rave-card-20260502-1");
+window.JUSTCLOVER_BUILD = "stage30-3-remove-rave-card-20260502-1";
 
 (function(){
   function sourceKey(s){
@@ -5773,10 +5773,10 @@ window.JUSTCLOVER_BUILD = "stage30-2-remove-ad-labels-20260502-1";
 
 /* =========================================================
    JustClover Stage 30.2 — remove ad labels everywhere
-   Version: stage30-2-remove-ad-labels-20260502-1
+   Version: stage30-3-remove-rave-card-20260502-1
    ========================================================= */
-console.log("JustClover Stage 30.2 CLEAN loaded:", "stage30-2-remove-ad-labels-20260502-1");
-window.JUSTCLOVER_BUILD = "stage30-2-remove-ad-labels-20260502-1";
+console.log("JustClover Stage 30.3 CLEAN loaded:", "stage30-3-remove-rave-card-20260502-1");
+window.JUSTCLOVER_BUILD = "stage30-3-remove-rave-card-20260502-1";
 
 (function(){
   function labelFromType(type){
@@ -5872,4 +5872,30 @@ window.JUSTCLOVER_BUILD = "stage30-2-remove-ad-labels-20260502-1";
 
   setInterval(mark, 700);
   setTimeout(mark, 300);
+})();
+
+
+/* =========================================================
+   JustClover Stage 30.3 — remove big Rave sources card JS
+   Version: stage30-3-remove-rave-card-20260502-1
+   ========================================================= */
+console.log("JustClover Stage 30.3 CLEAN loaded:", "stage30-3-remove-rave-card-20260502-1");
+window.JUSTCLOVER_BUILD = "stage30-3-remove-rave-card-20260502-1";
+
+(function(){
+  function removeBigRaveCard(){
+    document.querySelectorAll('[data-rave-tool-clean]').forEach(el => el.remove());
+  }
+
+  // Перехватываем старую функцию, если Stage30 уже добавил кнопку.
+  if(typeof enhanceSourceTools === 'function' && !window.__jc303EnhancePatched){
+    window.__jc303EnhancePatched = true;
+    enhanceSourceTools = function(){
+      removeBigRaveCard();
+    };
+  }
+
+  setInterval(removeBigRaveCard, 500);
+  setTimeout(removeBigRaveCard, 200);
+  setTimeout(removeBigRaveCard, 1200);
 })();

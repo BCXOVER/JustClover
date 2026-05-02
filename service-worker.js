@@ -1,4 +1,4 @@
-/* JustClover cache killer stage30-2-remove-ad-labels-20260502-1 */
+/* JustClover cache killer stage30-3-remove-rave-card-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
