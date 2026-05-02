@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 59 — Auth Safe Stable Sidebar
-   Version: stage59-auth-safe-sidebar-20260502-1
+   JustClover Stage 60 — Auth Guest Safe
+   Version: stage60-auth-guest-safe-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage59-auth-safe-sidebar-20260502-1";
+const JC40_BUILD = "stage60-auth-guest-safe-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 59 STABLE loader:", JC40_BUILD);
+console.log("JustClover Stage 60 AUTHGUEST loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 59: base app import failed", e);
+  console.error("JustClover Stage 60: base app import failed", e);
   throw e;
 }
 
@@ -90,6 +90,89 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   setTimeout(window.__jc59CleanAuthShell, 250);
   setInterval(window.__jc59CleanAuthShell, 180);
 })();
+
+/* =========================================================
+   Stage 60 auth/guest guard.
+   Keeps auth page native and supports direct guest-room links via ?guest=1.
+   This does not move chat DOM and does not enable active view before entering the app.
+   ========================================================= */
+(function(){
+  const params = new URLSearchParams(location.search);
+  const wantGuest = /^(1|true|yes|guest)$/i.test(String(params.get('guest') || params.get('autoGuest') || params.get('asGuest') || ''));
+  const wantedRoom = String(params.get('room') || '').trim();
+  let guestClicked = false;
+  let joinClicked = false;
+
+  function isAuthScreen(){
+    return !!(window.__jc59IsAuthScreen ? window.__jc59IsAuthScreen() : (document.getElementById('appView')?.classList.contains('hidden')));
+  }
+
+  function cleanAuthOnly(){
+    if(!isAuthScreen()) return false;
+    window.__jc59CleanAuthShell?.();
+    document.documentElement.classList.remove('jc41-rave-focus','jc40-watch-mode','jc40-catalog-open','jc40-force-new-catalog');
+    document.body?.classList?.remove('jc41-rave-focus','jc40-watch-mode','jc40-catalog-open','jc40-force-new-catalog');
+    return true;
+  }
+
+  function clickGuestOnce(){
+    if(!wantGuest || guestClicked || !isAuthScreen()) return false;
+    const tab = document.getElementById('guestTab');
+    const submit = document.getElementById('guestSubmit');
+    if(!tab || !submit) return false;
+    tab.click();
+    setTimeout(()=>{
+      const b = document.getElementById('guestSubmit');
+      if(!b || b.classList.contains('hidden')) return;
+      guestClicked = true;
+      b.click();
+    }, 120);
+    return true;
+  }
+
+  function joinWantedRoomOnce(){
+    if(joinClicked || !wantedRoom || isAuthScreen()) return false;
+    const app = document.getElementById('appView');
+    if(!app || app.classList.contains('hidden')) return false;
+    const watch = document.getElementById('watchSection');
+    if(watch?.classList.contains('active')) { joinClicked = true; return true; }
+    const input = document.getElementById('joinRoomInput');
+    const btn = document.getElementById('joinRoomBtn');
+    if(!input || !btn) return false;
+    input.value = wantedRoom;
+    joinClicked = true;
+    btn.click();
+    return true;
+  }
+
+  function tick(){
+    cleanAuthOnly();
+    clickGuestOnce();
+    joinWantedRoomOnce();
+  }
+
+  tick();
+  setTimeout(tick, 100);
+  setTimeout(tick, 350);
+  setTimeout(tick, 800);
+  const timer = setInterval(tick, 450);
+  setTimeout(()=>clearInterval(timer), 12000);
+
+  window.jc60AuthDebug = function(){
+    return {
+      build: window.JUSTCLOVER_BUILD,
+      auth: isAuthScreen(),
+      wantGuest,
+      room: wantedRoom,
+      guestClicked,
+      joinClicked,
+      appHidden: document.getElementById('appView')?.classList.contains('hidden'),
+      guestSubmitHidden: document.getElementById('guestSubmit')?.classList.contains('hidden'),
+      activeViewClass: document.body?.classList.contains('jc41-rave-focus')
+    };
+  };
+})();
+
 
 (function(){
   const BUILD = JC40_BUILD;
@@ -600,11 +683,11 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 59 — Auth Safe Stable Sidebar
-   Version: stage59-auth-safe-sidebar-20260502-1
+   JustClover Stage 60 — Auth Guest Safe
+   Version: stage60-auth-guest-safe-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage59-auth-safe-sidebar-20260502-1";
+  const BUILD = "stage60-auth-guest-safe-20260502-1";
   const STORE_KEY = "jc58ActiveViewMode";
   let desired = false;
 
@@ -1122,7 +1205,7 @@ try{
 
 // Stage 58 — stable sidebar geometry: no chat DOM moves, no clones.
 (function(){
-  const BUILD = "stage59-auth-safe-sidebar-20260502-1";
+  const BUILD = "stage60-auth-guest-safe-20260502-1";
 
   function hideCinemaButtons(root=document){
     const nodes = Array.from(root.querySelectorAll('button,a,[role="button"],.chip,.pill,.segmented button'));
@@ -1172,3 +1255,10 @@ try{
   };
   window.jc58ToggleFullscreen = window.jc54ToggleFullscreen || window.jc53ToggleFullscreen || window.jc52ToggleFullscreen || window.jc51ToggleFullscreen || window.jc42ToggleFullscreen;
 })();
+
+
+// Stage 60 public aliases.
+try{
+  window.jc60ActiveViewDebug = window.jc58ActiveViewDebug || window.jc54ActiveViewDebug || function(){ return { build: window.JUSTCLOVER_BUILD }; };
+  window.jc60HideCinema = window.jc58HideCinema || window.jc55HideCinema || function(){ return false; };
+}catch(_){}

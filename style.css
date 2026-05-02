@@ -6,7 +6,7 @@
    ========================================================= */
 
 html::after{
-  content:'59 AUTH-SAFE'!important;
+  content:'60 AUTH-GUEST'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -565,7 +565,7 @@ body.jc40-watch-mode [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'59 AUTH-SAFE'!important;
+  content:'60 AUTH-GUEST'!important;
   background:rgba(34,197,94,.94)!important;
 }
 
@@ -943,7 +943,7 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'59 AUTH-SAFE'!important;
+  content:'60 AUTH-GUEST'!important;
 }
 
 body.jc41-rave-focus .watch-stage{
@@ -1040,7 +1040,7 @@ body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
    ========================================================= */
 
 html::after{
-  content:'59 AUTH-SAFE'!important;
+  content:'60 AUTH-GUEST'!important;
 }
 
 body.jc41-rave-focus .watch-main,
@@ -1133,7 +1133,7 @@ body.jc41-rave-focus #jc45ActiveDock{
    ========================================================= */
 
 html::after{
-  content:'59 AUTH-SAFE'!important;
+  content:'60 AUTH-GUEST'!important;
 }
 
 body.jc41-rave-focus .watch-layout{
@@ -1239,7 +1239,7 @@ body.jc41-rave-focus #jc45ActiveDock::after{
    верхняя плашка источника скрывается, снизу — только компактные кнопки.
    ========================================================= */
 
-html::after{ content:'59 AUTH-SAFE'!important; }
+html::after{ content:'60 AUTH-GUEST'!important; }
 
 body.jc41-rave-focus .watch-layout{
   width:min(100vw,1540px)!important;
@@ -1406,7 +1406,7 @@ body.jc41-rave-focus .chat-card{
    плеер 16:9 без лишней чёрной шапки от растянутого контейнера.
    ========================================================= */
 
-html::after{ content:'59 AUTH-SAFE'!important; }
+html::after{ content:'60 AUTH-GUEST'!important; }
 
 html.jc41-rave-focus,
 body.jc41-rave-focus{
@@ -1682,7 +1682,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'59 AUTH-SAFE'!important;
+  content:'60 AUTH-GUEST'!important;
 }
 
 html.jc41-rave-focus,
@@ -1983,7 +1983,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'59 AUTH-SAFE'!important;
+  content:'60 AUTH-GUEST'!important;
 }
 
 body.jc41-rave-focus{
@@ -2350,7 +2350,7 @@ body.jc41-rave-focus #jc41RaveFloating button{
    ========================================================= */
 
 html::after{
-  content:'59 AUTH-SAFE'!important;
+  content:'60 AUTH-GUEST'!important;
 }
 
 body.jc41-rave-focus{
@@ -2591,7 +2591,7 @@ html:-webkit-full-screen body.jc41-rave-focus #jc51RaveTopbar{
 
 
 /* Stage 53 — remove top-right mic/chat/fullscreen icons and rebalance topbar */
-html::after{ content:'59 AUTH-SAFE'!important; }
+html::after{ content:'60 AUTH-GUEST'!important; }
 body.jc41-rave-focus #jc51RaveTopbar{
   grid-template-columns:minmax(260px,1fr) auto minmax(120px,1fr)!important;
 }
@@ -2615,7 +2615,7 @@ body.jc41-rave-focus #jc51RaveTopbar [data-jc51-full]{
 
 
 /* Stage 54 — Rave Polish: remove top black strip feel, darken chat, tighten proportions. */
-html::after{ content:'59 AUTH-SAFE'!important; }
+html::after{ content:'60 AUTH-GUEST'!important; }
 body.jc41-rave-focus{
   --jc54-chat:clamp(292px,17.2vw,330px)!important;
 }
@@ -2676,7 +2676,7 @@ body.jc41-rave-focus .chat-card .message-form{
 
 /* Stage 59 — Stable Sidebar Geometry
    Правило: не переносим DOM чата. Чат остаётся своим, но визуально pinned справа. */
-html::after{ content:'59 AUTH-SAFE'!important; }
+html::after{ content:'60 AUTH-GUEST'!important; }
 
 body.jc41-rave-focus{
   --jc58-chat:clamp(300px,17.8vw,350px)!important;
@@ -2837,4 +2837,18 @@ body:not(.jc41-rave-focus) .chat-card[data-jc59-chat]{
 html:not(.jc40-watch-mode),
 body:not(.jc40-watch-mode){
   overscroll-behavior:auto!important;
+}
+
+
+/* Stage 60 — hide stage badge outside actual watch/active mode; auth must look native. */
+html:not(.jc40-watch-mode):not(.jc41-rave-focus)::after{
+  display:none!important;
+  content:none!important;
+}
+body:not(.jc41-rave-focus) #jc51RaveTopbar,
+body:not(.jc41-rave-focus) #jc45ActiveDock,
+body:not(.jc41-rave-focus) #jc43ActiveDock,
+body:not(.jc41-rave-focus) #jc41RaveFloating{
+  display:none!important;
+  pointer-events:none!important;
 }
