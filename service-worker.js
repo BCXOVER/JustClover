@@ -1,4 +1,4 @@
-/* JustClover cache killer stage32-smart-youtube-vk-links-20260502-1 */
+/* JustClover cache killer stage33-reliable-youtube-vk-embed-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
