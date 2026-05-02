@@ -4951,8 +4951,8 @@ setTimeout(jc251Patch, 1000);
    JustClover Stage 28 CLEAN — player/cinema JS
    Version: stage28-clean-cinema-player-20260502-1
    ========================================================= */
-console.log("JustClover Stage 31 SYNC loaded:", "stage31-youtube-sync-lock-20260502-1");
-window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
+console.log("JustClover Stage 32 LINK loaded:", "stage32-smart-youtube-vk-links-20260502-1");
+window.JUSTCLOVER_BUILD = "stage32-smart-youtube-vk-links-20260502-1";
 
 try{
   if(localStorage.getItem('jc28LastBuild') !== window.JUSTCLOVER_BUILD){
@@ -4965,7 +4965,7 @@ try{
 
 
 (function(){
-  const BUILD = "stage31-youtube-sync-lock-20260502-1";
+  const BUILD = "stage32-smart-youtube-vk-links-20260502-1";
   let zoom = Number(localStorage.getItem('jc28CinemaZoomV4') || '0') || 0;
 
   function svg(name){
@@ -5415,10 +5415,10 @@ try{
 
 /* =========================================================
    JustClover Stage 30 — Rave-like clean sources JS
-   Version: stage31-youtube-sync-lock-20260502-1
+   Version: stage32-smart-youtube-vk-links-20260502-1
    ========================================================= */
-console.log("JustClover Stage 31 SYNC loaded:", "stage31-youtube-sync-lock-20260502-1");
-window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
+console.log("JustClover Stage 32 LINK loaded:", "stage32-smart-youtube-vk-links-20260502-1");
+window.JUSTCLOVER_BUILD = "stage32-smart-youtube-vk-links-20260502-1";
 
 (function(){
   function sourceLabel(type){
@@ -5621,7 +5621,7 @@ window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
 
 /* =========================================================
    JustClover Stage 30.1 — YouTube/VK source reload + sync bounce fix
-   Version: stage31-youtube-sync-lock-20260502-1
+   Version: stage32-smart-youtube-vk-links-20260502-1
 
    Причина бага:
    renderRoom() вызывается на КАЖДОЕ изменение rooms/{id}, включая playback.
@@ -5629,8 +5629,8 @@ window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
    Для YouTube это вызывало ytPlayer.loadVideoById(...) снова и снова,
    поэтому видео бесконечно ставилось на паузу/включалось.
    ========================================================= */
-console.log("JustClover Stage 31 SYNC loaded:", "stage31-youtube-sync-lock-20260502-1");
-window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
+console.log("JustClover Stage 32 LINK loaded:", "stage32-smart-youtube-vk-links-20260502-1");
+window.JUSTCLOVER_BUILD = "stage32-smart-youtube-vk-links-20260502-1";
 
 (function(){
   function sourceKey(s){
@@ -5773,10 +5773,10 @@ window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
 
 /* =========================================================
    JustClover Stage 30.2 — remove ad labels everywhere
-   Version: stage31-youtube-sync-lock-20260502-1
+   Version: stage32-smart-youtube-vk-links-20260502-1
    ========================================================= */
-console.log("JustClover Stage 31 SYNC loaded:", "stage31-youtube-sync-lock-20260502-1");
-window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
+console.log("JustClover Stage 32 LINK loaded:", "stage32-smart-youtube-vk-links-20260502-1");
+window.JUSTCLOVER_BUILD = "stage32-smart-youtube-vk-links-20260502-1";
 
 (function(){
   function labelFromType(type){
@@ -5877,10 +5877,10 @@ window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
 
 /* =========================================================
    JustClover Stage 30.3 — remove big Rave sources card JS
-   Version: stage31-youtube-sync-lock-20260502-1
+   Version: stage32-smart-youtube-vk-links-20260502-1
    ========================================================= */
-console.log("JustClover Stage 31 SYNC loaded:", "stage31-youtube-sync-lock-20260502-1");
-window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
+console.log("JustClover Stage 32 LINK loaded:", "stage32-smart-youtube-vk-links-20260502-1");
+window.JUSTCLOVER_BUILD = "stage32-smart-youtube-vk-links-20260502-1";
 
 (function(){
   function removeBigRaveCard(){
@@ -5903,7 +5903,7 @@ window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
 
 /* =========================================================
    JustClover Stage 31 — YouTube Sync Lock Clean Rewrite
-   Version: stage31-youtube-sync-lock-20260502-1
+   Version: stage32-smart-youtube-vk-links-20260502-1
 
    Исправляет бесконечный play/pause loop:
    - source загружается только если sourceKey реально изменился;
@@ -5914,11 +5914,11 @@ window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
    - applyPlayback не дёргает play/pause/seek, если состояние уже почти такое же;
    - YouTube poll больше не спамит play/pause каждую секунду.
    ========================================================= */
-console.log("JustClover Stage 31 SYNC loaded:", "stage31-youtube-sync-lock-20260502-1");
-window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
+console.log("JustClover Stage 32 LINK loaded:", "stage32-smart-youtube-vk-links-20260502-1");
+window.JUSTCLOVER_BUILD = "stage32-smart-youtube-vk-links-20260502-1";
 
 (function(){
-  const BUILD = "stage31-youtube-sync-lock-20260502-1";
+  const BUILD = "stage32-smart-youtube-vk-links-20260502-1";
   const CLIENT_KEY = "jcClientId";
   let jc31ClientId = "";
   try {
@@ -6399,4 +6399,375 @@ window.JUSTCLOVER_BUILD = "stage31-youtube-sync-lock-20260502-1";
     ensurePill();
     dbg("ready", window.jcSyncDebug());
   }, 600);
+})();
+
+
+/* =========================================================
+   JustClover Stage 32 — Smart YouTube/VK link parser
+   Version: stage32-smart-youtube-vk-links-20260502-1
+
+   Исправляет:
+   - YouTube share/live/shorts/embed/youtu.be/music links;
+   - YouTube attribution links;
+   - VK/vkvideo/m.vk.com links;
+   - VK links with z=video-123_456;
+   - автодетект источника при вставке ссылки.
+   ========================================================= */
+console.log("JustClover Stage 32 LINK loaded:", "stage32-smart-youtube-vk-links-20260502-1");
+window.JUSTCLOVER_BUILD = "stage32-smart-youtube-vk-links-20260502-1";
+
+(function(){
+  function cleanRaw(raw){
+    let v = String(raw || '').trim();
+    v = v.replace(/^<|>$/g, '').replace(/^["']|["']$/g, '').trim();
+    if(v && !/^https?:\/\//i.test(v) && /^(www\.|m\.|youtube\.com|youtu\.be|vk\.com|vkvideo\.ru|m\.vk\.com|drive\.google|disk\.yandex)/i.test(v)){
+      v = 'https://' + v;
+    }
+    return v;
+  }
+
+  function safeURL(raw){
+    try { return new URL(cleanRaw(raw)); }
+    catch(e) { return null; }
+  }
+
+  function decodeMaybe(v){
+    try { return decodeURIComponent(String(v || '')); }
+    catch(e) { return String(v || ''); }
+  }
+
+  function validYtId(id){
+    return /^[a-zA-Z0-9_-]{11}$/.test(String(id || ''));
+  }
+
+  function extractYouTubeId(raw){
+    const text = cleanRaw(raw);
+    if(validYtId(text)) return text;
+
+    const u = safeURL(text);
+    const candidates = [];
+
+    function add(v){
+      v = String(v || '').trim();
+      if(!v) return;
+      candidates.push(v);
+    }
+
+    if(u){
+      const host = u.hostname.replace(/^www\./,'').replace(/^m\./,'').replace(/^music\./,'').toLowerCase();
+      const parts = u.pathname.split('/').filter(Boolean);
+
+      add(u.searchParams.get('v'));
+      add(u.searchParams.get('vi'));
+
+      // youtu.be/VIDEOID
+      if(host === 'youtu.be' && parts[0]) add(parts[0]);
+
+      // youtube.com/shorts/VIDEOID, /embed/VIDEOID, /live/VIDEOID, /v/VIDEOID
+      ['shorts','embed','live','v'].forEach(key => {
+        const i = parts.indexOf(key);
+        if(i >= 0 && parts[i+1]) add(parts[i+1]);
+      });
+
+      // youtube attribution_link?u=/watch%3Fv%3DVIDEOID
+      ['u','url','q'].forEach(param => {
+        const nested = decodeMaybe(u.searchParams.get(param));
+        if(nested && nested !== 'null'){
+          const nestedId = extractYouTubeId(nested);
+          if(nestedId) add(nestedId);
+        }
+      });
+
+      // Иногда ID спрятан в pathname/search текстом
+      add(u.pathname);
+      add(u.search);
+      add(u.href);
+    }
+
+    add(text);
+    add(decodeMaybe(text));
+
+    for(const c of candidates){
+      const direct = String(c).match(/^[a-zA-Z0-9_-]{11}$/);
+      if(direct) return direct[0];
+
+      const m1 = String(c).match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+      if(m1) return m1[1];
+
+      const m2 = String(c).match(/\/(shorts|embed|live|v)\/([a-zA-Z0-9_-]{11})/);
+      if(m2) return m2[2];
+
+      const m3 = String(c).match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+      if(m3) return m3[1];
+
+      // Последний fallback: 11-символьный ID рядом с youtube контекстом.
+      const m4 = String(c).match(/(?:youtube|youtu|watch|shorts|embed|live).*?([a-zA-Z0-9_-]{11})/i);
+      if(m4) return m4[1];
+    }
+
+    return '';
+  }
+
+  function extractVkParts(raw){
+    const text = cleanRaw(raw);
+    const variants = [text, decodeMaybe(text)];
+
+    const u = safeURL(text);
+    if(u){
+      variants.push(u.href, u.pathname, u.search);
+      ['z','w','q','url'].forEach(param => {
+        const v = u.searchParams.get(param);
+        if(v) {
+          variants.push(v);
+          variants.push(decodeMaybe(v));
+        }
+      });
+      const oid = u.searchParams.get('oid');
+      const id = u.searchParams.get('id');
+      if(oid && id) return {oid, id, kind:'video'};
+    }
+
+    for(const v of variants){
+      const s = String(v || '');
+      let m = s.match(/(?:video|clip)(-?\d+)_(\d+)/i);
+      if(m) return {oid:m[1], id:m[2], kind:s.toLowerCase().includes('clip') ? 'clip' : 'video'};
+
+      m = s.match(/[?&]oid=(-?\d+).*?[?&]id=(\d+)/i) || s.match(/[?&]id=(\d+).*?[?&]oid=(-?\d+)/i);
+      if(m){
+        if(s.match(/[?&]id=(\d+).*?[?&]oid=(-?\d+)/i)) return {oid:m[2], id:m[1], kind:'video'};
+        return {oid:m[1], id:m[2], kind:'video'};
+      }
+    }
+
+    return null;
+  }
+
+  function makeVkEmbed(raw){
+    const parts = extractVkParts(raw);
+    if(!parts) return '';
+    return `https://vk.com/video_ext.php?oid=${parts.oid}&id=${parts.id}&hd=2`;
+  }
+
+  function detectSource(raw){
+    const v = cleanRaw(raw).toLowerCase();
+    if(!v) return '';
+    if(v.includes('youtu.be') || v.includes('youtube.com') || v.includes('music.youtube.com') || validYtId(v)) return 'youtube';
+    if(v.includes('vk.com') || v.includes('m.vk.com') || v.includes('vkvideo.ru') || /(?:video|clip)-?\d+_\d+/i.test(v)) return 'vk';
+    if(v.includes('drive.google.com')) return 'drive';
+    if(v.includes('disk.yandex') || v.includes('yadi.sk')) return 'yandex';
+    if(/\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(v)) return 'mp4';
+    return '';
+  }
+
+  // Override old parsers.
+  ytId = function(u){
+    return extractYouTubeId(u);
+  };
+
+  vkEmbed = function(u){
+    return makeVkEmbed(u) || '';
+  };
+
+  if(typeof jcStage8GuessSource === 'function'){
+    jcStage8GuessSource = function(url){
+      const t = detectSource(url);
+      if(t && typeof jcStage8SelectSource === 'function') return jcStage8SelectSource(t);
+    };
+  }
+
+  function sourceFromUrlAndType(rawUrl, selectedType, title){
+    const url = safeUrl(cleanRaw(rawUrl));
+    if(!url) return {error:'Вставь корректную ссылку.'};
+
+    const detected = detectSource(url);
+    const type = detected || selectedType || 'youtube';
+
+    if(type === 'youtube'){
+      const id = extractYouTubeId(url);
+      if(!id){
+        if(String(url).includes('list=')) return {error:'Это ссылка на плейлист. Вставь ссылку на конкретное видео YouTube.'};
+        return {error:'Не удалось распознать YouTube video ID. Попробуй ссылку вида https://youtu.be/VIDEO_ID или https://youtube.com/watch?v=VIDEO_ID'};
+      }
+      return {source:{type:'youtube', url, videoId:id, title:title || 'YouTube'}};
+    }
+
+    if(type === 'vk'){
+      const embedUrl = makeVkEmbed(url);
+      if(!embedUrl){
+        return {error:'Не удалось распознать VK Video ID. Нужна ссылка вида vk.com/video-123_456 или vkvideo.ru/video-123_456'};
+      }
+      return {source:{type:'vk', url, embedUrl, title:title || 'VK Video'}};
+    }
+
+    if(type === 'mp4'){
+      return {source:{type:'mp4', url, title:title || 'Direct MP4'}};
+    }
+
+    if(type === 'drive'){
+      return {source:{type:'drive', url, embedUrl:typeof jcStage8DrivePreview === 'function' ? jcStage8DrivePreview(url) : url, title:title || 'Google Drive'}};
+    }
+
+    if(type === 'yandex'){
+      return {source:{type:'yandex', url, title:title || 'Яндекс Диск'}};
+    }
+
+    return {source:{type:'anilibrix', url, embedUrl:url, title:title || 'Источник'}};
+  }
+
+  // Main form smart submit.
+  setSource = async function(){
+    if(!currentRoomId){
+      status(els.roomStatus, 'Сначала создай комнату.');
+      return;
+    }
+    if(currentRoom?.ownerUid && currentRoom.ownerUid !== currentUser.uid){
+      status(els.roomStatus, 'Источник может менять только хост.');
+      return;
+    }
+
+    const selected = els.sourceType?.value || 'youtube';
+    const title = els.sourceTitle?.value?.trim() || 'Источник';
+
+    if(selected === 'local'){
+      const f = els.localVideoFile.files?.[0];
+      if(!f){
+        status(els.roomStatus, 'Выбери local video файл.');
+        return;
+      }
+      loadLocal();
+      const source = {type:'local', title:f.name, filename:f.name, size:f.size};
+      await update(ref(db, `rooms/${currentRoomId}`), {
+        source,
+        playback:{time:0, playing:false, updatedAt:Date.now(), byUid:currentUser.uid},
+        updatedAt:Date.now()
+      });
+      return;
+    }
+
+    const raw = els.sourceUrl?.value?.trim() || '';
+    const result = sourceFromUrlAndType(raw, selected, title === 'Источник' ? '' : title);
+    if(result.error){
+      status(els.roomStatus, result.error);
+      status(els.sourceNote, result.error);
+      return;
+    }
+
+    const source = result.source;
+    if(els.sourceType && [...els.sourceType.options].some(o => o.value === source.type)){
+      els.sourceType.value = source.type;
+      els.sourceType.dispatchEvent(new Event('change'));
+    }
+
+    await update(ref(db, `rooms/${currentRoomId}`), {
+      source,
+      playback:{time:0, playing:false, updatedAt:Date.now(), byUid:currentUser.uid, sourceKey: source.type + '|' + (source.videoId || source.embedUrl || source.url || '')},
+      updatedAt:Date.now()
+    });
+
+    status(els.roomStatus, `Источник запущен: ${source.title || source.type}`);
+    section('watchSection');
+  };
+
+  if(typeof jcStage8SetSourceFromFields === 'function'){
+    jcStage8SetSourceFromFields = async function(){
+      if(!currentRoomId){
+        jcStage8Toast('Сначала создай комнату');
+        status(els.roomStatus, 'Сначала создай комнату.');
+        return;
+      }
+      if(currentRoom?.ownerUid && currentRoom.ownerUid !== currentUser.uid){
+        status(els.roomStatus, 'Источник может менять только хост.');
+        return;
+      }
+
+      const selected = jcStage8Selected === 'paste' ? '' : jcStage8Selected;
+      if(selected === 'local'){
+        els.sourceType.value = 'local';
+        els.localVideoFile?.click();
+        return;
+      }
+
+      const urlInput = document.querySelector('#jcCatalogUrl');
+      const titleInput = document.querySelector('#jcCatalogTitle');
+      const raw = urlInput?.value?.trim() || '';
+      const fallbackTitle = document.querySelector('.jc-source-card.active b')?.textContent || 'Источник';
+      const title = titleInput?.value?.trim() || fallbackTitle;
+
+      const result = sourceFromUrlAndType(raw, selected || detectSource(raw) || 'youtube', title);
+      if(result.error){
+        jcStage8Toast(result.error);
+        status(els.sourceNote, result.error);
+        return;
+      }
+
+      const source = result.source;
+      if(els.sourceType && [...els.sourceType.options].some(o => o.value === source.type)){
+        els.sourceType.value = source.type;
+        els.sourceType.dispatchEvent(new Event('change'));
+      }
+
+      await update(ref(db, `rooms/${currentRoomId}`), {
+        source,
+        playback:{time:0, playing:false, updatedAt:Date.now(), byUid:currentUser.uid, sourceKey: source.type + '|' + (source.videoId || source.embedUrl || source.url || '')},
+        updatedAt:Date.now()
+      });
+
+      jcStage8Toast('Источник запущен');
+      document.querySelector('.jc-catalog-layer')?.classList.remove('open');
+      section('watchSection');
+    };
+  }
+
+  function wireSmartInputs(){
+    const inputs = [els?.sourceUrl, document.querySelector('#jcCatalogUrl')].filter(Boolean);
+    inputs.forEach(input => {
+      if(input.dataset.jc32Smart === '1') return;
+      input.dataset.jc32Smart = '1';
+      input.addEventListener('input', () => {
+        const t = detectSource(input.value);
+        if(!t) return;
+        if(input.id === 'jcCatalogUrl' && typeof jcStage8SelectSource === 'function') jcStage8SelectSource(t);
+        if(input === els.sourceUrl && els.sourceType && [...els.sourceType.options].some(o => o.value === t)){
+          els.sourceType.value = t;
+          els.sourceType.dispatchEvent(new Event('change'));
+        }
+      });
+      input.addEventListener('paste', () => setTimeout(() => {
+        const t = detectSource(input.value);
+        if(input.id === 'jcCatalogUrl' && t && typeof jcStage8SelectSource === 'function') jcStage8SelectSource(t);
+      }, 40));
+    });
+  }
+
+  function ensurePill(){
+    if(document.getElementById('jc32LinkPill')) return;
+    const p = document.createElement('div');
+    p.id = 'jc32LinkPill';
+    p.textContent = '32 LINK';
+    document.body.appendChild(p);
+  }
+
+  window.jcLinkDebug = function(raw){
+    return {
+      raw,
+      clean: cleanRaw(raw),
+      detected: detectSource(raw),
+      youtubeId: extractYouTubeId(raw),
+      vkParts: extractVkParts(raw),
+      vkEmbed: makeVkEmbed(raw)
+    };
+  };
+
+  setInterval(() => {
+    document.body.classList.add('jc32-link-fix');
+    ensurePill();
+    wireSmartInputs();
+  }, 700);
+
+  setTimeout(() => {
+    document.body.classList.add('jc32-link-fix');
+    ensurePill();
+    wireSmartInputs();
+    console.log('[JC32 link] ready', window.jcLinkDebug('https://youtu.be/dQw4w9WgXcQ'));
+  }, 500);
 })();
