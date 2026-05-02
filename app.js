@@ -1,37 +1,42 @@
 /* =========================================================
-   JustClover Stage 61 — Direct Guest Auth
-   Version: stage61-direct-guest-auth-20260502-1
+   JustClover Stage 62 — Auth Reset Stable
+   Version: stage62-auth-reset-stable-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage61-direct-guest-auth-20260502-1";
+const JC40_BUILD = "stage62-auth-reset-stable-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 61 DIRECTGUEST loader:", JC40_BUILD);
+console.log("JustClover Stage 62 AUTHRESET loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 61: base app import failed", e);
+  console.error("JustClover Stage 62: base app import failed", e);
   throw e;
 }
+
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
 
 /* =========================================================
-   Stage 59 auth safety gate.
-   Auth/login page must stay exactly native: no active-view classes,
-   no floating docks, no fixed chat, no catalog hooks over the form.
+   Stage 62 auth reset.
+   Правило: страница входа полностью нативная. Никаких active-view,
+   dock, catalog hooks, автокликов, direct Firebase login и guest loops.
    ========================================================= */
 (function(){
+  const ACTIVE_KEYS = [
+    'jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode','jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode','jc50ActiveViewMode','jc49ActiveViewMode','jc48ActiveViewMode','jc47ActiveViewMode','jc46ActiveViewMode','jc45ActiveViewMode','jc44ActiveViewMode','jc43ActiveViewMode','jc41ActiveViewMode'
+  ];
   const CLEAN_CLASSES = [
     'jc41-rave-focus','jc40-watch-mode','jc40-catalog-open','jc40-force-new-catalog',
     'jc37-modal-lock','jc38-catalog-open','jc-catalog-open','jc35-scroll-guard'
   ];
+  let removedGuestParam = false;
 
   function visible(el){
     if(!el) return false;
@@ -42,7 +47,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
     return !r || (r.width > 2 && r.height > 2);
   }
 
-  window.__jc59IsAuthScreen = function(){
+  window.__jc62IsAuthScreen = function(){
     const app = document.getElementById('appView');
     if(!app || app.classList.contains('hidden')) return true;
     const auth = document.getElementById('authView') || document.getElementById('authSection') ||
@@ -50,8 +55,20 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
     return !!(auth && visible(auth));
   };
 
-  window.__jc59CleanAuthShell = function(){
-    if(!window.__jc59IsAuthScreen()) return false;
+  function removeAutoGuestParams(){
+    try{
+      const u = new URL(location.href);
+      let changed = false;
+      ['guest','autoGuest','asGuest'].forEach(k => { if(u.searchParams.has(k)){ u.searchParams.delete(k); changed = true; } });
+      if(changed){
+        history.replaceState({}, '', u.pathname + u.search + u.hash);
+        removedGuestParam = true;
+      }
+    }catch(_){}
+  }
+
+  window.jc62ResetAuth = function(){
+    ACTIVE_KEYS.forEach(k => { try{ localStorage.removeItem(k); }catch(_){} });
     for(const c of CLEAN_CLASSES){
       document.documentElement.classList.remove(c);
       document.body?.classList?.remove(c);
@@ -63,13 +80,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       document.body.style.width = '';
       document.body.style.overflow = '';
     }
-    const catalog = document.getElementById('jc40CatalogRoot');
-    if(catalog){
-      catalog.classList.remove('open');
-      catalog.setAttribute('aria-hidden','true');
-      catalog.style.display = 'none';
-      catalog.style.pointerEvents = 'none';
-    }
+    document.getElementById('jc40CatalogRoot')?.remove?.();
+    document.getElementById('jc51RaveTopbar')?.remove?.();
+    document.getElementById('jc45ActiveDock')?.remove?.();
+    document.getElementById('jc43ActiveDock')?.remove?.();
     const oldCatalog = document.querySelector('.jc-catalog-layer');
     if(oldCatalog){
       oldCatalog.classList.remove('open');
@@ -77,102 +91,33 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       oldCatalog.style.display = 'none';
       oldCatalog.style.pointerEvents = 'none';
     }
-    document.getElementById('jc51RaveTopbar')?.remove?.();
-    document.getElementById('jc45ActiveDock')?.remove?.();
-    document.getElementById('jc43ActiveDock')?.remove?.();
-    const target = document.getElementById('jc45ActiveFullscreenTarget') || document.getElementById('jc43ActiveFullscreenTarget');
-    target?.removeAttribute?.('id');
+    removeAutoGuestParams();
     return true;
   };
 
-  window.__jc59CleanAuthShell();
-  setTimeout(window.__jc59CleanAuthShell, 0);
-  setTimeout(window.__jc59CleanAuthShell, 250);
-  setInterval(window.__jc59CleanAuthShell, 180);
-})();
-
-/* =========================================================
-   Stage 60 auth/guest guard.
-   Keeps auth page native and supports direct guest-room links via ?guest=1.
-   This does not move chat DOM and does not enable active view before entering the app.
-   ========================================================= */
-(function(){
-  const params = new URLSearchParams(location.search);
-  const wantGuest = /^(1|true|yes|guest)$/i.test(String(params.get('guest') || params.get('autoGuest') || params.get('asGuest') || ''));
-  const wantedRoom = String(params.get('room') || '').trim();
-  let guestClicked = false;
-  let joinClicked = false;
-
-  function isAuthScreen(){
-    return !!(window.__jc59IsAuthScreen ? window.__jc59IsAuthScreen() : (document.getElementById('appView')?.classList.contains('hidden')));
-  }
-
-  function cleanAuthOnly(){
-    if(!isAuthScreen()) return false;
-    window.__jc59CleanAuthShell?.();
-    document.documentElement.classList.remove('jc41-rave-focus','jc40-watch-mode','jc40-catalog-open','jc40-force-new-catalog');
-    document.body?.classList?.remove('jc41-rave-focus','jc40-watch-mode','jc40-catalog-open','jc40-force-new-catalog');
-    return true;
-  }
-
-  function clickGuestOnce(){
-    if(!wantGuest || guestClicked || !isAuthScreen()) return false;
-    const tab = document.getElementById('guestTab');
-    const submit = document.getElementById('guestSubmit');
-    if(!tab || !submit) return false;
-    tab.click();
-    setTimeout(()=>{
-      const b = document.getElementById('guestSubmit');
-      if(!b || b.classList.contains('hidden')) return;
-      guestClicked = true;
-      b.click();
-    }, 120);
-    return true;
-  }
-
-  function joinWantedRoomOnce(){
-    if(joinClicked || !wantedRoom || isAuthScreen()) return false;
-    const app = document.getElementById('appView');
-    if(!app || app.classList.contains('hidden')) return false;
-    const watch = document.getElementById('watchSection');
-    if(watch?.classList.contains('active')) { joinClicked = true; return true; }
-    const input = document.getElementById('joinRoomInput');
-    const btn = document.getElementById('joinRoomBtn');
-    if(!input || !btn) return false;
-    input.value = wantedRoom;
-    joinClicked = true;
-    btn.click();
-    return true;
-  }
+  window.jc62AuthDebug = function(){
+    return {
+      build: window.JUSTCLOVER_BUILD,
+      auth: window.__jc62IsAuthScreen(),
+      removedGuestParam,
+      appHidden: document.getElementById('appView')?.classList.contains('hidden'),
+      activeClass: document.body?.classList.contains('jc41-rave-focus'),
+      guestParam: new URLSearchParams(location.search).get('guest'),
+      activeStorage: ACTIVE_KEYS.filter(k => { try{return localStorage.getItem(k)==='1'}catch(_){return false} })
+    };
+  };
 
   function tick(){
-    cleanAuthOnly();
-    clickGuestOnce();
-    joinWantedRoomOnce();
+    if(!window.__jc62IsAuthScreen()) return;
+    window.jc62ResetAuth();
   }
 
   tick();
-  setTimeout(tick, 100);
-  setTimeout(tick, 350);
-  setTimeout(tick, 800);
-  const timer = setInterval(tick, 450);
+  setTimeout(tick, 0);
+  setTimeout(tick, 250);
+  const timer = setInterval(tick, 400);
   setTimeout(()=>clearInterval(timer), 12000);
-
-  window.jc60AuthDebug = function(){
-    return {
-      build: window.JUSTCLOVER_BUILD,
-      auth: isAuthScreen(),
-      wantGuest,
-      room: wantedRoom,
-      guestClicked,
-      joinClicked,
-      appHidden: document.getElementById('appView')?.classList.contains('hidden'),
-      guestSubmitHidden: document.getElementById('guestSubmit')?.classList.contains('hidden'),
-      activeViewClass: document.body?.classList.contains('jc41-rave-focus')
-    };
-  };
 })();
-
 
 (function(){
   const BUILD = JC40_BUILD;
@@ -198,7 +143,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   let nativeFocus = HTMLElement.prototype.focus;
   let nativeScrollIntoView = Element.prototype.scrollIntoView;
 
-  if(!window.__jc59IsAuthScreen?.()) document.body.classList.add('jc40-force-new-catalog');
+  if(!window.__jc62IsAuthScreen?.()) document.body.classList.add('jc40-force-new-catalog');
 
   function $(id){ return document.getElementById(id); }
   function oldLayer(){ return document.querySelector('.jc-catalog-layer'); }
@@ -386,7 +331,6 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   }
 
   function openCatalog(preselect){
-    if(window.__jc59IsAuthScreen?.()) return;
     ensureCatalog();
     hideOldCatalog();
     selectedType = preselect || selectedType || 'youtube';
@@ -512,7 +456,6 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   }
 
   function shouldOpenFromButton(btn){
-    if(window.__jc59IsAuthScreen?.()) return false;
     if(!btn || isOwnCatalog(btn)) return false;
     const text = (btn.textContent || btn.getAttribute('aria-label') || btn.title || '').trim().toLowerCase();
     if(!text) return false;
@@ -632,11 +575,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   }
 
   function tick(){
-    if(window.__jc59CleanAuthShell?.()) return;
     ensureCatalog();
     watchOldCatalog();
     updateWatchMode();
-    if(!window.__jc59IsAuthScreen?.()) document.body.classList.add('jc40-force-new-catalog');
+    if(!window.__jc62IsAuthScreen?.()) document.body.classList.add('jc40-force-new-catalog');
     if(open){
       hideOldCatalog();
     }else if(Date.now() < playerClickUntil){
@@ -683,15 +625,15 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 61 — Direct Guest Auth
-   Version: stage61-direct-guest-auth-20260502-1
+   JustClover Stage 62 — Auth Reset Stable
+   Version: stage62-auth-reset-stable-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage61-direct-guest-auth-20260502-1";
-  const STORE_KEY = "jc58ActiveViewMode";
+  const BUILD = "stage62-auth-reset-stable-20260502-1";
+  const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
-  try { desired = localStorage.getItem(STORE_KEY) === "1"; } catch(_) {}
+  try { desired = !window.__jc62IsAuthScreen?.() && localStorage.getItem(STORE_KEY) === "1"; } catch(_) {}
 
   function isWatchMode(){
     const app = document.getElementById('appView');
@@ -705,6 +647,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   }
 
   function openCatalog(){
+    if(window.__jc62IsAuthScreen?.()) return;
     const fn = window.jc40OpenCatalog || window.jc39OpenCatalog || window.jcStage8OpenCatalog;
     if(typeof fn === 'function') fn('youtube');
   }
@@ -997,7 +940,6 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   }
 
   function apply(){
-    if(window.__jc59CleanAuthShell?.()) return;
     const floating = ensureFloating();
     ensureToggle();
     syncFullscreenButtons();
@@ -1032,7 +974,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   }
 
   function setFocus(on){
-    if(on && window.__jc59IsAuthScreen?.()) { desired = false; return; }
+    if(on && window.__jc62IsAuthScreen?.()) return;
     desired = !!on;
     try { localStorage.setItem(STORE_KEY, desired ? '1' : '0'); } catch(_) {}
     apply();
@@ -1203,188 +1145,7 @@ try{
 }catch(_){ }
 
 
-// Stage 58 — stable sidebar geometry: no chat DOM moves, no clones.
-(function(){
-  const BUILD = "stage61-direct-guest-auth-20260502-1";
-
-  function hideCinemaButtons(root=document){
-    const nodes = Array.from(root.querySelectorAll('button,a,[role="button"],.chip,.pill,.segmented button'));
-    for(const el of nodes){
-      const hay = String((el.textContent||'') + ' ' + (el.getAttribute('aria-label')||'') + ' ' + (el.getAttribute('title')||'')).replace(/\s+/g,' ').trim().toLowerCase();
-      if(/(^|\s)кино($|\s)/i.test(hay) || /(^|\s)(cinema|movie)($|\s)/i.test(hay)){
-        el.setAttribute('data-jc58-hidden-cinema','1');
-        el.style.setProperty('display','none','important');
-      }
-    }
-  }
-
-  function applyStableSidebarMarks(){
-    const chat = document.querySelector('.watch-sidebar .chat-card') || document.querySelector('.chat-card');
-    const sidebar = document.querySelector('.watch-sidebar');
-    if(chat) chat.setAttribute('data-jc58-chat','1');
-    if(sidebar) sidebar.setAttribute('data-jc58-sidebar','1');
-    return !!(chat && sidebar);
-  }
-
-  function tick(){
-    if(window.__jc59IsAuthScreen?.()) return;
-    try { hideCinemaButtons(document); } catch(_){ }
-    try { applyStableSidebarMarks(); } catch(_){ }
-  }
-
-  tick();
-  setInterval(tick, 700);
-  const mo = new MutationObserver(tick);
-  mo.observe(document.documentElement || document.body, {subtree:true, childList:true, attributes:true, characterData:true});
-
-  window.jc58HideCinema = function(){ hideCinemaButtons(document); return document.querySelectorAll('[data-jc58-hidden-cinema]').length; };
-  window.jc58ActiveViewDebug = function(){
-    const chat = document.querySelector('[data-jc58-chat], .watch-sidebar .chat-card, .chat-card');
-    const sidebar = document.querySelector('[data-jc58-sidebar], .watch-sidebar');
-    const cr = chat?.getBoundingClientRect?.();
-    const sr = sidebar?.getBoundingClientRect?.();
-    return {
-      build: BUILD,
-      justCloverBuild: window.JUSTCLOVER_BUILD,
-      active: document.body.classList.contains('jc41-rave-focus'),
-      chatRect: cr ? {top:cr.top, left:cr.left, width:cr.width, height:cr.height} : null,
-      sidebarRect: sr ? {top:sr.top, left:sr.left, width:sr.width, height:sr.height} : null,
-      hiddenCinema: document.querySelectorAll('[data-jc58-hidden-cinema]').length,
-      chatDomMoved: false
-    };
-  };
-  window.jc58ToggleFullscreen = window.jc54ToggleFullscreen || window.jc53ToggleFullscreen || window.jc52ToggleFullscreen || window.jc51ToggleFullscreen || window.jc42ToggleFullscreen;
-})();
-
-
-// Stage 60 public aliases.
+// Stage 62 public aliases.
 try{
-  window.jc60ActiveViewDebug = window.jc58ActiveViewDebug || window.jc54ActiveViewDebug || function(){ return { build: window.JUSTCLOVER_BUILD }; };
-  window.jc60HideCinema = window.jc58HideCinema || window.jc55HideCinema || function(){ return false; };
+  window.jc62ActiveViewDebug = window.jc54ActiveViewDebug || function(){ return { build: window.JUSTCLOVER_BUILD }; };
 }catch(_){}
-
-
-
-/* =========================================================
-   Stage 61 direct guest auth.
-   Fix: Stage60 set "guestClicked" too early; if base handlers were not bound yet, nothing happened.
-   This block signs in anonymously through Firebase directly, then lets the base app's
-   onAuthStateChanged render the normal app. No DOM stealing, no active-view before auth.
-   ========================================================= */
-(function(){
-  const params = new URLSearchParams(location.search);
-  const wantGuest = /^(1|true|yes|guest)$/i.test(String(params.get('guest') || params.get('autoGuest') || params.get('asGuest') || ''));
-  const wantedRoom = String(params.get('room') || '').trim();
-  let authStarted = false;
-  let authDone = false;
-  let authError = '';
-  let joinTries = 0;
-
-  function isAuthScreen(){
-    return !!(window.__jc59IsAuthScreen ? window.__jc59IsAuthScreen() : (document.getElementById('appView')?.classList.contains('hidden')));
-  }
-
-  function setStatus(text){
-    const s = document.getElementById('authStatus');
-    if(s && text) s.textContent = text;
-  }
-
-  async function directGuestSignIn(){
-    if(!wantGuest || authStarted || !isAuthScreen()) return false;
-    authStarted = true;
-    setStatus('Входим гостем...');
-    try{
-      const [{ firebaseConfig }, appMod, authMod] = await Promise.all([
-        import('./firebase-config.js'),
-        import('https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js'),
-        import('https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js')
-      ]);
-      const app = appMod.getApps().length ? appMod.getApp() : appMod.initializeApp(firebaseConfig);
-      const auth = authMod.getAuth(app);
-      if(!auth.currentUser){
-        await authMod.signInAnonymously(auth);
-      }
-      authDone = true;
-      setStatus('Гость вошёл. Открываю комнату...');
-      return true;
-    }catch(e){
-      authError = String(e?.message || e || 'unknown auth error');
-      authStarted = false; // allow retry
-      setStatus('Не удалось войти гостем: ' + authError);
-      console.error('[JC61] direct guest auth failed', e);
-      return false;
-    }
-  }
-
-  function clickLikeHuman(el){
-    if(!el) return false;
-    try{
-      el.dispatchEvent(new PointerEvent('pointerdown', {bubbles:true, cancelable:true, pointerId:1, isPrimary:true}));
-      el.dispatchEvent(new MouseEvent('mousedown', {bubbles:true, cancelable:true}));
-      el.dispatchEvent(new PointerEvent('pointerup', {bubbles:true, cancelable:true, pointerId:1, isPrimary:true}));
-      el.dispatchEvent(new MouseEvent('mouseup', {bubbles:true, cancelable:true}));
-      el.click();
-      return true;
-    }catch(_){
-      try{ el.click(); return true; }catch(__){ return false; }
-    }
-  }
-
-  function showGuestTab(){
-    const tab = document.getElementById('guestTab');
-    const submit = document.getElementById('guestSubmit');
-    if(tab && submit && submit.classList.contains('hidden')) clickLikeHuman(tab);
-  }
-
-  function joinWantedRoom(){
-    if(!wantedRoom || isAuthScreen()) return false;
-    const app = document.getElementById('appView');
-    if(!app || app.classList.contains('hidden')) return false;
-
-    const watch = document.getElementById('watchSection');
-    const currentRoomVisible = watch?.classList.contains('active') && document.getElementById('chatMessages');
-    if(currentRoomVisible) return true;
-
-    const input = document.getElementById('joinRoomInput');
-    const btn = document.getElementById('joinRoomBtn');
-    if(!input || !btn) return false;
-
-    input.value = wantedRoom;
-    input.dispatchEvent(new Event('input', {bubbles:true}));
-    joinTries++;
-    clickLikeHuman(btn);
-    return true;
-  }
-
-  function tick(){
-    try{ window.__jc59CleanAuthShell?.(); }catch(_){}
-    if(wantGuest && isAuthScreen()){
-      showGuestTab();
-      directGuestSignIn();
-    }
-    if(wantedRoom && !isAuthScreen()){
-      joinWantedRoom();
-    }
-  }
-
-  tick();
-  const timer = setInterval(tick, 500);
-  setTimeout(()=>clearInterval(timer), 30000);
-
-  window.jc61AuthDebug = function(){
-    return {
-      build: window.JUSTCLOVER_BUILD,
-      wantGuest,
-      room: wantedRoom,
-      auth: isAuthScreen(),
-      authStarted,
-      authDone,
-      authError,
-      joinTries,
-      appHidden: document.getElementById('appView')?.classList.contains('hidden'),
-      guestSubmitHidden: document.getElementById('guestSubmit')?.classList.contains('hidden'),
-      activeSection: document.querySelector('.section.active')?.id || ''
-    };
-  };
-})();
-

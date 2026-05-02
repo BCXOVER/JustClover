@@ -1,12 +1,12 @@
 @import url("https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@f658b5bfad3fade4eb7f9c4d82865452cdc19f00/style.css");
 
 /* =========================================================
-   JustClover Stage 45 — Active View Clean Player Dock CSS
-   Version: stage52-rave-clean-shell-20260502-1
+   JustClover Stage 62 — Auth Reset Stable CSS
+   Version: stage62-auth-reset-stable-20260502-1
    ========================================================= */
 
 html::after{
-  content:'61 DIRECT-GUEST'!important;
+  content:'62 AUTH-RESET'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -565,7 +565,7 @@ body.jc40-watch-mode [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'61 DIRECT-GUEST'!important;
+  content:'62 AUTH-RESET'!important;
   background:rgba(34,197,94,.94)!important;
 }
 
@@ -943,7 +943,7 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'61 DIRECT-GUEST'!important;
+  content:'62 AUTH-RESET'!important;
 }
 
 body.jc41-rave-focus .watch-stage{
@@ -1040,7 +1040,7 @@ body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
    ========================================================= */
 
 html::after{
-  content:'61 DIRECT-GUEST'!important;
+  content:'62 AUTH-RESET'!important;
 }
 
 body.jc41-rave-focus .watch-main,
@@ -1133,7 +1133,7 @@ body.jc41-rave-focus #jc45ActiveDock{
    ========================================================= */
 
 html::after{
-  content:'61 DIRECT-GUEST'!important;
+  content:'62 AUTH-RESET'!important;
 }
 
 body.jc41-rave-focus .watch-layout{
@@ -1239,7 +1239,7 @@ body.jc41-rave-focus #jc45ActiveDock::after{
    верхняя плашка источника скрывается, снизу — только компактные кнопки.
    ========================================================= */
 
-html::after{ content:'61 DIRECT-GUEST'!important; }
+html::after{ content:'62 AUTH-RESET'!important; }
 
 body.jc41-rave-focus .watch-layout{
   width:min(100vw,1540px)!important;
@@ -1406,7 +1406,7 @@ body.jc41-rave-focus .chat-card{
    плеер 16:9 без лишней чёрной шапки от растянутого контейнера.
    ========================================================= */
 
-html::after{ content:'61 DIRECT-GUEST'!important; }
+html::after{ content:'62 AUTH-RESET'!important; }
 
 html.jc41-rave-focus,
 body.jc41-rave-focus{
@@ -1682,7 +1682,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'61 DIRECT-GUEST'!important;
+  content:'62 AUTH-RESET'!important;
 }
 
 html.jc41-rave-focus,
@@ -1983,7 +1983,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'61 DIRECT-GUEST'!important;
+  content:'62 AUTH-RESET'!important;
 }
 
 body.jc41-rave-focus{
@@ -2350,7 +2350,7 @@ body.jc41-rave-focus #jc41RaveFloating button{
    ========================================================= */
 
 html::after{
-  content:'61 DIRECT-GUEST'!important;
+  content:'62 AUTH-RESET'!important;
 }
 
 body.jc41-rave-focus{
@@ -2591,7 +2591,7 @@ html:-webkit-full-screen body.jc41-rave-focus #jc51RaveTopbar{
 
 
 /* Stage 53 — remove top-right mic/chat/fullscreen icons and rebalance topbar */
-html::after{ content:'61 DIRECT-GUEST'!important; }
+html::after{ content:'62 AUTH-RESET'!important; }
 body.jc41-rave-focus #jc51RaveTopbar{
   grid-template-columns:minmax(260px,1fr) auto minmax(120px,1fr)!important;
 }
@@ -2615,7 +2615,7 @@ body.jc41-rave-focus #jc51RaveTopbar [data-jc51-full]{
 
 
 /* Stage 54 — Rave Polish: remove top black strip feel, darken chat, tighten proportions. */
-html::after{ content:'61 DIRECT-GUEST'!important; }
+html::after{ content:'62 AUTH-RESET'!important; }
 body.jc41-rave-focus{
   --jc54-chat:clamp(292px,17.2vw,330px)!important;
 }
@@ -2674,185 +2674,18 @@ body.jc41-rave-focus .chat-card .message-form{
 }
 
 
-/* Stage 59 — Stable Sidebar Geometry
-   Правило: не переносим DOM чата. Чат остаётся своим, но визуально pinned справа. */
-html::after{ content:'61 DIRECT-GUEST'!important; }
-
-body.jc41-rave-focus{
-  --jc58-chat:clamp(300px,17.8vw,350px)!important;
-}
-
-body.jc41-rave-focus .watch-layout{
-  position:fixed!important;
-  left:0!important;
-  right:0!important;
-  top:var(--jc51-top)!important;
-  bottom:0!important;
-  width:100vw!important;
-  height:calc(100vh - var(--jc51-top))!important;
-  max-height:calc(100vh - var(--jc51-top))!important;
-  display:grid!important;
-  grid-template-columns:minmax(0,calc(100vw - var(--jc58-chat))) var(--jc58-chat)!important;
-  gap:0!important;
-  align-items:stretch!important;
-  overflow:hidden!important;
-  background:#050507!important;
-}
-
-body.jc41-rave-focus .watch-main,
-body.jc41-rave-focus .watch-stage{
-  grid-column:1!important;
-  width:calc(100vw - var(--jc58-chat))!important;
-  max-width:calc(100vw - var(--jc58-chat))!important;
-  height:calc(100vh - var(--jc51-top))!important;
-  max-height:calc(100vh - var(--jc51-top))!important;
-  min-width:0!important;
-  margin:0!important;
-  padding:0!important;
-  overflow:hidden!important;
-}
-
-/* Правая колонка теперь просто резервирует ширину. Никаких переносов/клонов. */
-body.jc41-rave-focus .watch-sidebar{
-  grid-column:2!important;
-  position:relative!important;
-  width:var(--jc58-chat)!important;
-  max-width:var(--jc58-chat)!important;
-  height:calc(100vh - var(--jc51-top))!important;
-  max-height:calc(100vh - var(--jc51-top))!important;
-  min-height:0!important;
-  margin:0!important;
-  padding:0!important;
-  border-left:1px solid rgba(255,255,255,.10)!important;
-  overflow:hidden!important;
-  background:linear-gradient(180deg,rgba(32,24,31,.98),rgba(12,12,18,.99))!important;
-}
-
-/* Сам чат визуально pinned к верхнему краю правой зоны.
-   DOM не трогаем, поэтому отправка/скролл/рендер сообщений остаются родными. */
-body.jc41-rave-focus .watch-sidebar .chat-card,
-body.jc41-rave-focus .chat-card[data-jc58-chat],
-body.jc41-rave-focus .chat-card{
-  position:fixed!important;
-  top:var(--jc51-top)!important;
-  right:0!important;
-  bottom:0!important;
-  left:auto!important;
-  width:var(--jc58-chat)!important;
-  max-width:var(--jc58-chat)!important;
-  height:calc(100vh - var(--jc51-top))!important;
-  max-height:calc(100vh - var(--jc51-top))!important;
-  min-height:0!important;
-  margin:0!important;
-  padding:8px 10px 8px!important;
-  border:0!important;
-  border-left:1px solid rgba(255,255,255,.10)!important;
-  border-radius:0!important;
-  box-shadow:none!important;
-  background:linear-gradient(180deg,rgba(17,15,23,.88),rgba(10,10,16,.94))!important;
-  z-index:2147481200!important;
-  display:flex!important;
-  flex-direction:column!important;
-  overflow:hidden!important;
-}
-
-body.jc41-rave-focus .chat-card .side-card-head{
-  flex:0 0 auto!important;
-  margin:0 0 5px!important;
-  padding:0!important;
-}
-body.jc41-rave-focus .chat-card .side-card-head h3{
-  margin:0!important;
-  font-size:17px!important;
-}
-body.jc41-rave-focus .chat-card #chatMessages,
-body.jc41-rave-focus .chat-card .messages{
-  flex:1 1 auto!important;
-  min-height:0!important;
-  max-height:none!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  overscroll-behavior:contain!important;
-}
-body.jc41-rave-focus .chat-card #chatForm,
-body.jc41-rave-focus .chat-card .message-form{
-  flex:0 0 auto!important;
-  margin:6px 0 0!important;
-}
-
-/* Служебное: прячем Кино без изменения DOM/порядка элементов. */
-body.jc41-rave-focus [data-jc58-hidden-cinema='1']{
+/* Stage 62: auth screen must stay untouched and clickable. */
+body:not(.jc40-watch-mode):not(.jc41-rave-focus) #jc41RaveFloating,
+body:not(.jc40-watch-mode):not(.jc41-rave-focus) #jc45ActiveDock,
+body:not(.jc40-watch-mode):not(.jc41-rave-focus) #jc51RaveTopbar,
+body:not(.jc40-watch-mode):not(.jc41-rave-focus) #jc40CatalogRoot{
   display:none!important;
-}
-
-@media(max-width:980px){
-  body.jc41-rave-focus{ --jc58-chat:100vw!important; }
-  body.jc41-rave-focus .watch-layout{
-    grid-template-columns:1fr!important;
-    grid-template-rows:minmax(0,1fr) 34vh!important;
-  }
-  body.jc41-rave-focus .watch-main,
-  body.jc41-rave-focus .watch-stage{
-    width:100vw!important;
-    max-width:100vw!important;
-  }
-  body.jc41-rave-focus .watch-sidebar .chat-card,
-  body.jc41-rave-focus .chat-card[data-jc58-chat],
-  body.jc41-rave-focus .chat-card{
-    top:auto!important;
-    bottom:0!important;
-    width:100vw!important;
-    max-width:100vw!important;
-    height:34vh!important;
-    max-height:34vh!important;
-  }
-}
-
-
-/* =========================================================
-   Stage 59 — auth safety CSS fallback.
-   When not in active viewing mode, stage UI must not cover login/register.
-   ========================================================= */
-body:not(.jc41-rave-focus) #jc51RaveTopbar,
-body:not(.jc41-rave-focus) #jc45ActiveDock,
-body:not(.jc41-rave-focus) #jc43ActiveDock,
-body:not(.jc41-rave-focus) #jc41RaveFloating{
-  display:none!important;
-  visibility:hidden!important;
   pointer-events:none!important;
+}
+body:not(.jc40-watch-mode):not(.jc41-rave-focus) .jc-catalog-layer,
+body:not(.jc40-watch-mode):not(.jc41-rave-focus) .jc-catalog-layer.open{
+  display:none!important;
+  pointer-events:none!important;
+  visibility:hidden!important;
   opacity:0!important;
 }
-
-body:not(.jc41-rave-focus) .chat-card[data-jc58-chat],
-body:not(.jc41-rave-focus) .chat-card[data-jc59-chat]{
-  position:static!important;
-  width:auto!important;
-  max-width:none!important;
-  height:auto!important;
-  max-height:none!important;
-  inset:auto!important;
-  z-index:auto!important;
-}
-
-html:not(.jc40-watch-mode),
-body:not(.jc40-watch-mode){
-  overscroll-behavior:auto!important;
-}
-
-
-/* Stage 60 — hide stage badge outside actual watch/active mode; auth must look native. */
-html:not(.jc40-watch-mode):not(.jc41-rave-focus)::after{
-  display:none!important;
-  content:none!important;
-}
-body:not(.jc41-rave-focus) #jc51RaveTopbar,
-body:not(.jc41-rave-focus) #jc45ActiveDock,
-body:not(.jc41-rave-focus) #jc43ActiveDock,
-body:not(.jc41-rave-focus) #jc41RaveFloating{
-  display:none!important;
-  pointer-events:none!important;
-}
-
-
-html::after{content:'61 DIRECT-GUEST'!important;}
-body #authStatus{min-height:18px!important;}

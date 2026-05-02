@@ -1,4 +1,4 @@
-/* JustClover cache killer stage61-direct-guest-auth-20260502-1 */
+/* JustClover cache killer stage62-auth-reset-stable-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
