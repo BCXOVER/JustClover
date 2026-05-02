@@ -1,4 +1,4 @@
-/* JustClover cache killer stage39-clean-catalog-menu-20260502-1 */
+/* JustClover cache killer stage40-no-page-scroll-watch-mode-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));

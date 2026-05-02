@@ -6,20 +6,20 @@
   <title>JustClover</title>
   <meta name="theme-color" content="#080912" />
   <script>
-    window.JUSTCLOVER_BUILD = "stage39-clean-catalog-menu-20260502-1";
+    window.JUSTCLOVER_BUILD = "stage40-no-page-scroll-watch-mode-20260502-1";
   </script>
   <style>
     html,body{margin:0;min-height:100%;background:#06070d;color:#f5f7ff;font-family:Inter,Segoe UI,Arial,sans-serif}
-    .jc39-loader{min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at top,#1a1230,transparent 42%),#06070d}
-    .jc39-loader-card{max-width:560px;padding:26px 28px;border-radius:24px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);box-shadow:0 28px 80px rgba(0,0,0,.42)}
-    .jc39-loader-card b{font-size:24px}.jc39-loader-card p{color:#a5a8c7;line-height:1.55}
+    .jc40-loader{min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at top,#1a1230,transparent 42%),#06070d}
+    .jc40-loader-card{max-width:560px;padding:26px 28px;border-radius:24px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);box-shadow:0 28px 80px rgba(0,0,0,.42)}
+    .jc40-loader-card b{font-size:24px}.jc40-loader-card p{color:#a5a8c7;line-height:1.55}
   </style>
 </head>
 <body>
-  <div class="jc39-loader">
-    <div class="jc39-loader-card">
-      <b>JustClover Stage 39</b>
-      <p>Загружаю чистый каталог и защиту от scroll/focus…</p>
+  <div class="jc40-loader">
+    <div class="jc40-loader-card">
+      <b>JustClover Stage 40</b>
+      <p>Загружаю режим просмотра без прокрутки страницы…</p>
     </div>
   </div>
 
@@ -27,7 +27,7 @@
     (async function(){
       const BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
       const BASE_VERSION = "stage37-catalog-hard-scroll-fix-20260502-1";
-      const BUILD = "stage39-clean-catalog-menu-20260502-1";
+      const BUILD = "stage40-no-page-scroll-watch-mode-20260502-1";
       const BASE_INDEX = "https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@" + BASE_COMMIT + "/index.html";
 
       try {
@@ -38,19 +38,19 @@
           caches.keys().then(keys => keys.forEach(k => caches.delete(k))).catch(() => {});
         }
 
-        const res = await fetch(BASE_INDEX + "?jc39=" + Date.now(), { cache: "no-store" });
+        const res = await fetch(BASE_INDEX + "?jc40=" + Date.now(), { cache: "no-store" });
         if (!res.ok) throw new Error("Не удалось загрузить базовый index: " + res.status);
         let html = await res.text();
         html = html.replaceAll(BASE_VERSION, BUILD);
-        html = html.replace(/37 HARD/g, "39 MENU");
-        html = html.replace(/Stage 37 HARD/g, "Stage 39 MENU");
+        html = html.replace(/37 HARD/g, "40 NOSCROLL");
+        html = html.replace(/Stage 37 HARD/g, "Stage 40 NOSCROLL");
 
         document.open();
         document.write(html);
         document.close();
       } catch (e) {
-        console.error("JustClover Stage 39 boot failed", e);
-        document.body.innerHTML = '<div class="jc39-loader"><div class="jc39-loader-card"><b>Stage 39 не загрузился</b><p>' + String(e.message || e) + '</p><p>Проверь интернет/CDN или загрузи предыдущий архив.</p></div></div>';
+        console.error("JustClover Stage 40 boot failed", e);
+        document.body.innerHTML = '<div class="jc40-loader"><div class="jc40-loader-card"><b>Stage 40 не загрузился</b><p>' + String(e.message || e) + '</p><p>Проверь интернет/CDN или загрузи предыдущий архив.</p></div></div>';
       }
     })();
   </script>

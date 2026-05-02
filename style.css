@@ -1,12 +1,12 @@
 @import url("https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@f658b5bfad3fade4eb7f9c4d82865452cdc19f00/style.css");
 
 /* =========================================================
-   JustClover Stage 39 — Clean Catalog Menu CSS
-   Version: stage39-clean-catalog-menu-20260502-1
+   JustClover Stage 40 — No Page Scroll Watch Mode CSS
+   Version: stage40-no-page-scroll-watch-mode-20260502-1
    ========================================================= */
 
 html::after{
-  content:'39 MENU'!important;
+  content:'40 NOSCROLL'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -22,19 +22,19 @@ html::after{
 }
 
 #jc31SyncPill,#jc32LinkPill,#jc33EmbedPill,#jc34RunPill,
-#jc35ScrollPill,#jc36CatalogPill,#jc37HardPill,#jc38CleanPill,#jc39MenuPill{
+#jc35ScrollPill,#jc36CatalogPill,#jc37HardPill,#jc38CleanPill,#jc40MenuPill{
   display:none!important;
 }
 
-html.jc39-catalog-open,
-body.jc39-catalog-open{
+html.jc40-catalog-open,
+body.jc40-catalog-open{
   overflow:hidden!important;
   overscroll-behavior:none!important;
 }
 
-body.jc39-force-new-catalog,
-body.jc39-force-new-catalog.jc37-modal-lock,
-body.jc39-force-new-catalog.jc38-catalog-open{
+body.jc40-force-new-catalog,
+body.jc40-force-new-catalog.jc37-modal-lock,
+body.jc40-force-new-catalog.jc38-catalog-open{
   position:static!important;
   top:auto!important;
   left:auto!important;
@@ -43,17 +43,17 @@ body.jc39-force-new-catalog.jc38-catalog-open{
 }
 
 /* Старый каталог Stage35/36/37 больше не используется: он и вызывал кривой scroll/focus. */
-body.jc39-force-new-catalog .jc-catalog-layer,
-body.jc39-force-new-catalog .jc-catalog-layer.open,
-body.jc39-force-new-catalog #jcCatalogLayer,
-body.jc39-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
+body.jc40-force-new-catalog .jc-catalog-layer,
+body.jc40-force-new-catalog .jc-catalog-layer.open,
+body.jc40-force-new-catalog #jcCatalogLayer,
+body.jc40-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
   display:none!important;
   visibility:hidden!important;
   pointer-events:none!important;
   opacity:0!important;
 }
 
-#jc39CatalogRoot{
+#jc40CatalogRoot{
   position:fixed!important;
   inset:0!important;
   z-index:2147483200!important;
@@ -65,24 +65,24 @@ body.jc39-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
   pointer-events:none!important;
 }
 
-#jc39CatalogRoot.open{
+#jc40CatalogRoot.open{
   display:flex!important;
   pointer-events:auto!important;
 }
 
-#jc39CatalogRoot,
-#jc39CatalogRoot *{
+#jc40CatalogRoot,
+#jc40CatalogRoot *{
   box-sizing:border-box!important;
 }
 
-.jc39-backdrop{
+.jc40-backdrop{
   position:absolute!important;
   inset:0!important;
   background:rgba(2,3,8,.76)!important;
   backdrop-filter:blur(16px)!important;
 }
 
-.jc39-modal{
+.jc40-modal{
   position:relative!important;
   width:min(1240px, calc(100vw - 44px))!important;
   max-height:calc(100vh - 34px)!important;
@@ -99,7 +99,7 @@ body.jc39-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
   transform:none!important;
 }
 
-.jc39-head{
+.jc40-head{
   flex:0 0 auto!important;
   display:grid!important;
   grid-template-columns:54px minmax(0,1fr) 46px!important;
@@ -109,7 +109,7 @@ body.jc39-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
   border-bottom:1px solid rgba(255,255,255,.10)!important;
 }
 
-.jc39-logo{
+.jc40-logo{
   width:54px!important;
   height:54px!important;
   border-radius:18px!important;
@@ -120,20 +120,20 @@ body.jc39-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
   font-size:24px!important;
 }
 
-.jc39-head h2{
+.jc40-head h2{
   margin:0!important;
   color:#fff!important;
   font:900 clamp(22px,2vw,30px)/1.05 Inter,Segoe UI,Arial,sans-serif!important;
   letter-spacing:-.045em!important;
 }
 
-.jc39-head p{
+.jc40-head p{
   margin:6px 0 0!important;
   color:#aeb1cf!important;
   font:500 14px/1.45 Inter,Segoe UI,Arial,sans-serif!important;
 }
 
-.jc39-close{
+.jc40-close{
   width:46px!important;
   height:46px!important;
   min-height:46px!important;
@@ -147,12 +147,12 @@ body.jc39-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
   cursor:pointer!important;
 }
 
-.jc39-close:hover{
+.jc40-close:hover{
   background:rgba(255,255,255,.13)!important;
   transform:translateY(-1px)!important;
 }
 
-.jc39-scroll{
+.jc40-scroll{
   flex:1 1 auto!important;
   min-height:0!important;
   overflow-y:auto!important;
@@ -162,14 +162,14 @@ body.jc39-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
   padding:20px 24px 24px!important;
 }
 
-.jc39-source-grid{
+.jc40-source-grid{
   display:grid!important;
   grid-template-columns:repeat(4, minmax(0,1fr))!important;
   gap:14px!important;
   margin-bottom:18px!important;
 }
 
-.jc39-source-card{
+.jc40-source-card{
   min-width:0!important;
   min-height:124px!important;
   display:flex!important;
@@ -188,8 +188,8 @@ body.jc39-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
   transform:none!important;
 }
 
-.jc39-source-card:hover,
-.jc39-source-card.active{
+.jc40-source-card:hover,
+.jc40-source-card.active{
   border-color:rgba(251,113,133,.55)!important;
   background:
     radial-gradient(circle at 18% 16%,rgba(251,113,133,.16),transparent 42%),
@@ -197,7 +197,7 @@ body.jc39-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
   box-shadow:0 18px 42px rgba(0,0,0,.22),0 0 0 1px rgba(251,113,133,.10) inset!important;
 }
 
-.jc39-card-icon{
+.jc40-card-icon{
   width:44px!important;
   height:44px!important;
   flex:0 0 auto!important;
@@ -210,40 +210,40 @@ body.jc39-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
   font:900 15px/1 Inter,Segoe UI,Arial,sans-serif!important;
 }
 
-.jc39-source-card strong{
+.jc40-source-card strong{
   display:block!important;
   margin:0!important;
   color:#fff!important;
   font:900 17px/1.1 Inter,Segoe UI,Arial,sans-serif!important;
 }
 
-.jc39-source-card small{
+.jc40-source-card small{
   display:block!important;
   color:#aeb1cf!important;
   font:600 13px/1.25 Inter,Segoe UI,Arial,sans-serif!important;
 }
 
-.jc39-runbox,
-.jc39-searchbox,
-.jc39-help-grid > div{
+.jc40-runbox,
+.jc40-searchbox,
+.jc40-help-grid > div{
   border:1px solid rgba(255,255,255,.10)!important;
   border-radius:22px!important;
   background:rgba(255,255,255,.035)!important;
 }
 
-.jc39-runbox{
+.jc40-runbox{
   padding:16px!important;
   margin-bottom:16px!important;
 }
 
-.jc39-input-row{
+.jc40-input-row{
   display:grid!important;
   grid-template-columns:minmax(240px,1.35fr) minmax(180px,.7fr) 150px!important;
   gap:10px!important;
   align-items:center!important;
 }
 
-#jc39CatalogRoot input{
+#jc40CatalogRoot input{
   width:100%!important;
   min-width:0!important;
   height:48px!important;
@@ -256,14 +256,14 @@ body.jc39-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
   font:600 14px/1 Inter,Segoe UI,Arial,sans-serif!important;
 }
 
-#jc39CatalogRoot input:focus{
+#jc40CatalogRoot input:focus{
   border-color:rgba(192,132,252,.58)!important;
   box-shadow:0 0 0 3px rgba(192,132,252,.14)!important;
 }
 
-.jc39-run,
-.jc39-actions button,
-.jc39-searchbox button{
+.jc40-run,
+.jc40-actions button,
+.jc40-searchbox button{
   min-width:0!important;
   min-height:44px!important;
   border-radius:15px!important;
@@ -275,32 +275,32 @@ body.jc39-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
   cursor:pointer!important;
 }
 
-.jc39-run{
+.jc40-run{
   height:48px!important;
   background:linear-gradient(135deg,#ef6f87,#a855f7)!important;
   border-color:transparent!important;
 }
 
-.jc39-actions{
+.jc40-actions{
   display:flex!important;
   flex-wrap:wrap!important;
   gap:10px!important;
   margin-top:12px!important;
 }
 
-.jc39-actions button{
+.jc40-actions button{
   flex:1 1 170px!important;
 }
 
-.jc39-tip{
+.jc40-tip{
   margin:12px 0 0!important;
   color:#b8bbd5!important;
   font:500 13px/1.5 Inter,Segoe UI,Arial,sans-serif!important;
 }
 
-.jc39-tip b{color:#fff!important}
+.jc40-tip b{color:#fff!important}
 
-.jc39-searchbox{
+.jc40-searchbox{
   display:grid!important;
   grid-template-columns:minmax(260px,1fr) 150px 130px!important;
   gap:10px!important;
@@ -309,42 +309,252 @@ body.jc39-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
   margin-bottom:16px!important;
 }
 
-.jc39-help-grid{
+.jc40-help-grid{
   display:grid!important;
   grid-template-columns:repeat(3,minmax(0,1fr))!important;
   gap:14px!important;
 }
 
-.jc39-help-grid > div{
+.jc40-help-grid > div{
   padding:16px!important;
 }
 
-.jc39-help-grid b{
+.jc40-help-grid b{
   display:block!important;
   margin-bottom:8px!important;
   color:#fff!important;
   font:900 16px/1.15 Inter,Segoe UI,Arial,sans-serif!important;
 }
 
-.jc39-help-grid span{
+.jc40-help-grid span{
   display:block!important;
   color:#b8bbd5!important;
   font:500 13px/1.45 Inter,Segoe UI,Arial,sans-serif!important;
 }
 
 @media(max-width:980px){
-  .jc39-source-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-  .jc39-input-row,.jc39-searchbox{grid-template-columns:1fr!important}
-  .jc39-help-grid{grid-template-columns:1fr!important}
+  .jc40-source-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .jc40-input-row,.jc40-searchbox{grid-template-columns:1fr!important}
+  .jc40-help-grid{grid-template-columns:1fr!important}
 }
 
 @media(max-width:560px){
-  #jc39CatalogRoot{padding:8px!important;align-items:stretch!important}
-  .jc39-modal{width:calc(100vw - 16px)!important;max-height:calc(100vh - 16px)!important;border-radius:22px!important}
-  .jc39-head{grid-template-columns:44px minmax(0,1fr) 40px!important;gap:10px!important;padding:16px!important}
-  .jc39-logo{width:44px!important;height:44px!important;border-radius:15px!important}
-  .jc39-close{width:40px!important;height:40px!important;min-height:40px!important;border-radius:14px!important}
-  .jc39-scroll{padding:14px!important}
-  .jc39-source-grid{grid-template-columns:1fr!important;gap:10px!important}
-  .jc39-source-card{min-height:94px!important;padding:14px!important}
+  #jc40CatalogRoot{padding:8px!important;align-items:stretch!important}
+  .jc40-modal{width:calc(100vw - 16px)!important;max-height:calc(100vh - 16px)!important;border-radius:22px!important}
+  .jc40-head{grid-template-columns:44px minmax(0,1fr) 40px!important;gap:10px!important;padding:16px!important}
+  .jc40-logo{width:44px!important;height:44px!important;border-radius:15px!important}
+  .jc40-close{width:40px!important;height:40px!important;min-height:40px!important;border-radius:14px!important}
+  .jc40-scroll{padding:14px!important}
+  .jc40-source-grid{grid-template-columns:1fr!important;gap:10px!important}
+  .jc40-source-card{min-height:94px!important;padding:14px!important}
+}
+
+
+/* =========================================================
+   JustClover Stage 40 — No Page Scroll Watch Mode
+   В просмотре больше нет page scroll: колесо работает только внутри чата/списков/каталога.
+   ========================================================= */
+
+html.jc40-watch-mode,
+body.jc40-watch-mode{
+  height:100%!important;
+  max-height:100%!important;
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+}
+
+body.jc40-watch-mode{
+  position:static!important;
+  top:auto!important;
+  left:auto!important;
+  width:auto!important;
+}
+
+body.jc40-watch-mode .topbar{
+  display:none!important;
+}
+
+body.jc40-watch-mode .shell{
+  width:min(1880px,98vw)!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  margin:0 auto!important;
+  padding:10px 0!important;
+  overflow:hidden!important;
+}
+
+body.jc40-watch-mode #appView.app{
+  height:calc(100vh - 20px)!important;
+  max-height:calc(100vh - 20px)!important;
+  display:grid!important;
+  grid-template-columns:278px minmax(0,1fr)!important;
+  gap:18px!important;
+  align-items:stretch!important;
+  overflow:hidden!important;
+  min-height:0!important;
+}
+
+body.jc40-watch-mode .rail{
+  position:relative!important;
+  top:auto!important;
+  height:100%!important;
+  max-height:100%!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  min-height:0!important;
+}
+
+body.jc40-watch-mode .content,
+body.jc40-watch-mode #watchSection,
+body.jc40-watch-mode .watch-layout,
+body.jc40-watch-mode .watch-main,
+body.jc40-watch-mode .watch-stage{
+  height:100%!important;
+  max-height:100%!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+body.jc40-watch-mode #watchSection.active{
+  display:block!important;
+}
+
+body.jc40-watch-mode .watch-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 350px!important;
+  gap:18px!important;
+  align-items:stretch!important;
+}
+
+body.jc40-watch-mode .watch-stage{
+  display:flex!important;
+  flex-direction:column!important;
+}
+
+body.jc40-watch-mode .watch-brandbar,
+body.jc40-watch-mode .watch-header,
+body.jc40-watch-mode .source-strip,
+body.jc40-watch-mode .watch-footer-meta{
+  flex:0 0 auto!important;
+}
+
+body.jc40-watch-mode .watch-header{
+  padding-top:14px!important;
+  padding-bottom:8px!important;
+}
+
+body.jc40-watch-mode .watch-header h2{
+  font-size:clamp(25px,2.15vw,34px)!important;
+  margin:6px 0 8px!important;
+}
+
+body.jc40-watch-mode .watch-header .status,
+body.jc40-watch-mode .watch-header p{
+  margin-bottom:0!important;
+}
+
+body.jc40-watch-mode .player-card-redesign,
+body.jc40-watch-mode .player-card,
+body.jc40-watch-mode .player-shell{
+  flex:0 0 auto!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+body.jc40-watch-mode .player-frame{
+  aspect-ratio:auto!important;
+  height:clamp(310px,48vh,560px)!important;
+  max-height:52vh!important;
+  min-height:260px!important;
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+}
+
+body.jc40-watch-mode .player-frame iframe,
+body.jc40-watch-mode .player-frame video,
+body.jc40-watch-mode .embed-box{
+  width:100%!important;
+  height:100%!important;
+}
+
+body.jc40-watch-mode .watch-sidebar{
+  height:100%!important;
+  max-height:100%!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  display:grid!important;
+  grid-template-rows:auto auto minmax(0,1fr)!important;
+  gap:16px!important;
+}
+
+body.jc40-watch-mode .side-card,
+body.jc40-watch-mode .members-card,
+body.jc40-watch-mode .voice-card,
+body.jc40-watch-mode .chat-card{
+  min-height:0!important;
+}
+
+body.jc40-watch-mode .members-card .list,
+body.jc40-watch-mode .voice-card,
+body.jc40-watch-mode .messages,
+body.jc40-watch-mode #chatMessages,
+body.jc40-watch-mode #dmMessages{
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+}
+
+body.jc40-watch-mode .chat-card{
+  height:100%!important;
+  max-height:100%!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+
+body.jc40-watch-mode .chat-card .side-card-head,
+body.jc40-watch-mode .chat-card .message-form,
+body.jc40-watch-mode .chat-card #chatForm{
+  flex:0 0 auto!important;
+}
+
+body.jc40-watch-mode .chat-card .messages,
+body.jc40-watch-mode #chatMessages{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+}
+
+body.jc40-watch-mode .reactions-dock{
+  margin-top:10px!important;
+  margin-bottom:8px!important;
+}
+
+body.jc40-watch-mode .source-history,
+body.jc40-watch-mode .queue-card,
+body.jc40-watch-mode [class*="history"],
+body.jc40-watch-mode [class*="queue"]{
+  max-height:120px!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+}
+
+@media(max-width:1280px){
+  body.jc40-watch-mode #appView.app{
+    grid-template-columns:1fr!important;
+  }
+  body.jc40-watch-mode .rail{
+    display:none!important;
+  }
+  body.jc40-watch-mode .watch-layout{
+    grid-template-columns:1fr!important;
+  }
+  body.jc40-watch-mode .watch-sidebar{
+    display:none!important;
+  }
+  body.jc40-watch-mode .player-frame{
+    height:clamp(300px,58vh,620px)!important;
+    max-height:62vh!important;
+  }
 }
