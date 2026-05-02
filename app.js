@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 47 — Compact Dock + Catalog Row
-   Version: stage47-compact-dock-catalog-20260502-1
+   JustClover Stage 48 — Restore Player Compact Bottom Controls
+   Version: stage48-restore-player-compact-bottom-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage47-compact-dock-catalog-20260502-1";
+const JC40_BUILD = "stage48-restore-player-compact-bottom-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 47 ACTIVE loader:", JC40_BUILD);
+console.log("JustClover Stage 48 ACTIVE loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 47: base app import failed", e);
+  console.error("JustClover Stage 48: base app import failed", e);
   throw e;
 }
 
@@ -528,15 +528,15 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 47 — Compact Dock + Catalog Row
-   Version: stage47-compact-dock-catalog-20260502-1
+   JustClover Stage 48 — Restore Player Compact Bottom Controls
+   Version: stage48-restore-player-compact-bottom-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage47-compact-dock-catalog-20260502-1";
-  const STORE_KEY = "jc47ActiveViewMode";
+  const BUILD = "stage48-restore-player-compact-bottom-20260502-1";
+  const STORE_KEY = "jc48ActiveViewMode";
   let desired = false;
 
-  try { desired = localStorage.getItem(STORE_KEY) === "1" || localStorage.getItem("jc46ActiveViewMode") === "1" || localStorage.getItem("jc45ActiveViewMode") === "1" || localStorage.getItem("jc44ActiveViewMode") === "1" || localStorage.getItem("jc43ActiveViewMode") === "1"; } catch(_) {}
+  try { desired = localStorage.getItem(STORE_KEY) === "1" || localStorage.getItem("jc47ActiveViewMode") === "1" || localStorage.getItem("jc46ActiveViewMode") === "1" || localStorage.getItem("jc45ActiveViewMode") === "1" || localStorage.getItem("jc44ActiveViewMode") === "1" || localStorage.getItem("jc43ActiveViewMode") === "1"; } catch(_) {}
 
   function isWatchMode(){
     const app = document.getElementById('appView');
@@ -680,7 +680,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       syncFullscreenButtons();
       return;
     }
-    console.warn('[JC46] browser blocked fullscreen request');
+    console.warn('[JC48] browser blocked fullscreen request');
   }
 
   function syncFullscreenButtons(){
@@ -689,6 +689,76 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       btn.textContent = on ? 'Выйти' : 'Экран';
       btn.title = on ? 'Выйти из большого экрана' : 'Открыть плеер на большой экран';
       btn.setAttribute('aria-label', btn.title);
+    });
+  }
+
+  function chooseLocalShortcut(){
+    try{
+      const sourceType = document.getElementById('sourceType');
+      if(sourceType){
+        const hasLocal = Array.from(sourceType.options || []).some(o => o.value === 'local');
+        if(hasLocal) sourceType.value = 'local';
+      }
+      document.getElementById('localVideoFile')?.click?.();
+    }catch(_){}
+  }
+
+  function ensureCompactDock(dock){
+    if(!dock) return null;
+    let inner = dock.querySelector('.jc48-dock-inner');
+    if(!inner){
+      inner = document.createElement('div');
+      inner.className = 'jc48-dock-inner';
+      dock.appendChild(inner);
+    }
+    let actions = inner.querySelector('.jc48-actions-slot');
+    if(!actions){
+      actions = document.createElement('div');
+      actions.className = 'jc48-actions-slot';
+      inner.appendChild(actions);
+    }
+    let sources = inner.querySelector('.jc48-source-row');
+    if(!sources){
+      sources = document.createElement('div');
+      sources.className = 'jc48-source-row';
+      sources.innerHTML = `
+        <button type="button" data-jc48-open-sources>Источники</button>
+        <button type="button" data-jc48-open-catalog>Каталог</button>
+        <button type="button" data-jc48-local>Local</button>
+      `;
+      sources.addEventListener('click', function(e){
+        const b = e.target.closest('button');
+        if(!b) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if(b.hasAttribute('data-jc48-open-sources') || b.hasAttribute('data-jc48-open-catalog')) openCatalog();
+        if(b.hasAttribute('data-jc48-local')) chooseLocalShortcut();
+      });
+      inner.appendChild(sources);
+    }
+    return { inner, actions, sources };
+  }
+
+  function hideTopSourceChrome(on){
+    document.querySelectorAll('.jc48-top-source-hidden').forEach(el => el.classList.remove('jc48-top-source-hidden'));
+    if(!on) return;
+    const stage = document.querySelector('.watch-stage');
+    if(!stage) return;
+    const protectedSelector = '.watch-main,.watch-stage,.player-card,.player-card-redesign,.player-shell,.player-frame,#jc45ActiveDock,#jc41RaveFloating,#jc48SourceDock';
+    const candidates = stage.querySelectorAll('header,nav,section,div');
+    candidates.forEach(el => {
+      if(!el || el.matches?.(protectedSelector) || el.closest?.('#jc45ActiveDock,#jc41RaveFloating,#jc40CatalogRoot')) return;
+      // Never hide a node that owns the actual media/player.
+      if(el.querySelector?.('iframe,video,#iframePlayer,#youtubePlayer,#videoPlayer,.player-frame')) return;
+      const txt = (el.textContent || '').replace(/\s+/g,' ').trim();
+      if(!txt) return;
+      const hasNativeHint = /Родной плеер источника|VK Video|YouTube/i.test(txt);
+      const buttons = Array.from(el.querySelectorAll('button,a')).map(b => (b.textContent || b.title || b.getAttribute('aria-label') || '').trim());
+      const hasCatalogButtons = buttons.some(t => /Источники/i.test(t)) && buttons.some(t => /Каталог/i.test(t));
+      const hasLocal = buttons.some(t => /^Local$/i.test(t));
+      if((hasNativeHint && (hasCatalogButtons || hasLocal)) || (hasCatalogButtons && hasLocal)){
+        el.classList.add('jc48-top-source-hidden');
+      }
     });
   }
 
@@ -717,74 +787,6 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
     });
     document.body.appendChild(f);
     return f;
-  }
-
-  function ensureDockStructure(dock){
-    if(!dock) return null;
-    let inner = dock.querySelector('.jc47-dock-inner');
-    if(!inner){
-      inner = document.createElement('div');
-      inner.className = 'jc47-dock-inner';
-      dock.appendChild(inner);
-    }
-    let sourceSlot = dock.querySelector('.jc47-source-slot');
-    if(!sourceSlot){
-      sourceSlot = document.createElement('div');
-      sourceSlot.className = 'jc47-source-slot';
-      inner.appendChild(sourceSlot);
-    }
-    return { inner, sourceSlot };
-  }
-
-  function findCatalogControls(){
-    const stage = document.querySelector('.watch-stage');
-    if(!stage) return null;
-    const all = Array.from(stage.querySelectorAll('div,section,nav'));
-    for(const el of all){
-      if(!el || el.id === 'jc45ActiveDock' || el.closest?.('#jc45ActiveDock,#jc41RaveFloating')) continue;
-      const texts = Array.from(el.querySelectorAll('button,a,.toolbar-chip,.chip')).map(n => (n.textContent || '').trim());
-      const hasCatalog = texts.some(t => /Каталог/i.test(t));
-      const hasLocal = texts.some(t => /^Local$/i.test(t));
-      const hasSource = texts.some(t => /Источники/i.test(t));
-      if((hasCatalog && hasLocal) || (hasCatalog && hasSource)) return el;
-    }
-    return null;
-  }
-
-  function moveCatalogControls(on){
-    const state = window.__jc47CatalogControlsState || (window.__jc47CatalogControlsState = {});
-    if(!on){
-      const el = state.el;
-      const parent = state.parent;
-      if(el && parent){
-        try {
-          if(state.next && state.next.parentNode === parent) parent.insertBefore(el, state.next);
-          else parent.appendChild(el);
-        } catch(_) {}
-        el.classList.remove('jc47-source-controls');
-      }
-      state.el = null;
-      state.parent = null;
-      state.next = null;
-      return;
-    }
-
-    const dock = document.getElementById('jc45ActiveDock');
-    const slot = dock?.querySelector('.jc47-source-slot');
-    if(!slot) return;
-
-    let el = state.el;
-    if(!el){
-      el = findCatalogControls();
-      if(!el) return;
-      state.el = el;
-      state.parent = el.parentNode;
-      state.next = el.nextSibling;
-    }
-    if(el && el.parentNode !== slot){
-      slot.appendChild(el);
-      el.classList.add('jc47-source-controls');
-    }
   }
 
   function ensureToggle(){
@@ -825,15 +827,15 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       document.body.style.left = '';
       document.body.style.width = '';
       const dock = ensureDock();
-      const structure = ensureDockStructure(dock);
-      if(structure?.inner && floating.parentNode !== structure.inner) structure.inner.insertBefore(floating, structure.inner.firstChild || null);
-      moveCatalogControls(true);
+      const compact = ensureCompactDock(dock);
+      if(compact?.actions && floating.parentNode !== compact.actions) compact.actions.appendChild(floating);
+      hideTopSourceChrome(true);
       markActiveHiddenPanels(true);
       hardTop();
     } else {
       const dock = document.getElementById('jc45ActiveDock') || document.getElementById('jc43ActiveDock');
       const target = document.getElementById('jc45ActiveFullscreenTarget') || document.getElementById('jc43ActiveFullscreenTarget');
-      moveCatalogControls(false);
+      hideTopSourceChrome(false);
       if(floating && floating.parentNode !== document.body) document.body.appendChild(floating);
       markActiveHiddenPanels(false);
       if(dock) dock.remove();
@@ -951,10 +953,10 @@ try {
 } catch(_) {}
 
 
-// Stage 47 public aliases.
+// Stage 48 public aliases.
 try {
-  window.jc47ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
-  window.jc47ToggleActiveView = window.jc46ToggleActiveView || window.jc45ToggleActiveView || window.jc42ToggleActiveView || window.jc41ToggleRaveMode;
-  window.jc47SetActiveView = window.jc46SetActiveView || window.jc45SetActiveView || window.jc42SetActiveView || window.jc41SetRaveMode;
-  window.jc47ToggleFullscreen = window.jc46ToggleFullscreen || togglePlayerFullscreen;
+  window.jc48ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc48ToggleActiveView = window.jc46ToggleActiveView || window.jc45ToggleActiveView || window.jc42ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc48SetActiveView = window.jc46SetActiveView || window.jc45SetActiveView || window.jc42SetActiveView || window.jc41SetRaveMode;
+  window.jc48ToggleFullscreen = window.jc46ToggleFullscreen || window.jc45ToggleFullscreen || window.jc42ToggleFullscreen;
 } catch(_) {}
