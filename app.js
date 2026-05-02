@@ -4951,8 +4951,8 @@ setTimeout(jc251Patch, 1000);
    JustClover Stage 28 CLEAN — player/cinema JS
    Version: stage28-clean-cinema-player-20260502-1
    ========================================================= */
-console.log("JustClover Stage 29 VK CTRL loaded:", "stage29-vk-native-controls-20260502-1");
-window.JUSTCLOVER_BUILD = "stage29-vk-native-controls-20260502-1";
+console.log("JustClover Stage 30 RAVE loaded:", "stage30-rave-like-clean-sources-20260502-1");
+window.JUSTCLOVER_BUILD = "stage30-rave-like-clean-sources-20260502-1";
 
 try{
   if(localStorage.getItem('jc28LastBuild') !== window.JUSTCLOVER_BUILD){
@@ -4965,7 +4965,7 @@ try{
 
 
 (function(){
-  const BUILD = "stage29-vk-native-controls-20260502-1";
+  const BUILD = "stage30-rave-like-clean-sources-20260502-1";
   let zoom = Number(localStorage.getItem('jc28CinemaZoomV4') || '0') || 0;
 
   function svg(name){
@@ -5410,4 +5410,210 @@ try{
     sync();
     audit();
   }, 800);
+})();
+
+
+/* =========================================================
+   JustClover Stage 30 — Rave-like clean sources JS
+   Version: stage30-rave-like-clean-sources-20260502-1
+   ========================================================= */
+console.log("JustClover Stage 30 RAVE loaded:", "stage30-rave-like-clean-sources-20260502-1");
+window.JUSTCLOVER_BUILD = "stage30-rave-like-clean-sources-20260502-1";
+
+(function(){
+  function sourceLabel(type){
+    const map = {
+      youtube:'YouTube',
+      vk:'VK Video',
+      local:'Local',
+      mp4:'Direct MP4',
+      drive:'Google Drive',
+      yandex:'Яндекс Диск',
+      anilibrix:'AniLibria',
+      none:'Источник не выбран'
+    };
+    return map[type || 'none'] || type || 'Источник';
+  }
+
+  function sourceRisk(type){
+    if(!type || type === 'none') return {badge:'NO SRC', note:'Выбери источник для совместного просмотра.', danger:false};
+    if(type === 'youtube' || type === 'vk') return {badge:'ADS?', note:'Родной плеер может показать рекламу. Для чистого просмотра используй Local / MP4 / Drive.', danger:true};
+    if(type === 'local') return {badge:'CLEAN', note:'Файл с устройства: рекламы нет, но другим участникам нужен тот же файл.', danger:false};
+    if(type === 'mp4' || type === 'drive' || type === 'yandex') return {badge:'CLEAN', note:'Публичный/direct источник: обычно без рекламы и ближе к Rave-режиму.', danger:false};
+    return {badge:'IFRAME', note:'Источник открыт через iframe. Реклама зависит от сервиса.', danger:true};
+  }
+
+  function ensureRaveLayer(){
+    const f = document.querySelector('.player-frame');
+    if(!f) return;
+
+    if(!document.getElementById('jcRaveSourceBar')){
+      const bar = document.createElement('div');
+      bar.id = 'jcRaveSourceBar';
+      bar.innerHTML = `
+        <div class="jc-rave-left">
+          <div class="jc-rave-badge">RAVE</div>
+          <div class="jc-rave-title">
+            <strong>Источник</strong>
+            <span>чат + голос поверх родного плеера</span>
+          </div>
+        </div>
+        <div class="jc-rave-actions">
+          <button type="button" data-rave-clean class="primary">Чистый источник</button>
+          <button type="button" data-rave-catalog>Каталог</button>
+          <button type="button" data-rave-local>Local</button>
+        </div>
+      `;
+      f.appendChild(bar);
+    }
+
+    if(!document.getElementById('jcCleanSourcePanel')){
+      const panel = document.createElement('div');
+      panel.id = 'jcCleanSourcePanel';
+      panel.innerHTML = `
+        <div class="jc-clean-panel">
+          <div class="jc-clean-head">
+            <div>
+              <h3>Rave-like режим источников</h3>
+              <p>Мы не ломаем рекламу внутри YouTube/VK. Вместо этого держим родной плеер, чат и голос поверх, а для просмотра без рекламы быстро меняем источник на Local / MP4 / Drive.</p>
+            </div>
+            <button type="button" data-rave-close>×</button>
+          </div>
+          <div class="jc-clean-grid">
+            <button type="button" class="jc-clean-card clean" data-clean-source="local"><b>Local</b><span>файл с устройства, без рекламы</span></button>
+            <button type="button" class="jc-clean-card clean" data-clean-source="mp4"><b>Direct MP4</b><span>прямая mp4/webm ссылка</span></button>
+            <button type="button" class="jc-clean-card clean" data-clean-source="drive"><b>Google Drive</b><span>public preview / файл</span></button>
+            <button type="button" class="jc-clean-card clean" data-clean-source="yandex"><b>Яндекс Диск</b><span>публичная ссылка</span></button>
+            <button type="button" class="jc-clean-card warn" data-clean-source="youtube"><b>YouTube</b><span>родной плеер, может быть реклама</span></button>
+            <button type="button" class="jc-clean-card warn" data-clean-source="vk"><b>VK Video</b><span>родной плеер, может быть реклама</span></button>
+            <button type="button" class="jc-clean-card warn" data-clean-source="anilibrix"><b>AniLibria</b><span>iframe, зависит от сервиса</span></button>
+            <button type="button" class="jc-clean-card clean" data-clean-paste><b>Из буфера</b><span>авто-распознавание ссылки</span></button>
+          </div>
+          <div class="jc-clean-foot">
+            <small>Совет: если началась реклама, нажми “Чистый источник” и замени ссылку на MP4/Drive/Local. Это самый стабильный вариант для сайта.</small>
+            <button type="button" class="primary" data-rave-open-catalog>Открыть каталог</button>
+          </div>
+        </div>
+      `;
+      f.appendChild(panel);
+    }
+
+    wireRaveLayer();
+    updateRaveLayer();
+  }
+
+  function openCleanPanel(){
+    document.body.classList.add('jc-rave-source-open');
+  }
+
+  function closeCleanPanel(){
+    document.body.classList.remove('jc-rave-source-open');
+  }
+
+  function openCatalog(id='mp4'){
+    closeCleanPanel();
+    if(typeof jcStage8OpenCatalog === 'function') {
+      jcStage8OpenCatalog(id);
+      return;
+    }
+    document.querySelector('.toolbar-chip[data-jc-action*="catalog"]')?.click?.();
+  }
+
+  async function pasteAndGuess(){
+    try{
+      const text = await navigator.clipboard.readText();
+      if(typeof jcStage8OpenCatalog === 'function') jcStage8OpenCatalog('paste');
+      setTimeout(() => {
+        const input = document.querySelector('#jcCatalogUrl') || els?.sourceUrl;
+        if(input) {
+          input.value = text;
+          input.dispatchEvent(new Event('input', {bubbles:true}));
+        }
+        if(typeof jcStage8GuessSource === 'function') jcStage8GuessSource(text);
+      }, 180);
+    }catch(e){
+      openCatalog('youtube');
+    }
+  }
+
+  function wireRaveLayer(){
+    const bar = document.getElementById('jcRaveSourceBar');
+    const panel = document.getElementById('jcCleanSourcePanel');
+    if(bar && bar.dataset.bound !== '1'){
+      bar.dataset.bound = '1';
+      bar.querySelector('[data-rave-clean]')?.addEventListener('click', openCleanPanel);
+      bar.querySelector('[data-rave-catalog]')?.addEventListener('click', () => openCatalog('youtube'));
+      bar.querySelector('[data-rave-local]')?.addEventListener('click', () => openCatalog('local'));
+    }
+
+    if(panel && panel.dataset.bound !== '1'){
+      panel.dataset.bound = '1';
+      panel.querySelector('[data-rave-close]')?.addEventListener('click', closeCleanPanel);
+      panel.querySelector('[data-rave-open-catalog]')?.addEventListener('click', () => openCatalog('mp4'));
+      panel.querySelector('[data-clean-paste]')?.addEventListener('click', pasteAndGuess);
+      panel.querySelectorAll('[data-clean-source]').forEach(btn => {
+        btn.addEventListener('click', () => openCatalog(btn.dataset.cleanSource || 'mp4'));
+      });
+    }
+  }
+
+  function updateRaveLayer(){
+    const bar = document.getElementById('jcRaveSourceBar');
+    if(!bar) return;
+
+    let type = 'none';
+    let title = 'Источник не выбран';
+    try{
+      type = currentSource?.type || 'none';
+      title = currentSource?.title || currentSource?.videoId || currentSource?.url || sourceLabel(type);
+    }catch(e){}
+
+    const risk = sourceRisk(type);
+    const badge = bar.querySelector('.jc-rave-badge');
+    const strong = bar.querySelector('.jc-rave-title strong');
+    const span = bar.querySelector('.jc-rave-title span');
+    const cleanBtn = bar.querySelector('[data-rave-clean]');
+
+    if(badge){
+      badge.textContent = risk.badge;
+      badge.classList.toggle('jc-rave-danger', !!risk.danger);
+    }
+    if(strong) strong.textContent = sourceLabel(type) + (title && title !== sourceLabel(type) ? ' · ' + String(title).slice(0,60) : '');
+    if(span) span.textContent = risk.note;
+    if(cleanBtn) cleanBtn.textContent = risk.danger ? 'Заменить источник' : 'Чистый источник';
+  }
+
+  // Добавим кнопку рядом с историей/очередью, если эти блоки есть.
+  function enhanceSourceTools(){
+    const tools = document.querySelector('.jc-source-tools');
+    if(!tools || tools.querySelector('[data-rave-tool-clean]')) return;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn primary';
+    b.dataset.raveToolClean = '1';
+    b.textContent = 'Rave источники';
+    b.onclick = openCleanPanel;
+    tools.prepend(b);
+  }
+
+  // Подсветка в каталоге строится CSS, но карточки должны быть position:relative.
+  function patchCatalogCards(){
+    document.querySelectorAll('.jc-source-card').forEach(c => {
+      c.style.position = c.style.position || 'relative';
+    });
+  }
+
+  setInterval(() => {
+    ensureRaveLayer();
+    enhanceSourceTools();
+    patchCatalogCards();
+    updateRaveLayer();
+  }, 700);
+
+  setTimeout(() => {
+    ensureRaveLayer();
+    enhanceSourceTools();
+    patchCatalogCards();
+    updateRaveLayer();
+  }, 900);
 })();
