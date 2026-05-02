@@ -1,12 +1,12 @@
 @import url("https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@f658b5bfad3fade4eb7f9c4d82865452cdc19f00/style.css");
 
 /* =========================================================
-   JustClover Stage 38 — Clean Scroll/Focus Rewrite CSS
-   Version: stage38-clean-scroll-focus-rewrite-20260502-1
+   JustClover Stage 39 — Clean Catalog Menu CSS
+   Version: stage39-clean-catalog-menu-20260502-1
    ========================================================= */
 
 html::after{
-  content:'38 CLEAN'!important;
+  content:'39 MENU'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -21,21 +21,20 @@ html::after{
   pointer-events:none!important;
 }
 
-/* Убираем старые боковые debug-бейджи, чтобы меню не выглядело сломанным. */
 #jc31SyncPill,#jc32LinkPill,#jc33EmbedPill,#jc34RunPill,
-#jc35ScrollPill,#jc36CatalogPill,#jc37HardPill,#jc38CleanPill{
+#jc35ScrollPill,#jc36CatalogPill,#jc37HardPill,#jc38CleanPill,#jc39MenuPill{
   display:none!important;
 }
 
-html.jc38-catalog-open,
-body.jc38-catalog-open{
+html.jc39-catalog-open,
+body.jc39-catalog-open{
   overflow:hidden!important;
   overscroll-behavior:none!important;
 }
 
-/* Stage37 мог фиксировать body inline-стилями; Stage38 возвращает нормальный layout. */
-body.jc38-clean-scroll,
-body.jc38-clean-scroll.jc37-modal-lock{
+body.jc39-force-new-catalog,
+body.jc39-force-new-catalog.jc37-modal-lock,
+body.jc39-force-new-catalog.jc38-catalog-open{
   position:static!important;
   top:auto!important;
   left:auto!important;
@@ -43,170 +42,309 @@ body.jc38-clean-scroll.jc37-modal-lock{
   min-height:100%!important;
 }
 
-/* Нормальный fixed modal каталога. */
-.jc-catalog-layer.open{
+/* Старый каталог Stage35/36/37 больше не используется: он и вызывал кривой scroll/focus. */
+body.jc39-force-new-catalog .jc-catalog-layer,
+body.jc39-force-new-catalog .jc-catalog-layer.open,
+body.jc39-force-new-catalog #jcCatalogLayer,
+body.jc39-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  opacity:0!important;
+}
+
+#jc39CatalogRoot{
   position:fixed!important;
   inset:0!important;
-  z-index:2147483000!important;
-  display:flex!important;
+  z-index:2147483200!important;
+  display:none!important;
   align-items:center!important;
   justify-content:center!important;
-  padding:clamp(10px,2.5vh,28px) clamp(10px,2.5vw,30px)!important;
-  background:rgba(2,3,8,.72)!important;
-  backdrop-filter:blur(14px)!important;
-  overflow:hidden!important;
-  overscroll-behavior:none!important;
-  transform:none!important;
+  padding:clamp(12px,2vh,24px) clamp(12px,2.5vw,34px)!important;
+  color:#f6f7ff!important;
+  pointer-events:none!important;
 }
 
-.jc-catalog-layer:not(.open){
-  display:none!important;
+#jc39CatalogRoot.open{
+  display:flex!important;
+  pointer-events:auto!important;
 }
 
-.jc-catalog-layer.open .jc-catalog-modal,
-.jc-catalog-layer.open .jc-catalog-panel,
-.jc-catalog-layer.open .jc-catalog-content,
-.jc-catalog-layer.open > .panel,
-.jc-catalog-layer.open > div:first-child{
+#jc39CatalogRoot,
+#jc39CatalogRoot *{
   box-sizing:border-box!important;
-  max-width:calc(100vw - 24px)!important;
-  max-height:calc(100vh - 24px)!important;
-  overflow-x:hidden!important;
-  overscroll-behavior:contain!important;
-  -webkit-overflow-scrolling:touch!important;
 }
 
-.jc-catalog-layer.open .jc-catalog-modal,
-.jc-catalog-layer.open .jc-catalog-panel,
-.jc-catalog-layer.open > .panel,
-.jc-catalog-layer.open > div:first-child{
-  width:min(1040px,calc(100vw - 24px))!important;
-  margin:auto!important;
-  border-radius:28px!important;
-  transform:none!important;
+.jc39-backdrop{
+  position:absolute!important;
+  inset:0!important;
+  background:rgba(2,3,8,.76)!important;
+  backdrop-filter:blur(16px)!important;
 }
 
-.jc-catalog-layer.open .jc-catalog-modal,
-.jc-catalog-layer.open .jc-catalog-panel,
-.jc-catalog-layer.open > .panel{
+.jc39-modal{
+  position:relative!important;
+  width:min(1240px, calc(100vw - 44px))!important;
+  max-height:calc(100vh - 34px)!important;
   display:flex!important;
   flex-direction:column!important;
+  overflow:hidden!important;
+  border:1px solid rgba(255,255,255,.13)!important;
+  border-radius:30px!important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(192,132,252,.16), transparent 34%),
+    radial-gradient(circle at 86% 40%, rgba(251,113,133,.10), transparent 34%),
+    linear-gradient(180deg,rgba(19,19,31,.98),rgba(8,9,17,.98))!important;
+  box-shadow:0 34px 100px rgba(0,0,0,.64), 0 0 0 1px rgba(255,255,255,.035) inset!important;
+  transform:none!important;
 }
 
-.jc-catalog-layer.open .jc-catalog-content{
-  width:100%!important;
-  flex:1 1 auto!important;
-  overflow-y:auto!important;
-  padding-right:min(10px,1vw)!important;
-}
-
-/* Если старый каталог не имеет отдельного content-контейнера, скроллится сам modal/panel. */
-.jc-catalog-layer.open .jc-catalog-modal:not(:has(.jc-catalog-content)),
-.jc-catalog-layer.open .jc-catalog-panel:not(:has(.jc-catalog-content)){
-  overflow-y:auto!important;
-}
-
-/* Ломавшаяся часть: карточки больше не уходят вправо и не обрезают кнопки. */
-.jc-catalog-layer.open *{
-  max-width:100%!important;
-}
-
-.jc-catalog-layer.open [class*="grid"],
-.jc-catalog-layer.open [class*="cards"],
-.jc-catalog-layer.open [class*="sources"],
-.jc-catalog-layer.open [class*="source-list"]{
-  min-width:0!important;
-}
-
-.jc-catalog-layer.open .jc-catalog-grid,
-.jc-catalog-layer.open .jc-rave-source-grid,
-.jc-catalog-layer.open .jc-clean-source-grid,
-.jc-catalog-layer.open .jc-source-grid,
-.jc-catalog-layer.open .source-grid,
-.jc-catalog-layer.open .compact-source-grid{
+.jc39-head{
+  flex:0 0 auto!important;
   display:grid!important;
-  grid-template-columns:repeat(auto-fit,minmax(min(210px,100%),1fr))!important;
-  gap:14px!important;
+  grid-template-columns:54px minmax(0,1fr) 46px!important;
+  gap:16px!important;
+  align-items:center!important;
+  padding:24px 24px 18px!important;
+  border-bottom:1px solid rgba(255,255,255,.10)!important;
 }
 
-.jc-catalog-layer.open .jc-catalog-card,
-.jc-catalog-layer.open .jc-source-card,
-.jc-catalog-layer.open [class*="source-card"],
-.jc-catalog-layer.open button[class*="card"]{
-  min-width:0!important;
-  width:100%!important;
-}
-
-.jc-catalog-layer.open input,
-.jc-catalog-layer.open select,
-.jc-catalog-layer.open textarea,
-.jc-catalog-layer.open button{
-  min-width:0!important;
-}
-
-.jc-catalog-layer.open .jc-catalog-run-row,
-.jc-catalog-layer.open .jc-catalog-input-row,
-.jc-catalog-layer.open .jc-source-run-row,
-.jc-catalog-layer.open .jc-rave-input-row,
-.jc-catalog-layer.open form{
-  max-width:100%!important;
-}
-
-.jc-catalog-layer.open .jc-catalog-run-row,
-.jc-catalog-layer.open .jc-source-run-row,
-.jc-catalog-layer.open .jc-rave-action-row{
-  display:flex!important;
-  flex-wrap:wrap!important;
-  gap:10px!important;
-}
-
-.jc-catalog-layer.open .jc-catalog-run-row > *,
-.jc-catalog-layer.open .jc-source-run-row > *,
-.jc-catalog-layer.open .jc-rave-action-row > *{
-  flex:1 1 180px!important;
-}
-
-/* Дополнительная кнопка выхода Stage38. */
-#jc38CatalogClose{
-  position:sticky!important;
-  top:8px!important;
-  margin-left:auto!important;
-  z-index:5!important;
-  width:38px!important;
-  height:38px!important;
-  min-height:38px!important;
-  border-radius:14px!important;
+.jc39-logo{
+  width:54px!important;
+  height:54px!important;
+  border-radius:18px!important;
   display:grid!important;
   place-items:center!important;
-  background:rgba(255,255,255,.08)!important;
-  border:1px solid rgba(255,255,255,.14)!important;
+  background:linear-gradient(135deg,#ef6f87,#a855f7)!important;
+  box-shadow:0 12px 28px rgba(168,85,247,.24)!important;
+  font-size:24px!important;
+}
+
+.jc39-head h2{
+  margin:0!important;
   color:#fff!important;
+  font:900 clamp(22px,2vw,30px)/1.05 Inter,Segoe UI,Arial,sans-serif!important;
+  letter-spacing:-.045em!important;
+}
+
+.jc39-head p{
+  margin:6px 0 0!important;
+  color:#aeb1cf!important;
+  font:500 14px/1.45 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+.jc39-close{
+  width:46px!important;
+  height:46px!important;
+  min-height:46px!important;
+  border-radius:16px!important;
+  display:grid!important;
+  place-items:center!important;
+  background:rgba(255,255,255,.07)!important;
+  border:1px solid rgba(255,255,255,.13)!important;
+  color:#fff!important;
+  font:900 28px/1 Inter,Segoe UI,Arial,sans-serif!important;
   cursor:pointer!important;
 }
 
-#jc38CatalogClose:hover{
-  background:rgba(255,255,255,.14)!important;
+.jc39-close:hover{
+  background:rgba(255,255,255,.13)!important;
+  transform:translateY(-1px)!important;
 }
 
-@media(max-width:760px){
-  .jc-catalog-layer.open{
-    align-items:stretch!important;
-    padding:8px!important;
-  }
-  .jc-catalog-layer.open .jc-catalog-modal,
-  .jc-catalog-layer.open .jc-catalog-panel,
-  .jc-catalog-layer.open > .panel,
-  .jc-catalog-layer.open > div:first-child{
-    width:calc(100vw - 16px)!important;
-    max-height:calc(100vh - 16px)!important;
-    border-radius:22px!important;
-  }
-  .jc-catalog-layer.open .jc-catalog-grid,
-  .jc-catalog-layer.open .jc-rave-source-grid,
-  .jc-catalog-layer.open .jc-clean-source-grid,
-  .jc-catalog-layer.open .jc-source-grid,
-  .jc-catalog-layer.open .source-grid,
-  .jc-catalog-layer.open .compact-source-grid{
-    grid-template-columns:1fr!important;
-  }
+.jc39-scroll{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+  padding:20px 24px 24px!important;
+}
+
+.jc39-source-grid{
+  display:grid!important;
+  grid-template-columns:repeat(4, minmax(0,1fr))!important;
+  gap:14px!important;
+  margin-bottom:18px!important;
+}
+
+.jc39-source-card{
+  min-width:0!important;
+  min-height:124px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  padding:18px!important;
+  border-radius:22px!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.032))!important;
+  border:1px solid rgba(255,255,255,.11)!important;
+  color:#fff!important;
+  text-align:left!important;
+  cursor:pointer!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+
+.jc39-source-card:hover,
+.jc39-source-card.active{
+  border-color:rgba(251,113,133,.55)!important;
+  background:
+    radial-gradient(circle at 18% 16%,rgba(251,113,133,.16),transparent 42%),
+    linear-gradient(180deg,rgba(255,255,255,.085),rgba(255,255,255,.04))!important;
+  box-shadow:0 18px 42px rgba(0,0,0,.22),0 0 0 1px rgba(251,113,133,.10) inset!important;
+}
+
+.jc39-card-icon{
+  width:44px!important;
+  height:44px!important;
+  flex:0 0 auto!important;
+  display:grid!important;
+  place-items:center!important;
+  border-radius:15px!important;
+  background:rgba(255,255,255,.11)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  color:#fff!important;
+  font:900 15px/1 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+.jc39-source-card strong{
+  display:block!important;
+  margin:0!important;
+  color:#fff!important;
+  font:900 17px/1.1 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+.jc39-source-card small{
+  display:block!important;
+  color:#aeb1cf!important;
+  font:600 13px/1.25 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+.jc39-runbox,
+.jc39-searchbox,
+.jc39-help-grid > div{
+  border:1px solid rgba(255,255,255,.10)!important;
+  border-radius:22px!important;
+  background:rgba(255,255,255,.035)!important;
+}
+
+.jc39-runbox{
+  padding:16px!important;
+  margin-bottom:16px!important;
+}
+
+.jc39-input-row{
+  display:grid!important;
+  grid-template-columns:minmax(240px,1.35fr) minmax(180px,.7fr) 150px!important;
+  gap:10px!important;
+  align-items:center!important;
+}
+
+#jc39CatalogRoot input{
+  width:100%!important;
+  min-width:0!important;
+  height:48px!important;
+  border-radius:15px!important;
+  border:1px solid rgba(255,255,255,.11)!important;
+  background:rgba(5,8,18,.74)!important;
+  color:#fff!important;
+  padding:0 15px!important;
+  outline:none!important;
+  font:600 14px/1 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+#jc39CatalogRoot input:focus{
+  border-color:rgba(192,132,252,.58)!important;
+  box-shadow:0 0 0 3px rgba(192,132,252,.14)!important;
+}
+
+.jc39-run,
+.jc39-actions button,
+.jc39-searchbox button{
+  min-width:0!important;
+  min-height:44px!important;
+  border-radius:15px!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  background:rgba(255,255,255,.07)!important;
+  color:#fff!important;
+  padding:0 15px!important;
+  font:900 14px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  cursor:pointer!important;
+}
+
+.jc39-run{
+  height:48px!important;
+  background:linear-gradient(135deg,#ef6f87,#a855f7)!important;
+  border-color:transparent!important;
+}
+
+.jc39-actions{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:10px!important;
+  margin-top:12px!important;
+}
+
+.jc39-actions button{
+  flex:1 1 170px!important;
+}
+
+.jc39-tip{
+  margin:12px 0 0!important;
+  color:#b8bbd5!important;
+  font:500 13px/1.5 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+.jc39-tip b{color:#fff!important}
+
+.jc39-searchbox{
+  display:grid!important;
+  grid-template-columns:minmax(260px,1fr) 150px 130px!important;
+  gap:10px!important;
+  align-items:center!important;
+  padding:16px!important;
+  margin-bottom:16px!important;
+}
+
+.jc39-help-grid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:14px!important;
+}
+
+.jc39-help-grid > div{
+  padding:16px!important;
+}
+
+.jc39-help-grid b{
+  display:block!important;
+  margin-bottom:8px!important;
+  color:#fff!important;
+  font:900 16px/1.15 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+.jc39-help-grid span{
+  display:block!important;
+  color:#b8bbd5!important;
+  font:500 13px/1.45 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+@media(max-width:980px){
+  .jc39-source-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .jc39-input-row,.jc39-searchbox{grid-template-columns:1fr!important}
+  .jc39-help-grid{grid-template-columns:1fr!important}
+}
+
+@media(max-width:560px){
+  #jc39CatalogRoot{padding:8px!important;align-items:stretch!important}
+  .jc39-modal{width:calc(100vw - 16px)!important;max-height:calc(100vh - 16px)!important;border-radius:22px!important}
+  .jc39-head{grid-template-columns:44px minmax(0,1fr) 40px!important;gap:10px!important;padding:16px!important}
+  .jc39-logo{width:44px!important;height:44px!important;border-radius:15px!important}
+  .jc39-close{width:40px!important;height:40px!important;min-height:40px!important;border-radius:14px!important}
+  .jc39-scroll{padding:14px!important}
+  .jc39-source-grid{grid-template-columns:1fr!important;gap:10px!important}
+  .jc39-source-card{min-height:94px!important;padding:14px!important}
 }
