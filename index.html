@@ -7,10 +7,10 @@
   <meta name="theme-color" content="#080912" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icons/icon.svg" />
-  <link rel="stylesheet" href="./style.css?v=stage28-6-hard-fullscreen-button-20260502-1" />
+  <link rel="stylesheet" href="./style.css?v=stage28-7-player-frame-fullscreen-20260502-1" />
 
   <script>
-    window.JUSTCLOVER_BUILD = "stage28-6-hard-fullscreen-button-20260502-1";
+    window.JUSTCLOVER_BUILD = "stage28-7-player-frame-fullscreen-20260502-1";
     (function(){
       try {
         if ("serviceWorker" in navigator) {
@@ -411,10 +411,10 @@
   </main>
 
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script type="module" src="./app.js?v=stage28-6-hard-fullscreen-button-20260502-1"></script>
+  <script type="module" src="./app.js?v=stage28-7-player-frame-fullscreen-20260502-1"></script>
 
   <script>
-    window.JUSTCLOVER_BUILD = "stage28-6-hard-fullscreen-button-20260502-1";
+    window.JUSTCLOVER_BUILD = "stage28-7-player-frame-fullscreen-20260502-1";
     (function(){
       function toast(text){
         var old = document.getElementById('jcHardFullscreenToast');
@@ -436,8 +436,9 @@
             await document.exitFullscreen();
             toast('Fullscreen выключен');
           }else{
-            await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
-            toast('Fullscreen включён');
+            var target = document.querySelector('.player-frame') || document.documentElement;
+            await target.requestFullscreen({ navigationUI: 'hide' });
+            toast('Fullscreen плеера включён');
           }
         }catch(e){
           toast('Браузер не дал включить fullscreen');
@@ -451,7 +452,7 @@
         var btn = document.getElementById('jcHardFullscreenBtn');
         if(btn){
           btn.textContent = on ? '×' : '⛶';
-          btn.title = on ? 'Выйти из fullscreen' : 'Во весь экран';
+          btn.title = on ? 'Выйти из fullscreen' : 'Плеер во весь экран';
           btn.setAttribute('aria-label', btn.title);
         }
       }

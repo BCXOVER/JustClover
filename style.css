@@ -4728,7 +4728,7 @@ body.jc-wallpaper-paused #jcWallpaperMediaLayer img{
    ========================================================= */
 
 html::after{
-  content:'28.6 CLEAN';
+  content:'28.7 CLEAN';
   position:fixed;
   left:8px;
   bottom:8px;
@@ -5220,7 +5220,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'28.6 CLEAN'!important;
+  content:'28.7 CLEAN'!important;
 }
 
 /* В CSS-кино держим плеер внутри вкладки, без системного fullscreen overlay */
@@ -5281,7 +5281,7 @@ body.jc28-cinema .player-frame{
    ========================================================= */
 
 html::after{
-  content:'28.6 CLEAN'!important;
+  content:'28.7 CLEAN'!important;
 }
 
 /* В кино iframe не просто 16:9, а заполняет экран с умным zoom.
@@ -5380,7 +5380,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'28.6 CLEAN'!important;
+  content:'28.7 CLEAN'!important;
 }
 
 body.jc28-cinema .player-frame #iframePlayer,
@@ -5454,7 +5454,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'28.6 CLEAN'!important;
+  content:'28.7 CLEAN'!important;
 }
 
 /* Всегда делаем player-frame настоящим viewport для iframe */
@@ -5576,7 +5576,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'28.6 CLEAN'!important;
+  content:'28.7 CLEAN'!important;
 }
 
 /* Чуть шире панель, потому что вернули Full */
@@ -5687,7 +5687,7 @@ body.jc28-browser-full #jc28Panel .jc28-btn[data-jc28-act="full"]{
    ========================================================= */
 
 html::after{
-  content:'28.6 CLEAN'!important;
+  content:'28.7 CLEAN'!important;
 }
 
 .jc-hard-full-btn{
@@ -5788,4 +5788,160 @@ body.jc-player-frame-fullscreen .jc-hard-full-btn{
     right:60px!important;
     top:12px!important;
   }
+}
+
+
+/* =========================================================
+   JustClover Stage 28.7 — PLAYER-FRAME FULLSCREEN
+   Исправление: fullscreen теперь применяется к .player-frame, а не ко всему сайту.
+   Поэтому во весь экран уходит именно плеер + микрофон/чат/кнопка выхода.
+   ========================================================= */
+
+html::after{
+  content:'28.7 CLEAN'!important;
+}
+
+/* Fullscreen именно плеера */
+.player-frame:fullscreen,
+.player-frame:-webkit-full-screen{
+  width:100vw!important;
+  height:100vh!important;
+  min-width:100vw!important;
+  min-height:100vh!important;
+  max-width:none!important;
+  max-height:none!important;
+  aspect-ratio:auto!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  overflow:hidden!important;
+  display:block!important;
+}
+
+/* Внутри fullscreen плеера media занимает экран */
+.player-frame:fullscreen #iframePlayer,
+.player-frame:fullscreen iframe,
+.player-frame:fullscreen #youtubePlayer,
+.player-frame:fullscreen #videoPlayer,
+.player-frame:fullscreen video,
+.player-frame:-webkit-full-screen #iframePlayer,
+.player-frame:-webkit-full-screen iframe,
+.player-frame:-webkit-full-screen #youtubePlayer,
+.player-frame:-webkit-full-screen #videoPlayer,
+.player-frame:-webkit-full-screen video{
+  position:absolute!important;
+  left:50%!important;
+  top:50%!important;
+  width:100vw!important;
+  height:100vh!important;
+  min-width:100vw!important;
+  min-height:100vh!important;
+  max-width:none!important;
+  max-height:none!important;
+  transform:translate(-50%,-50%) scale(var(--jc28-vk-embed-zoom, 1.62))!important;
+  transform-origin:center center!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+}
+
+/* Для YouTube и local в fullscreen не нужен такой сильный crop */
+.player-frame:fullscreen #youtubePlayer,
+.player-frame:-webkit-full-screen #youtubePlayer{
+  transform:translate(-50%,-50%) scale(1.02)!important;
+}
+
+.player-frame:fullscreen #videoPlayer,
+.player-frame:fullscreen video,
+.player-frame:-webkit-full-screen #videoPlayer,
+.player-frame:-webkit-full-screen video{
+  object-fit:cover!important;
+  transform:translate(-50%,-50%) scale(1)!important;
+}
+
+/* Overlay внутри fullscreen плеера */
+.player-frame:fullscreen #jc28Panel,
+.player-frame:-webkit-full-screen #jc28Panel{
+  position:absolute!important;
+  left:50%!important;
+  bottom:34px!important;
+  top:auto!important;
+  transform:translateX(-50%)!important;
+  z-index:2147483000!important;
+  display:flex!important;
+}
+
+.player-frame:fullscreen #jc28Panel .jc28-btn:not([data-jc28-act="mic"]):not([data-jc28-act="full"]),
+.player-frame:-webkit-full-screen #jc28Panel .jc28-btn:not([data-jc28-act="mic"]):not([data-jc28-act="full"]){
+  display:none!important;
+}
+
+.player-frame:fullscreen #jc28Panel .jc28-btn[data-jc28-act="mic"],
+.player-frame:fullscreen #jc28Panel .jc28-btn[data-jc28-act="full"],
+.player-frame:-webkit-full-screen #jc28Panel .jc28-btn[data-jc28-act="mic"],
+.player-frame:-webkit-full-screen #jc28Panel .jc28-btn[data-jc28-act="full"]{
+  display:flex!important;
+  width:54px!important;
+  min-width:54px!important;
+  height:54px!important;
+  padding:0!important;
+  border-radius:999px!important;
+}
+
+.player-frame:fullscreen #jc28Panel .label,
+.player-frame:-webkit-full-screen #jc28Panel .label{
+  display:none!important;
+}
+
+/* Hard fullscreen button inside player fullscreen */
+.player-frame:fullscreen .jc-hard-full-btn,
+.player-frame:-webkit-full-screen .jc-hard-full-btn{
+  position:absolute!important;
+  right:18px!important;
+  top:18px!important;
+  bottom:auto!important;
+  z-index:2147483006!important;
+  display:grid!important;
+}
+
+/* Top messages / toast inside player fullscreen */
+.player-frame:fullscreen #jc28TopMsg,
+.player-frame:-webkit-full-screen #jc28TopMsg{
+  position:absolute!important;
+  top:18px!important;
+  left:50%!important;
+  width:min(900px,calc(100vw - 140px))!important;
+  z-index:2147482999!important;
+}
+
+.player-frame:fullscreen #jc28Toast,
+.player-frame:-webkit-full-screen #jc28Toast{
+  position:absolute!important;
+  left:50%!important;
+  bottom:98px!important;
+  z-index:2147483001!important;
+}
+
+/* Если player-frame в fullscreen, не показываем отдельную старую кнопку exit страницы */
+.player-frame:fullscreen #jc28Exit,
+.player-frame:-webkit-full-screen #jc28Exit{
+  display:none!important;
+}
+
+/* VK fill badge в настоящем fullscreen не нужен */
+.player-frame:fullscreen::after,
+.player-frame:-webkit-full-screen::after{
+  display:none!important;
+}
+
+/* Состояние активного fullscreen */
+body.jc-hard-browser-full .player-frame{
+  outline:0!important;
+}
+
+/* Маркер автотеста */
+body::before{
+  --jc28-7-ready: 1;
 }

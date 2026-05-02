@@ -1,4 +1,4 @@
-/* JustClover cache killer stage28-6-hard-fullscreen-button-20260502-1 */
+/* JustClover cache killer stage28-7-player-frame-fullscreen-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
