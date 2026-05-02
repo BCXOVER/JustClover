@@ -4951,8 +4951,8 @@ setTimeout(jc251Patch, 1000);
    JustClover Stage 28 CLEAN — player/cinema JS
    Version: stage28-clean-cinema-player-20260502-1
    ========================================================= */
-console.log("JustClover Stage 33 EMBED loaded:", "stage33-reliable-youtube-vk-embed-20260502-1");
-window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
+console.log("JustClover Stage 34 RUN loaded:", "stage34-source-buttons-rebind-20260502-1");
+window.JUSTCLOVER_BUILD = "stage34-source-buttons-rebind-20260502-1";
 
 try{
   if(localStorage.getItem('jc28LastBuild') !== window.JUSTCLOVER_BUILD){
@@ -4965,7 +4965,7 @@ try{
 
 
 (function(){
-  const BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
+  const BUILD = "stage34-source-buttons-rebind-20260502-1";
   let zoom = Number(localStorage.getItem('jc28CinemaZoomV4') || '0') || 0;
 
   function svg(name){
@@ -5415,10 +5415,10 @@ try{
 
 /* =========================================================
    JustClover Stage 30 — Rave-like clean sources JS
-   Version: stage33-reliable-youtube-vk-embed-20260502-1
+   Version: stage34-source-buttons-rebind-20260502-1
    ========================================================= */
-console.log("JustClover Stage 33 EMBED loaded:", "stage33-reliable-youtube-vk-embed-20260502-1");
-window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
+console.log("JustClover Stage 34 RUN loaded:", "stage34-source-buttons-rebind-20260502-1");
+window.JUSTCLOVER_BUILD = "stage34-source-buttons-rebind-20260502-1";
 
 (function(){
   function sourceLabel(type){
@@ -5621,7 +5621,7 @@ window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
 
 /* =========================================================
    JustClover Stage 30.1 — YouTube/VK source reload + sync bounce fix
-   Version: stage33-reliable-youtube-vk-embed-20260502-1
+   Version: stage34-source-buttons-rebind-20260502-1
 
    Причина бага:
    renderRoom() вызывается на КАЖДОЕ изменение rooms/{id}, включая playback.
@@ -5629,8 +5629,8 @@ window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
    Для YouTube это вызывало ytPlayer.loadVideoById(...) снова и снова,
    поэтому видео бесконечно ставилось на паузу/включалось.
    ========================================================= */
-console.log("JustClover Stage 33 EMBED loaded:", "stage33-reliable-youtube-vk-embed-20260502-1");
-window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
+console.log("JustClover Stage 34 RUN loaded:", "stage34-source-buttons-rebind-20260502-1");
+window.JUSTCLOVER_BUILD = "stage34-source-buttons-rebind-20260502-1";
 
 (function(){
   function sourceKey(s){
@@ -5773,10 +5773,10 @@ window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
 
 /* =========================================================
    JustClover Stage 30.2 — remove ad labels everywhere
-   Version: stage33-reliable-youtube-vk-embed-20260502-1
+   Version: stage34-source-buttons-rebind-20260502-1
    ========================================================= */
-console.log("JustClover Stage 33 EMBED loaded:", "stage33-reliable-youtube-vk-embed-20260502-1");
-window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
+console.log("JustClover Stage 34 RUN loaded:", "stage34-source-buttons-rebind-20260502-1");
+window.JUSTCLOVER_BUILD = "stage34-source-buttons-rebind-20260502-1";
 
 (function(){
   function labelFromType(type){
@@ -5877,10 +5877,10 @@ window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
 
 /* =========================================================
    JustClover Stage 30.3 — remove big Rave sources card JS
-   Version: stage33-reliable-youtube-vk-embed-20260502-1
+   Version: stage34-source-buttons-rebind-20260502-1
    ========================================================= */
-console.log("JustClover Stage 33 EMBED loaded:", "stage33-reliable-youtube-vk-embed-20260502-1");
-window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
+console.log("JustClover Stage 34 RUN loaded:", "stage34-source-buttons-rebind-20260502-1");
+window.JUSTCLOVER_BUILD = "stage34-source-buttons-rebind-20260502-1";
 
 (function(){
   function removeBigRaveCard(){
@@ -5903,7 +5903,7 @@ window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
 
 /* =========================================================
    JustClover Stage 31 — YouTube Sync Lock Clean Rewrite
-   Version: stage33-reliable-youtube-vk-embed-20260502-1
+   Version: stage34-source-buttons-rebind-20260502-1
 
    Исправляет бесконечный play/pause loop:
    - source загружается только если sourceKey реально изменился;
@@ -5914,11 +5914,11 @@ window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
    - applyPlayback не дёргает play/pause/seek, если состояние уже почти такое же;
    - YouTube poll больше не спамит play/pause каждую секунду.
    ========================================================= */
-console.log("JustClover Stage 33 EMBED loaded:", "stage33-reliable-youtube-vk-embed-20260502-1");
-window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
+console.log("JustClover Stage 34 RUN loaded:", "stage34-source-buttons-rebind-20260502-1");
+window.JUSTCLOVER_BUILD = "stage34-source-buttons-rebind-20260502-1";
 
 (function(){
-  const BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
+  const BUILD = "stage34-source-buttons-rebind-20260502-1";
   const CLIENT_KEY = "jcClientId";
   let jc31ClientId = "";
   try {
@@ -6404,7 +6404,7 @@ window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
 
 /* =========================================================
    JustClover Stage 32 — Smart YouTube/VK link parser
-   Version: stage33-reliable-youtube-vk-embed-20260502-1
+   Version: stage34-source-buttons-rebind-20260502-1
 
    Исправляет:
    - YouTube share/live/shorts/embed/youtu.be/music links;
@@ -6413,8 +6413,8 @@ window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
    - VK links with z=video-123_456;
    - автодетект источника при вставке ссылки.
    ========================================================= */
-console.log("JustClover Stage 33 EMBED loaded:", "stage33-reliable-youtube-vk-embed-20260502-1");
-window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
+console.log("JustClover Stage 34 RUN loaded:", "stage34-source-buttons-rebind-20260502-1");
+window.JUSTCLOVER_BUILD = "stage34-source-buttons-rebind-20260502-1";
 
 (function(){
   function cleanRaw(raw){
@@ -6775,7 +6775,7 @@ window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
 
 /* =========================================================
    JustClover Stage 33 — Reliable YouTube/VK embed/play fix
-   Version: stage33-reliable-youtube-vk-embed-20260502-1
+   Version: stage34-source-buttons-rebind-20260502-1
 
    Фиксит ситуацию: ссылку вставили, источник сохранился,
    но видео не появляется/не воспроизводится.
@@ -6785,8 +6785,8 @@ window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
    - YouTube получает fallback через youtube-nocookie iframe, если API не готов;
    - после установки источника он сразу загружается локально, не ждём Firebase roundtrip.
    ========================================================= */
-console.log("JustClover Stage 33 EMBED loaded:", "stage33-reliable-youtube-vk-embed-20260502-1");
-window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
+console.log("JustClover Stage 34 RUN loaded:", "stage34-source-buttons-rebind-20260502-1");
+window.JUSTCLOVER_BUILD = "stage34-source-buttons-rebind-20260502-1";
 
 (function(){
   function clean(raw){
@@ -7160,4 +7160,437 @@ window.JUSTCLOVER_BUILD = "stage33-reliable-youtube-vk-embed-20260502-1";
     prepIframe(els?.iframePlayer);
     console.log('[JC33 embed] ready', window.jcEmbedDebug('https://vkvideo.ru/video-1_456239017'));
   }, 500);
+})();
+
+
+/* =========================================================
+   JustClover Stage 34 — Source buttons rebind + paste-and-run
+   Version: stage34-source-buttons-rebind-20260502-1
+
+   Почему прошлые фиксы могли "не работать":
+   старые кнопки уже были привязаны к старому setSource/jcStage8SetSourceFromFields.
+   Здесь перехватываем клики на кнопки источников в capture-фазе
+   и всегда запускаем новый надёжный обработчик.
+   ========================================================= */
+console.log("JustClover Stage 34 RUN loaded:", "stage34-source-buttons-rebind-20260502-1");
+window.JUSTCLOVER_BUILD = "stage34-source-buttons-rebind-20260502-1";
+
+(function(){
+  function toast(text){
+    let t = document.getElementById('jc34SourceToast');
+    if(!t){
+      t = document.createElement('div');
+      t.id = 'jc34SourceToast';
+      document.body.appendChild(t);
+    }
+    t.textContent = text;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2400);
+    try { if(typeof jcStage5Toast === 'function') jcStage5Toast(text); } catch(e) {}
+    console.log('[JC34]', text);
+  }
+
+  function clean(raw){
+    let v = String(raw || '').trim();
+    v = v.replace(/^<|>$/g, '').replace(/^["']|["']$/g, '').trim();
+    if(v && !/^https?:\/\//i.test(v) && /^(www\.|m\.|youtube\.com|youtu\.be|vk\.com|vkvideo\.ru|m\.vk\.com)/i.test(v)){
+      v = 'https://' + v;
+    }
+    return v;
+  }
+
+  function dec(v){ try { return decodeURIComponent(String(v || '')); } catch(e) { return String(v || ''); } }
+  function urlObj(v){ try { return new URL(clean(v)); } catch(e) { return null; } }
+  function ytOk(id){ return /^[a-zA-Z0-9_-]{11}$/.test(String(id || '')); }
+
+  function youtubeId(raw){
+    const text = clean(raw);
+    if(ytOk(text)) return text;
+    const u = urlObj(text);
+    const vals = [text, dec(text)];
+
+    if(u){
+      vals.push(u.href, u.pathname, u.search, u.hash);
+      ['v','vi'].forEach(k => vals.push(u.searchParams.get(k)));
+      ['u','url','q'].forEach(k => {
+        const n = dec(u.searchParams.get(k));
+        if(n && n !== 'null') vals.push(n);
+      });
+      const parts = u.pathname.split('/').filter(Boolean);
+      if(u.hostname.includes('youtu.be') && parts[0]) vals.push(parts[0]);
+      ['shorts','embed','live','v'].forEach(k => {
+        const i = parts.indexOf(k);
+        if(i >= 0 && parts[i+1]) vals.push(parts[i+1]);
+      });
+    }
+
+    for(const v of vals){
+      const s = String(v || '');
+      if(ytOk(s)) return s;
+      let m = s.match(/[?&#]v=([a-zA-Z0-9_-]{11})/); if(m) return m[1];
+      m = s.match(/\/(?:shorts|embed|live|v)\/([a-zA-Z0-9_-]{11})/); if(m) return m[1];
+      m = s.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/); if(m) return m[1];
+      m = s.match(/(?:youtube|youtu|watch|shorts|embed|live).*?([a-zA-Z0-9_-]{11})/i); if(m) return m[1];
+    }
+    return '';
+  }
+
+  function vkParts(raw){
+    const text = clean(raw);
+    const u = urlObj(text);
+    const vals = [text, dec(text)];
+
+    if(u){
+      vals.push(u.href, u.pathname, u.search, u.hash);
+      ['z','w','q','url','to'].forEach(k => {
+        const v = u.searchParams.get(k);
+        if(v) {
+          vals.push(v);
+          vals.push(dec(v));
+        }
+      });
+      const oid = u.searchParams.get('oid');
+      const id = u.searchParams.get('id');
+      const hash = u.searchParams.get('hash') || u.searchParams.get('h') || '';
+      if(oid && id) return {oid, id, hash};
+    }
+
+    for(const v of vals){
+      const s = String(v || '');
+      let m = s.match(/(?:video|clip)(-?\d+)_(\d+)/i);
+      if(m) {
+        const hm = s.match(/[?&#](?:hash|h)=([a-zA-Z0-9_-]+)/i);
+        return {oid:m[1], id:m[2], hash:hm?.[1] || ''};
+      }
+      m = s.match(/[?&]oid=(-?\d+).*?[?&]id=(\d+)/i);
+      if(m) return {oid:m[1], id:m[2], hash:''};
+      m = s.match(/[?&]id=(\d+).*?[?&]oid=(-?\d+)/i);
+      if(m) return {oid:m[2], id:m[1], hash:''};
+    }
+    return null;
+  }
+
+  function vkEmbedUrl(raw){
+    const p = vkParts(raw);
+    if(!p) return '';
+    const hash = p.hash ? `&hash=${encodeURIComponent(p.hash)}` : '';
+    return `https://vk.com/video_ext.php?oid=${p.oid}&id=${p.id}&hd=2${hash}`;
+  }
+
+  function ytEmbedUrl(id){
+    return `https://www.youtube-nocookie.com/embed/${id}?enablejsapi=1&playsinline=1&rel=0&origin=${encodeURIComponent(location.origin)}`;
+  }
+
+  function detect(raw){
+    const v = clean(raw).toLowerCase();
+    if(!v) return '';
+    if(youtubeId(v)) return 'youtube';
+    if(v.includes('vk.com') || v.includes('vkvideo.ru') || vkParts(v)) return 'vk';
+    if(v.includes('drive.google')) return 'drive';
+    if(v.includes('disk.yandex') || v.includes('yadi.sk')) return 'yandex';
+    if(/\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(v)) return 'mp4';
+    return '';
+  }
+
+  ytId = youtubeId;
+  vkEmbed = vkEmbedUrl;
+
+  function prepIframe(){
+    const iframe = els?.iframePlayer || document.getElementById('iframePlayer');
+    if(!iframe) return;
+    iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
+    iframe.setAttribute('allowfullscreen', 'true');
+    iframe.allowFullscreen = true;
+    iframe.referrerPolicy = 'origin-when-cross-origin';
+  }
+
+  function makeSource(raw, selected){
+    const url = safeUrl(clean(raw));
+    if(!url) return {error:'Вставь корректную ссылку'};
+    const type = detect(url) || selected || 'youtube';
+
+    if(type === 'youtube'){
+      const id = youtubeId(url);
+      if(!id) return {error:'Не удалось распознать YouTube. Нужна ссылка на конкретное видео.'};
+      return {source:{type:'youtube', url, videoId:id, embedUrl:ytEmbedUrl(id), title:'YouTube'}};
+    }
+
+    if(type === 'vk'){
+      const embedUrl = vkEmbedUrl(url);
+      if(!embedUrl){
+        // fallback: сохраним внешнюю ссылку, чтобы пользователь не оставался с пустым экраном
+        return {source:{type:'anilibrix', url, embedUrl:url, title:'VK Video'}};
+      }
+      return {source:{type:'vk', url, embedUrl, title:'VK Video'}};
+    }
+
+    if(type === 'mp4') return {source:{type:'mp4', url, title:'Direct MP4'}};
+    if(type === 'drive') return {source:{type:'drive', url, embedUrl:typeof jcStage8DrivePreview === 'function' ? jcStage8DrivePreview(url) : url, title:'Google Drive'}};
+    if(type === 'yandex') return {source:{type:'yandex', url, title:'Яндекс Диск'}};
+    return {source:{type:'anilibrix', url, embedUrl:url, title:'Источник'}};
+  }
+
+  function showSourceNow(source){
+    currentSource = source;
+    hidePlayers();
+
+    if(source.type === 'youtube'){
+      show(els.youtubePlayer);
+      // Если API готов — используем его. Если нет — iframe fallback, чтобы видео хотя бы появилось.
+      Promise.resolve().then(async () => {
+        let ok = false;
+        try {
+          ok = await Promise.race([waitYT(), new Promise(res => setTimeout(() => res(false), 2500))]);
+        } catch(e) {}
+
+        if(ok && typeof loadYT === 'function'){
+          await loadYT(source.videoId);
+        } else {
+          hidePlayers();
+          show(els.iframePlayer);
+          prepIframe();
+          els.iframePlayer.src = source.embedUrl || ytEmbedUrl(source.videoId);
+        }
+        status(els.sourceNote, 'YouTube загружен. Нажми Play в плеере.');
+      });
+      return;
+    }
+
+    if(source.type === 'vk'){
+      show(els.iframePlayer);
+      prepIframe();
+      els.iframePlayer.src = source.embedUrl || vkEmbedUrl(source.url);
+      status(els.sourceNote, 'VK Video загружен. Нажми Play в плеере.');
+      return;
+    }
+
+    if(source.type === 'mp4' || source.type === 'direct'){
+      show(els.videoPlayer);
+      els.videoPlayer.src = source.url || '';
+      els.videoPlayer.load();
+      status(els.sourceNote, 'Direct MP4 загружен.');
+      return;
+    }
+
+    if(source.type === 'drive'){
+      show(els.iframePlayer);
+      prepIframe();
+      els.iframePlayer.src = source.embedUrl || source.url;
+      status(els.sourceNote, 'Google Drive загружен.');
+      return;
+    }
+
+    show(els.iframePlayer);
+    prepIframe();
+    els.iframePlayer.src = source.embedUrl || source.url;
+    status(els.sourceNote, 'Источник открыт через iframe.');
+  }
+
+  async function runLink(raw, selected){
+    raw = clean(raw || '');
+    if(!raw){
+      try { raw = await navigator.clipboard.readText(); }
+      catch(e) {}
+    }
+    if(!raw){
+      raw = prompt('Вставь ссылку YouTube/VK/MP4:') || '';
+    }
+
+    const result = makeSource(raw, selected);
+    if(result.error){
+      toast(result.error);
+      status(els.sourceNote, result.error);
+      return false;
+    }
+
+    if(!currentRoomId){
+      toast('Сначала создай или зайди в комнату');
+      status(els.roomStatus, 'Сначала создай или зайди в комнату.');
+      return false;
+    }
+
+    if(currentRoom?.ownerUid && currentUser?.uid && currentRoom.ownerUid !== currentUser.uid){
+      toast('Источник может менять только хост');
+      status(els.roomStatus, 'Источник может менять только хост.');
+      return false;
+    }
+
+    const source = result.source;
+
+    if(els.sourceType && [...els.sourceType.options].some(o => o.value === source.type)){
+      els.sourceType.value = source.type;
+      els.sourceType.dispatchEvent(new Event('change'));
+    }
+    if(els.sourceUrl) els.sourceUrl.value = source.url || raw;
+
+    showSourceNow(source);
+
+    try {
+      await update(ref(db, `rooms/${currentRoomId}`), {
+        source,
+        playback: {
+          time:0,
+          playing:false,
+          updatedAt:Date.now(),
+          byUid:currentUser?.uid || '',
+          sourceKey: source.type + '|' + (source.videoId || source.embedUrl || source.url || '')
+        },
+        updatedAt:Date.now()
+      });
+      toast('Источник запущен');
+      section('watchSection');
+      return true;
+    } catch(e) {
+      console.error('[JC34] save source failed', e);
+      toast('Не удалось сохранить источник в комнате');
+      return false;
+    }
+  }
+
+  window.jcRunLink = runLink;
+  window.jcLinkDebug = function(raw){
+    return {
+      raw,
+      clean: clean(raw),
+      detected: detect(raw),
+      youtubeId: youtubeId(raw),
+      vkParts: vkParts(raw),
+      vkEmbed: vkEmbedUrl(raw),
+      source: makeSource(raw, detect(raw))
+    };
+  };
+
+  // Переопределяем старые функции.
+  setSource = async function(){
+    if(els.sourceType?.value === 'local'){
+      const f = els.localVideoFile.files?.[0];
+      if(!f) return toast('Выбери local video файл');
+      loadLocal();
+      const source = {type:'local', title:f.name, filename:f.name, size:f.size};
+      await update(ref(db, `rooms/${currentRoomId}`), {source, playback:{time:0,playing:false,updatedAt:Date.now(),byUid:currentUser?.uid || ''}, updatedAt:Date.now()});
+      return;
+    }
+    return runLink(els.sourceUrl?.value || '', els.sourceType?.value || '');
+  };
+
+  if(typeof jcStage8SetSourceFromFields === 'function'){
+    jcStage8SetSourceFromFields = async function(){
+      const raw = document.querySelector('#jcCatalogUrl')?.value || '';
+      const selected = jcStage8Selected === 'paste' ? '' : jcStage8Selected;
+      const ok = await runLink(raw, selected);
+      if(ok) document.querySelector('.jc-catalog-layer')?.classList.remove('open');
+    };
+  }
+
+  if(typeof jcStage8GuessSource === 'function'){
+    jcStage8GuessSource = function(url){
+      const t = detect(url);
+      if(t && typeof jcStage8SelectSource === 'function') jcStage8SelectSource(t);
+    };
+  }
+
+  // Жёстко перехватываем старые кнопки.
+  document.addEventListener('click', async function(e){
+    const btn = e.target.closest?.('button');
+    if(!btn) return;
+    const text = (btn.textContent || '').trim().toLowerCase();
+    const id = btn.id || '';
+
+    const isRun =
+      id === 'setSourceBtn' ||
+      id === 'jcCatalogRunBtn' ||
+      id === 'jcCatalogPasteRunBtn' ||
+      text === 'запустить' ||
+      text.includes('вставить и запустить');
+
+    const isEmptyPaste = text.includes('вставить ссылку') && btn.closest('#emptyPlayer');
+
+    if(isRun || isEmptyPaste){
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      let raw = '';
+      let selected = '';
+
+      if(id === 'jcCatalogRunBtn' || id === 'jcCatalogPasteRunBtn' || btn.closest('.jc-catalog-layer')){
+        raw = document.querySelector('#jcCatalogUrl')?.value || '';
+        selected = jcStage8Selected === 'paste' ? '' : jcStage8Selected;
+      } else {
+        raw = els.sourceUrl?.value || '';
+        selected = els.sourceType?.value || '';
+      }
+
+      if(id === 'jcCatalogPasteRunBtn' || isEmptyPaste || text.includes('вставить')){
+        try {
+          const clip = await navigator.clipboard.readText();
+          if(clip) raw = clip;
+        } catch(e) {}
+      }
+
+      await runLink(raw, selected);
+    }
+  }, true);
+
+  function wireInputs(){
+    [els?.sourceUrl, document.querySelector('#jcCatalogUrl')].filter(Boolean).forEach(input => {
+      if(input.dataset.jc34 === '1') return;
+      input.dataset.jc34 = '1';
+      input.addEventListener('input', () => {
+        const t = detect(input.value);
+        if(!t) return;
+        if(input === els.sourceUrl && els.sourceType && [...els.sourceType.options].some(o => o.value === t)){
+          els.sourceType.value = t;
+          els.sourceType.dispatchEvent(new Event('change'));
+        }
+        if(input.id === 'jcCatalogUrl' && typeof jcStage8SelectSource === 'function') jcStage8SelectSource(t);
+      });
+      input.addEventListener('keydown', e => {
+        if(e.key === 'Enter'){
+          e.preventDefault();
+          runLink(input.value, input.id === 'jcCatalogUrl' ? jcStage8Selected : els.sourceType?.value || '');
+        }
+      });
+    });
+  }
+
+  function rebindButtons(){
+    if(els?.setSourceBtn) {
+      els.setSourceBtn.onclick = e => {
+        e?.preventDefault?.();
+        return setSource();
+      };
+    }
+    const run = document.querySelector('#jcCatalogRunBtn');
+    if(run) run.onclick = e => {
+      e?.preventDefault?.();
+      return jcStage8SetSourceFromFields();
+    };
+  }
+
+  function ensurePill(){
+    if(document.getElementById('jc34RunPill')) return;
+    const p = document.createElement('div');
+    p.id = 'jc34RunPill';
+    p.textContent = '34 RUN';
+    document.body.appendChild(p);
+  }
+
+  setInterval(() => {
+    document.body.classList.add('jc34-source-run');
+    ensurePill();
+    prepIframe();
+    wireInputs();
+    rebindButtons();
+  }, 500);
+
+  setTimeout(() => {
+    document.body.classList.add('jc34-source-run');
+    ensurePill();
+    prepIframe();
+    wireInputs();
+    rebindButtons();
+    console.log('[JC34] ready', window.jcLinkDebug('https://youtu.be/dQw4w9WgXcQ'));
+  }, 400);
 })();

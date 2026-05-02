@@ -4728,7 +4728,7 @@ body.jc-wallpaper-paused #jcWallpaperMediaLayer img{
    ========================================================= */
 
 html::after{
-  content:'33 EMBED';
+  content:'34 RUN';
   position:fixed;
   left:8px;
   bottom:8px;
@@ -5220,7 +5220,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'33 EMBED'!important;
+  content:'34 RUN'!important;
 }
 
 /* В CSS-кино держим плеер внутри вкладки, без системного fullscreen overlay */
@@ -5281,7 +5281,7 @@ body.jc28-cinema .player-frame{
    ========================================================= */
 
 html::after{
-  content:'33 EMBED'!important;
+  content:'34 RUN'!important;
 }
 
 /* В кино iframe не просто 16:9, а заполняет экран с умным zoom.
@@ -5380,7 +5380,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'33 EMBED'!important;
+  content:'34 RUN'!important;
 }
 
 body.jc28-cinema .player-frame #iframePlayer,
@@ -5454,7 +5454,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'33 EMBED'!important;
+  content:'34 RUN'!important;
 }
 
 /* Всегда делаем player-frame настоящим viewport для iframe */
@@ -5576,7 +5576,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'33 EMBED'!important;
+  content:'34 RUN'!important;
 }
 
 /* Чуть шире панель, потому что вернули Full */
@@ -5687,7 +5687,7 @@ body.jc28-browser-full #jc28Panel .jc28-btn[data-jc28-act="full"]{
    ========================================================= */
 
 html::after{
-  content:'33 EMBED'!important;
+  content:'34 RUN'!important;
 }
 
 .jc-hard-full-btn{
@@ -5798,7 +5798,7 @@ body.jc-player-frame-fullscreen .jc-hard-full-btn{
    ========================================================= */
 
 html::after{
-  content:'33 EMBED'!important;
+  content:'34 RUN'!important;
 }
 
 /* Fullscreen именно плеера */
@@ -5957,7 +5957,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'33 EMBED'!important;
+  content:'34 RUN'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6108,7 +6108,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'33 EMBED'!important;
+  content:'34 RUN'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6440,7 +6440,7 @@ body.jc28-cinema #jcCleanSourcePanel{
    ========================================================= */
 
 html::after{
-  content:'33 EMBED'!important;
+  content:'34 RUN'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6455,7 +6455,7 @@ body.jc-youtube-sync-fixed #jcRaveSourceBar .jc-rave-badge{
    ========================================================= */
 
 html::after{
-  content:'33 EMBED'!important;
+  content:'34 RUN'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6495,7 +6495,7 @@ body.jc30-no-ad-labels{
    ========================================================= */
 
 html::after{
-  content:'33 EMBED'!important;
+  content:'34 RUN'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6536,7 +6536,7 @@ button[data-rave-tool-clean],
    ========================================================= */
 
 html::after{
-  content:'33 EMBED'!important;
+  content:'34 RUN'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6570,7 +6570,7 @@ body.jc31-sync-lock #jc31SyncPill{
    ========================================================= */
 
 html::after{
-  content:'33 EMBED'!important;
+  content:'34 RUN'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6604,7 +6604,7 @@ body.jc32-link-fix #jc32LinkPill{
    ========================================================= */
 
 html::after{
-  content:'33 EMBED'!important;
+  content:'34 RUN'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6676,4 +6676,59 @@ body.jc33-embed-fix #jc33EmbedPill{
 /* Если используем fallback iframe для YouTube */
 body.jc33-youtube-fallback #iframePlayer{
   background:#000!important;
+}
+
+
+/* =========================================================
+   JustClover Stage 34 — Source buttons rebind
+   ========================================================= */
+
+html::after{
+  content:'34 RUN'!important;
+  background:rgba(34,197,94,.92)!important;
+}
+
+#jc34RunPill{
+  position:fixed;
+  right:10px;
+  bottom:70px;
+  z-index:2147483645;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(3,6,14,.62);
+  color:rgba(255,255,255,.74);
+  font:900 10px/1 system-ui,-apple-system,Segoe UI,sans-serif;
+  pointer-events:none;
+  opacity:0;
+  transition:.2s ease;
+}
+
+body.jc34-source-run #jc34RunPill{
+  opacity:.72;
+}
+
+#jc34SourceToast{
+  position:fixed;
+  left:50%;
+  bottom:110px;
+  transform:translateX(-50%) translateY(8px);
+  z-index:2147483647;
+  max-width:min(680px,calc(100vw - 24px));
+  padding:10px 13px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(3,6,14,.82);
+  color:#fff;
+  font-size:12px;
+  font-weight:850;
+  opacity:0;
+  pointer-events:none;
+  transition:.18s ease;
+  backdrop-filter:blur(16px);
+}
+
+#jc34SourceToast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
 }
