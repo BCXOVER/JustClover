@@ -1,12 +1,12 @@
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage87-rollback-icon-mic-dock-20260502-1
+   Version: stage88-active-icon-mic-dock-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage87-rollback-icon-mic-dock-20260502-1";
+const JC40_BUILD = "stage88-active-icon-mic-dock-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
@@ -595,7 +595,6 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
     const p = panel();
     return {
       build: BUILD,
-      micStateClass: document.querySelector('#jc80Dock [data-jc80-mic]')?.className || '',
       open,
       watchMode: isWatchMode(),
       htmlWatchClass: document.documentElement.classList.contains('jc40-watch-mode'),
@@ -627,10 +626,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage87-rollback-icon-mic-dock-20260502-1
+   Version: stage88-active-icon-mic-dock-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage87-rollback-icon-mic-dock-20260502-1";
+  const BUILD = "stage88-active-icon-mic-dock-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -706,42 +705,1325 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
     return false;
   }
 
-  function inferMicEnabled(){
-    const btn = document.getElementById('voiceBtn');
-    const status = document.getElementById('voiceStatus');
+  function ensureDock(){
+    const stage = document.querySelector('.watch-stage');
+    const main = document.querySelector('.watch-main');
+    const playerCard =
+      document.querySelector('.player-card-redesign') ||
+      document.querySelector('.player-card') ||
+      document.querySelector('.player-shell')?.closest?.('.player-card,.player-card-redesign') ||
+      document.querySelector('.player-frame')?.closest?.('.player-card,.player-card-redesign,.player-shell');
 
-    if(btn?.hasAttribute('aria-pressed')) return btn.getAttribute('aria-pressed') === 'true';
+    if(!stage || !playerCard) return null;
 
-    const text = [
-      btn?.textContent,
-      status?.textContent,
-      btn?.getAttribute('aria-label'),
-      status?.getAttribute('aria-label'),
-      btn?.getAttribute('title'),
-      status?.getAttribute('title'),
-      btn?.dataset?.state,
-      status?.dataset?.state
-    ].filter(Boolean).join(' ').toLowerCase();
+    let oldDock = document.getElementById('jc43ActiveDock');
+    if(oldDock) oldDock.id = 'jc45ActiveDock';
 
-    const classBag = [btn?.className, status?.className].filter(Boolean).join(' ').toLowerCase();
-    const offRx = /(выкл|выключ|откл|muted|mute|off|disabled|blocked)/;
-    const onRx = /(вкл|включ|unmuted|unmute|enabled|active|connected|on)/;
+    let dock = document.getElementById('jc45ActiveDock');
+    if(!dock){
+      dock = document.createElement('div');
+      dock.id = 'jc45ActiveDock';
+    }
 
-    if(offRx.test(text) || offRx.test(classBag)) return false;
-    if(onRx.test(text) || onRx.test(classBag)) return true;
+    if(dock.parentNode !== stage || dock.previousElementSibling !== playerCard){
+      playerCard.insertAdjacentElement('afterend', dock);
+    }
 
+    stage.id = 'jc45ActiveFullscreenTarget';
+    if(main && main.id === 'jc45ActiveFullscreenTarget') main.removeAttribute('id');
+    return dock;
+  }
+
+  function markActiveHiddenPanels(on){
+    // Stage45: сначала снимаем ВСЕ старые/новые hidden-классы, чтобы не остался скрытым watch-main/player.
+    document.querySelectorAll('.jc45-active-hidden-panel,.jc44-active-hidden-panel,.jc43-active-hidden-panel').forEach(el => {
+      el.classList.remove('jc45-active-hidden-panel','jc44-active-hidden-panel','jc43-active-hidden-panel');
+    });
+    if(!on) return;
+
+    const stage = document.querySelector('.watch-stage');
+    if(!stage) return;
+
+    // Никогда не скрываем каркас активного просмотра и сам плеер.
+    const protectedSelector = '.watch-main,.watch-stage,.player-card,.player-card-redesign,.player-shell,.player-frame,#jc45ActiveDock,#jc41RaveFloating';
+    const badText = /История источников|Очередь видео/i;
+
+    // Скрываем только отдельные панели-дети stage после плеера, но не весь watch-main.
+    Array.from(stage.children).forEach(child => {
+      if(!child || child.matches?.(protectedSelector) || child.closest?.('.player-card,.player-card-redesign,.player-shell,.player-frame,#jc45ActiveDock,#jc41RaveFloating')) return;
+      if(badText.test(child.textContent || '')) child.classList.add('jc45-active-hidden-panel');
+    });
+
+    // На случай если история/очередь вложены глубже: поднимаемся только до небольшой панели,
+    // но останавливаемся перед player/stage/main, чтобы больше не прятать весь плеер.
+    stage.querySelectorAll('h1,h2,h3,h4,strong,b').forEach(el => {
+      if(!badText.test(el.textContent || '')) return;
+      if(el.closest?.(protectedSelector)) return;
+      let panel = el.closest?.('.source-history,.queue-card,[class*="history"],[class*="queue"],.side-card,.panel,.card');
+      if(!panel || panel.matches?.(protectedSelector) || panel.closest?.('.player-card,.player-card-redesign,.player-shell,.player-frame,#jc45ActiveDock,#jc41RaveFloating')) return;
+      if(panel === stage || panel.classList?.contains('watch-stage') || panel.classList?.contains('watch-main')) return;
+      panel.classList.add('jc45-active-hidden-panel');
+    });
+  }
+
+  async function togglePlayerFullscreen(){
+    if(getFullscreenElement()) {
+      await exitAnyFullscreen();
+      syncFullscreenButtons();
+      return;
+    }
+
+    const fullscreenTarget = document.documentElement || document.getElementById('jc45ActiveFullscreenTarget') || document.querySelector('.watch-stage') || document.querySelector('.watch-main') || document.querySelector('.player-shell') || document.querySelector('.player-card') || document.querySelector('.player-frame');
+    if(await requestFullOn(fullscreenTarget || document.documentElement)){
+      syncFullscreenButtons();
+      return;
+    }
+    console.warn('[JC52] browser blocked fullscreen request');
+  }
+
+  function syncFullscreenButtons(){
+    const on = !!getFullscreenElement();
+    document.querySelectorAll('[data-jc41-full]').forEach(btn => {
+      btn.textContent = on ? 'Выйти' : 'Экран';
+      btn.title = on ? 'Выйти из большого экрана' : 'Открыть плеер на большой экран';
+      btn.setAttribute('aria-label', btn.title);
+    });
+  }
+
+  function chooseLocalShortcut(){
+    try{
+      const sourceType = document.getElementById('sourceType');
+      if(sourceType){
+        const hasLocal = Array.from(sourceType.options || []).some(o => o.value === 'local');
+        if(hasLocal) sourceType.value = 'local';
+      }
+      document.getElementById('localVideoFile')?.click?.();
+    }catch(_){}
+  }
+
+  function ensureRaveTopbar(){
+    let bar = document.getElementById('jc51RaveTopbar');
+    if(bar) return bar;
+    bar = document.createElement('div');
+    bar.id = 'jc51RaveTopbar';
+    bar.innerHTML = `
+      <div class="jc51-rave-left">
+        <button type="button" data-jc51-exit title="Обычный режим" aria-label="Обычный режим">×</button>
+        <button type="button" data-jc51-sources title="Источники" aria-label="Источники">☰</button>
+        <button type="button" data-jc51-catalog title="Каталог" aria-label="Каталог">⚙</button>
+        <button type="button" data-jc51-search title="Поиск / каталог" aria-label="Поиск / каталог">⌕</button>
+      </div>
+      <div class="jc51-rave-logo">JUST&nbsp;☘&nbsp;CLOVER</div>
+      <div class="jc51-rave-right jc53-rave-right-spacer" aria-hidden="true"></div>`;
+    bar.addEventListener('click', function(e){
+      const b = e.target.closest('button');
+      if(!b) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if(b.hasAttribute('data-jc51-exit')) setFocus(false);
+      if(b.hasAttribute('data-jc51-sources') || b.hasAttribute('data-jc51-catalog') || b.hasAttribute('data-jc51-search')) openCatalog();
+    });
+    document.body.appendChild(bar);
+    return bar;
+  }
+
+  function removeRaveTopbar(){
+    document.getElementById('jc51RaveTopbar')?.remove?.();
+  }
+
+  function ensureCompactDock(dock){
+    if(!dock) return null;
+    let inner = dock.querySelector('.jc48-dock-inner');
+    if(!inner){
+      inner = document.createElement('div');
+      inner.className = 'jc48-dock-inner';
+      dock.appendChild(inner);
+    }
+    let actions = inner.querySelector('.jc48-actions-slot');
+    if(!actions){
+      actions = document.createElement('div');
+      actions.className = 'jc48-actions-slot';
+      inner.appendChild(actions);
+    }
+    let sources = inner.querySelector('.jc48-source-row');
+    if(!sources){
+      sources = document.createElement('div');
+      sources.className = 'jc48-source-row';
+      sources.innerHTML = `
+        <button type="button" data-jc48-open-sources>Источники</button>
+        <button type="button" data-jc48-open-catalog>Каталог</button>
+        <button type="button" data-jc48-local>Local</button>
+      `;
+      sources.addEventListener('click', function(e){
+        const b = e.target.closest('button');
+        if(!b) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if(b.hasAttribute('data-jc48-open-sources') || b.hasAttribute('data-jc48-open-catalog')) openCatalog();
+        if(b.hasAttribute('data-jc48-local')) chooseLocalShortcut();
+      });
+      inner.appendChild(sources);
+    }
+    return { inner, actions, sources };
+  }
+
+  function hideTopSourceChrome(on){
+    document.querySelectorAll('.jc48-top-source-hidden').forEach(el => el.classList.remove('jc48-top-source-hidden'));
+    if(!on) return;
+    const stage = document.querySelector('.watch-stage');
+    if(!stage) return;
+    const protectedSelector = '.watch-main,.watch-stage,.player-card,.player-card-redesign,.player-shell,.player-frame,#jc45ActiveDock,#jc41RaveFloating,#jc48SourceDock';
+    const candidates = stage.querySelectorAll('header,nav,section,div');
+    candidates.forEach(el => {
+      if(!el || el.matches?.(protectedSelector) || el.closest?.('#jc45ActiveDock,#jc41RaveFloating,#jc40CatalogRoot')) return;
+      // Never hide a node that owns the actual media/player.
+      if(el.querySelector?.('iframe,video,#iframePlayer,#youtubePlayer,#videoPlayer,.player-frame')) return;
+      const txt = (el.textContent || '').replace(/\s+/g,' ').trim();
+      if(!txt) return;
+      const hasNativeHint = /Родной плеер источника|VK Video|YouTube/i.test(txt);
+      const buttons = Array.from(el.querySelectorAll('button,a')).map(b => (b.textContent || b.title || b.getAttribute('aria-label') || '').trim());
+      const hasCatalogButtons = buttons.some(t => /Источники/i.test(t)) && buttons.some(t => /Каталог/i.test(t));
+      const hasLocal = buttons.some(t => /^Local$/i.test(t));
+      if((hasNativeHint && (hasCatalogButtons || hasLocal)) || (hasCatalogButtons && hasLocal)){
+        el.classList.add('jc48-top-source-hidden');
+      }
+    });
+  }
+
+  function ensureFloating(){
+    let f = document.getElementById('jc41RaveFloating');
+    if(f) return f;
+    f = document.createElement('div');
+    f.id = 'jc41RaveFloating';
+    f.innerHTML = `
+      <button type="button" data-jc41-exit>Обычный</button>
+      <button type="button" data-jc41-catalog>Источники</button>
+      <button type="button" data-jc41-mic>Микро</button>
+      <button type="button" data-jc41-chat>Чат</button>
+      <button type="button" data-jc41-full title="Открыть плеер на большой экран" aria-label="Открыть плеер на большой экран">Экран</button>
+    `;
+    f.addEventListener('click', function(e){
+      const b = e.target.closest('button');
+      if(!b) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if(b.hasAttribute('data-jc41-exit')) setFocus(false);
+      if(b.hasAttribute('data-jc41-catalog')) openCatalog();
+      if(b.hasAttribute('data-jc41-mic')) clickMic();
+      if(b.hasAttribute('data-jc41-chat')) focusChat();
+      if(b.hasAttribute('data-jc41-full')) togglePlayerFullscreen();
+    });
+    document.body.appendChild(f);
+    return f;
+  }
+
+  function ensureToggle(){
+    const row = document.querySelector('.watch-chip-row.left') || document.querySelector('.watch-brandbar') || document.querySelector('#watchSection');
+    if(!row) return;
+    let btn = document.getElementById('jc41RaveToggle');
+    if(!btn){
+      btn = document.createElement('button');
+      btn.id = 'jc41RaveToggle';
+      btn.type = 'button';
+      btn.className = 'toolbar-chip jc41-rave-toggle';
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        setFocus(!desired);
+      });
+      if(row.firstChild) row.insertBefore(btn, row.firstChild);
+      else row.appendChild(btn);
+    }
+    btn.textContent = desired ? 'Обычный' : 'Активный просмотр';
+    btn.classList.toggle('active', desired);
+    btn.title = desired ? 'Вернуть обычный интерфейс' : 'Оставить только плеер, чат и микрофон';
+  }
+
+  function apply(){
+    const floating = ensureFloating();
+    ensureToggle();
+    syncFullscreenButtons();
+    const on = desired && isWatchMode();
+    document.documentElement.classList.toggle('jc41-rave-focus', on);
+    document.body.classList.toggle('jc41-rave-focus', on);
+    if(on){
+      document.documentElement.classList.add('jc40-watch-mode');
+      document.body.classList.add('jc40-watch-mode');
+      document.body.classList.remove('jc35-scroll-guard','jc37-modal-lock','jc38-catalog-open','jc-catalog-open');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.width = '';
+      ensureRaveTopbar();
+      const dock = ensureDock();
+      const compact = ensureCompactDock(dock);
+      if(compact?.actions && floating.parentNode !== compact.actions) compact.actions.appendChild(floating);
+      hideTopSourceChrome(true);
+      markActiveHiddenPanels(true);
+      hardTop();
+    } else {
+      removeRaveTopbar();
+      const dock = document.getElementById('jc45ActiveDock') || document.getElementById('jc43ActiveDock');
+      const target = document.getElementById('jc45ActiveFullscreenTarget') || document.getElementById('jc43ActiveFullscreenTarget');
+      hideTopSourceChrome(false);
+      if(floating && floating.parentNode !== document.body) document.body.appendChild(floating);
+      markActiveHiddenPanels(false);
+      if(dock) dock.remove();
+      if(target) target.removeAttribute('id');
+    }
+  }
+
+  function setFocus(on){
+    if(on && window.__jc62IsAuthScreen?.()) return;
+    desired = !!on;
+    try { localStorage.setItem(STORE_KEY, desired ? '1' : '0'); } catch(_) {}
+    apply();
+  }
+
+  // Не даём колесу дергать страницу в активный просмотре; чат и каталог остаются скроллящимися.
+  function isAllowedScrollTarget(node){
+    return !!node?.closest?.('#chatMessages, .chat-card .messages, #jc40CatalogRoot .jc40-scroll, .watch-sidebar, .jc41-allow-scroll');
+  }
+
+  document.addEventListener('wheel', function(e){
+    if(!document.body.classList.contains('jc41-rave-focus')) return;
+    if(isAllowedScrollTarget(e.target)) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }, {capture:true, passive:false});
+
+  document.addEventListener('touchmove', function(e){
+    if(!document.body.classList.contains('jc41-rave-focus')) return;
+    if(isAllowedScrollTarget(e.target)) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }, {capture:true, passive:false});
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && document.body.classList.contains('jc41-rave-focus') && !(window.jc40CleanMenuDebug?.().open)){
+      setFocus(false);
+    }
+  }, true);
+
+  document.addEventListener('fullscreenchange', syncFullscreenButtons);
+  document.addEventListener('webkitfullscreenchange', syncFullscreenButtons);
+  document.addEventListener('msfullscreenchange', syncFullscreenButtons);
+
+  window.jc41SetRaveMode = setFocus;
+  window.jc41ToggleRaveMode = function(){ setFocus(!desired); };
+  window.jc42SetActiveView = setFocus;
+  window.jc42ToggleActiveView = function(){ setFocus(!desired); };
+  window.jc42ToggleFullscreen = togglePlayerFullscreen;
+  window.jc41RaveDebug = function(){
+    return {
+      build: BUILD,
+      desired,
+      active: document.body.classList.contains('jc41-rave-focus'),
+      watchMode: isWatchMode(),
+      scrollY: window.scrollY || document.documentElement.scrollTop || 0,
+      hasToggle: !!document.getElementById('jc41RaveToggle'),
+      hasFloating: !!document.getElementById('jc41RaveFloating'),
+      hasFullscreenButton: !!document.querySelector('[data-jc41-full]'),
+      hasDock: !!document.getElementById('jc45ActiveDock'),
+      fullscreenElement: document.fullscreenElement?.id || document.fullscreenElement?.tagName || '',
+      fullscreenTarget: document.getElementById('jc45ActiveFullscreenTarget')?.id || '',
+      playerHeight: document.querySelector('.player-frame')?.getBoundingClientRect?.().height || 0,
+      sidebarWidth: document.querySelector('.watch-sidebar')?.getBoundingClientRect?.().width || 0
+    };
+  };
+
+  setInterval(apply, 180);
+  setTimeout(function(){
+    apply();
+    console.log('[JC44 active view] ready', window.jc41RaveDebug());
+  }, 500);
+})();
+
+
+// Stage 42 public aliases with the new name.
+try {
+  window.jc42ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc42ToggleActiveView = window.jc42ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc42SetActiveView = window.jc42SetActiveView || window.jc41SetRaveMode;
+} catch(_) {}
+
+
+// Stage 45 public aliases.
+try {
+  window.jc44ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc44ToggleActiveView = window.jc42ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc44SetActiveView = window.jc42SetActiveView || window.jc41SetRaveMode;
+  window.jc44ToggleFullscreen = window.jc42ToggleFullscreen;
+} catch(_) {}
+
+
+// Stage 45 public aliases.
+try {
+  window.jc44ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc44ToggleActiveView = window.jc42ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc44SetActiveView = window.jc42SetActiveView || window.jc41SetRaveMode;
+  window.jc44ToggleFullscreen = window.jc42ToggleFullscreen;
+} catch(_) {}
+
+
+// Stage 45 public aliases.
+try {
+  window.jc45ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc45ToggleActiveView = window.jc42ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc45SetActiveView = window.jc42SetActiveView || window.jc41SetRaveMode;
+  window.jc45ToggleFullscreen = window.jc42ToggleFullscreen;
+} catch(_) {}
+
+
+// Stage 46 public aliases.
+try {
+  window.jc46ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc46ToggleActiveView = window.jc45ToggleActiveView || window.jc42ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc46SetActiveView = window.jc45SetActiveView || window.jc42SetActiveView || window.jc41SetRaveMode;
+  window.jc46ToggleFullscreen = togglePlayerFullscreen;
+} catch(_) {}
+
+
+// Stage 48 public aliases.
+try {
+  window.jc48ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc48ToggleActiveView = window.jc46ToggleActiveView || window.jc45ToggleActiveView || window.jc42ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc48SetActiveView = window.jc46SetActiveView || window.jc45SetActiveView || window.jc42SetActiveView || window.jc41SetRaveMode;
+  window.jc48ToggleFullscreen = window.jc46ToggleFullscreen || window.jc45ToggleFullscreen || window.jc42ToggleFullscreen;
+} catch(_) {}
+
+
+// Stage 50 public aliases.
+try {
+  window.jc49ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc49ToggleActiveView = window.jc48ToggleActiveView || window.jc46ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc49SetActiveView = window.jc48SetActiveView || window.jc46SetActiveView || window.jc41SetRaveMode;
+  window.jc49ToggleFullscreen = window.jc48ToggleFullscreen || window.jc46ToggleFullscreen || window.jc42ToggleFullscreen;
+} catch(_) {}
+
+
+// Stage 50 public aliases — Rave-like active view.
+try {
+  window.jc50ActiveViewDebug = function(){ return window.jc49ActiveViewDebug ? window.jc49ActiveViewDebug() : (window.jc48ActiveViewDebug ? window.jc48ActiveViewDebug() : { build: window.JUSTCLOVER_BUILD }); };
+  window.jc50ToggleActiveView = window.jc49ToggleActiveView || window.jc48ToggleActiveView || window.jc46ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc50SetActiveView = window.jc49SetActiveView || window.jc48SetActiveView || window.jc46SetActiveView || window.jc41SetRaveMode;
+  window.jc50ToggleFullscreen = window.jc49ToggleFullscreen || window.jc48ToggleFullscreen || window.jc46ToggleFullscreen || window.jc42ToggleFullscreen;
+} catch(_) {}
+
+
+// Stage 51 public aliases — Rave clone layout.
+try {
+  window.jc51ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc51ToggleActiveView = window.jc50ToggleActiveView || window.jc49ToggleActiveView || window.jc48ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc51SetActiveView = window.jc50SetActiveView || window.jc49SetActiveView || window.jc48SetActiveView || window.jc41SetRaveMode;
+  window.jc51ToggleFullscreen = window.jc50ToggleFullscreen || window.jc49ToggleFullscreen || window.jc48ToggleFullscreen || window.jc42ToggleFullscreen;
+} catch(_) {}
+
+
+// Stage 52 public aliases — clean Rave-like shell.
+try {
+  window.jc52ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc52ToggleActiveView = window.jc51ToggleActiveView || window.jc50ToggleActiveView || window.jc49ToggleActiveView || window.jc48ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc52SetActiveView = window.jc51SetActiveView || window.jc50SetActiveView || window.jc49SetActiveView || window.jc48SetActiveView || window.jc41SetRaveMode;
+  window.jc52ToggleFullscreen = window.jc51ToggleFullscreen || window.jc50ToggleFullscreen || window.jc49ToggleFullscreen || window.jc48ToggleFullscreen || window.jc42ToggleFullscreen;
+} catch(_) {}
+
+
+// Stage 53 public aliases — top-right icons removed.
+try{
+  window.jc53ActiveViewDebug = function(){ return window.jc52ActiveViewDebug ? window.jc52ActiveViewDebug() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc53ToggleActiveView = window.jc52ToggleActiveView || window.jc51ToggleActiveView || window.jc50ToggleActiveView || window.jc49ToggleActiveView || window.jc48ToggleActiveView || window.jc41ToggleRaveMode;
+  window.jc53SetActiveView = window.jc52SetActiveView || window.jc51SetActiveView || window.jc50SetActiveView || window.jc49SetActiveView || window.jc48SetActiveView || window.jc41SetRaveMode;
+  window.jc53ToggleFullscreen = window.jc52ToggleFullscreen || window.jc51ToggleFullscreen || window.jc50ToggleFullscreen || window.jc49ToggleFullscreen || window.jc48ToggleFullscreen || window.jc42ToggleFullscreen;
+}catch(_){ }
+
+
+// Stage 54 public aliases — polish only, no DOM reshuffle.
+try{
+  window.jc54ActiveViewDebug = function(){ return (window.jc53ActiveViewDebug||window.jc52ActiveViewDebug) ? (window.jc53ActiveViewDebug||window.jc52ActiveViewDebug)() : { build: window.JUSTCLOVER_BUILD }; };
+  window.jc54ToggleFullscreen = window.jc53ToggleFullscreen || window.jc52ToggleFullscreen || window.jc51ToggleFullscreen || window.jc42ToggleFullscreen;
+}catch(_){ }
+
+
+// Stage 62 public aliases.
+try{
+  window.jc62ActiveViewDebug = window.jc54ActiveViewDebug || function(){ return { build: window.JUSTCLOVER_BUILD }; };
+}catch(_){}
+
+/* =========================================================
+   JustClover Stage 74 — Fixed Viewport Player
+   Главная идея: после входа в комнату показываем только active-view.
+   Auth/guest/login не трогаем. Чат не переносим в DOM.
+   ========================================================= */
+(function(){
+  const BUILD = "stage88-active-icon-mic-dock-20260502-1";
+  const ACTIVE_KEYS = [
+    'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
+    'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
+    'jc50ActiveViewMode','jc49ActiveViewMode','jc48ActiveViewMode','jc47ActiveViewMode','jc46ActiveViewMode',
+    'jc45ActiveViewMode','jc44ActiveViewMode','jc43ActiveViewMode','jc41ActiveViewMode'
+  ];
+
+  function isAuthScreen(){
+    return !!(window.__jc62IsAuthScreen ? window.__jc62IsAuthScreen() :
+      (document.getElementById('appView')?.classList.contains('hidden')));
+  }
+
+  function isWatchMode(){
+    const app = document.getElementById('appView');
+    const watch = document.getElementById('watchSection');
+    return !!(watch && watch.classList.contains('active') && !app?.classList.contains('hidden') && !isAuthScreen());
+  }
+
+  function hardTop(){
+    try { document.documentElement.scrollTop = 0; } catch(_) {}
+    try { document.body.scrollTop = 0; } catch(_) {}
+  }
+
+  function makeActivePersistent(){
+    ACTIVE_KEYS.forEach(k => { try { localStorage.setItem(k, '1'); } catch(_) {} });
+  }
+
+  function hideCinemaButtons(root=document){
+    const nodes = Array.from(root.querySelectorAll('button,a,[role="button"],.chip,.pill,.toolbar-chip'));
+    nodes.forEach((el)=>{
+      const text = String(el.textContent || '').trim().toLowerCase();
+      const meta = ((el.getAttribute('aria-label') || '') + ' ' + (el.getAttribute('title') || '')).toLowerCase();
+      const hay = (text + ' ' + meta).replace(/\s+/g,' ');
+      if(/(^|\s)кино($|\s)/i.test(hay) || /(^|\s)(cinema|movie)($|\s)/i.test(hay)){
+        el.style.setProperty('display','none','important');
+        el.setAttribute('data-jc64-hidden-cinema','1');
+      }
+    });
+  }
+
+  function normalizeTopbar(){
+    const bar = document.getElementById('jc51RaveTopbar');
+    if(!bar) return false;
+
+    const exit = bar.querySelector('[data-jc51-exit]');
+    if(exit){
+      exit.setAttribute('title','Комнаты');
+      exit.setAttribute('aria-label','Комнаты');
+      // Не открываем старый "обычный режим"; главный интерфейс теперь active-first.
+      exit.onclick = function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        // Мягкая попытка вернуться к комнатам через родную навигацию, если такая кнопка есть.
+        const candidates = Array.from(document.querySelectorAll('button,a,[role="button"]'));
+        const rooms = candidates.find(b => /комнаты|создать комнату|rooms/i.test((b.textContent || b.title || b.getAttribute('aria-label') || '').trim()));
+        if(rooms && !rooms.closest('#jc51RaveTopbar')) rooms.click();
+      };
+    }
+
+    // Верхняя панель — навигация и каталог, без дублей микро/чата/fullscreen.
+    bar.querySelectorAll('[data-jc51-mic],[data-jc51-chat],[data-jc51-full]').forEach(el => el.remove());
     return true;
   }
 
-  function syncMicState(){
-    const btn = document.querySelector('#jc80Dock [data-jc80-mic]');
+  function normalizeDock(){
+    const dock = document.getElementById('jc45ActiveDock') || document.getElementById('jc43ActiveDock');
+    if(!dock) return false;
+    dock.classList.add('jc64-main-dock');
+
+    const floating = document.getElementById('jc41RaveFloating');
+    if(floating){
+      floating.querySelector('[data-jc41-exit]')?.remove?.();
+      floating.querySelector('[data-jc41-catalog]')?.setAttribute('title','Источники');
+      const full = floating.querySelector('[data-jc41-full]');
+      if(full){
+        full.textContent = document.fullscreenElement ? 'Выйти' : 'Экран';
+      }
+      // Убираем кино, если старые stages где-то его добавили.
+      hideCinemaButtons(floating);
+    }
+    return true;
+  }
+
+  function extractYouTubeId(url){
+    const raw = String(url || '').trim();
+    if(!raw) return '';
+    try{
+      const u = new URL(raw, location.href);
+      const h = u.hostname.replace(/^www\./,'').toLowerCase();
+      if(h === 'youtu.be') return u.pathname.split('/').filter(Boolean)[0] || '';
+      if(h.endsWith('youtube.com') || h.endsWith('youtube-nocookie.com')){
+        if(u.searchParams.get('v')) return u.searchParams.get('v') || '';
+        const parts = u.pathname.split('/').filter(Boolean);
+        const keys = ['embed','shorts','live','v'];
+        for(let i=0;i<parts.length-1;i++){
+          if(keys.includes(parts[i])) return parts[i+1] || '';
+        }
+      }
+    }catch(_){
+      const m = raw.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{8,})/);
+      return m ? m[1] : '';
+    }
+    return '';
+  }
+
+  function currentSourceUrl(){
+    const fields = [
+      document.getElementById('sourceUrl'),
+      document.querySelector('input[name="sourceUrl"]'),
+      document.querySelector('[data-current-source-url]'),
+      document.querySelector('[data-source-url]')
+    ];
+    for(const f of fields){
+      const v = (f?.value || f?.dataset?.currentSourceUrl || f?.dataset?.sourceUrl || '').trim();
+      if(v) return v;
+    }
+    const text = Array.from(document.querySelectorAll('.source-history,.queue-card,.player-card,.player-card-redesign'))
+      .map(el => el.textContent || '').join(' ');
+    const m = text.match(/https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s"')]+/i);
+    return m ? m[0] : '';
+  }
+
+  function ensureYouTubeVisible(){
+    if(!isWatchMode()) return false;
+    const url = currentSourceUrl();
+    const id = extractYouTubeId(url);
+    if(!id) return false;
+
+    const frame = document.querySelector('.player-frame');
+    if(!frame) return false;
+
+    // Если VK/local уже реально отображается, не трогаем.
+    const vk = frame.querySelector('iframe[src*="vk.com"],iframe[src*="vkvideo"],video[src],video:not([src=""])');
+    if(vk && vk.getBoundingClientRect().width > 20 && vk.getBoundingClientRect().height > 20) return false;
+
+    // Если родной YouTube iframe есть и не схлопнут — просто оставляем.
+    const nativeYt = frame.querySelector('iframe[src*="youtube.com"],iframe[src*="youtube-nocookie.com"],#youtubePlayer iframe');
+    if(nativeYt){
+      nativeYt.style.setProperty('display','block','important');
+      nativeYt.style.setProperty('width','100%','important');
+      nativeYt.style.setProperty('height','100%','important');
+      nativeYt.style.setProperty('opacity','1','important');
+      nativeYt.style.setProperty('visibility','visible','important');
+      return true;
+    }
+
+    // Fallback без вмешательства в синхронизацию: показывает ролик, если родной iframe не появился.
+    let fb = document.getElementById('jc64YouTubeFallback');
+    if(!fb){
+      fb = document.createElement('iframe');
+      fb.id = 'jc64YouTubeFallback';
+      fb.className = 'jc64-youtube-fallback';
+      fb.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      fb.allowFullscreen = true;
+      fb.referrerPolicy = 'strict-origin-when-cross-origin';
+      frame.appendChild(fb);
+    }
+    const src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=0&playsinline=1&rel=0&modestbranding=1`;
+    if(fb.src !== src) fb.src = src;
+    return true;
+  }
+
+  function forceActiveFirst(){
+    if(isAuthScreen()){
+      document.documentElement.classList.remove('jc64-active-first','jc41-rave-focus');
+      document.body?.classList?.remove('jc64-active-first','jc41-rave-focus');
+      return false;
+    }
+
+    if(!isWatchMode()){
+      document.documentElement.classList.remove('jc64-active-first');
+      document.body?.classList?.remove('jc64-active-first');
+      return false;
+    }
+
+    makeActivePersistent();
+
+    // Используем существующий стабильный active-view Stage62, но он теперь не отдельный режим, а основной.
+    if(typeof window.jc42SetActiveView === 'function' && !document.body.classList.contains('jc41-rave-focus')){
+      try { window.jc42SetActiveView(true); } catch(_) {}
+    }
+
+    document.documentElement.classList.add('jc64-active-first','jc41-rave-focus','jc40-watch-mode');
+    document.body.classList.add('jc64-active-first','jc41-rave-focus','jc40-watch-mode');
+    document.body.classList.remove('jc35-scroll-guard','jc37-modal-lock','jc38-catalog-open','jc-catalog-open');
+
+    normalizeTopbar();
+    normalizeDock();
+    hideCinemaButtons(document);
+    ensureYouTubeVisible();
+    hardTop();
+    return true;
+  }
+
+  function tick(){
+    try { forceActiveFirst(); } catch(e) { console.warn('[JC64] active-first tick failed', e); }
+  }
+
+  tick();
+  setTimeout(tick, 80);
+  setTimeout(tick, 300);
+  setTimeout(tick, 900);
+  setInterval(tick, 700);
+
+  document.addEventListener('click', () => setTimeout(tick, 30), true);
+  document.addEventListener('fullscreenchange', () => setTimeout(tick, 30), true);
+
+  window.jc64ApplyMainView = forceActiveFirst;
+  window.jc64ActiveFirstDebug = function(){
+    const frame = document.querySelector('.player-frame');
+    const chat = document.querySelector('.chat-card');
+    return {
+      build: BUILD,
+      auth: isAuthScreen(),
+      watchMode: isWatchMode(),
+      activeFirst: document.body.classList.contains('jc64-active-first'),
+      activeView: document.body.classList.contains('jc41-rave-focus'),
+      topbar: !!document.getElementById('jc51RaveTopbar'),
+      dock: !!(document.getElementById('jc45ActiveDock') || document.getElementById('jc43ActiveDock')),
+      sourceUrl: currentSourceUrl(),
+      youtubeFallback: !!document.getElementById('jc64YouTubeFallback'),
+      playerRect: frame ? {...frame.getBoundingClientRect().toJSON?.() || {width:frame.getBoundingClientRect().width,height:frame.getBoundingClientRect().height,top:frame.getBoundingClientRect().top,left:frame.getBoundingClientRect().left}} : null,
+      chatRect: chat ? {width:chat.getBoundingClientRect().width,height:chat.getBoundingClientRect().height,top:chat.getBoundingClientRect().top,left:chat.getBoundingClientRect().left} : null
+    };
+  };
+  window.jc83DockMicDebug = window.jc88IconMicDebug;
+})();
+
+
+
+/* =========================================================
+   JustClover Stage 65 — Player Load Repair
+   Active-first stays main. Auth is untouched.
+   Fix: source controls remain alive offscreen, and YouTube/VK are rendered
+   into the player slot immediately after setting a source.
+   ========================================================= */
+(function(){
+  const BUILD = "stage88-active-icon-mic-dock-20260502-1";
+  let lastRenderedKey = "";
+  let lastUrl = "";
+  let lastType = "";
+  let renderTimer = null;
+
+  function isAuthScreen(){
+    return !!(window.__jc62IsAuthScreen ? window.__jc62IsAuthScreen() :
+      (document.getElementById('appView')?.classList.contains('hidden')));
+  }
+
+  function isWatchMode(){
+    const app = document.getElementById('appView');
+    const watch = document.getElementById('watchSection');
+    return !!(watch && watch.classList.contains('active') && !app?.classList.contains('hidden') && !isAuthScreen());
+  }
+
+  function qs(sel, root=document){ return root.querySelector(sel); }
+
+  function playerFrame(){
+    return qs('.player-frame') || qs('.player-card-redesign') || qs('.player-card') || qs('.player-shell');
+  }
+
+  function normalizeUrl(raw){
+    raw = String(raw || '').trim();
+    if(!raw) return '';
+    try { return new URL(raw, location.href).href; } catch(_) { return raw; }
+  }
+
+  function getNativeSourceUrl(){
+    const candidates = [
+      document.getElementById('jc40Url'),
+      document.getElementById('sourceUrl'),
+      document.querySelector('input[name="sourceUrl"]'),
+      document.querySelector('[data-current-source-url]'),
+      document.querySelector('[data-source-url]')
+    ];
+    for(const el of candidates){
+      const v = normalizeUrl(el?.value || el?.dataset?.currentSourceUrl || el?.dataset?.sourceUrl || '');
+      if(v) return v;
+    }
+    return '';
+  }
+
+  function getNativeSourceType(){
+    const st = document.getElementById('sourceType');
+    return String(st?.value || lastType || '').toLowerCase();
+  }
+
+  function parseYouTubeId(raw){
+    raw = String(raw || '').trim();
+    if(!raw) return '';
+    try{
+      const u = new URL(raw, location.href);
+      const h = u.hostname.replace(/^www\./,'').toLowerCase();
+      if(h === 'youtu.be') return (u.pathname.split('/').filter(Boolean)[0] || '').replace(/[^A-Za-z0-9_-]/g,'');
+      if(h.endsWith('youtube.com') || h.endsWith('youtube-nocookie.com')){
+        const v = u.searchParams.get('v');
+        if(v) return v.replace(/[^A-Za-z0-9_-]/g,'');
+        const parts = u.pathname.split('/').filter(Boolean);
+        const idx = parts.findIndex(p => ['embed','shorts','live','v'].includes(p));
+        if(idx >= 0 && parts[idx+1]) return parts[idx+1].replace(/[^A-Za-z0-9_-]/g,'');
+      }
+    }catch(_){}
+    const m = raw.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?.*?v=|embed\/|shorts\/|live\/)|[?&]v=)([A-Za-z0-9_-]{8,})/i);
+    return m ? m[1] : '';
+  }
+
+  function parseVkEmbed(raw){
+    raw = String(raw || '').trim();
+    if(!raw) return '';
+    try{
+      const u = new URL(raw, location.href);
+      if(/video_ext\.php$/i.test(u.pathname) || u.pathname.includes('video_ext.php')){
+        return u.href.replace(/^http:/,'https:');
+      }
+      let m = (u.pathname + u.search + u.hash).match(/video(-?\d+)_(\d+)/i);
+      if(!m){
+        const z = u.searchParams.get('z') || '';
+        m = z.match(/video(-?\d+)_(\d+)/i);
+      }
+      if(m){
+        return `https://vk.com/video_ext.php?oid=${encodeURIComponent(m[1])}&id=${encodeURIComponent(m[2])}&hd=2`;
+      }
+    }catch(_){
+      const m = raw.match(/video(-?\d+)_(\d+)/i);
+      if(m) return `https://vk.com/video_ext.php?oid=${encodeURIComponent(m[1])}&id=${encodeURIComponent(m[2])}&hd=2`;
+    }
+    return '';
+  }
+
+  function isVkUrl(url){
+    return /(^|\/\/)(?:m\.)?(?:vk\.com|vkvideo\.ru)\//i.test(String(url||'')) || /video(-?\d+)_(\d+)/i.test(String(url||''));
+  }
+
+  function isYoutubeUrl(url){
+    return /youtu\.be|youtube\.com|youtube-nocookie\.com/i.test(String(url||''));
+  }
+
+  function isDirectVideo(url){
+    return /\.(mp4|webm|ogg)(?:[?#].*)?$/i.test(String(url||''));
+  }
+
+  function removeDirectPlayer(){
+    document.getElementById('jc65DirectPlayer')?.remove();
+    document.body?.classList?.remove('jc67-main-player-active');
+    document.querySelector('.player-frame')?.removeAttribute?.('data-jc67-main-player');
+  }
+
+  function ensureDirectPlayer(url, type){
+    if(!isWatchMode()) return false;
+    url = normalizeUrl(url || getNativeSourceUrl());
+    type = String(type || getNativeSourceType() || '').toLowerCase();
+    if(!url) return false;
+
+    const frame = playerFrame();
+    if(!frame) return false;
+
+    let kind = '';
+    let src = '';
+
+    const yt = parseYouTubeId(url);
+    if(type === 'youtube' || yt || isYoutubeUrl(url)){
+      if(!yt) return false;
+      kind = 'youtube';
+      // youtube.com tends to be less problematic than nocookie for some browsers/extensions.
+      src = `https://www.youtube.com/embed/${encodeURIComponent(yt)}?playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}`;
+    }else if(type === 'vk' || isVkUrl(url)){
+      const vk = parseVkEmbed(url);
+      if(!vk) return false;
+      kind = 'vk';
+      src = vk;
+    }else if(type === 'mp4' || type === 'direct' || isDirectVideo(url)){
+      kind = 'video';
+      src = url;
+    }else{
+      return false;
+    }
+
+    const key = `${kind}:${src}`;
+    if(key === lastRenderedKey && document.getElementById('jc65DirectPlayer')) return true;
+    lastRenderedKey = key;
+    lastUrl = url;
+    lastType = type || kind;
+
+    removeDirectPlayer();
+
+    let el;
+    if(kind === 'video'){
+      el = document.createElement('video');
+      el.controls = true;
+      el.playsInline = true;
+      el.preload = 'metadata';
+      el.src = src;
+    }else{
+      el = document.createElement('iframe');
+      el.src = src;
+      el.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-write; web-share';
+      el.allowFullscreen = true;
+      el.referrerPolicy = 'strict-origin-when-cross-origin';
+    }
+
+    el.id = 'jc65DirectPlayer';
+    el.className = `jc65-direct-player jc67-main-player jc65-${kind}`;
+    el.setAttribute('data-jc65-url', url);
+    el.setAttribute('data-jc65-kind', kind);
+
+    frame.appendChild(el);
+    document.body.classList.add('jc65-direct-player-active','jc67-main-player-active');
+    try{ frame.setAttribute('data-jc67-main-player','1'); }catch(_){}
+    return true;
+  }
+
+  function scheduleRender(url, type, delay=80){
+    if(url) lastUrl = normalizeUrl(url);
+    if(type) lastType = String(type).toLowerCase();
+    clearTimeout(renderTimer);
+    renderTimer = setTimeout(()=>{
+      ensureDirectPlayer(lastUrl || getNativeSourceUrl(), lastType || getNativeSourceType());
+    }, delay);
+    setTimeout(()=>ensureDirectPlayer(lastUrl || getNativeSourceUrl(), lastType || getNativeSourceType()), 450);
+    setTimeout(()=>ensureDirectPlayer(lastUrl || getNativeSourceUrl(), lastType || getNativeSourceType()), 1200);
+  }
+
+  function hookSourceSubmit(){
+    document.addEventListener('click', function(e){
+      const btn = e.target?.closest?.('#jc40RunBtn,#setSourceBtn,[data-jc40-paste-run]');
+      if(!btn) return;
+
+      const url =
+        normalizeUrl(document.getElementById('jc40Url')?.value) ||
+        normalizeUrl(document.getElementById('sourceUrl')?.value) ||
+        lastUrl;
+      const type =
+        String(document.querySelector('.jc40-source-card.active')?.dataset?.jc40Source || '').toLowerCase() ||
+        getNativeSourceType();
+
+      if(url) scheduleRender(url, type, 160);
+    }, true);
+
+    document.addEventListener('change', function(e){
+      if(e.target?.matches?.('#sourceUrl,#jc40Url,#sourceType,input[name="sourceUrl"]')){
+        scheduleRender(getNativeSourceUrl(), getNativeSourceType(), 180);
+      }
+    }, true);
+  }
+
+  function keepNativeControlsAlive(){
+    if(!isWatchMode()) return;
+    const panel = document.querySelector('.source-panel-embedded');
+    if(panel){
+      panel.setAttribute('data-jc65-keepalive','1');
+      panel.style.setProperty('display','block','important');
+      panel.style.setProperty('position','absolute','important');
+      panel.style.setProperty('left','-9999px','important');
+      panel.style.setProperty('top','0','important');
+      panel.style.setProperty('width','1px','important');
+      panel.style.setProperty('height','1px','important');
+      panel.style.setProperty('overflow','hidden','important');
+      panel.style.setProperty('opacity','0','important');
+      panel.style.setProperty('pointer-events','none','important');
+    }
+  }
+
+  function fixYouTubeNativeVisibility(){
+    if(!isWatchMode()) return;
+    const frame = playerFrame();
+    if(!frame) return;
+    frame.querySelectorAll('#youtubePlayer,#youtubePlayer iframe,iframe[src*="youtube"],iframe[src*="youtu.be"],iframe[src*="youtube-nocookie"],iframe[src*="vk.com"],iframe[src*="vkvideo"]').forEach(el=>{
+      el.style.setProperty('display','block','important');
+      el.style.setProperty('position','absolute','important');
+      el.style.setProperty('inset','0','important');
+      el.style.setProperty('width','100%','important');
+      el.style.setProperty('height','100%','important');
+      el.style.setProperty('opacity','1','important');
+      el.style.setProperty('visibility','visible','important');
+      el.style.setProperty('border','0','important');
+    });
+  }
+
+  function tick(){
+    if(isAuthScreen()) return;
+    keepNativeControlsAlive();
+    fixYouTubeNativeVisibility();
+    // If user already typed/selected a source and native player is still empty, render fallback.
+    const url = lastUrl || getNativeSourceUrl();
+    if(url) ensureDirectPlayer(url, lastType || getNativeSourceType());
+  }
+
+  hookSourceSubmit();
+  tick();
+  setTimeout(tick, 300);
+  setTimeout(tick, 1000);
+  setInterval(tick, 1200);
+
+  window.jc65RenderSource = ensureDirectPlayer;
+  window.jc65PlayerDebug = function(){
+    const frame = playerFrame();
+    const direct = document.getElementById('jc65DirectPlayer');
+    return {
+      build: BUILD,
+      auth: isAuthScreen(),
+      watchMode: isWatchMode(),
+      url: lastUrl || getNativeSourceUrl(),
+      type: lastType || getNativeSourceType(),
+      direct: !!direct,
+      directKind: direct?.getAttribute('data-jc65-kind') || '',
+      directSrc: direct?.src || '',
+      nativeSourceUrl: document.getElementById('sourceUrl')?.value || '',
+      catalogUrl: document.getElementById('jc40Url')?.value || '',
+      sourceType: document.getElementById('sourceType')?.value || '',
+      frame: frame ? {w: frame.getBoundingClientRect().width, h: frame.getBoundingClientRect().height} : null,
+      iframes: frame ? Array.from(frame.querySelectorAll('iframe')).map(i => i.src).slice(0,5) : []
+    };
+  };
+})();
+
+
+// Stage 71 public helpers. Stable direct player + persistent source state.
+try{
+  window.jc67RenderSource = window.jc65RenderSource;
+  window.jc67PlayerDebug = function(){
+    const d = window.jc65PlayerDebug ? window.jc65PlayerDebug() : {};
+    d.stage67 = true;
+    d.mainPlayerActive = document.body.classList.contains('jc67-main-player-active');
+    d.whiteScreenGuard = !!document.querySelector('.player-frame[data-jc67-main-player] #jc65DirectPlayer');
+    return d;
+  };
+}catch(_){}
+
+
+/* =========================================================
+   Stage 71 — Stable Persistent Player.
+   Base: Stage67 because it actually loads YouTube/VK.
+   Removed the later geometry loops idea: no per-frame resize, no iframe reflow.
+   Adds source persistence and one-time stable sizing only.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage88-active-icon-mic-dock-20260502-1';
+  const PREFIX = 'jc71:lastSource:';
+  let restoreAttempts = 0;
+  let lastStableKey = '';
+
+  function auth(){ return !!window.__jc62IsAuthScreen?.(); }
+  function roomId(){
+    try { return new URL(location.href).searchParams.get('room') || 'default'; }
+    catch(_) { return 'default'; }
+  }
+  function key(){ return PREFIX + roomId(); }
+  function isWatch(){
+    const app = document.getElementById('appView');
+    const watch = document.getElementById('watchSection');
+    return !auth() && !!(watch && watch.classList.contains('active') && !app?.classList.contains('hidden'));
+  }
+  function normalizeUrl(raw){
+    raw = String(raw || '').trim();
+    if(!raw) return '';
+    try{ return new URL(raw, location.href).href; }catch(_){ return raw; }
+  }
+  function typeFromUrl(url){
+    url = String(url||'').toLowerCase();
+    if(/youtu\.be|youtube\.com|youtube-nocookie\.com/.test(url)) return 'youtube';
+    if(/vk\.com|vkvideo\.ru|video(-?\d+)_(\d+)/.test(url)) return 'vk';
+    if(/\.(mp4|webm|ogg)(?:[?#].*)?$/.test(url)) return 'mp4';
+    return '';
+  }
+  function currentSourceFromDom(){
+    const url = normalizeUrl(document.getElementById('jc40Url')?.value) ||
+      normalizeUrl(document.getElementById('sourceUrl')?.value) ||
+      normalizeUrl(document.querySelector('#jc65DirectPlayer')?.getAttribute('data-jc65-url'));
+    const type = String(document.querySelector('.jc40-source-card.active')?.dataset?.jc40Source ||
+      document.getElementById('sourceType')?.value || typeFromUrl(url) || '').toLowerCase();
+    return url ? {url, type:type || typeFromUrl(url), room:roomId(), savedAt:Date.now()} : null;
+  }
+  function saveSource(data){
+    if(!data?.url || auth()) return false;
+    const source = {url:normalizeUrl(data.url), type:String(data.type || typeFromUrl(data.url) || '').toLowerCase(), room:roomId(), savedAt:Date.now()};
+    if(!source.url) return false;
+    try{ localStorage.setItem(key(), JSON.stringify(source)); }catch(_){}
+    return true;
+  }
+  function readSource(){
+    try{
+      const raw = localStorage.getItem(key());
+      if(!raw) return null;
+      const data = JSON.parse(raw);
+      if(!data?.url) return null;
+      return {url:normalizeUrl(data.url), type:String(data.type || typeFromUrl(data.url) || '').toLowerCase(), room:roomId(), savedAt:data.savedAt||0};
+    }catch(_){ return null; }
+  }
+  function directPlayer(){ return document.getElementById('jc65DirectPlayer'); }
+  function frame(){ return document.querySelector('.player-frame'); }
+
+  function stabilizePlayer(){
+    if(!isWatch()) return false;
+    const fr = frame();
+    const el = directPlayer();
+    if(!fr || !el) return false;
+    const src = String(el.src || el.getAttribute('data-jc65-url') || '');
+    const k = `${src}|${roomId()}`;
+    // Important: do not constantly write layout. Only enforce if source changed or first run.
+    if(k === lastStableKey && el.getAttribute('data-jc71-stable') === '1') return true;
+    lastStableKey = k;
+
+    fr.setAttribute('data-jc71-stable-frame','1');
+    el.setAttribute('data-jc71-stable','1');
+    el.style.setProperty('position','absolute','important');
+    el.style.setProperty('inset','0','important');
+    el.style.setProperty('width','100%','important');
+    el.style.setProperty('height','100%','important');
+    el.style.setProperty('min-width','0','important');
+    el.style.setProperty('min-height','0','important');
+    el.style.setProperty('max-width','none','important');
+    el.style.setProperty('max-height','none','important');
+    el.style.setProperty('transform','none','important');
+    el.style.setProperty('border','0','important');
+    el.style.setProperty('background','#000','important');
+    el.style.setProperty('z-index','30','important');
+    el.style.setProperty('opacity','1','important');
+    el.style.setProperty('visibility','visible','important');
+    return true;
+  }
+
+  function renderSaved(delay=0){
+    const data = readSource();
+    if(!data?.url || !isWatch()) return false;
+    setTimeout(()=>{
+      if(!isWatch()) return;
+      const direct = directPlayer();
+      const same = direct && normalizeUrl(direct.getAttribute('data-jc65-url') || '') === data.url;
+      if(!same && typeof window.jc65RenderSource === 'function'){
+        window.jc65RenderSource(data.url, data.type || typeFromUrl(data.url));
+      }
+      stabilizePlayer();
+    }, delay);
+    return true;
+  }
+
+  // Wrap the Stage67 renderer: save once, render once, no geometry loop.
+  const prevRender = window.jc65RenderSource;
+  if(typeof prevRender === 'function' && !prevRender.__jc71Wrapped){
+    const wrapped = function(url, type){
+      const data = {url:normalizeUrl(url), type:String(type || typeFromUrl(url) || '').toLowerCase()};
+      if(data.url) saveSource(data);
+      const out = prevRender.apply(this, arguments);
+      setTimeout(stabilizePlayer, 60);
+      setTimeout(stabilizePlayer, 350);
+      return out;
+    };
+    wrapped.__jc71Wrapped = true;
+    window.jc65RenderSource = wrapped;
+    window.jc67RenderSource = wrapped;
+  }
+
+  document.addEventListener('click', function(e){
+    const btn = e.target?.closest?.('#jc40RunBtn,#setSourceBtn,[data-jc40-paste-run]');
     if(!btn) return;
-    const on = inferMicEnabled();
-    btn.classList.toggle('is-off', !on);
-    btn.classList.toggle('is-on', on);
-    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-    btn.title = on ? 'Микрофон включен' : 'Микрофон выключен';
-    btn.setAttribute('aria-label', btn.title);
+    setTimeout(()=>{
+      const data = currentSourceFromDom();
+      if(data) saveSource(data);
+      stabilizePlayer();
+    }, 80);
+  }, true);
+
+  document.addEventListener('change', function(e){
+    if(e.target?.matches?.('#sourceUrl,#jc40Url,#sourceType,input[name="sourceUrl"]')){
+      setTimeout(()=>{ const data=currentSourceFromDom(); if(data) saveSource(data); }, 80);
+    }
+  }, true);
+
+  // Restore with finite attempts only. No infinite reload/re-render loop.
+  function restoreTick(){
+    if(!isWatch()) return;
+    restoreAttempts += 1;
+    const live = currentSourceFromDom();
+    if(live?.url) saveSource(live);
+    renderSaved(0);
+    stabilizePlayer();
+  }
+
+  [250, 800, 1600, 2800, 4500].forEach(ms => setTimeout(restoreTick, ms));
+  window.addEventListener('resize', () => setTimeout(stabilizePlayer, 120), {passive:true});
+  document.addEventListener('fullscreenchange', () => setTimeout(stabilizePlayer, 120), true);
+  document.addEventListener('webkitfullscreenchange', () => setTimeout(stabilizePlayer, 120), true);
+
+  window.jc71SaveCurrentSource = function(){ const data=currentSourceFromDom(); return data ? saveSource(data) : false; };
+  window.jc71RestorePlayer = function(){ return renderSaved(0); };
+  window.jc71StabilizePlayer = stabilizePlayer;
+  window.jc71ForgetSource = function(){ try{ localStorage.removeItem(key()); }catch(_){} return true; };
+  window.jc71PlayerDebug = function(){
+    const fr = frame();
+    const el = directPlayer();
+    const frR = fr?.getBoundingClientRect?.();
+    const elR = el?.getBoundingClientRect?.();
+    return {
+      build: BUILD,
+      auth: auth(),
+      watch: isWatch(),
+      storageKey:key(),
+      stored: readSource(),
+      live: currentSourceFromDom(),
+      direct: !!el,
+      directUrl: el?.getAttribute('data-jc65-url') || '',
+      directSrc: el?.src || '',
+      stable: el?.getAttribute('data-jc71-stable') === '1',
+      frame: frR ? {x:Math.round(frR.x), y:Math.round(frR.y), w:Math.round(frR.width), h:Math.round(frR.height)} : null,
+      player: elR ? {x:Math.round(elR.x), y:Math.round(elR.y), w:Math.round(elR.width), h:Math.round(elR.height)} : null,
+      attempts: restoreAttempts
+    };
+  };
+})();
+
+
+/* =========================================================
+   Stage 72 — Auto Update.
+   Проверяет app.js на GitHub Pages без cache и сам перезагружает сайт,
+   когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
+   ========================================================= */
+(function(){
+  const BUILD = "stage88-active-icon-mic-dock-20260502-1";
+  const CHECK_EVERY_MS = 15000;
+  const FIRST_CHECK_MS = 4500;
+  const RELOAD_DELAY_MS = 1800;
+  let checking = false;
+  let updateFound = false;
+  let lastRemoteBuild = '';
+
+  function parseBuild(jsText){
+    const text = String(jsText || '');
+    return (
+      text.match(/const\s+JC40_BUILD\s*=\s*["']([^"']+)["']/)?.[1] ||
+      text.match(/window\.JUSTCLOVER_BUILD\s*=\s*["']([^"']+)["']/)?.[1] ||
+      text.match(/Version:\s*([a-z0-9._-]+)/i)?.[1] ||
+      ''
+    ).trim();
+  }
+
+  function currentBuild(){
+    return String(window.JUSTCLOVER_BUILD || BUILD || '').trim();
+  }
+
+  function isNewBuild(remote){
+    const current = currentBuild();
+    return !!remote && !!current && remote !== current;
+  }
+
+  function updateUrlBuild(remoteBuild){
+    try{
+      const u = new URL(location.href);
+      u.searchParams.set('v', remoteBuild);
+      u.searchParams.set('t', String(Date.now()));
+      return u.toString();
+    }catch(_){
+      return location.href;
+    }
+  }
+
+  function showUpdateNotice(remoteBuild){
+    let el = document.getElementById('jc72UpdateNotice');
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'jc72UpdateNotice';
+      el.setAttribute('role','status');
+      el.innerHTML = '<b>Обновление JustClover</b><span></span>';
+      document.body.appendChild(el);
+    }
+    const span = el.querySelector('span');
+    if(span) span.textContent = `Найден ${remoteBuild}. Сейчас обновлю страницу…`;
+    el.classList.add('show');
+  }
+
+  async function checkForUpdate(force=false){
+    if(checking || updateFound) return { checking, updateFound, remoteBuild:lastRemoteBuild };
+    checking = true;
+    try{
+      const url = new URL('app.js', location.href);
+      url.searchParams.set('jcAutoUpdate', String(Date.now()));
+      const res = await fetch(url.toString(), {
+        cache:'no-store',
+        headers:{ 'Cache-Control':'no-cache', 'Pragma':'no-cache' }
+      });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const remoteText = await res.text();
+      const remoteBuild = parseBuild(remoteText);
+      lastRemoteBuild = remoteBuild;
+
+      if(isNewBuild(remoteBuild)){
+        updateFound = true;
+        try{ sessionStorage.setItem('jc72ApplyingBuild', remoteBuild); }catch(_){}
+        showUpdateNotice(remoteBuild);
+        setTimeout(() => {
+          location.replace(updateUrlBuild(remoteBuild));
+        }, force ? 300 : RELOAD_DELAY_MS);
+      }
+
+      return { checking:false, updateFound, remoteBuild, currentBuild:currentBuild() };
+    }catch(e){
+      return { checking:false, updateFound:false, error:String(e?.message || e), remoteBuild:lastRemoteBuild, currentBuild:currentBuild() };
+    }finally{
+      checking = false;
+    }
+  }
+
+  function clearAppliedMarker(){
+    try{
+      const applying = sessionStorage.getItem('jc72ApplyingBuild');
+      if(applying && applying === currentBuild()) sessionStorage.removeItem('jc72ApplyingBuild');
+    }catch(_){}
+  }
+
+  clearAppliedMarker();
+  setTimeout(() => checkForUpdate(false), FIRST_CHECK_MS);
+  setInterval(() => checkForUpdate(false), CHECK_EVERY_MS);
+
+  window.jc72CheckForUpdate = checkForUpdate;
+  window.jc72UpdateDebug = function(){
+    return {
+      build: currentBuild(),
+      updateFound,
+      lastRemoteBuild,
+      applying: (()=>{ try{return sessionStorage.getItem('jc72ApplyingBuild') || ''}catch(_){return ''} })(),
+      checkEveryMs: CHECK_EVERY_MS
+    };
+  };
+})();
+
+
+
+
+
+/* =========================================================
+   JustClover Stage 81 — Real Stable Player Dock
+   Version: stage88-active-icon-mic-dock-20260502-1
+
+   No player resize loop. No fixed/cover iframe fighting.
+   JS only creates bottom buttons and toggles the stable CSS class.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage88-active-icon-mic-dock-20260502-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+
+  let scheduled = false;
+  let bodyObserver = null;
+  let appObserver = null;
+  let watchObserver = null;
+
+  function isAuth(){
+    try { return !!window.__jc62IsAuthScreen?.(); } catch(_) { return false; }
+  }
+
+  function appOpen(){
+    const app = document.getElementById('appView');
+    return !!(app && !app.classList.contains('hidden'));
+  }
+
+  function watchActive(){
+    const watch = document.getElementById('watchSection');
+    return !!(watch && watch.classList.contains('active'));
+  }
+
+  function activeRoomView(){
+    return !isAuth() && appOpen() && watchActive();
+  }
+
+  function main(){
+    return document.querySelector('.watch-main') || document.getElementById('watchSection');
+  }
+
+  function frame(){
+    return document.querySelector('.player-frame');
   }
 
   function ensureDock(){
@@ -750,20 +2032,13 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       dock = document.createElement('div');
       dock.id = 'jc80Dock';
       dock.setAttribute('aria-label','Нижняя панель комнаты');
-      dock.innerHTML =         '<div class="jc80-dock-inner">' +
-          '<button type="button" data-jc80-mic class="jc80-mic-btn" title="Микрофон" aria-label="Микрофон">' +
-            '<span class="jc80-mic-icon" aria-hidden="true">' +
-              '<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">' +
-                '<rect x="9" y="3" width="6" height="11" rx="3"></rect>' +
-                '<path d="M6 11a6 6 0 0 0 12 0"></path>' +
-                '<path d="M12 17v4"></path>' +
-                '<path d="M9 21h6"></path>' +
-              '</svg>' +
-            '</span>' +
-          '</button>' +
-          '<button type="button" data-jc80-source title="Источники" aria-label="Источники">▦ Источники</button>' +
-          '<button type="button" data-jc80-full title="Fullscreen" aria-label="Fullscreen">⛶ Экран</button>' +
-        '</div>';
+      dock.innerHTML = `
+        <div class="jc80-dock-inner">
+          <button type="button" data-jc80-mic title="Микрофон" aria-label="Микрофон">🎙 Микро</button>
+          <button type="button" data-jc80-chat title="Чат" aria-label="Чат">💬 Чат</button>
+          <button type="button" data-jc80-source title="Источники" aria-label="Источники">▦ Источники</button>
+          <button type="button" data-jc80-full title="Fullscreen" aria-label="Fullscreen">⛶ Экран</button>
+        </div>`;
 
       dock.addEventListener('click', function(e){
         const btn = e.target.closest('button');
@@ -773,8 +2048,14 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
         if(btn.hasAttribute('data-jc80-mic')){
           document.getElementById('voiceBtn')?.click?.();
-          setTimeout(syncMicState, 60);
-          setTimeout(syncMicState, 240);
+        }
+
+        if(btn.hasAttribute('data-jc80-chat')){
+          const input = document.getElementById('chatInput');
+          if(input){
+            try { input.focus({preventScroll:true}); }
+            catch(_) { input.focus(); }
+          }
         }
 
         if(btn.hasAttribute('data-jc80-source')){
@@ -790,7 +2071,6 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
     const host = main();
     if(host && dock.parentNode !== host) host.appendChild(dock);
-    syncMicState();
     return dock;
   }
 
@@ -882,7 +2162,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
   [0,80,250,700,1400].forEach(ms => setTimeout(schedule, ms));
 
-  window.jc87PlayerDebug = function(){
+  window.jc80PlayerDebug = function(){
     const fr = frame();
     const dr = document.getElementById('jc80Dock')?.getBoundingClientRect?.();
     const rr = fr?.getBoundingClientRect?.();
@@ -900,8 +2180,558 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
       frame: rr ? {x:Math.round(rr.x), y:Math.round(rr.y), w:Math.round(rr.width), h:Math.round(rr.height)} : null,
       dock: dr ? {x:Math.round(dr.x), y:Math.round(dr.y), w:Math.round(dr.width), h:Math.round(dr.height)} : null,
       hasMic: !!document.querySelector('#jc80Dock [data-jc80-mic]'),
+      hasChat: !!document.querySelector('#jc80Dock [data-jc80-chat]'),
       hasSource: !!document.querySelector('#jc80Dock [data-jc80-source]'),
       hasFull: !!document.querySelector('#jc80Dock [data-jc80-full]')
+    };
+  };
+})();
+
+
+/* =========================================================
+   JustClover Stage 81 — Player Mic Overlay
+   Version: stage88-active-icon-mic-dock-20260502-1
+
+   Adds a clear mic toggle inside the player and removes the chat action from
+   the bottom dock. Does not change auth, chat DOM, source logic, or player fit.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage88-active-icon-mic-dock-20260502-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+
+  let scheduled = false;
+  let frameObserver = null;
+  let voiceObserver = null;
+  let statusObserver = null;
+
+  function isAuth(){
+    try { return !!window.__jc62IsAuthScreen?.(); } catch(_) { return false; }
+  }
+
+  function activeRoomView(){
+    const app = document.getElementById('appView');
+    const watch = document.getElementById('watchSection');
+    return !isAuth() && !!app && !app.classList.contains('hidden') && !!watch && watch.classList.contains('active');
+  }
+
+  function frame(){
+    return document.querySelector('.player-frame');
+  }
+
+  function voiceBtn(){
+    return document.getElementById('voiceBtn');
+  }
+
+  function voiceStatus(){
+    return document.getElementById('voiceStatus');
+  }
+
+  function readVoiceState(){
+    const b = voiceBtn();
+    const s = voiceStatus();
+    const text = `${b?.textContent || ''} ${s?.textContent || ''} ${b?.getAttribute('aria-pressed') || ''}`.toLowerCase();
+
+    if(/ошибка|недоступ|запрещ|denied|error|failed/.test(text)) return 'error';
+    if(/выключить|включ[её]н|enabled|on|true/.test(text)) return 'on';
+    if(/загрузка|подключ|разреш|ожидан|pending|loading/.test(text)) return 'pending';
+    return 'off';
+  }
+
+  function stateLabel(state){
+    if(state === 'on') return '🎙 Микро вкл';
+    if(state === 'pending') return '🎙 Микро…';
+    if(state === 'error') return '🎙 Ошибка';
+    return '🎙 Микро выкл';
+  }
+
+  function ensurePlayerMic(){
+    let wrap = document.getElementById('jc81PlayerMic');
+    if(!wrap){
+      wrap = document.createElement('div');
+      wrap.id = 'jc81PlayerMic';
+      wrap.setAttribute('aria-label','Микрофон');
+      wrap.innerHTML = '<button type="button" data-jc81-player-mic aria-label="Переключить микрофон">🎙 Микро выкл</button>';
+      wrap.addEventListener('click', function(e){
+        const btn = e.target.closest('button');
+        if(!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        wrap.dataset.state = 'pending';
+        btn.textContent = stateLabel('pending');
+        voiceBtn()?.click?.();
+        setTimeout(updateMicState, 80);
+        setTimeout(updateMicState, 450);
+        setTimeout(updateMicState, 1200);
+      }, true);
+    }
+
+    const fr = frame();
+    if(fr && wrap.parentNode !== fr) fr.appendChild(wrap);
+    return wrap;
+  }
+
+  function updateMicState(){
+    const wrap = document.getElementById('jc81PlayerMic');
+    if(!wrap) return;
+    const state = readVoiceState();
+    const btn = wrap.querySelector('button');
+    wrap.dataset.state = state;
+    if(btn){
+      btn.textContent = stateLabel(state);
+      btn.title = state === 'on' ? 'Микрофон включён — нажми, чтобы выключить' : 'Микрофон выключен — нажми, чтобы включить';
+      btn.setAttribute('aria-label', btn.title);
+      btn.setAttribute('aria-pressed', state === 'on' ? 'true' : 'false');
+    }
+  }
+
+  function hideOldDockButtons(){
+    document.querySelectorAll('#jc80Dock [data-jc80-mic], #jc80Dock [data-jc80-chat]').forEach(el => {
+      el.hidden = true;
+      el.setAttribute('aria-hidden','true');
+      el.tabIndex = -1;
+    });
+  }
+
+  function attachObservers(){
+    const fr = frame();
+    if(fr && !frameObserver){
+      frameObserver = new MutationObserver(schedule);
+      frameObserver.observe(fr, {childList:true, subtree:false});
+    }
+    const b = voiceBtn();
+    if(b && !voiceObserver){
+      voiceObserver = new MutationObserver(schedule);
+      voiceObserver.observe(b, {childList:true, subtree:true, attributes:true, attributeFilter:['class','aria-pressed','disabled']});
+    }
+    const s = voiceStatus();
+    if(s && !statusObserver){
+      statusObserver = new MutationObserver(schedule);
+      statusObserver.observe(s, {childList:true, subtree:true, characterData:true});
+    }
+  }
+
+  function sync(){
+    scheduled = false;
+    const on = activeRoomView();
+    document.documentElement.classList.toggle('jc81-player-mic-overlay', on);
+    document.body?.classList?.toggle('jc81-player-mic-overlay', on);
+
+    const mic = ensurePlayerMic();
+    mic.hidden = !on;
+    mic.setAttribute('aria-hidden', on ? 'false' : 'true');
+    hideOldDockButtons();
+    updateMicState();
+    attachObservers();
+  }
+
+  function schedule(){
+    if(scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(sync);
+  }
+
+  document.addEventListener('click', function(){ setTimeout(schedule, 20); }, true);
+  document.addEventListener('fullscreenchange', schedule, true);
+  document.addEventListener('webkitfullscreenchange', schedule, true);
+  window.addEventListener('resize', schedule, {passive:true});
+  window.addEventListener('orientationchange', schedule, {passive:true});
+  [0,80,250,700,1400].forEach(ms => setTimeout(schedule, ms));
+
+  window.jc81MicDebug = function(){
+    const wrap = document.getElementById('jc81PlayerMic');
+    const r = wrap?.getBoundingClientRect?.();
+    return {
+      build: BUILD,
+      activeRoomView: activeRoomView(),
+      classOn: document.body?.classList?.contains('jc81-player-mic-overlay'),
+      state: wrap?.dataset.state || '',
+      micExists: !!wrap,
+      micHidden: !!wrap?.hidden,
+      micRect: r ? {x:Math.round(r.x), y:Math.round(r.y), w:Math.round(r.width), h:Math.round(r.height)} : null,
+      dockHasChatVisible: !!Array.from(document.querySelectorAll('#jc80Dock [data-jc80-chat]')).find(el => !el.hidden && getComputedStyle(el).display !== 'none'),
+      dockHasMicVisible: !!Array.from(document.querySelectorAll('#jc80Dock [data-jc80-mic]')).find(el => !el.hidden && getComputedStyle(el).display !== 'none'),
+      voiceText: voiceBtn()?.textContent || '',
+      voiceStatus: voiceStatus()?.textContent || '',
+      fullscreen: !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement)
+    };
+  };
+})();
+
+
+/* =========================================================
+   JustClover Stage 82 — Fullscreen Mic Fix
+   Version: stage88-active-icon-mic-dock-20260502-1
+
+   Adds a robust mic control mounted on .watch-main. It is not a child of the
+   YouTube iframe/player element and therefore remains visible in JustClover
+   site fullscreen. No player scale/fit logic is changed.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage88-active-icon-mic-dock-20260502-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+
+  let scheduled = false;
+  let bodyObserver = null;
+  let appObserver = null;
+  let watchObserver = null;
+  let voiceObserver = null;
+  let statusObserver = null;
+
+  function isAuth(){
+    try { return !!window.__jc62IsAuthScreen?.(); } catch(_) { return false; }
+  }
+
+  function appOpen(){
+    const app = document.getElementById('appView');
+    return !!(app && !app.classList.contains('hidden'));
+  }
+
+  function watchActive(){
+    const watch = document.getElementById('watchSection');
+    return !!(watch && watch.classList.contains('active'));
+  }
+
+  function activeRoomView(){
+    return !isAuth() && appOpen() && watchActive();
+  }
+
+  function main(){
+    return document.querySelector('.watch-main') || document.getElementById('watchSection');
+  }
+
+  function voiceBtn(){
+    return document.getElementById('voiceBtn');
+  }
+
+  function voiceStatus(){
+    return document.getElementById('voiceStatus');
+  }
+
+  function readVoiceState(){
+    const b = voiceBtn();
+    const s = voiceStatus();
+    const text = `${b?.textContent || ''} ${s?.textContent || ''} ${b?.getAttribute('aria-pressed') || ''}`.toLowerCase();
+
+    if(/ошибка|недоступ|запрещ|denied|error|failed/.test(text)) return 'error';
+    if(/выключить|включ[её]н|enabled|on|true/.test(text)) return 'on';
+    if(/загрузка|подключ|разреш|ожидан|pending|loading/.test(text)) return 'pending';
+    return 'off';
+  }
+
+  function label(state){
+    if(state === 'on') return '🎙 Микро вкл';
+    if(state === 'pending') return '🎙 Микро…';
+    if(state === 'error') return '🎙 Ошибка';
+    return '🎙 Микро выкл';
+  }
+
+  function ensureMic(){
+    let wrap = document.getElementById('jc82PlayerMic');
+    if(!wrap){
+      wrap = document.createElement('div');
+      wrap.id = 'jc82PlayerMic';
+      wrap.setAttribute('aria-label','Микрофон в плеере');
+      wrap.innerHTML = '<button type="button" data-jc82-player-mic aria-label="Переключить микрофон">🎙 Микро выкл</button>';
+      wrap.addEventListener('click', function(e){
+        const btn = e.target.closest('button');
+        if(!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        wrap.dataset.state = 'pending';
+        btn.textContent = label('pending');
+        voiceBtn()?.click?.();
+        setTimeout(updateMic, 80);
+        setTimeout(updateMic, 450);
+        setTimeout(updateMic, 1200);
+      }, true);
+    }
+
+    const host = main();
+    if(host && wrap.parentNode !== host) host.appendChild(wrap);
+    return wrap;
+  }
+
+  function updateMic(){
+    const wrap = document.getElementById('jc82PlayerMic');
+    if(!wrap) return;
+    const state = readVoiceState();
+    const btn = wrap.querySelector('button');
+    wrap.dataset.state = state;
+    if(btn){
+      btn.textContent = label(state);
+      btn.title = state === 'on' ? 'Микрофон включён — нажми, чтобы выключить' : 'Микрофон выключен — нажми, чтобы включить';
+      btn.setAttribute('aria-label', btn.title);
+      btn.setAttribute('aria-pressed', state === 'on' ? 'true' : 'false');
+    }
+  }
+
+  function cleanOldButtons(){
+    document.querySelectorAll('#jc80Dock [data-jc80-mic], #jc80Dock [data-jc80-chat]').forEach(el => {
+      el.hidden = true;
+      el.setAttribute('aria-hidden','true');
+      el.tabIndex = -1;
+    });
+    const old = document.getElementById('jc81PlayerMic');
+    if(old){
+      old.hidden = true;
+      old.setAttribute('aria-hidden','true');
+    }
+  }
+
+  function attachObservers(){
+    if(document.body && !bodyObserver){
+      bodyObserver = new MutationObserver(schedule);
+      bodyObserver.observe(document.body, {attributes:true, attributeFilter:['class']});
+    }
+    const app = document.getElementById('appView');
+    if(app && !appObserver){
+      appObserver = new MutationObserver(schedule);
+      appObserver.observe(app, {attributes:true, attributeFilter:['class']});
+    }
+    const watch = document.getElementById('watchSection');
+    if(watch && !watchObserver){
+      watchObserver = new MutationObserver(schedule);
+      watchObserver.observe(watch, {attributes:true, attributeFilter:['class']});
+    }
+    const b = voiceBtn();
+    if(b && !voiceObserver){
+      voiceObserver = new MutationObserver(schedule);
+      voiceObserver.observe(b, {childList:true, subtree:true, attributes:true, attributeFilter:['class','aria-pressed','disabled']});
+    }
+    const s = voiceStatus();
+    if(s && !statusObserver){
+      statusObserver = new MutationObserver(schedule);
+      statusObserver.observe(s, {childList:true, subtree:true, characterData:true});
+    }
+  }
+
+  function sync(){
+    scheduled = false;
+    const on = activeRoomView();
+    document.documentElement.classList.toggle('jc82-fullscreen-mic', on);
+    document.body?.classList?.toggle('jc82-fullscreen-mic', on);
+
+    const mic = ensureMic();
+    mic.hidden = !on;
+    mic.setAttribute('aria-hidden', on ? 'false' : 'true');
+    cleanOldButtons();
+    updateMic();
+    attachObservers();
+  }
+
+  function schedule(){
+    if(scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(sync);
+  }
+
+  document.addEventListener('click', function(){ setTimeout(schedule, 20); }, true);
+  document.addEventListener('fullscreenchange', schedule, true);
+  document.addEventListener('webkitfullscreenchange', schedule, true);
+  window.addEventListener('resize', schedule, {passive:true});
+  window.addEventListener('orientationchange', schedule, {passive:true});
+  [0,80,250,700,1400].forEach(ms => setTimeout(schedule, ms));
+
+  window.jc82MicDebug = function(){
+    const wrap = document.getElementById('jc82PlayerMic');
+    const r = wrap?.getBoundingClientRect?.();
+    const fs = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+    return {
+      build: BUILD,
+      activeRoomView: activeRoomView(),
+      classOn: document.body?.classList?.contains('jc82-fullscreen-mic'),
+      state: wrap?.dataset.state || '',
+      micExists: !!wrap,
+      micHidden: !!wrap?.hidden,
+      micParent: wrap?.parentElement?.className || wrap?.parentElement?.id || '',
+      micRect: r ? {x:Math.round(r.x), y:Math.round(r.y), w:Math.round(r.width), h:Math.round(r.height)} : null,
+      dockHasChatVisible: !!Array.from(document.querySelectorAll('#jc80Dock [data-jc80-chat]')).find(el => !el.hidden && getComputedStyle(el).display !== 'none'),
+      dockHasMicVisible: !!Array.from(document.querySelectorAll('#jc80Dock [data-jc80-mic]')).find(el => !el.hidden && getComputedStyle(el).display !== 'none'),
+      oldMicExists: !!document.getElementById('jc81PlayerMic'),
+      voiceText: voiceBtn()?.textContent || '',
+      voiceStatus: voiceStatus()?.textContent || '',
+      fullscreen: !!fs,
+      fullscreenElement: fs?.className || fs?.id || fs?.tagName || ''
+    };
+  };
+})();
+
+
+/* =========================================================
+   JustClover Stage 83 — Dock Mic Fullscreen
+   Version: stage88-active-icon-mic-dock-20260502-1
+
+   Keep Stage80 layout. Put mic back into the bottom dock next to sources and
+   fullscreen, keep chat hidden, and mirror voice state on the dock button.
+   NOTE: this works in JustClover fullscreen (Экран). Native fullscreen opened
+   inside the YouTube/VK iframe cannot show external DOM controls.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage88-active-icon-mic-dock-20260502-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+
+  let scheduled = false;
+  let bodyObserver = null;
+  let appObserver = null;
+  let watchObserver = null;
+  let voiceObserver = null;
+  let statusObserver = null;
+
+  function isAuth(){
+    try { return !!window.__jc62IsAuthScreen?.(); } catch(_) { return false; }
+  }
+  function appOpen(){
+    const app = document.getElementById('appView');
+    return !!(app && !app.classList.contains('hidden'));
+  }
+  function watchActive(){
+    const watch = document.getElementById('watchSection');
+    return !!(watch && watch.classList.contains('active'));
+  }
+  function activeRoomView(){
+    return !isAuth() && appOpen() && watchActive();
+  }
+  function voiceBtn(){ return document.getElementById('voiceBtn'); }
+  function voiceStatus(){ return document.getElementById('voiceStatus'); }
+  function dockMic(){ return document.querySelector('#jc80Dock [data-jc80-mic]'); }
+  function dockChat(){ return document.querySelector('#jc80Dock [data-jc80-chat]'); }
+  function dockSource(){ return document.querySelector('#jc80Dock [data-jc80-source]'); }
+  function dockFull(){ return document.querySelector('#jc80Dock [data-jc80-full]'); }
+
+  function readVoiceState(){
+    const b = voiceBtn();
+    const s = voiceStatus();
+    const text = `${b?.textContent || ''} ${s?.textContent || ''} ${b?.getAttribute('aria-pressed') || ''}`.toLowerCase();
+    if(/ошибка|недоступ|запрещ|denied|error|failed/.test(text)) return 'error';
+    if(/выключить|включ[её]н|enabled|on|true/.test(text)) return 'on';
+    if(/загрузка|подключ|разреш|ожидан|pending|loading/.test(text)) return 'pending';
+    return 'off';
+  }
+
+  function iconMarkup(){
+    return '<span class="jc88-mic-icon" aria-hidden="true">' +
+      '<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">' +
+        '<rect x="9" y="3" width="6" height="11" rx="3"></rect>' +
+        '<path d="M6 11a6 6 0 0 0 12 0"></path>' +
+        '<path d="M12 17v4"></path>' +
+        '<path d="M9 21h6"></path>' +
+      '</svg>' +
+    '</span>';
+  }
+
+  function syncDockMic(){
+    const mic = dockMic();
+    if(!mic) return;
+    const state = readVoiceState();
+    mic.hidden = false;
+    mic.setAttribute('aria-hidden','false');
+    mic.tabIndex = 0;
+    mic.disabled = false;
+    mic.dataset.micState = state;
+    mic.classList.toggle('is-off', state !== 'on');
+    mic.classList.toggle('is-on', state === 'on');
+    if(!mic.querySelector('.jc88-mic-icon')) mic.innerHTML = iconMarkup();
+    const title = state === 'on'
+      ? 'Микрофон включён — нажми, чтобы выключить'
+      : state === 'pending'
+        ? 'Микрофон переключается'
+        : state === 'error'
+          ? 'Ошибка микрофона — нажми, чтобы попробовать снова'
+          : 'Микрофон выключен — нажми, чтобы включить';
+    mic.title = title;
+    mic.setAttribute('aria-label', title);
+    mic.setAttribute('aria-pressed', state === 'on' ? 'true' : 'false');
+  }
+
+  function cleanup(){
+    const overlay = document.getElementById('jc82PlayerMic');
+    if(overlay){
+      overlay.hidden = true;
+      overlay.setAttribute('aria-hidden','true');
+      overlay.style.display = 'none';
+    }
+    const chat = dockChat();
+    if(chat){
+      chat.hidden = true;
+      chat.setAttribute('aria-hidden','true');
+      chat.tabIndex = -1;
+    }
+    const mic = dockMic();
+    if(mic){
+      mic.hidden = false;
+      mic.setAttribute('aria-hidden','false');
+      mic.tabIndex = 0;
+    }
+  }
+
+  function attachObservers(){
+    if(document.body && !bodyObserver){
+      bodyObserver = new MutationObserver(schedule);
+      bodyObserver.observe(document.body, {attributes:true, attributeFilter:['class']});
+    }
+    const app = document.getElementById('appView');
+    if(app && !appObserver){
+      appObserver = new MutationObserver(schedule);
+      appObserver.observe(app, {attributes:true, attributeFilter:['class']});
+    }
+    const watch = document.getElementById('watchSection');
+    if(watch && !watchObserver){
+      watchObserver = new MutationObserver(schedule);
+      watchObserver.observe(watch, {attributes:true, attributeFilter:['class']});
+    }
+    const b = voiceBtn();
+    if(b && !voiceObserver){
+      voiceObserver = new MutationObserver(schedule);
+      voiceObserver.observe(b, {childList:true, subtree:true, attributes:true, attributeFilter:['class','aria-pressed','disabled']});
+    }
+    const s = voiceStatus();
+    if(s && !statusObserver){
+      statusObserver = new MutationObserver(schedule);
+      statusObserver.observe(s, {childList:true, subtree:true, characterData:true});
+    }
+  }
+
+  function sync(){
+    scheduled = false;
+    const on = activeRoomView();
+    document.documentElement.classList.toggle('jc88-icon-mic-dock', on);
+    document.body?.classList?.toggle('jc88-icon-mic-dock', on);
+    cleanup();
+    if(on) syncDockMic();
+    attachObservers();
+  }
+  function schedule(){
+    if(scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(sync);
+  }
+
+  document.addEventListener('click', function(){ setTimeout(schedule, 20); }, true);
+  document.addEventListener('fullscreenchange', schedule, true);
+  document.addEventListener('webkitfullscreenchange', schedule, true);
+  window.addEventListener('resize', schedule, {passive:true});
+  window.addEventListener('orientationchange', schedule, {passive:true});
+  [0,80,250,700,1400].forEach(ms => setTimeout(schedule, ms));
+
+  window.jc88IconMicDebug = function(){
+    const mic = dockMic();
+    const fs = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+    return {
+      build: BUILD,
+      activeRoomView: activeRoomView(),
+      classOn: document.body?.classList?.contains('jc88-icon-mic-dock'),
+      micExists: !!mic,
+      micHidden: !!mic?.hidden,
+      micState: mic?.dataset?.micState || '',
+      micText: mic?.textContent || '',
+      chatHidden: !!dockChat()?.hidden,
+      sourceExists: !!dockSource(),
+      fullExists: !!dockFull(),
+      overlayHidden: !!document.getElementById('jc82PlayerMic')?.hidden,
+      fullscreen: !!fs,
+      fullscreenElement: fs?.className || fs?.id || fs?.tagName || ''
     };
   };
 })();
