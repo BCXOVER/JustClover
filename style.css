@@ -2,11 +2,11 @@
 
 /* =========================================================
    JustClover Stage 45 — Active View Clean Player Dock CSS
-   Version: stage45-active-player-restore-20260502-1
+   Version: stage46-active-overlay-controls-20260502-1
    ========================================================= */
 
 html::after{
-  content:'45 ACTIVE'!important;
+  content:'46 ACTIVE'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -565,7 +565,7 @@ body.jc40-watch-mode [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'45 ACTIVE'!important;
+  content:'46 ACTIVE'!important;
   background:rgba(34,197,94,.94)!important;
 }
 
@@ -943,7 +943,7 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'45 ACTIVE'!important;
+  content:'46 ACTIVE'!important;
 }
 
 body.jc41-rave-focus .watch-stage{
@@ -1040,7 +1040,7 @@ body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
    ========================================================= */
 
 html::after{
-  content:'45 ACTIVE'!important;
+  content:'46 ACTIVE'!important;
 }
 
 body.jc41-rave-focus .watch-main,
@@ -1123,4 +1123,111 @@ body.jc41-rave-focus #jc45ActiveDock{
   display:block!important;
   flex:0 0 auto!important;
   min-height:56px!important;
+}
+
+
+/* =========================================================
+   JustClover Stage 46 — Active Overlay Controls
+   Убираем нижнюю отдельную панель, приближаем плеер к чату,
+   оставляем компактные кнопки поверх плеера.
+   ========================================================= */
+
+html::after{
+  content:'46 ACTIVE'!important;
+}
+
+body.jc41-rave-focus .watch-layout{
+  grid-template-columns:minmax(0,1fr) clamp(300px,22vw,390px)!important;
+  gap:0!important;
+}
+
+body.jc41-rave-focus .watch-stage{
+  position:relative!important;
+}
+
+body.jc41-rave-focus .watch-sidebar{
+  padding:8px!important;
+  border-left:1px solid rgba(255,255,255,.08)!important;
+}
+
+body.jc41-rave-focus .player-card-redesign,
+body.jc41-rave-focus .player-card,
+body.jc41-rave-focus .player-shell,
+body.jc41-rave-focus .player-frame{
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock{
+  position:absolute!important;
+  left:12px!important;
+  bottom:12px!important;
+  right:auto!important;
+  width:auto!important;
+  min-height:0!important;
+  padding:0!important;
+  margin:0!important;
+  background:transparent!important;
+  border:0!important;
+  z-index:30!important;
+  pointer-events:none!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
+  width:auto!important;
+  max-width:min(calc(100vw - 32px), 560px)!important;
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:8px!important;
+  padding:8px!important;
+  border-radius:18px!important;
+  background:rgba(9,12,20,.82)!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.28)!important;
+  backdrop-filter:blur(14px)!important;
+  pointer-events:auto!important;
+}
+
+body.jc41-rave-focus #jc41RaveFloating button{
+  min-height:38px!important;
+  padding:0 13px!important;
+}
+
+/* В активном просмотре убираем отдельную нижнюю панель-растяжку. */
+body.jc41-rave-focus #jc45ActiveDock::before,
+body.jc41-rave-focus #jc45ActiveDock::after{
+  display:none!important;
+  content:none!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock{
+  position:absolute!important;
+  left:12px!important;
+  bottom:12px!important;
+  width:auto!important;
+  min-height:0!important;
+  background:transparent!important;
+  border:0!important;
+  z-index:40!important;
+  pointer-events:none!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock #jc41RaveFloating,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock #jc41RaveFloating{
+  pointer-events:auto!important;
+}
+
+@media(max-width:980px){
+  body.jc41-rave-focus .watch-layout{
+    grid-template-columns:1fr!important;
+    grid-template-rows:minmax(0,1fr) 34vh!important;
+  }
+  body.jc41-rave-focus #jc45ActiveDock{
+    left:8px!important;
+    bottom:8px!important;
+  }
+  body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
+    max-width:calc(100vw - 16px)!important;
+  }
 }
