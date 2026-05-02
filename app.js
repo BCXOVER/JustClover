@@ -1,12 +1,12 @@
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage83-dock-mic-fullscreen-20260502-1
+   Version: stage84-no-native-fullscreen-mic-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage83-dock-mic-fullscreen-20260502-1";
+const JC40_BUILD = "stage84-no-native-fullscreen-mic-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
@@ -626,10 +626,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage83-dock-mic-fullscreen-20260502-1
+   Version: stage84-no-native-fullscreen-mic-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage83-dock-mic-fullscreen-20260502-1";
+  const BUILD = "stage84-no-native-fullscreen-mic-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1156,7 +1156,7 @@ try{
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage83-dock-mic-fullscreen-20260502-1";
+  const BUILD = "stage84-no-native-fullscreen-mic-20260502-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1393,7 +1393,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage83-dock-mic-fullscreen-20260502-1";
+  const BUILD = "stage84-no-native-fullscreen-mic-20260502-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1691,7 +1691,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage83-dock-mic-fullscreen-20260502-1';
+  const BUILD = 'stage84-no-native-fullscreen-mic-20260502-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1872,7 +1872,7 @@ try{
    когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
    ========================================================= */
 (function(){
-  const BUILD = "stage83-dock-mic-fullscreen-20260502-1";
+  const BUILD = "stage84-no-native-fullscreen-mic-20260502-1";
   const CHECK_EVERY_MS = 15000;
   const FIRST_CHECK_MS = 4500;
   const RELOAD_DELAY_MS = 1800;
@@ -1985,13 +1985,13 @@ try{
 
 /* =========================================================
    JustClover Stage 81 — Real Stable Player Dock
-   Version: stage83-dock-mic-fullscreen-20260502-1
+   Version: stage84-no-native-fullscreen-mic-20260502-1
 
    No player resize loop. No fixed/cover iframe fighting.
    JS only creates bottom buttons and toggles the stable CSS class.
    ========================================================= */
 (function(){
-  const BUILD = 'stage83-dock-mic-fullscreen-20260502-1';
+  const BUILD = 'stage84-no-native-fullscreen-mic-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2189,13 +2189,13 @@ try{
 
 /* =========================================================
    JustClover Stage 81 — Player Mic Overlay
-   Version: stage83-dock-mic-fullscreen-20260502-1
+   Version: stage84-no-native-fullscreen-mic-20260502-1
 
    Adds a clear mic toggle inside the player and removes the chat action from
    the bottom dock. Does not change auth, chat DOM, source logic, or player fit.
    ========================================================= */
 (function(){
-  const BUILD = 'stage83-dock-mic-fullscreen-20260502-1';
+  const BUILD = 'stage84-no-native-fullscreen-mic-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2360,14 +2360,14 @@ try{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage83-dock-mic-fullscreen-20260502-1
+   Version: stage84-no-native-fullscreen-mic-20260502-1
 
    Adds a robust mic control mounted on .watch-main. It is not a child of the
    YouTube iframe/player element and therefore remains visible in JustClover
    site fullscreen. No player scale/fit logic is changed.
    ========================================================= */
 (function(){
-  const BUILD = 'stage83-dock-mic-fullscreen-20260502-1';
+  const BUILD = 'stage84-no-native-fullscreen-mic-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2560,7 +2560,7 @@ try{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage83-dock-mic-fullscreen-20260502-1
+   Version: stage84-no-native-fullscreen-mic-20260502-1
 
    Keep Stage80 layout. Put mic back into the bottom dock next to sources and
    fullscreen, keep chat hidden, and mirror voice state on the dock button.
@@ -2568,7 +2568,7 @@ try{
    inside the YouTube/VK iframe cannot show external DOM controls.
    ========================================================= */
 (function(){
-  const BUILD = 'stage83-dock-mic-fullscreen-20260502-1';
+  const BUILD = 'stage84-no-native-fullscreen-mic-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2725,6 +2725,200 @@ try{
       overlayHidden: !!document.getElementById('jc82PlayerMic')?.hidden,
       fullscreen: !!fs,
       fullscreenElement: fs?.className || fs?.id || fs?.tagName || ''
+    };
+  };
+})();
+
+
+/* =========================================================
+   JustClover Stage 84 — No Native Iframe Fullscreen + Dock Mic
+   Version: stage84-no-native-fullscreen-mic-20260502-1
+
+   Fix: users were entering native YouTube/VK iframe fullscreen, where external
+   site controls cannot be shown. Route the bottom-right fullscreen click to
+   JustClover fullscreen and keep the dock mic visible there.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage84-no-native-fullscreen-mic-20260502-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+
+  let scheduled = false;
+  let frameObserver = null;
+  let bodyObserver = null;
+  let appObserver = null;
+  let watchObserver = null;
+
+  function isAuth(){ try { return !!window.__jc62IsAuthScreen?.(); } catch(_) { return false; } }
+  function appOpen(){ const app = document.getElementById('appView'); return !!(app && !app.classList.contains('hidden')); }
+  function watchActive(){ const watch = document.getElementById('watchSection'); return !!(watch && watch.classList.contains('active')); }
+  function activeRoomView(){ return !isAuth() && appOpen() && watchActive(); }
+  function main(){ return document.querySelector('.watch-main') || document.getElementById('watchSection'); }
+  function frame(){ return document.querySelector('.player-frame'); }
+  function dock(){ return document.getElementById('jc80Dock'); }
+  function dockMic(){ return document.querySelector('#jc80Dock [data-jc80-mic]'); }
+  function dockChat(){ return document.querySelector('#jc80Dock [data-jc80-chat]'); }
+
+  function requestJcFullscreen(){
+    const cur = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+    try{
+      if(cur){
+        if(document.exitFullscreen) return document.exitFullscreen();
+        if(document.webkitExitFullscreen) return document.webkitExitFullscreen();
+        if(document.msExitFullscreen) return document.msExitFullscreen();
+        return;
+      }
+      const target = main() || document.documentElement;
+      if(target.requestFullscreen) return target.requestFullscreen({navigationUI:'hide'});
+      if(target.webkitRequestFullscreen) return target.webkitRequestFullscreen();
+      if(target.msRequestFullscreen) return target.msRequestFullscreen();
+    }catch(e){ console.warn('JC84 fullscreen failed', e); }
+  }
+
+  function ensureProxy(){
+    let proxy = document.getElementById('jc84FullscreenProxy');
+    if(!proxy){
+      proxy = document.createElement('button');
+      proxy.id = 'jc84FullscreenProxy';
+      proxy.type = 'button';
+      proxy.textContent = '⛶';
+      proxy.title = 'Полный экран JustClover';
+      proxy.setAttribute('aria-label','Полный экран JustClover');
+      proxy.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        requestJcFullscreen();
+      }, true);
+    }
+    const host = main();
+    if(host && proxy.parentNode !== host) host.appendChild(proxy);
+    return proxy;
+  }
+
+  function stripNativeFullscreen(){
+    const fr = frame();
+    if(!fr) return;
+    const iframes = Array.from(fr.querySelectorAll('iframe, #youtubePlayer iframe, #iframePlayer')).filter(Boolean);
+    iframes.forEach(ifr => {
+      try{
+        ifr.removeAttribute('allowfullscreen');
+        ifr.removeAttribute('webkitallowfullscreen');
+        ifr.removeAttribute('mozallowfullscreen');
+        const allow = String(ifr.getAttribute('allow') || '');
+        if(allow){
+          const cleaned = allow
+            .split(';')
+            .map(x => x.trim())
+            .filter(x => x && !/^fullscreen\b/i.test(x))
+            .join('; ');
+          ifr.setAttribute('allow', cleaned || 'autoplay; encrypted-media; picture-in-picture');
+        }else{
+          ifr.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+        }
+        ifr.dataset.jc84NoNativeFullscreen = '1';
+      }catch(_){ }
+    });
+  }
+
+  function syncFullscreenText(){
+    const on = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+    const full = document.querySelector('#jc80Dock [data-jc80-full]');
+    if(full){
+      full.textContent = on ? '× Выйти' : '⛶ Экран';
+      full.title = on ? 'Выйти из fullscreen' : 'Fullscreen JustClover';
+      full.setAttribute('aria-label', full.title);
+    }
+    const proxy = document.getElementById('jc84FullscreenProxy');
+    if(proxy){
+      proxy.textContent = on ? '×' : '⛶';
+      proxy.title = on ? 'Выйти из полного экрана' : 'Полный экран JustClover';
+      proxy.setAttribute('aria-label', proxy.title);
+    }
+  }
+
+  function forceDockVisibleInFullscreen(){
+    const d = dock();
+    const m = dockMic();
+    const ch = dockChat();
+    if(ch){ ch.hidden = true; ch.setAttribute('aria-hidden','true'); ch.tabIndex = -1; }
+    if(m){ m.hidden = false; m.setAttribute('aria-hidden','false'); m.tabIndex = 0; }
+    if(d && activeRoomView()){
+      d.hidden = false;
+      d.setAttribute('aria-hidden','false');
+    }
+  }
+
+  function attachObservers(){
+    if(document.body && !bodyObserver){
+      bodyObserver = new MutationObserver(schedule);
+      bodyObserver.observe(document.body, {attributes:true, attributeFilter:['class']});
+    }
+    const app = document.getElementById('appView');
+    if(app && !appObserver){
+      appObserver = new MutationObserver(schedule);
+      appObserver.observe(app, {attributes:true, attributeFilter:['class']});
+    }
+    const watch = document.getElementById('watchSection');
+    if(watch && !watchObserver){
+      watchObserver = new MutationObserver(schedule);
+      watchObserver.observe(watch, {attributes:true, attributeFilter:['class']});
+    }
+    const fr = frame();
+    if(fr && !frameObserver){
+      frameObserver = new MutationObserver(schedule);
+      frameObserver.observe(fr, {childList:true, subtree:true, attributes:true, attributeFilter:['src','allow','allowfullscreen','webkitallowfullscreen','mozallowfullscreen']});
+    }
+  }
+
+  function sync(){
+    scheduled = false;
+    const on = activeRoomView();
+    document.documentElement.classList.toggle('jc84-no-native-fullscreen', on);
+    document.body?.classList?.toggle('jc84-no-native-fullscreen', on);
+    if(on){
+      ensureProxy();
+      stripNativeFullscreen();
+      forceDockVisibleInFullscreen();
+    }
+    const proxy = document.getElementById('jc84FullscreenProxy');
+    if(proxy){ proxy.hidden = !on; proxy.setAttribute('aria-hidden', on ? 'false' : 'true'); }
+    syncFullscreenText();
+    attachObservers();
+  }
+
+  function schedule(){
+    if(scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(sync);
+  }
+
+  document.addEventListener('fullscreenchange', schedule, true);
+  document.addEventListener('webkitfullscreenchange', schedule, true);
+  document.addEventListener('click', function(){ setTimeout(schedule, 20); }, true);
+  window.addEventListener('resize', schedule, {passive:true});
+  window.addEventListener('orientationchange', schedule, {passive:true});
+  [0,80,250,700,1400].forEach(ms => setTimeout(schedule, ms));
+
+  window.jc84FullscreenDebug = function(){
+    const fs = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+    const proxy = document.getElementById('jc84FullscreenProxy');
+    const pr = proxy?.getBoundingClientRect?.();
+    const dr = dock()?.getBoundingClientRect?.();
+    return {
+      build: BUILD,
+      activeRoomView: activeRoomView(),
+      classOn: document.body?.classList?.contains('jc84-no-native-fullscreen'),
+      fullscreen: !!fs,
+      fullscreenElement: fs?.className || fs?.id || fs?.tagName || '',
+      proxyExists: !!proxy,
+      proxyHidden: !!proxy?.hidden,
+      proxyRect: pr ? {x:Math.round(pr.x), y:Math.round(pr.y), w:Math.round(pr.width), h:Math.round(pr.height)} : null,
+      dockHidden: !!dock()?.hidden,
+      dockRect: dr ? {x:Math.round(dr.x), y:Math.round(dr.y), w:Math.round(dr.width), h:Math.round(dr.height)} : null,
+      micHidden: !!dockMic()?.hidden,
+      micText: dockMic()?.textContent || '',
+      chatHidden: !!dockChat()?.hidden,
+      strippedIframes: Array.from(frame()?.querySelectorAll('iframe') || []).map(ifr => ({src:ifr.src, allow:ifr.getAttribute('allow') || '', allowfullscreen: ifr.hasAttribute('allowfullscreen')}))
     };
   };
 })();
