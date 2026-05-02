@@ -4728,7 +4728,7 @@ body.jc-wallpaper-paused #jcWallpaperMediaLayer img{
    ========================================================= */
 
 html::after{
-  content:'34 RUN';
+  content:'35 SCROLL';
   position:fixed;
   left:8px;
   bottom:8px;
@@ -5220,7 +5220,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'34 RUN'!important;
+  content:'35 SCROLL'!important;
 }
 
 /* В CSS-кино держим плеер внутри вкладки, без системного fullscreen overlay */
@@ -5281,7 +5281,7 @@ body.jc28-cinema .player-frame{
    ========================================================= */
 
 html::after{
-  content:'34 RUN'!important;
+  content:'35 SCROLL'!important;
 }
 
 /* В кино iframe не просто 16:9, а заполняет экран с умным zoom.
@@ -5380,7 +5380,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'34 RUN'!important;
+  content:'35 SCROLL'!important;
 }
 
 body.jc28-cinema .player-frame #iframePlayer,
@@ -5454,7 +5454,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'34 RUN'!important;
+  content:'35 SCROLL'!important;
 }
 
 /* Всегда делаем player-frame настоящим viewport для iframe */
@@ -5576,7 +5576,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'34 RUN'!important;
+  content:'35 SCROLL'!important;
 }
 
 /* Чуть шире панель, потому что вернули Full */
@@ -5687,7 +5687,7 @@ body.jc28-browser-full #jc28Panel .jc28-btn[data-jc28-act="full"]{
    ========================================================= */
 
 html::after{
-  content:'34 RUN'!important;
+  content:'35 SCROLL'!important;
 }
 
 .jc-hard-full-btn{
@@ -5798,7 +5798,7 @@ body.jc-player-frame-fullscreen .jc-hard-full-btn{
    ========================================================= */
 
 html::after{
-  content:'34 RUN'!important;
+  content:'35 SCROLL'!important;
 }
 
 /* Fullscreen именно плеера */
@@ -5957,7 +5957,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'34 RUN'!important;
+  content:'35 SCROLL'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6108,7 +6108,7 @@ body::before{
    ========================================================= */
 
 html::after{
-  content:'34 RUN'!important;
+  content:'35 SCROLL'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6440,7 +6440,7 @@ body.jc28-cinema #jcCleanSourcePanel{
    ========================================================= */
 
 html::after{
-  content:'34 RUN'!important;
+  content:'35 SCROLL'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6455,7 +6455,7 @@ body.jc-youtube-sync-fixed #jcRaveSourceBar .jc-rave-badge{
    ========================================================= */
 
 html::after{
-  content:'34 RUN'!important;
+  content:'35 SCROLL'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6495,7 +6495,7 @@ body.jc30-no-ad-labels{
    ========================================================= */
 
 html::after{
-  content:'34 RUN'!important;
+  content:'35 SCROLL'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6536,7 +6536,7 @@ button[data-rave-tool-clean],
    ========================================================= */
 
 html::after{
-  content:'34 RUN'!important;
+  content:'35 SCROLL'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6570,7 +6570,7 @@ body.jc31-sync-lock #jc31SyncPill{
    ========================================================= */
 
 html::after{
-  content:'34 RUN'!important;
+  content:'35 SCROLL'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6604,7 +6604,7 @@ body.jc32-link-fix #jc32LinkPill{
    ========================================================= */
 
 html::after{
-  content:'34 RUN'!important;
+  content:'35 SCROLL'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6684,7 +6684,7 @@ body.jc33-youtube-fallback #iframePlayer{
    ========================================================= */
 
 html::after{
-  content:'34 RUN'!important;
+  content:'35 SCROLL'!important;
   background:rgba(34,197,94,.92)!important;
 }
 
@@ -6731,4 +6731,49 @@ body.jc34-source-run #jc34RunPill{
 #jc34SourceToast.show{
   opacity:1;
   transform:translateX(-50%) translateY(0);
+}
+
+
+/* =========================================================
+   JustClover Stage 35 — Player scroll guard
+   Фикс: при клике Play в YouTube/VK страница не должна улетать вниз к источникам.
+   ========================================================= */
+
+html::after{
+  content:'35 SCROLL'!important;
+  background:rgba(34,197,94,.92)!important;
+}
+
+#jc35ScrollPill{
+  position:fixed;
+  right:10px;
+  bottom:90px;
+  z-index:2147483645;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(3,6,14,.62);
+  color:rgba(255,255,255,.74);
+  font:900 10px/1 system-ui,-apple-system,Segoe UI,sans-serif;
+  pointer-events:none;
+  opacity:0;
+  transition:.2s ease;
+}
+
+body.jc35-scroll-guard #jc35ScrollPill{
+  opacity:.72;
+}
+
+/* Если реальный iframe/video открыт, пустой экран с кнопками источника точно не должен ловить клики */
+.player-frame:has(#iframePlayer:not(.hidden)) #emptyPlayer,
+.player-frame:has(#youtubePlayer:not(.hidden)) #emptyPlayer,
+.player-frame:has(#videoPlayer:not(.hidden)) #emptyPlayer{
+  display:none!important;
+  pointer-events:none!important;
+}
+
+/* Каталог не должен вылезать из-за случайного фокуса */
+.jc-catalog-layer:not(.open) #jcCatalogUrl,
+.jc-catalog-layer:not(.open) button{
+  pointer-events:none!important;
 }
