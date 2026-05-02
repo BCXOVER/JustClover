@@ -1,12 +1,12 @@
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage92-real-room-background-glass-20260502-1
+   Version: stage93-player-recovery-safe-glass-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage92-real-room-background-glass-20260502-1";
+const JC40_BUILD = "stage93-player-recovery-safe-glass-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
@@ -626,10 +626,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage92-real-room-background-glass-20260502-1
+   Version: stage93-player-recovery-safe-glass-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage92-real-room-background-glass-20260502-1";
+  const BUILD = "stage93-player-recovery-safe-glass-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1156,7 +1156,7 @@ try{
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage92-real-room-background-glass-20260502-1";
+  const BUILD = "stage93-player-recovery-safe-glass-20260502-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1394,7 +1394,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage92-real-room-background-glass-20260502-1";
+  const BUILD = "stage93-player-recovery-safe-glass-20260502-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1692,7 +1692,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage92-real-room-background-glass-20260502-1';
+  const BUILD = 'stage93-player-recovery-safe-glass-20260502-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1873,7 +1873,7 @@ try{
    когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
    ========================================================= */
 (function(){
-  const BUILD = "stage92-real-room-background-glass-20260502-1";
+  const BUILD = "stage93-player-recovery-safe-glass-20260502-1";
   const CHECK_EVERY_MS = 15000;
   const FIRST_CHECK_MS = 4500;
   const RELOAD_DELAY_MS = 1800;
@@ -1986,13 +1986,13 @@ try{
 
 /* =========================================================
    JustClover Stage 81 — Real Stable Player Dock
-   Version: stage92-real-room-background-glass-20260502-1
+   Version: stage93-player-recovery-safe-glass-20260502-1
 
    No player resize loop. No fixed/cover iframe fighting.
    JS only creates bottom buttons and toggles the stable CSS class.
    ========================================================= */
 (function(){
-  const BUILD = 'stage92-real-room-background-glass-20260502-1';
+  const BUILD = 'stage93-player-recovery-safe-glass-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2190,13 +2190,13 @@ try{
 
 /* =========================================================
    JustClover Stage 81 — Player Mic Overlay
-   Version: stage92-real-room-background-glass-20260502-1
+   Version: stage93-player-recovery-safe-glass-20260502-1
 
    Adds a clear mic toggle inside the player and removes the chat action from
    the bottom dock. Does not change auth, chat DOM, source logic, or player fit.
    ========================================================= */
 (function(){
-  const BUILD = 'stage92-real-room-background-glass-20260502-1';
+  const BUILD = 'stage93-player-recovery-safe-glass-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2361,14 +2361,14 @@ try{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage92-real-room-background-glass-20260502-1
+   Version: stage93-player-recovery-safe-glass-20260502-1
 
    Adds a robust mic control mounted on .watch-main. It is not a child of the
    YouTube iframe/player element and therefore remains visible in JustClover
    site fullscreen. No player scale/fit logic is changed.
    ========================================================= */
 (function(){
-  const BUILD = 'stage92-real-room-background-glass-20260502-1';
+  const BUILD = 'stage93-player-recovery-safe-glass-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2561,7 +2561,7 @@ try{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage92-real-room-background-glass-20260502-1
+   Version: stage93-player-recovery-safe-glass-20260502-1
 
    Keep Stage80 layout. Put mic back into the bottom dock next to sources and
    fullscreen, keep chat hidden, and mirror voice state on the dock button.
@@ -2569,7 +2569,7 @@ try{
    inside the YouTube/VK iframe cannot show external DOM controls.
    ========================================================= */
 (function(){
-  const BUILD = 'stage92-real-room-background-glass-20260502-1';
+  const BUILD = 'stage93-player-recovery-safe-glass-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2737,182 +2737,56 @@ try{
 })();
 
 /* =========================================================
-   JustClover Stage 92 — Real Room Background Glass
-   Version: stage92-real-room-background-glass-20260502-1
-   Finds the menu/live background and applies it as a CSS variable to active-room chrome.
-   No player/fullscreen/source/auth edits.
+   JustClover Stage 89 — Glass Chat + Dock Transparency
+   Version: stage93-player-recovery-safe-glass-20260502-1
+   Small runtime marker/debug only; no layout JS hacks added.
    ========================================================= */
 (()=>{
-  const BUILD = 'stage92-real-room-background-glass-20260502-1';
+  const BUILD = 'stage93-player-recovery-safe-glass-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
-  let raf = 0;
-  let chosen = '';
-
-  function activeRoom(){
-    const app = document.getElementById('appView');
-    const watch = document.getElementById('watchSection');
-    return !!(app && !app.classList.contains('hidden') && watch && watch.classList.contains('active'));
-  }
-
-  function ensureLayer(){
-    let el = document.getElementById('jc92RoomBg');
-    if(!el){
-      el = document.createElement('div');
-      el.id = 'jc92RoomBg';
-      el.setAttribute('aria-hidden','true');
-      document.body.insertBefore(el, document.body.firstChild || null);
-    }
-    return el;
-  }
-
-  function scoreText(str, key){
-    const s = String(str || '');
-    if(!s) return -1;
-    let score = 0;
-    const low = (String(key || '') + ' ' + s).toLowerCase();
-    if(/background|wallpaper|live|theme|cover|bg|фон|обои|аниме|anime/.test(low)) score += 1000;
-    if(/url\(|data:image|blob:|https?:\/\//i.test(s)) score += 800;
-    if(/\.gif|\.webp|\.png|\.jpe?g|\.avif|\.svg/i.test(s)) score += 500;
-    if(/avatar|gif|sticker|emoji|youtube|ytimg|vkvideo|thumbnail|thumb|room|source|message|chat/i.test(low)) score -= 700;
-    if(s.length > 50) score += Math.min(180, s.length / 20);
-    return score;
-  }
-
-  function extractImages(value){
-    const out = [];
-    const seen = new Set();
-    function push(v, key){
-      if(!v) return;
-      let s = String(v).trim();
-      if(!s || s === 'none') return;
-      if(/^url\(/i.test(s) || /gradient\(/i.test(s)){
-        if(!seen.has(s)){ seen.add(s); out.push({value:s,key,score:scoreText(s,key)}); }
-        return;
-      }
-      const data = s.match(/data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+/);
-      if(data){ const v2 = `url("${data[0]}")`; if(!seen.has(v2)){ seen.add(v2); out.push({value:v2,key,score:scoreText(v2,key)}); } }
-      const urls = s.match(/https?:\/\/[^\s"'()<>]+|blob:[^\s"'()<>]+/g) || [];
-      urls.forEach(u => {
-        if(/\.(gif|webp|png|jpe?g|avif|svg)(\?|#|$)/i.test(u) || /image|background|wallpaper|cover|anime|photo/i.test(u)){
-          const v2 = `url("${u}")`;
-          if(!seen.has(v2)){ seen.add(v2); out.push({value:v2,key,score:scoreText(v2,key)}); }
-        }
-      });
-    }
-    function walk(v, key, depth){
-      if(depth > 5 || v == null) return;
-      if(typeof v === 'string'){
-        push(v, key);
-        const t = v.trim();
-        if((t.startsWith('{') && t.endsWith('}')) || (t.startsWith('[') && t.endsWith(']'))){
-          try{ walk(JSON.parse(t), key, depth + 1); }catch(_){}
-        }
-        return;
-      }
-      if(Array.isArray(v)) return v.forEach((x,i)=>walk(x, `${key}.${i}`, depth+1));
-      if(typeof v === 'object') return Object.entries(v).forEach(([k,x])=>walk(x, `${key}.${k}`, depth+1));
-    }
-    walk(value, '', 0);
-    return out;
-  }
-
-  function cssImageFrom(el, pseudo){
-    if(!el) return [];
-    try{
-      const st = getComputedStyle(el, pseudo || null);
-      const img = st.backgroundImage;
-      if(!img || img === 'none') return [];
-      const rect = el.getBoundingClientRect?.();
-      const area = rect ? Math.max(1, rect.width * rect.height) : 1;
-      return [{ value:img, key:`css:${el.id || el.className || el.tagName}${pseudo || ''}`, score:scoreText(img, el.id || el.className || el.tagName) + Math.min(500, area/5000) }];
-    }catch(_){ return []; }
-  }
-
-  function collectCandidates(){
-    const c = [];
-    const rootStyle = getComputedStyle(document.documentElement);
-    const bodyStyle = getComputedStyle(document.body);
-    ['--jc-room-bg','--room-bg','--app-bg','--bg-image','--wallpaper','--background-image','--preview'].forEach(k=>{
-      [rootStyle, bodyStyle].forEach(st => c.push(...extractImages(st.getPropertyValue(k), k)));
-    });
-    [document.documentElement, document.body, document.querySelector('.bg'), document.querySelector('#appView'), document.querySelector('.app'), document.querySelector('.content'), document.querySelector('.shell'), document.querySelector('#lobbySection'), document.querySelector('.section.active')]
-      .filter(Boolean)
-      .forEach(el => { c.push(...cssImageFrom(el)); c.push(...cssImageFrom(el,'::before')); c.push(...cssImageFrom(el,'::after')); c.push(...extractImages(el.getAttribute('style') || '', el.id || el.className || el.tagName)); });
-
-    document.querySelectorAll('[style*="background"],[style*="url"],[style*="image"]').forEach(el => {
-      c.push(...extractImages(el.getAttribute('style') || '', el.id || el.className || el.tagName));
-      c.push(...cssImageFrom(el));
-    });
-
-    try{
-      for(let i=0;i<localStorage.length;i++){
-        const key = localStorage.key(i);
-        if(!key) continue;
-        const val = localStorage.getItem(key);
-        const hits = extractImages(val, key);
-        hits.forEach(h => {
-          h.score += scoreText(val, key);
-          c.push(h);
-        });
-      }
-    }catch(_){}
-
-    try{
-      const last = localStorage.getItem('jc92LastRoomBg') || localStorage.getItem('jc91LastRoomBg') || localStorage.getItem('jc90LastRoomBg') || '';
-      c.push(...extractImages(last, 'lastRoomBg').map(x => ({...x, score:x.score + 300})));
-    }catch(_){}
-
-    return c.filter(x => x.value && !/youtube|ytimg|vkvideo|thumbnail|thumb|emoji|sticker|minion/i.test(x.value));
-  }
-
-  function applyBackground(){
-    const layer = ensureLayer();
-    const candidates = collectCandidates().sort((a,b)=>b.score-a.score);
-    const best = candidates[0];
-    if(best && best.value && best.score > 0){
-      chosen = best.value;
-      try{ localStorage.setItem('jc92LastRoomBg', chosen); }catch(_){}
-    } else {
-      try{ chosen = chosen || localStorage.getItem('jc92LastRoomBg') || ''; }catch(_){}
-    }
-    if(chosen){
-      document.documentElement.style.setProperty('--jc92-room-bg-image', chosen);
-      document.documentElement.style.setProperty('--jc92-room-bg-pos', 'center center');
-      document.documentElement.style.setProperty('--jc92-room-bg-size', 'cover');
-      layer.style.backgroundImage = chosen;
-    }
-  }
-
-  function sync(){
-    raf = 0;
-    const on = activeRoom();
-    document.body?.classList?.toggle('jc92-real-bg', on);
-    const layer = ensureLayer();
-    layer.hidden = !on;
-    if(on) applyBackground();
-  }
-
-  function schedule(){ if(!raf) raf = requestAnimationFrame(sync); }
-  function start(){
-    schedule();
-    const mo = new MutationObserver(schedule);
-    if(document.body) mo.observe(document.body, {subtree:true, attributes:true, attributeFilter:['class','style']});
-  }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true}); else start();
-  document.addEventListener('click', () => setTimeout(schedule, 60), true);
-  window.addEventListener('resize', schedule, {passive:true});
-  [0,150,500,1200,2400,4200].forEach(t => setTimeout(schedule, t));
-
-  window.jc92RealBgDebug = function(){
-    const layer = document.getElementById('jc92RoomBg');
+  window.jc89GlassDebug = function(){
     const dock = document.getElementById('jc80Dock');
-    const side = document.querySelector('.watch-sidebar');
+    const sidebar = document.querySelector('.watch-sidebar');
     const chat = document.querySelector('.chat-card');
-    const pick = el => {
-      if(!el) return null;
-      const s = getComputedStyle(el);
-      return { display:s.display, hidden:!!el.hidden, backgroundColor:s.backgroundColor, backgroundImage:s.backgroundImage, backdropFilter:s.backdropFilter || s.webkitBackdropFilter || '', zIndex:s.zIndex };
+    const css = el => el ? getComputedStyle(el) : null;
+    const pick = s => s ? {
+      backgroundColor: s.backgroundColor,
+      backgroundImage: s.backgroundImage,
+      backdropFilter: s.backdropFilter || s.webkitBackdropFilter || '',
+      borderColor: s.borderColor,
+      opacity: s.opacity
+    } : null;
+    return {
+      build: BUILD,
+      dock: pick(css(dock)),
+      sidebar: pick(css(sidebar)),
+      chat: pick(css(chat)),
+      bodyClass: document.body?.className || ''
     };
-    return { build:BUILD, activeRoom:activeRoom(), chosen, rootVar:getComputedStyle(document.documentElement).getPropertyValue('--jc92-room-bg-image'), layer:pick(layer), dock:pick(dock), sidebar:pick(side), chat:pick(chat), candidateCount:collectCandidates().length, topCandidates:collectCandidates().sort((a,b)=>b.score-a.score).slice(0,5) };
+  };
+})();
+
+/* =========================================================
+   JustClover Stage 93 — Player Recovery Safe Glass
+   Version: stage93-player-recovery-safe-glass-20260502-1
+   Debug marker only. No background/player mutation.
+   ========================================================= */
+(()=>{
+  const BUILD = 'stage93-player-recovery-safe-glass-20260502-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+  window.jc93RecoveryDebug = function(){
+    const q = s => document.querySelector(s);
+    const visible = el => !!el && getComputedStyle(el).display !== 'none' && getComputedStyle(el).visibility !== 'hidden' && getComputedStyle(el).opacity !== '0';
+    const iframe = q('.player-frame iframe, #youtubePlayer iframe, #jc65DirectPlayer');
+    return {
+      build: BUILD,
+      playerFrameVisible: visible(q('.player-frame')),
+      iframeVisible: visible(iframe),
+      iframeSrc: iframe?.src || '',
+      brokenBgLayers: ['#jc90LiveBg','#jc91RoomBg','#jc92RoomBg'].map(sel => ({sel, exists: !!q(sel), visible: visible(q(sel))})),
+      dockVisible: visible(q('#jc80Dock')),
+      micVisible: visible(q('#jc80Dock [data-jc80-mic]')),
+      chatVisible: visible(q('.chat-card'))
+    };
   };
 })();
