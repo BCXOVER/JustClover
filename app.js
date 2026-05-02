@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 60 — Auth Guest Safe
-   Version: stage60-auth-guest-safe-20260502-1
+   JustClover Stage 61 — Direct Guest Auth
+   Version: stage61-direct-guest-auth-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage60-auth-guest-safe-20260502-1";
+const JC40_BUILD = "stage61-direct-guest-auth-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 60 AUTHGUEST loader:", JC40_BUILD);
+console.log("JustClover Stage 61 DIRECTGUEST loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 60: base app import failed", e);
+  console.error("JustClover Stage 61: base app import failed", e);
   throw e;
 }
 
@@ -683,11 +683,11 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 60 — Auth Guest Safe
-   Version: stage60-auth-guest-safe-20260502-1
+   JustClover Stage 61 — Direct Guest Auth
+   Version: stage61-direct-guest-auth-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage60-auth-guest-safe-20260502-1";
+  const BUILD = "stage61-direct-guest-auth-20260502-1";
   const STORE_KEY = "jc58ActiveViewMode";
   let desired = false;
 
@@ -1205,7 +1205,7 @@ try{
 
 // Stage 58 — stable sidebar geometry: no chat DOM moves, no clones.
 (function(){
-  const BUILD = "stage60-auth-guest-safe-20260502-1";
+  const BUILD = "stage61-direct-guest-auth-20260502-1";
 
   function hideCinemaButtons(root=document){
     const nodes = Array.from(root.querySelectorAll('button,a,[role="button"],.chip,.pill,.segmented button'));
@@ -1262,3 +1262,129 @@ try{
   window.jc60ActiveViewDebug = window.jc58ActiveViewDebug || window.jc54ActiveViewDebug || function(){ return { build: window.JUSTCLOVER_BUILD }; };
   window.jc60HideCinema = window.jc58HideCinema || window.jc55HideCinema || function(){ return false; };
 }catch(_){}
+
+
+
+/* =========================================================
+   Stage 61 direct guest auth.
+   Fix: Stage60 set "guestClicked" too early; if base handlers were not bound yet, nothing happened.
+   This block signs in anonymously through Firebase directly, then lets the base app's
+   onAuthStateChanged render the normal app. No DOM stealing, no active-view before auth.
+   ========================================================= */
+(function(){
+  const params = new URLSearchParams(location.search);
+  const wantGuest = /^(1|true|yes|guest)$/i.test(String(params.get('guest') || params.get('autoGuest') || params.get('asGuest') || ''));
+  const wantedRoom = String(params.get('room') || '').trim();
+  let authStarted = false;
+  let authDone = false;
+  let authError = '';
+  let joinTries = 0;
+
+  function isAuthScreen(){
+    return !!(window.__jc59IsAuthScreen ? window.__jc59IsAuthScreen() : (document.getElementById('appView')?.classList.contains('hidden')));
+  }
+
+  function setStatus(text){
+    const s = document.getElementById('authStatus');
+    if(s && text) s.textContent = text;
+  }
+
+  async function directGuestSignIn(){
+    if(!wantGuest || authStarted || !isAuthScreen()) return false;
+    authStarted = true;
+    setStatus('Входим гостем...');
+    try{
+      const [{ firebaseConfig }, appMod, authMod] = await Promise.all([
+        import('./firebase-config.js'),
+        import('https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js'),
+        import('https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js')
+      ]);
+      const app = appMod.getApps().length ? appMod.getApp() : appMod.initializeApp(firebaseConfig);
+      const auth = authMod.getAuth(app);
+      if(!auth.currentUser){
+        await authMod.signInAnonymously(auth);
+      }
+      authDone = true;
+      setStatus('Гость вошёл. Открываю комнату...');
+      return true;
+    }catch(e){
+      authError = String(e?.message || e || 'unknown auth error');
+      authStarted = false; // allow retry
+      setStatus('Не удалось войти гостем: ' + authError);
+      console.error('[JC61] direct guest auth failed', e);
+      return false;
+    }
+  }
+
+  function clickLikeHuman(el){
+    if(!el) return false;
+    try{
+      el.dispatchEvent(new PointerEvent('pointerdown', {bubbles:true, cancelable:true, pointerId:1, isPrimary:true}));
+      el.dispatchEvent(new MouseEvent('mousedown', {bubbles:true, cancelable:true}));
+      el.dispatchEvent(new PointerEvent('pointerup', {bubbles:true, cancelable:true, pointerId:1, isPrimary:true}));
+      el.dispatchEvent(new MouseEvent('mouseup', {bubbles:true, cancelable:true}));
+      el.click();
+      return true;
+    }catch(_){
+      try{ el.click(); return true; }catch(__){ return false; }
+    }
+  }
+
+  function showGuestTab(){
+    const tab = document.getElementById('guestTab');
+    const submit = document.getElementById('guestSubmit');
+    if(tab && submit && submit.classList.contains('hidden')) clickLikeHuman(tab);
+  }
+
+  function joinWantedRoom(){
+    if(!wantedRoom || isAuthScreen()) return false;
+    const app = document.getElementById('appView');
+    if(!app || app.classList.contains('hidden')) return false;
+
+    const watch = document.getElementById('watchSection');
+    const currentRoomVisible = watch?.classList.contains('active') && document.getElementById('chatMessages');
+    if(currentRoomVisible) return true;
+
+    const input = document.getElementById('joinRoomInput');
+    const btn = document.getElementById('joinRoomBtn');
+    if(!input || !btn) return false;
+
+    input.value = wantedRoom;
+    input.dispatchEvent(new Event('input', {bubbles:true}));
+    joinTries++;
+    clickLikeHuman(btn);
+    return true;
+  }
+
+  function tick(){
+    try{ window.__jc59CleanAuthShell?.(); }catch(_){}
+    if(wantGuest && isAuthScreen()){
+      showGuestTab();
+      directGuestSignIn();
+    }
+    if(wantedRoom && !isAuthScreen()){
+      joinWantedRoom();
+    }
+  }
+
+  tick();
+  const timer = setInterval(tick, 500);
+  setTimeout(()=>clearInterval(timer), 30000);
+
+  window.jc61AuthDebug = function(){
+    return {
+      build: window.JUSTCLOVER_BUILD,
+      wantGuest,
+      room: wantedRoom,
+      auth: isAuthScreen(),
+      authStarted,
+      authDone,
+      authError,
+      joinTries,
+      appHidden: document.getElementById('appView')?.classList.contains('hidden'),
+      guestSubmitHidden: document.getElementById('guestSubmit')?.classList.contains('hidden'),
+      activeSection: document.querySelector('.section.active')?.id || ''
+    };
+  };
+})();
+
