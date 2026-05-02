@@ -1,12 +1,12 @@
 @import url("https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@f658b5bfad3fade4eb7f9c4d82865452cdc19f00/style.css");
 
 /* =========================================================
-   JustClover Stage 40 — No Page Scroll Watch Mode CSS
-   Version: stage40-no-page-scroll-watch-mode-20260502-1
+   JustClover Stage 41 — No Page Scroll Watch Mode CSS
+   Version: stage41-rave-focus-player-chat-20260502-1
    ========================================================= */
 
 html::after{
-  content:'40 NOSCROLL'!important;
+  content:'41 RAVE'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -22,7 +22,7 @@ html::after{
 }
 
 #jc31SyncPill,#jc32LinkPill,#jc33EmbedPill,#jc34RunPill,
-#jc35ScrollPill,#jc36CatalogPill,#jc37HardPill,#jc38CleanPill,#jc40MenuPill{
+#jc35ScrollPill,#jc36CatalogPill,#jc37HardPill,#jc38CleanPill,#jc40MenuPill,#jc41RavePill{
   display:none!important;
 }
 
@@ -351,7 +351,7 @@ body.jc40-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
 
 
 /* =========================================================
-   JustClover Stage 40 — No Page Scroll Watch Mode
+   JustClover Stage 41 — No Page Scroll Watch Mode
    В просмотре больше нет page scroll: колесо работает только внутри чата/списков/каталога.
    ========================================================= */
 
@@ -556,5 +556,312 @@ body.jc40-watch-mode [class*="queue"]{
   body.jc40-watch-mode .player-frame{
     height:clamp(300px,58vh,620px)!important;
     max-height:62vh!important;
+  }
+}
+
+/* =========================================================
+   JustClover Stage 41 — Rave Focus Player + Chat Mode
+   Большой плеер + чат + микрофон, без лишних полос над плеером.
+   ========================================================= */
+
+html::after{
+  content:'41 RAVE'!important;
+  background:rgba(34,197,94,.94)!important;
+}
+
+#jc41RaveToggle{
+  border-color:rgba(52,211,153,.32)!important;
+  background:linear-gradient(180deg,rgba(52,211,153,.14),rgba(255,255,255,.045))!important;
+}
+
+#jc41RaveToggle.active{
+  color:#03130a!important;
+  background:linear-gradient(135deg,#34d399,#a7f3d0)!important;
+  border-color:transparent!important;
+  box-shadow:0 14px 36px rgba(52,211,153,.20)!important;
+}
+
+#jc41RaveFloating{
+  position:fixed!important;
+  left:18px!important;
+  top:16px!important;
+  z-index:2147482500!important;
+  display:none!important;
+  align-items:center!important;
+  gap:8px!important;
+  padding:8px!important;
+  border-radius:22px!important;
+  background:rgba(5,7,14,.62)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  box-shadow:0 22px 70px rgba(0,0,0,.42)!important;
+  backdrop-filter:blur(16px)!important;
+}
+
+#jc41RaveFloating button{
+  min-height:38px!important;
+  border-radius:15px!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  background:rgba(255,255,255,.075)!important;
+  color:#fff!important;
+  padding:0 13px!important;
+  font:900 13px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  cursor:pointer!important;
+}
+
+#jc41RaveFloating button:hover{
+  background:rgba(255,255,255,.14)!important;
+  transform:translateY(-1px)!important;
+}
+
+#jc41RaveFloating [data-jc41-exit]{
+  background:linear-gradient(135deg,#ef6f87,#a855f7)!important;
+  border-color:transparent!important;
+}
+
+body.jc41-rave-focus #jc41RaveFloating{
+  display:flex!important;
+}
+
+/* Главный Rave-режим: только плеер слева и чат/микрофон справа. */
+html.jc41-rave-focus,
+body.jc41-rave-focus{
+  height:100%!important;
+  max-height:100%!important;
+  overflow:hidden!important;
+  background:#03040a!important;
+}
+
+body.jc41-rave-focus .topbar{
+  display:none!important;
+}
+
+body.jc41-rave-focus .shell{
+  width:100vw!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
+
+body.jc41-rave-focus #appView.app{
+  width:100vw!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:0!important;
+  overflow:hidden!important;
+  min-height:0!important;
+}
+
+body.jc41-rave-focus .rail{
+  display:none!important;
+}
+
+body.jc41-rave-focus .content,
+body.jc41-rave-focus #watchSection,
+body.jc41-rave-focus .watch-layout,
+body.jc41-rave-focus .watch-main,
+body.jc41-rave-focus .watch-stage{
+  height:100vh!important;
+  max-height:100vh!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+body.jc41-rave-focus .watch-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) clamp(330px,24vw,430px)!important;
+  gap:0!important;
+  align-items:stretch!important;
+}
+
+body.jc41-rave-focus .watch-main{
+  min-width:0!important;
+}
+
+body.jc41-rave-focus .watch-stage{
+  display:flex!important;
+  flex-direction:column!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#03040a!important;
+  box-shadow:none!important;
+}
+
+/* Убираем всё, что мешает над плеером: заголовок, описание, полоску источников и лишний toolbar. */
+body.jc41-rave-focus .watch-brandbar,
+body.jc41-rave-focus .watch-header,
+body.jc41-rave-focus .source-strip,
+body.jc41-rave-focus .source-panel-embedded,
+body.jc41-rave-focus .reactions-dock,
+body.jc41-rave-focus .watch-footer-meta{
+  display:none!important;
+}
+
+body.jc41-rave-focus .player-card-redesign,
+body.jc41-rave-focus .player-card,
+body.jc41-rave-focus .player-shell{
+  flex:1 1 auto!important;
+  width:100%!important;
+  height:100%!important;
+  max-height:100%!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:#000!important;
+  overflow:hidden!important;
+}
+
+body.jc41-rave-focus .player-frame{
+  width:100%!important;
+  height:100vh!important;
+  max-height:none!important;
+  min-height:0!important;
+  aspect-ratio:auto!important;
+  border-radius:0!important;
+  background:#000!important;
+  overflow:hidden!important;
+}
+
+body.jc41-rave-focus .player-frame iframe,
+body.jc41-rave-focus .player-frame video,
+body.jc41-rave-focus .embed-box{
+  width:100%!important;
+  height:100%!important;
+  border:0!important;
+  object-fit:contain!important;
+  background:#000!important;
+}
+
+body.jc41-rave-focus .watch-sidebar{
+  height:100vh!important;
+  max-height:100vh!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-rows:auto minmax(0,1fr)!important;
+  gap:10px!important;
+  padding:12px!important;
+  overflow:hidden!important;
+  border-left:1px solid rgba(255,255,255,.12)!important;
+  background:
+    radial-gradient(circle at top right,rgba(251,113,133,.17),transparent 42%),
+    linear-gradient(180deg,rgba(20,16,30,.92),rgba(9,9,18,.96))!important;
+  backdrop-filter:blur(16px)!important;
+}
+
+/* В фокусе участники не занимают место; чат всё равно виден. */
+body.jc41-rave-focus .members-card{
+  display:none!important;
+}
+
+body.jc41-rave-focus .voice-card{
+  min-height:0!important;
+  padding:12px!important;
+  border-radius:20px!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:10px!important;
+  align-items:center!important;
+  box-shadow:none!important;
+}
+
+body.jc41-rave-focus .voice-card .side-card-head{
+  display:none!important;
+}
+
+body.jc41-rave-focus .voice-card::before{
+  content:'Микрофон'!important;
+  color:#fff!important;
+  font:900 15px/1 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+body.jc41-rave-focus .voice-card #voiceBtn{
+  min-height:38px!important;
+  padding:0 13px!important;
+  border-radius:14px!important;
+  white-space:nowrap!important;
+}
+
+body.jc41-rave-focus .voice-card #voiceStatus,
+body.jc41-rave-focus .voice-card .status,
+body.jc41-rave-focus .voice-card .voice-wave,
+body.jc41-rave-focus .voice-card #remoteAudio{
+  display:none!important;
+}
+
+body.jc41-rave-focus .chat-card{
+  height:100%!important;
+  max-height:100%!important;
+  min-height:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  padding:14px!important;
+  border-radius:22px!important;
+  overflow:hidden!important;
+  box-shadow:none!important;
+}
+
+body.jc41-rave-focus .chat-card .side-card-head{
+  flex:0 0 auto!important;
+  margin-bottom:10px!important;
+}
+
+body.jc41-rave-focus .chat-card .side-card-head h3{
+  font-size:20px!important;
+}
+
+body.jc41-rave-focus #chatMessages,
+body.jc41-rave-focus .chat-card .messages{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+}
+
+body.jc41-rave-focus #chatForm,
+body.jc41-rave-focus .chat-card .message-form{
+  flex:0 0 auto!important;
+  margin-top:10px!important;
+}
+
+/* Низ под плеером в фокусе скрыт, чтобы видео было выше и больше. */
+body.jc41-rave-focus .watch-main .card,
+body.jc41-rave-focus .watch-main [class*="history"],
+body.jc41-rave-focus .watch-main [class*="queue"]{
+  display:none!important;
+}
+
+
+@media(max-width:980px){
+  body.jc41-rave-focus .watch-layout{
+    grid-template-columns:1fr!important;
+    grid-template-rows:minmax(0,1fr) 38vh!important;
+  }
+  body.jc41-rave-focus .player-frame{
+    height:62vh!important;
+  }
+  body.jc41-rave-focus .watch-sidebar{
+    height:38vh!important;
+    max-height:38vh!important;
+    border-left:0!important;
+    border-top:1px solid rgba(255,255,255,.12)!important;
+    grid-template-rows:auto minmax(0,1fr)!important;
+  }
+  #jc41RaveFloating{
+    left:8px!important;
+    top:8px!important;
+    max-width:calc(100vw - 16px)!important;
+    overflow-x:auto!important;
+  }
+  #jc41RaveFloating button{
+    white-space:nowrap!important;
   }
 }

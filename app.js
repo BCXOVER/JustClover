@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 40 — No Page Scroll Watch Mode
-   Version: stage40-no-page-scroll-watch-mode-20260502-1
+   JustClover Stage 41 — No Page Scroll Watch Mode
+   Version: stage41-rave-focus-player-chat-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage40-no-page-scroll-watch-mode-20260502-1";
+const JC40_BUILD = "stage41-rave-focus-player-chat-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 40 NOSCROLL loader:", JC40_BUILD);
+console.log("JustClover Stage 41 RAVE loader:", JC40_BUILD);
 
 try {
-  await import(JC40_BASE_APP + `?base=stage37&stage40=${Date.now()}`);
+  await import(JC40_BASE_APP + `?base=stage37&stage41=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 40: base app import failed", e);
+  console.error("JustClover Stage 41: base app import failed", e);
   throw e;
 }
 
@@ -525,4 +525,160 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
     tick();
     console.log('[JC40 no page scroll watch mode] ready', window.jc40CleanMenuDebug());
   }, 350);
+})();
+
+/* =========================================================
+   JustClover Stage 41 — Rave Focus Player + Chat Mode
+   Version: stage41-rave-focus-player-chat-20260502-1
+   ========================================================= */
+(function(){
+  const BUILD = "stage41-rave-focus-player-chat-20260502-1";
+  const STORE_KEY = "jc41RaveFocusMode";
+  let desired = false;
+
+  try { desired = localStorage.getItem(STORE_KEY) === "1"; } catch(_) {}
+
+  function isWatchMode(){
+    const app = document.getElementById('appView');
+    const watch = document.getElementById('watchSection');
+    return !!(watch && watch.classList.contains('active') && !app?.classList.contains('hidden'));
+  }
+
+  function hardTop(){
+    try { document.documentElement.scrollTop = 0; } catch(_) {}
+    try { document.body.scrollTop = 0; } catch(_) {}
+  }
+
+  function openCatalog(){
+    const fn = window.jc40OpenCatalog || window.jc39OpenCatalog || window.jcStage8OpenCatalog;
+    if(typeof fn === 'function') fn('youtube');
+  }
+
+  function clickMic(){
+    const b = document.getElementById('voiceBtn');
+    if(b) b.click();
+  }
+
+  function focusChat(){
+    const input = document.getElementById('chatInput');
+    if(input){
+      try { input.focus({preventScroll:true}); } catch(_) { input.focus(); }
+    }
+  }
+
+  function ensureFloating(){
+    if(document.getElementById('jc41RaveFloating')) return;
+    const f = document.createElement('div');
+    f.id = 'jc41RaveFloating';
+    f.innerHTML = `
+      <button type="button" data-jc41-exit>Обычный</button>
+      <button type="button" data-jc41-catalog>Источники</button>
+      <button type="button" data-jc41-mic>Микро</button>
+      <button type="button" data-jc41-chat>Чат</button>
+    `;
+    f.addEventListener('click', function(e){
+      const b = e.target.closest('button');
+      if(!b) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if(b.hasAttribute('data-jc41-exit')) setFocus(false);
+      if(b.hasAttribute('data-jc41-catalog')) openCatalog();
+      if(b.hasAttribute('data-jc41-mic')) clickMic();
+      if(b.hasAttribute('data-jc41-chat')) focusChat();
+    });
+    document.body.appendChild(f);
+  }
+
+  function ensureToggle(){
+    const row = document.querySelector('.watch-chip-row.left') || document.querySelector('.watch-brandbar') || document.querySelector('#watchSection');
+    if(!row) return;
+    let btn = document.getElementById('jc41RaveToggle');
+    if(!btn){
+      btn = document.createElement('button');
+      btn.id = 'jc41RaveToggle';
+      btn.type = 'button';
+      btn.className = 'toolbar-chip jc41-rave-toggle';
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        setFocus(!desired);
+      });
+      if(row.firstChild) row.insertBefore(btn, row.firstChild);
+      else row.appendChild(btn);
+    }
+    btn.textContent = desired ? 'Обычный' : 'Rave режим';
+    btn.classList.toggle('active', desired);
+    btn.title = desired ? 'Вернуть обычный интерфейс' : 'Оставить только плеер, чат и микрофон';
+  }
+
+  function apply(){
+    ensureFloating();
+    ensureToggle();
+    const on = desired && isWatchMode();
+    document.documentElement.classList.toggle('jc41-rave-focus', on);
+    document.body.classList.toggle('jc41-rave-focus', on);
+    if(on){
+      document.documentElement.classList.add('jc40-watch-mode');
+      document.body.classList.add('jc40-watch-mode');
+      document.body.classList.remove('jc35-scroll-guard','jc37-modal-lock','jc38-catalog-open','jc-catalog-open');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.width = '';
+      hardTop();
+    }
+  }
+
+  function setFocus(on){
+    desired = !!on;
+    try { localStorage.setItem(STORE_KEY, desired ? '1' : '0'); } catch(_) {}
+    apply();
+  }
+
+  // Не даём колесу дергать страницу в Rave-режиме; чат и каталог остаются скроллящимися.
+  function isAllowedScrollTarget(node){
+    return !!node?.closest?.('#chatMessages, .chat-card .messages, #jc40CatalogRoot .jc40-scroll, .watch-sidebar, .jc41-allow-scroll');
+  }
+
+  document.addEventListener('wheel', function(e){
+    if(!document.body.classList.contains('jc41-rave-focus')) return;
+    if(isAllowedScrollTarget(e.target)) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }, {capture:true, passive:false});
+
+  document.addEventListener('touchmove', function(e){
+    if(!document.body.classList.contains('jc41-rave-focus')) return;
+    if(isAllowedScrollTarget(e.target)) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }, {capture:true, passive:false});
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && document.body.classList.contains('jc41-rave-focus') && !(window.jc40CleanMenuDebug?.().open)){
+      setFocus(false);
+    }
+  }, true);
+
+  window.jc41SetRaveMode = setFocus;
+  window.jc41ToggleRaveMode = function(){ setFocus(!desired); };
+  window.jc41RaveDebug = function(){
+    return {
+      build: BUILD,
+      desired,
+      active: document.body.classList.contains('jc41-rave-focus'),
+      watchMode: isWatchMode(),
+      scrollY: window.scrollY || document.documentElement.scrollTop || 0,
+      hasToggle: !!document.getElementById('jc41RaveToggle'),
+      hasFloating: !!document.getElementById('jc41RaveFloating'),
+      playerHeight: document.querySelector('.player-frame')?.getBoundingClientRect?.().height || 0,
+      sidebarWidth: document.querySelector('.watch-sidebar')?.getBoundingClientRect?.().width || 0
+    };
+  };
+
+  setInterval(apply, 180);
+  setTimeout(function(){
+    apply();
+    console.log('[JC41 rave focus] ready', window.jc41RaveDebug());
+  }, 500);
 })();
