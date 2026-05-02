@@ -4951,8 +4951,8 @@ setTimeout(jc251Patch, 1000);
    JustClover Stage 28 CLEAN — player/cinema JS
    Version: stage28-clean-cinema-player-20260502-1
    ========================================================= */
-console.log("JustClover Stage 30 RAVE loaded:", "stage30-rave-like-clean-sources-20260502-1");
-window.JUSTCLOVER_BUILD = "stage30-rave-like-clean-sources-20260502-1";
+console.log("JustClover Stage 30.1 SYNC loaded:", "stage30-1-youtube-sync-fix-20260502-1");
+window.JUSTCLOVER_BUILD = "stage30-1-youtube-sync-fix-20260502-1";
 
 try{
   if(localStorage.getItem('jc28LastBuild') !== window.JUSTCLOVER_BUILD){
@@ -4965,7 +4965,7 @@ try{
 
 
 (function(){
-  const BUILD = "stage30-rave-like-clean-sources-20260502-1";
+  const BUILD = "stage30-1-youtube-sync-fix-20260502-1";
   let zoom = Number(localStorage.getItem('jc28CinemaZoomV4') || '0') || 0;
 
   function svg(name){
@@ -5415,10 +5415,10 @@ try{
 
 /* =========================================================
    JustClover Stage 30 — Rave-like clean sources JS
-   Version: stage30-rave-like-clean-sources-20260502-1
+   Version: stage30-1-youtube-sync-fix-20260502-1
    ========================================================= */
-console.log("JustClover Stage 30 RAVE loaded:", "stage30-rave-like-clean-sources-20260502-1");
-window.JUSTCLOVER_BUILD = "stage30-rave-like-clean-sources-20260502-1";
+console.log("JustClover Stage 30.1 SYNC loaded:", "stage30-1-youtube-sync-fix-20260502-1");
+window.JUSTCLOVER_BUILD = "stage30-1-youtube-sync-fix-20260502-1";
 
 (function(){
   function sourceLabel(type){
@@ -5616,4 +5616,156 @@ window.JUSTCLOVER_BUILD = "stage30-rave-like-clean-sources-20260502-1";
     patchCatalogCards();
     updateRaveLayer();
   }, 900);
+})();
+
+
+/* =========================================================
+   JustClover Stage 30.1 — YouTube/VK source reload + sync bounce fix
+   Version: stage30-1-youtube-sync-fix-20260502-1
+
+   Причина бага:
+   renderRoom() вызывается на КАЖДОЕ изменение rooms/{id}, включая playback.
+   В старом коде renderRoom() каждый раз делал loadSource(currentRoom.source).
+   Для YouTube это вызывало ytPlayer.loadVideoById(...) снова и снова,
+   поэтому видео бесконечно ставилось на паузу/включалось.
+   ========================================================= */
+console.log("JustClover Stage 30.1 SYNC loaded:", "stage30-1-youtube-sync-fix-20260502-1");
+window.JUSTCLOVER_BUILD = "stage30-1-youtube-sync-fix-20260502-1";
+
+(function(){
+  function sourceKey(s){
+    if(!s || !s.type || s.type === 'none') return 'none';
+    return [
+      s.type || '',
+      s.videoId || '',
+      s.embedUrl || '',
+      s.url || '',
+      s.filename || '',
+      s.size || ''
+    ].join('|');
+  }
+
+  function sourceIsAlreadyMounted(s){
+    if(!s || !s.type || s.type === 'none') {
+      return !!(els?.emptyPlayer && !els.emptyPlayer.classList.contains('hidden'));
+    }
+
+    if(s.type === 'youtube') {
+      try {
+        if(typeof ytPlayer !== 'undefined' && ytPlayer && ytPlayer.getVideoData) {
+          const data = ytPlayer.getVideoData?.();
+          if(!s.videoId) return true;
+          return !data?.video_id || data.video_id === s.videoId;
+        }
+      } catch(e) {}
+      return false;
+    }
+
+    if(s.type === 'vk' || s.type === 'anilibrix') {
+      const iframe = els?.iframePlayer;
+      if(!iframe) return false;
+      const src = iframe.getAttribute('src') || '';
+      const target = s.embedUrl || s.url || '';
+      return !!src && src !== 'about:blank' && (!target || src === target);
+    }
+
+    if(s.type === 'local') {
+      return !!(els?.videoPlayer && (els.videoPlayer.currentSrc || els.videoPlayer.src));
+    }
+
+    return false;
+  }
+
+  // 1) Не перезагружать YouTube/VK iframe на каждое изменение playback.
+  if(typeof loadSource === 'function' && !window.__jc301LoadSourcePatched){
+    window.__jc301LoadSourcePatched = true;
+    const originalLoadSource = loadSource;
+    let loadedKey = '';
+
+    loadSource = async function(s = {type:'none'}){
+      const key = sourceKey(s);
+      const same = key === loadedKey;
+
+      if(same && sourceIsAlreadyMounted(s)){
+        currentSource = s;
+        return;
+      }
+
+      loadedKey = key;
+      return originalLoadSource(s);
+    };
+  }
+
+  // 2) Не применять один и тот же playback snapshot много раз.
+  if(typeof applyPlayback === 'function' && !window.__jc301ApplyPlaybackPatched){
+    window.__jc301ApplyPlaybackPatched = true;
+    const originalApplyPlayback = applyPlayback;
+    let lastPlaybackKey = '';
+
+    applyPlayback = async function(p){
+      if(!p) return;
+      const key = [
+        p.byUid || '',
+        p.updatedAt || '',
+        p.playing ? '1' : '0',
+        Math.round((Number(p.time) || 0) * 10) / 10
+      ].join('|');
+
+      if(key === lastPlaybackKey) return;
+      lastPlaybackKey = key;
+
+      return originalApplyPlayback(p);
+    };
+  }
+
+  // 3) Не спамить одинаковые writePlayback от YouTube statechange + poll.
+  if(typeof writePlayback === 'function' && !window.__jc301WritePlaybackPatched){
+    window.__jc301WritePlaybackPatched = true;
+    const originalWritePlayback = writePlayback;
+    let lastWriteAt = 0;
+    let lastWritePlaying = null;
+    let lastWriteTime = 0;
+
+    writePlayback = async function(play, time){
+      const now = Date.now();
+      const t = Number(time) || 0;
+      const sameState = lastWritePlaying === !!play && Math.abs(t - lastWriteTime) < 0.75;
+
+      if(sameState && now - lastWriteAt < 900) return;
+
+      lastWriteAt = now;
+      lastWritePlaying = !!play;
+      lastWriteTime = t;
+
+      return originalWritePlayback(play, t);
+    };
+  }
+
+  // 4) Дополнительная защита: если YouTube уже стоит на нужном видео,
+  // не вызывать loadVideoById повторно.
+  if(typeof loadYT === 'function' && !window.__jc301LoadYTPatched){
+    window.__jc301LoadYTPatched = true;
+    const originalLoadYT = loadYT;
+
+    loadYT = async function(id){
+      try {
+        if(typeof ytPlayer !== 'undefined' && ytPlayer?.getVideoData) {
+          const data = ytPlayer.getVideoData?.();
+          if(data?.video_id === id) {
+            startYTPoll?.();
+            return;
+          }
+        }
+      } catch(e) {}
+
+      return originalLoadYT(id);
+    };
+  }
+
+  function mark(){
+    document.body.classList.add('jc-youtube-sync-fixed');
+  }
+
+  setInterval(mark, 1000);
+  setTimeout(mark, 500);
 })();
