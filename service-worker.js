@@ -1,4 +1,4 @@
-/* JustClover cache killer stage58-stable-sidebar-20260502-1 */
+/* JustClover cache killer stage59-auth-safe-sidebar-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));

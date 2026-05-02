@@ -1,26 +1,95 @@
 /* =========================================================
-   JustClover Stage 58 — Stable Sidebar Geometry
-   Version: stage58-stable-sidebar-20260502-1
+   JustClover Stage 59 — Auth Safe Stable Sidebar
+   Version: stage59-auth-safe-sidebar-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage58-stable-sidebar-20260502-1";
+const JC40_BUILD = "stage59-auth-safe-sidebar-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 58 STABLE loader:", JC40_BUILD);
+console.log("JustClover Stage 59 STABLE loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 58: base app import failed", e);
+  console.error("JustClover Stage 59: base app import failed", e);
   throw e;
 }
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
+
+/* =========================================================
+   Stage 59 auth safety gate.
+   Auth/login page must stay exactly native: no active-view classes,
+   no floating docks, no fixed chat, no catalog hooks over the form.
+   ========================================================= */
+(function(){
+  const CLEAN_CLASSES = [
+    'jc41-rave-focus','jc40-watch-mode','jc40-catalog-open','jc40-force-new-catalog',
+    'jc37-modal-lock','jc38-catalog-open','jc-catalog-open','jc35-scroll-guard'
+  ];
+
+  function visible(el){
+    if(!el) return false;
+    if(el.classList?.contains('hidden')) return false;
+    const cs = window.getComputedStyle ? getComputedStyle(el) : null;
+    if(cs && (cs.display === 'none' || cs.visibility === 'hidden' || Number(cs.opacity) === 0)) return false;
+    const r = el.getBoundingClientRect?.();
+    return !r || (r.width > 2 && r.height > 2);
+  }
+
+  window.__jc59IsAuthScreen = function(){
+    const app = document.getElementById('appView');
+    if(!app || app.classList.contains('hidden')) return true;
+    const auth = document.getElementById('authView') || document.getElementById('authSection') ||
+      document.querySelector('.auth-view,.auth-card,.auth-panel,.login-card,[data-auth-view]');
+    return !!(auth && visible(auth));
+  };
+
+  window.__jc59CleanAuthShell = function(){
+    if(!window.__jc59IsAuthScreen()) return false;
+    for(const c of CLEAN_CLASSES){
+      document.documentElement.classList.remove(c);
+      document.body?.classList?.remove(c);
+    }
+    if(document.body){
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+    }
+    const catalog = document.getElementById('jc40CatalogRoot');
+    if(catalog){
+      catalog.classList.remove('open');
+      catalog.setAttribute('aria-hidden','true');
+      catalog.style.display = 'none';
+      catalog.style.pointerEvents = 'none';
+    }
+    const oldCatalog = document.querySelector('.jc-catalog-layer');
+    if(oldCatalog){
+      oldCatalog.classList.remove('open');
+      oldCatalog.setAttribute('aria-hidden','true');
+      oldCatalog.style.display = 'none';
+      oldCatalog.style.pointerEvents = 'none';
+    }
+    document.getElementById('jc51RaveTopbar')?.remove?.();
+    document.getElementById('jc45ActiveDock')?.remove?.();
+    document.getElementById('jc43ActiveDock')?.remove?.();
+    const target = document.getElementById('jc45ActiveFullscreenTarget') || document.getElementById('jc43ActiveFullscreenTarget');
+    target?.removeAttribute?.('id');
+    return true;
+  };
+
+  window.__jc59CleanAuthShell();
+  setTimeout(window.__jc59CleanAuthShell, 0);
+  setTimeout(window.__jc59CleanAuthShell, 250);
+  setInterval(window.__jc59CleanAuthShell, 180);
+})();
 
 (function(){
   const BUILD = JC40_BUILD;
@@ -46,7 +115,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   let nativeFocus = HTMLElement.prototype.focus;
   let nativeScrollIntoView = Element.prototype.scrollIntoView;
 
-  document.body.classList.add('jc40-force-new-catalog');
+  if(!window.__jc59IsAuthScreen?.()) document.body.classList.add('jc40-force-new-catalog');
 
   function $(id){ return document.getElementById(id); }
   function oldLayer(){ return document.querySelector('.jc-catalog-layer'); }
@@ -234,6 +303,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   }
 
   function openCatalog(preselect){
+    if(window.__jc59IsAuthScreen?.()) return;
     ensureCatalog();
     hideOldCatalog();
     selectedType = preselect || selectedType || 'youtube';
@@ -359,6 +429,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   }
 
   function shouldOpenFromButton(btn){
+    if(window.__jc59IsAuthScreen?.()) return false;
     if(!btn || isOwnCatalog(btn)) return false;
     const text = (btn.textContent || btn.getAttribute('aria-label') || btn.title || '').trim().toLowerCase();
     if(!text) return false;
@@ -478,10 +549,11 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   }
 
   function tick(){
+    if(window.__jc59CleanAuthShell?.()) return;
     ensureCatalog();
     watchOldCatalog();
     updateWatchMode();
-    document.body.classList.add('jc40-force-new-catalog');
+    if(!window.__jc59IsAuthScreen?.()) document.body.classList.add('jc40-force-new-catalog');
     if(open){
       hideOldCatalog();
     }else if(Date.now() < playerClickUntil){
@@ -528,15 +600,15 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 58 — Stable Sidebar Geometry
-   Version: stage58-stable-sidebar-20260502-1
+   JustClover Stage 59 — Auth Safe Stable Sidebar
+   Version: stage59-auth-safe-sidebar-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage58-stable-sidebar-20260502-1";
+  const BUILD = "stage59-auth-safe-sidebar-20260502-1";
   const STORE_KEY = "jc58ActiveViewMode";
   let desired = false;
 
-  try { desired = localStorage.getItem(STORE_KEY) === "1" || localStorage.getItem("jc54ActiveViewMode") === "1" || localStorage.getItem("jc53ActiveViewMode") === "1" || localStorage.getItem("jc52ActiveViewMode") === "1" || localStorage.getItem("jc51ActiveViewMode") === "1" || localStorage.getItem("jc50ActiveViewMode") === "1" || localStorage.getItem("jc49ActiveViewMode") === "1" || localStorage.getItem("jc48ActiveViewMode") === "1" || localStorage.getItem("jc47ActiveViewMode") === "1" || localStorage.getItem("jc46ActiveViewMode") === "1" || localStorage.getItem("jc45ActiveViewMode") === "1" || localStorage.getItem("jc44ActiveViewMode") === "1" || localStorage.getItem("jc43ActiveViewMode") === "1"; } catch(_) {}
+  try { desired = localStorage.getItem(STORE_KEY) === "1"; } catch(_) {}
 
   function isWatchMode(){
     const app = document.getElementById('appView');
@@ -842,6 +914,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   }
 
   function apply(){
+    if(window.__jc59CleanAuthShell?.()) return;
     const floating = ensureFloating();
     ensureToggle();
     syncFullscreenButtons();
@@ -876,6 +949,7 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
   }
 
   function setFocus(on){
+    if(on && window.__jc59IsAuthScreen?.()) { desired = false; return; }
     desired = !!on;
     try { localStorage.setItem(STORE_KEY, desired ? '1' : '0'); } catch(_) {}
     apply();
@@ -1048,7 +1122,7 @@ try{
 
 // Stage 58 — stable sidebar geometry: no chat DOM moves, no clones.
 (function(){
-  const BUILD = "stage58-stable-sidebar-20260502-1";
+  const BUILD = "stage59-auth-safe-sidebar-20260502-1";
 
   function hideCinemaButtons(root=document){
     const nodes = Array.from(root.querySelectorAll('button,a,[role="button"],.chip,.pill,.segmented button'));
@@ -1070,6 +1144,7 @@ try{
   }
 
   function tick(){
+    if(window.__jc59IsAuthScreen?.()) return;
     try { hideCinemaButtons(document); } catch(_){ }
     try { applyStableSidebarMarks(); } catch(_){ }
   }
