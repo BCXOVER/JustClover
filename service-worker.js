@@ -1,4 +1,4 @@
-/* JustClover cache killer stage36-catalog-scroll-unlock-20260502-1 */
+/* JustClover cache killer stage37-catalog-hard-scroll-fix-20260502-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
