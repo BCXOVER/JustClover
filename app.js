@@ -4951,8 +4951,8 @@ setTimeout(jc251Patch, 1000);
    JustClover Stage 28 CLEAN — player/cinema JS
    Version: stage28-clean-cinema-player-20260502-1
    ========================================================= */
-console.log("JustClover Stage 30.1 SYNC loaded:", "stage30-1-youtube-sync-fix-20260502-1");
-window.JUSTCLOVER_BUILD = "stage30-1-youtube-sync-fix-20260502-1";
+console.log("JustClover Stage 30.2 CLEAN loaded:", "stage30-2-remove-ad-labels-20260502-1");
+window.JUSTCLOVER_BUILD = "stage30-2-remove-ad-labels-20260502-1";
 
 try{
   if(localStorage.getItem('jc28LastBuild') !== window.JUSTCLOVER_BUILD){
@@ -4965,7 +4965,7 @@ try{
 
 
 (function(){
-  const BUILD = "stage30-1-youtube-sync-fix-20260502-1";
+  const BUILD = "stage30-2-remove-ad-labels-20260502-1";
   let zoom = Number(localStorage.getItem('jc28CinemaZoomV4') || '0') || 0;
 
   function svg(name){
@@ -5415,10 +5415,10 @@ try{
 
 /* =========================================================
    JustClover Stage 30 — Rave-like clean sources JS
-   Version: stage30-1-youtube-sync-fix-20260502-1
+   Version: stage30-2-remove-ad-labels-20260502-1
    ========================================================= */
-console.log("JustClover Stage 30.1 SYNC loaded:", "stage30-1-youtube-sync-fix-20260502-1");
-window.JUSTCLOVER_BUILD = "stage30-1-youtube-sync-fix-20260502-1";
+console.log("JustClover Stage 30.2 CLEAN loaded:", "stage30-2-remove-ad-labels-20260502-1");
+window.JUSTCLOVER_BUILD = "stage30-2-remove-ad-labels-20260502-1";
 
 (function(){
   function sourceLabel(type){
@@ -5621,7 +5621,7 @@ window.JUSTCLOVER_BUILD = "stage30-1-youtube-sync-fix-20260502-1";
 
 /* =========================================================
    JustClover Stage 30.1 — YouTube/VK source reload + sync bounce fix
-   Version: stage30-1-youtube-sync-fix-20260502-1
+   Version: stage30-2-remove-ad-labels-20260502-1
 
    Причина бага:
    renderRoom() вызывается на КАЖДОЕ изменение rooms/{id}, включая playback.
@@ -5629,8 +5629,8 @@ window.JUSTCLOVER_BUILD = "stage30-1-youtube-sync-fix-20260502-1";
    Для YouTube это вызывало ytPlayer.loadVideoById(...) снова и снова,
    поэтому видео бесконечно ставилось на паузу/включалось.
    ========================================================= */
-console.log("JustClover Stage 30.1 SYNC loaded:", "stage30-1-youtube-sync-fix-20260502-1");
-window.JUSTCLOVER_BUILD = "stage30-1-youtube-sync-fix-20260502-1";
+console.log("JustClover Stage 30.2 CLEAN loaded:", "stage30-2-remove-ad-labels-20260502-1");
+window.JUSTCLOVER_BUILD = "stage30-2-remove-ad-labels-20260502-1";
 
 (function(){
   function sourceKey(s){
@@ -5768,4 +5768,108 @@ window.JUSTCLOVER_BUILD = "stage30-1-youtube-sync-fix-20260502-1";
 
   setInterval(mark, 1000);
   setTimeout(mark, 500);
+})();
+
+
+/* =========================================================
+   JustClover Stage 30.2 — remove ad labels everywhere
+   Version: stage30-2-remove-ad-labels-20260502-1
+   ========================================================= */
+console.log("JustClover Stage 30.2 CLEAN loaded:", "stage30-2-remove-ad-labels-20260502-1");
+window.JUSTCLOVER_BUILD = "stage30-2-remove-ad-labels-20260502-1";
+
+(function(){
+  function labelFromType(type){
+    const map = {
+      youtube:'YouTube',
+      vk:'VK Video',
+      local:'Local',
+      mp4:'Direct MP4',
+      drive:'Google Drive',
+      yandex:'Яндекс Диск',
+      anilibrix:'AniLibria',
+      none:'Источник'
+    };
+    return map[type || 'none'] || type || 'Источник';
+  }
+
+  function neutralNote(type){
+    if(!type || type === 'none') return 'Выбери источник для совместного просмотра.';
+    if(type === 'youtube' || type === 'vk') return 'Родной плеер источника.';
+    if(type === 'local') return 'Локальный файл с устройства.';
+    if(type === 'mp4') return 'Прямая ссылка на видеофайл.';
+    if(type === 'drive') return 'Источник из Google Drive.';
+    if(type === 'yandex') return 'Источник из Яндекс Диска.';
+    if(type === 'anilibrix') return 'Источник открыт через iframe.';
+    return 'Источник для совместного просмотра.';
+  }
+
+  function patchRaveBar(){
+    const bar = document.getElementById('jcRaveSourceBar');
+    if(!bar) return;
+    let type = 'none';
+    let title = 'Источник';
+    try {
+      type = currentSource?.type || 'none';
+      title = currentSource?.title || currentSource?.videoId || currentSource?.url || labelFromType(type);
+    } catch(e) {}
+
+    const badge = bar.querySelector('.jc-rave-badge');
+    const strong = bar.querySelector('.jc-rave-title strong');
+    const span = bar.querySelector('.jc-rave-title span');
+    const cleanBtn = bar.querySelector('[data-rave-clean]');
+
+    if(badge){
+      badge.classList.remove('jc-rave-danger');
+      badge.textContent = labelFromType(type);
+    }
+    if(strong){
+      strong.textContent = labelFromType(type) + (title && title !== labelFromType(type) ? ' · ' + String(title).slice(0,60) : '');
+    }
+    if(span){
+      span.textContent = neutralNote(type);
+    }
+    if(cleanBtn){
+      cleanBtn.textContent = 'Источники';
+    }
+  }
+
+  function patchCleanPanel(){
+    const panel = document.getElementById('jcCleanSourcePanel');
+    if(!panel) return;
+
+    const p = panel.querySelector('.jc-clean-head p');
+    if(p){
+      p.textContent = 'Здесь можно быстро выбрать подходящий источник для совместного просмотра.';
+    }
+
+    const notes = [
+      ['local', 'файл с устройства'],
+      ['mp4', 'прямая mp4/webm ссылка'],
+      ['drive', 'public preview / файл'],
+      ['yandex', 'публичная ссылка'],
+      ['youtube', 'родной плеер YouTube'],
+      ['vk', 'родной плеер VK Video'],
+      ['anilibrix', 'источник через iframe']
+    ];
+
+    notes.forEach(([key, text]) => {
+      const btn = panel.querySelector(`[data-clean-source="${key}"] span`);
+      if(btn) btn.textContent = text;
+    });
+
+    const small = panel.querySelector('.jc-clean-foot small');
+    if(small){
+      small.textContent = 'Выбирай источник в зависимости от удобства, качества и доступности.';
+    }
+  }
+
+  function mark(){
+    document.body.classList.add('jc30-no-ad-labels');
+    patchRaveBar();
+    patchCleanPanel();
+  }
+
+  setInterval(mark, 700);
+  setTimeout(mark, 300);
 })();
