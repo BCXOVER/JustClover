@@ -4951,8 +4951,8 @@ setTimeout(jc251Patch, 1000);
    JustClover Stage 28 CLEAN — player/cinema JS
    Version: stage28-clean-cinema-player-20260502-1
    ========================================================= */
-console.log("JustClover Stage 28.7 CLEAN loaded:", "stage28-7-player-frame-fullscreen-20260502-1");
-window.JUSTCLOVER_BUILD = "stage28-7-player-frame-fullscreen-20260502-1";
+console.log("JustClover Stage 29 VK CTRL loaded:", "stage29-vk-native-controls-20260502-1");
+window.JUSTCLOVER_BUILD = "stage29-vk-native-controls-20260502-1";
 
 try{
   if(localStorage.getItem('jc28LastBuild') !== window.JUSTCLOVER_BUILD){
@@ -4965,7 +4965,7 @@ try{
 
 
 (function(){
-  const BUILD = "stage28-7-player-frame-fullscreen-20260502-1";
+  const BUILD = "stage29-vk-native-controls-20260502-1";
   let zoom = Number(localStorage.getItem('jc28CinemaZoomV4') || '0') || 0;
 
   function svg(name){
@@ -5171,10 +5171,13 @@ try{
         await document.exitFullscreen();
         toast('Fullscreen выключен');
       }else{
-        const target = document.querySelector('.player-frame') || document.documentElement;
+        const iframe = document.getElementById('iframePlayer');
+        const yt = document.querySelector('#youtubePlayer iframe');
+        const video = document.getElementById('videoPlayer');
+        const target = (iframe && !iframe.classList.contains('hidden') && iframe.src && iframe.src !== 'about:blank') ? iframe : (yt || video || document.querySelector('.player-frame') || document.documentElement);
         if(target.requestFullscreen){
           await target.requestFullscreen({ navigationUI: 'hide' });
-          toast('Fullscreen плеера включён');
+          toast('Родной fullscreen плеера');
         }else{
           toast('Fullscreen не поддерживается');
         }

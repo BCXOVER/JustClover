@@ -7,10 +7,10 @@
   <meta name="theme-color" content="#080912" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icons/icon.svg" />
-  <link rel="stylesheet" href="./style.css?v=stage28-7-player-frame-fullscreen-20260502-1" />
+  <link rel="stylesheet" href="./style.css?v=stage29-vk-native-controls-20260502-1" />
 
   <script>
-    window.JUSTCLOVER_BUILD = "stage28-7-player-frame-fullscreen-20260502-1";
+    window.JUSTCLOVER_BUILD = "stage29-vk-native-controls-20260502-1";
     (function(){
       try {
         if ("serviceWorker" in navigator) {
@@ -242,7 +242,8 @@
                         <a id="externalLink" class="btn primary" target="_blank" rel="noreferrer">Открыть</a>
                       </div>
                       <div id="emptyPlayer" class="empty-player">Выбери источник, чтобы начать просмотр.</div>
-                      <button id="jcHardFullscreenBtn" class="jc-hard-full-btn" type="button" title="Во весь экран" aria-label="Во весь экран">⛶</button>
+                      <button id="jcHardFullscreenBtn" class="jc-hard-full-btn" type="button" title="Кино сайта" aria-label="Кино сайта">⛶</button>
+                      <button id="jcVkNativeFullBtn" class="jc-vk-native-full-btn" type="button" title="VK fullscreen с родными кнопками" aria-label="VK fullscreen">VK Full</button>
                     </div>
                   </div>
                 </div>
@@ -411,10 +412,10 @@
   </main>
 
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script type="module" src="./app.js?v=stage28-7-player-frame-fullscreen-20260502-1"></script>
+  <script type="module" src="./app.js?v=stage29-vk-native-controls-20260502-1"></script>
 
   <script>
-    window.JUSTCLOVER_BUILD = "stage28-7-player-frame-fullscreen-20260502-1";
+    window.JUSTCLOVER_BUILD = "stage29-vk-native-controls-20260502-1";
     (function(){
       function toast(text){
         var old = document.getElementById('jcHardFullscreenToast');
@@ -472,6 +473,62 @@
 
       document.addEventListener('DOMContentLoaded', bind);
       document.addEventListener('fullscreenchange', sync);
+      setInterval(bind, 1000);
+      setTimeout(bind, 300);
+    })();
+  </script>
+
+
+  <script>
+    window.JUSTCLOVER_BUILD = "stage29-vk-native-controls-20260502-1";
+    (function(){
+      function toast(text){
+        var old = document.getElementById('jcHardFullscreenToast');
+        if(!old){
+          old = document.createElement('div');
+          old.id = 'jcHardFullscreenToast';
+          old.className = 'jc-hard-full-toast';
+          document.body.appendChild(old);
+        }
+        old.textContent = text;
+        old.classList.add('show');
+        clearTimeout(old._t);
+        old._t = setTimeout(function(){ old.classList.remove('show'); }, 1800);
+      }
+
+      async function fullIframe(){
+        try{
+          var iframe = document.getElementById('iframePlayer');
+          var yt = document.querySelector('#youtubePlayer iframe');
+          var video = document.getElementById('videoPlayer');
+          var target = (iframe && !iframe.classList.contains('hidden') && iframe.src && iframe.src !== 'about:blank') ? iframe : (yt || video);
+          if(!target){
+            toast('Сначала запусти видео');
+            return;
+          }
+          if(document.fullscreenElement){
+            await document.exitFullscreen();
+            return;
+          }
+          await target.requestFullscreen({ navigationUI: 'hide' });
+          toast('Родной fullscreen плеера');
+        }catch(e){
+          toast('Браузер не дал открыть fullscreen');
+        }
+      }
+
+      function bind(){
+        var b = document.getElementById('jcVkNativeFullBtn');
+        if(b && b.dataset.bound !== '1'){
+          b.dataset.bound = '1';
+          b.addEventListener('click', function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            fullIframe();
+          });
+        }
+      }
+      document.addEventListener('DOMContentLoaded', bind);
       setInterval(bind, 1000);
       setTimeout(bind, 300);
     })();
