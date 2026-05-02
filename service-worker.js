@@ -1,20 +1,16 @@
-/* JustClover Stage75 clean active room layout — cache killer */
-const BUILD = "stage75-clean-active-room-layout-20260502-1";
-
-self.addEventListener("install", (event) => {
+/* JustClover cache killer stage75-player-scale-only-20260502-1 */
+self.addEventListener('install', event => {
   self.skipWaiting();
-  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.map((key) => caches.delete(key)))));
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
 });
-
-self.addEventListener("activate", (event) => {
+self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.map((key) => caches.delete(key)));
+    await Promise.all(keys.map(k => caches.delete(k)));
+    if (self.registration && self.registration.unregister) await self.registration.unregister();
     await self.clients.claim();
-    try { await self.registration.unregister(); } catch (error) {}
   })());
 });
-
-self.addEventListener("fetch", (event) => {
-  event.respondWith(fetch(event.request, { cache: "no-store" }));
+self.addEventListener('fetch', event => {
+  event.respondWith(fetch(event.request, { cache: 'no-store' }));
 });

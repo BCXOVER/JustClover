@@ -1,109 +1,3466 @@
-*{box-sizing:border-box}
-:root{
-  color-scheme:dark;
-  --bg:#06070d;
-  --panel:rgba(10,12,24,.82);
-  --panel-strong:rgba(13,16,31,.92);
-  --panel-soft:rgba(255,255,255,.055);
-  --line:rgba(255,255,255,.10);
-  --line-strong:rgba(255,255,255,.18);
-  --text:#f7f8ff;
-  --soft:#dddff5;
-  --muted:#9ca3c7;
-  --primary:#8b5cf6;
-  --primary2:#34d399;
-  --good:#22c55e;
-  --bad:#fb7185;
-  --shadow:0 28px 80px rgba(0,0,0,.42);
-  --radius:26px;
-  --topbar-h:78px;
-  --room-gap:14px;
-  --chat-w:390px;
+@import url("https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@f658b5bfad3fade4eb7f9c4d82865452cdc19f00/style.css");
+
+/* =========================================================
+   JustClover Stage 64 — Active First Stable CSS
+   Version: stage64-active-first-stable-20260502-1
+   ========================================================= */
+
+html::after{
+  content:'75 PLAYERSCALE'!important;
+  position:fixed!important;
+  left:8px!important;
+  bottom:8px!important;
+  z-index:2147483647!important;
+  padding:6px 10px!important;
+  border-radius:999px!important;
+  background:rgba(34,197,94,.94)!important;
+  color:#03130a!important;
+  font:900 12px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  letter-spacing:.02em!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.32)!important;
+  pointer-events:none!important;
 }
-html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
-html{height:100%}
-body{min-height:100dvh;overflow-x:hidden}
-.hidden{display:none!important}
-button,input,select,textarea{font:inherit}
-button{border:0}
-a{color:inherit}
-input,select,textarea{
-  width:100%;border:1px solid var(--line);background:rgba(4,7,17,.72);color:var(--text);
-  border-radius:16px;padding:13px 14px;outline:none;transition:.16s ease;
+
+#jc31SyncPill,#jc32LinkPill,#jc33EmbedPill,#jc34RunPill,
+#jc35ScrollPill,#jc36CatalogPill,#jc37HardPill,#jc38CleanPill,#jc40MenuPill,#jc41RavePill{
+  display:none!important;
 }
-input::placeholder,textarea::placeholder{color:#7f84ab}
-input:focus,select:focus,textarea:focus{border-color:rgba(52,211,153,.55);box-shadow:0 0 0 3px rgba(52,211,153,.13)}
-textarea{min-height:112px;resize:vertical}
-label{display:grid;gap:8px;color:var(--soft);font-weight:700}
-code{padding:.2em .42em;border-radius:10px;background:rgba(255,255,255,.07);border:1px solid var(--line)}
 
-.bg,.aurora,.grid-bg,.grain{pointer-events:none!important}
-.bg{position:fixed;inset:0;z-index:-3;background:radial-gradient(circle at top left,#0b0f21 0%,#06070d 48%,#030409 100%);overflow:hidden}
-.aurora{position:absolute;filter:blur(82px);opacity:.8;mix-blend-mode:screen;animation:floatAurora 20s ease-in-out infinite}
-.aurora-a{width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.24) 0,transparent 68%);top:-140px;left:-90px}
-.aurora-b{width:540px;height:540px;border-radius:50%;background:radial-gradient(circle,rgba(16,185,129,.16) 0,transparent 68%);right:-150px;top:18%;animation-duration:25s}
-.aurora-c{width:720px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(236,72,153,.11) 0,transparent 68%);left:24%;bottom:-130px;animation-duration:31s}
-.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:58px 58px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.46),transparent 76%)}
-.grain{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px);background-size:6px 6px;opacity:.026}
-@keyframes floatAurora{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(20px,-15px,0) scale(1.08)}}
+html.jc40-catalog-open,
+body.jc40-catalog-open{
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+}
 
-.panel{background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.03));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(20px)}
-.panel-soft{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:22px;backdrop-filter:blur(16px)}
-.status{color:var(--muted);font-size:14px;line-height:1.52}
-.kicker{text-transform:uppercase;letter-spacing:.22em;font-size:11px;font-weight:900;color:var(--primary2)}
-.notice-card{padding:18px;margin-bottom:16px}
+body.jc40-force-new-catalog,
+body.jc40-force-new-catalog.jc37-modal-lock,
+body.jc40-force-new-catalog.jc38-catalog-open{
+  position:static!important;
+  top:auto!important;
+  left:auto!important;
+  width:auto!important;
+  min-height:100%!important;
+}
 
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border-radius:16px;padding:11px 16px;color:#fff;cursor:pointer;background:rgba(255,255,255,.06);border:1px solid var(--line);transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease,background .15s ease;text-decoration:none}
-.btn:hover{transform:translateY(-1px);border-color:rgba(52,211,153,.38);box-shadow:0 14px 32px rgba(0,0,0,.28)}
-.btn:active{transform:translateY(0) scale(.985)}
-.btn.primary{background:linear-gradient(135deg,var(--primary),var(--primary2));border-color:transparent;box-shadow:0 10px 26px rgba(52,211,153,.16)}
-.btn.soft{background:rgba(255,255,255,.055)}
-.btn.google{width:100%;background:#f8fafc;color:#111827}
-.btn:disabled{opacity:.45;pointer-events:none}
+/* Старый каталог Stage35/36/37 больше не используется: он и вызывал кривой scroll/focus. */
+body.jc40-force-new-catalog .jc-catalog-layer,
+body.jc40-force-new-catalog .jc-catalog-layer.open,
+body.jc40-force-new-catalog #jcCatalogLayer,
+body.jc40-force-new-catalog .jc37-hard-catalog .jc-catalog-layer{
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  opacity:0!important;
+}
 
-.topbar{position:sticky;top:0;z-index:30;min-height:var(--topbar-h);display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(5,7,15,.76);border-bottom:1px solid var(--line);backdrop-filter:blur(20px)}
-.brand-block{display:flex;align-items:center;gap:14px;min-width:0}
-.brand-mark{width:50px;height:50px;border-radius:17px;display:grid;place-items:center;font-size:28px;background:linear-gradient(135deg,var(--primary),#0f172a);box-shadow:0 0 30px rgba(52,211,153,.18)}
-.brand-title{display:flex;align-items:center;gap:10px;font-size:26px;font-weight:950;letter-spacing:.08em;white-space:nowrap}.brand-title b{color:var(--primary2);filter:drop-shadow(0 0 14px rgba(52,211,153,.32))}
-.brand-caption{color:var(--muted);font-size:12px;margin-top:2px}
-.top-actions{display:flex;align-items:center;gap:10px}
-.user-pill{padding:11px 15px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--soft);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#jc40CatalogRoot{
+  position:fixed!important;
+  inset:0!important;
+  z-index:2147483200!important;
+  display:none!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:clamp(12px,2vh,24px) clamp(12px,2.5vw,34px)!important;
+  color:#f6f7ff!important;
+  pointer-events:none!important;
+}
 
-.shell{width:min(1700px,96vw);margin:18px auto 36px}
-.auth-screen{display:grid;grid-template-columns:minmax(0,1.15fr) 430px;gap:20px;align-items:center;min-height:calc(100dvh - var(--topbar-h) - 54px)}
-.hero{padding:42px}.hero h1{font-size:clamp(40px,5.7vw,82px);line-height:.96;letter-spacing:-.06em;margin:14px 0 18px;max-width:900px}.hero p{max-width:760px;color:var(--soft);font-size:18px;line-height:1.6}.hero-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.hero-row span{padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.055);border:1px solid var(--line)}
-.auth-card{padding:22px}.segmented{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}.segmented button{padding:12px;border-radius:14px;color:var(--soft);background:rgba(255,255,255,.06);cursor:pointer}.segmented button.active{color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary2))}.form-stack{display:grid;gap:12px}.auth-actions{display:grid;gap:10px;margin-top:10px}
+#jc40CatalogRoot.open{
+  display:flex!important;
+  pointer-events:auto!important;
+}
 
-.app{display:grid;grid-template-columns:286px minmax(0,1fr);gap:18px;align-items:start}.rail{position:sticky;top:calc(var(--topbar-h) + 18px);height:calc(100dvh - var(--topbar-h) - 36px);padding:16px;overflow:auto}.mini-card{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:24px;background:rgba(255,255,255,.04);margin-bottom:14px}.cover{height:106px;background:linear-gradient(135deg,rgba(139,92,246,.55),rgba(52,211,153,.18));background-size:cover;background-position:center}.avatar{width:72px;height:72px;border-radius:20px;object-fit:cover;border:3px solid rgba(255,255,255,.14);background:#111827}.mini-card .avatar{margin:-38px 0 0 16px}.mini-meta{padding:10px 16px 16px;display:grid;gap:4px}.mini-meta span,.mini-meta small{color:var(--muted)}.nav{display:grid;gap:8px;margin-bottom:14px}.nav-btn{width:100%;display:flex;gap:12px;align-items:center;text-align:left;padding:14px 15px;border-radius:18px;color:var(--soft);background:transparent;border:1px solid transparent;cursor:pointer;transition:.16s ease}.nav-btn span{width:22px;text-align:center}.nav-btn:hover,.nav-btn.active{background:rgba(255,255,255,.055);border-color:rgba(52,211,153,.24);box-shadow:inset 3px 0 0 var(--primary2)}.rail-footer{padding:16px}.rail-note-title{font-weight:800;margin-bottom:6px}
+#jc40CatalogRoot,
+#jc40CatalogRoot *{
+  box-sizing:border-box!important;
+}
 
-.content{min-width:0}.section{display:none;animation:fadeUp .22s ease both}.section.active{display:block}@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.section-head{display:flex;justify-content:space-between;gap:18px;align-items:end;margin:4px 0 18px}.section-head h2{margin:6px 0 0;font-size:36px;letter-spacing:-.05em}.section-head p{margin:0;color:var(--muted);max-width:660px}.dashboard-grid{display:grid;grid-template-columns:1.12fr .94fr .94fr;gap:16px;align-items:start}.dashboard-main-card{padding:22px}.dashboard-card-head{display:flex;justify-content:space-between;align-items:start;gap:16px;margin-bottom:16px}.dashboard-card-head.compact-head{margin-bottom:14px}.dashboard-card-head h3{margin:0;font-size:22px;letter-spacing:-.03em}.dashboard-card-head p{margin:6px 0 0}.pill-status,.soft-badge{padding:8px 12px;border-radius:999px;border:1px solid rgba(52,211,153,.25);background:rgba(52,211,153,.08);font-size:12px;color:var(--soft)}.room-stack{gap:12px}.card{padding:18px}.card h3{margin:0 0 14px;font-size:20px}.split{display:grid;grid-template-columns:1fr auto;gap:10px}.list{display:grid;gap:10px}.user-card,.room-card,.message{padding:12px;border-radius:18px;background:rgba(255,255,255,.045);border:1px solid var(--line)}.user-card,.room-card{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center}.user-card img,.room-card img{width:52px;height:52px;border-radius:16px;object-fit:cover;background:#111827}.card-main{display:grid;gap:4px}.card-main span{color:var(--muted);font-size:13px}.online{color:var(--good)!important}.card-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.card-actions .btn{min-height:38px;padding:9px 12px}
+.jc40-backdrop{
+  position:absolute!important;
+  inset:0!important;
+  background:rgba(2,3,8,.76)!important;
+  backdrop-filter:blur(16px)!important;
+}
 
-/* Stage75 active room: app-level shell, no old left navigation while watching */
-body.active-room .shell{width:min(1920px,100vw);margin:0 auto;padding:0 14px max(14px,env(safe-area-inset-bottom))}
-body.active-room .app{display:block}
-body.active-room .rail{display:none}
-body.active-room .content{width:100%}
-body.active-room #watchSection{min-height:calc(100dvh - var(--topbar-h))}
-body.active-room .top-actions #openProfileBtn{display:none!important}
-body.active-room .topbar{min-height:68px;padding:10px 18px}
-body.active-room .brand-caption{display:none}
-body.active-room .brand-title{font-size:22px}
+.jc40-modal{
+  position:relative!important;
+  width:min(1240px, calc(100vw - 44px))!important;
+  max-height:calc(100vh - 34px)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+  border:1px solid rgba(255,255,255,.13)!important;
+  border-radius:30px!important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(192,132,252,.16), transparent 34%),
+    radial-gradient(circle at 86% 40%, rgba(251,113,133,.10), transparent 34%),
+    linear-gradient(180deg,rgba(19,19,31,.98),rgba(8,9,17,.98))!important;
+  box-shadow:0 34px 100px rgba(0,0,0,.64), 0 0 0 1px rgba(255,255,255,.035) inset!important;
+  transform:none!important;
+}
 
-.active-room-shell{position:relative;display:grid;grid-template-columns:minmax(0,1fr) var(--chat-w);gap:var(--room-gap);align-items:stretch;min-height:calc(100dvh - var(--topbar-h) - 16px);padding:12px 0 0}.room-player-column{position:relative;min-width:0;display:grid;grid-template-rows:auto minmax(0,1fr);gap:10px}.room-topline{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:52px;padding:0 4px}.room-title-wrap h2{font-size:24px;letter-spacing:-.04em;margin:4px 0 0}.room-status-line{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px;min-width:0}.room-status-line span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
-.player-card{padding:0;overflow:visible;background:transparent;border:none;box-shadow:none}.active-player-card{min-height:0}.player-frame{position:relative;width:100%;height:calc(100dvh - var(--topbar-h) - 88px);min-height:460px;border:1px solid rgba(255,255,255,.12);border-radius:28px;overflow:hidden;background:#030509;box-shadow:0 28px 90px rgba(0,0,0,.50);display:grid;place-items:center;contain:layout paint}.player-frame video,.embed-box,.embed-box iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}.player-frame video{object-fit:contain}.empty-player,.external-player{position:relative;z-index:2;padding:32px;text-align:center;color:var(--muted)}.external-player a{text-decoration:none}
-.player-bottom-controls{position:absolute;left:50%;bottom:max(18px,env(safe-area-inset-bottom));z-index:8;display:flex;gap:10px;align-items:center;justify-content:center;padding:10px 12px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(5,7,15,.70);backdrop-filter:blur(18px);box-shadow:0 16px 50px rgba(0,0,0,.44);transform:translateX(-50%)}.control-btn{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.13);cursor:pointer;font-size:20px;transition:.15s ease}.control-btn:hover,.control-btn.active{background:linear-gradient(135deg,rgba(139,92,246,.75),rgba(52,211,153,.55));transform:translateY(-1px)}.control-btn.danger{background:rgba(251,113,133,.20);border-color:rgba(251,113,133,.40)}
+.jc40-head{
+  flex:0 0 auto!important;
+  display:grid!important;
+  grid-template-columns:54px minmax(0,1fr) 46px!important;
+  gap:16px!important;
+  align-items:center!important;
+  padding:24px 24px 18px!important;
+  border-bottom:1px solid rgba(255,255,255,.10)!important;
+}
 
-.source-panel-embedded{position:absolute;left:18px;bottom:88px;z-index:12;width:min(760px,calc(100% - 36px));padding:16px;border-radius:24px;background:rgba(8,10,20,.88);opacity:0;transform:translateY(10px) scale(.985);pointer-events:none;transition:opacity .16s ease,transform .16s ease}.source-panel-embedded.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}.source-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px}.source-panel-head h3{margin:5px 0 0}.source-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.source-pill{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.055);color:var(--soft);cursor:pointer}.source-pill.active,.source-pill:hover{background:linear-gradient(135deg,rgba(139,92,246,.65),rgba(52,211,153,.34));border-color:transparent}.source-grid{display:grid;grid-template-columns:150px minmax(160px,1.25fr) minmax(140px,.8fr) auto;gap:10px}.mini-icon-btn{width:40px;height:40px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid var(--line);color:var(--text);cursor:pointer;font-size:20px}
+.jc40-logo{
+  width:54px!important;
+  height:54px!important;
+  border-radius:18px!important;
+  display:grid!important;
+  place-items:center!important;
+  background:linear-gradient(135deg,#ef6f87,#a855f7)!important;
+  box-shadow:0 12px 28px rgba(168,85,247,.24)!important;
+  font-size:24px!important;
+}
 
-.room-chat-column{min-width:0;height:calc(100dvh - var(--topbar-h) - 16px);padding-bottom:max(12px,env(safe-area-inset-bottom))}.chat-card{height:100%;display:flex;flex-direction:column;min-height:0;padding:16px;border-radius:28px;background:rgba(8,10,20,.76);overflow:hidden}.chat-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.08)}.chat-head h3{margin:4px 0 0;font-size:22px}.members-inline{display:flex;gap:7px;overflow:auto;padding:10px 0 8px;min-height:42px}.member-chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.055);border:1px solid var(--line);font-size:12px;color:var(--soft)}.member-chip img{width:22px;height:22px;border-radius:50%;object-fit:cover}.messages{display:flex;flex-direction:column;gap:10px;overflow:auto;min-height:0;flex:1;padding:4px 4px 10px 0;scrollbar-width:thin}.message{line-height:1.48;background:rgba(255,255,255,.047);word-break:break-word}.message strong{display:block;margin-bottom:6px;color:var(--soft)}.message time{display:block;color:var(--muted);font-size:12px;margin-top:8px}.composer-tools{display:flex;gap:8px;flex-wrap:wrap;padding:10px 0 8px}.composer-tools button{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.065);border:1px solid var(--line);cursor:pointer}.message-form{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;padding-bottom:max(16px,env(safe-area-inset-bottom))}.message-form input{min-height:46px}.voice-status{position:fixed;left:18px;bottom:max(16px,env(safe-area-inset-bottom));z-index:4;margin:0;padding:6px 10px;border-radius:999px;background:rgba(5,7,15,.56);border:1px solid rgba(255,255,255,.10);opacity:.84}
-body.chat-collapsed{--chat-w:0px}body.chat-collapsed .room-chat-column{display:none}body.chat-collapsed .active-room-shell{grid-template-columns:minmax(0,1fr)}
+.jc40-head h2{
+  margin:0!important;
+  color:#fff!important;
+  font:900 clamp(22px,2vw,30px)/1.05 Inter,Segoe UI,Arial,sans-serif!important;
+  letter-spacing:-.045em!important;
+}
 
-.profile-grid{display:grid;grid-template-columns:320px 1fr;gap:16px}.profile-preview{overflow:hidden;padding:0 18px 18px}.profile-preview-cover{height:150px;margin:0 -18px 0;background:linear-gradient(135deg,rgba(139,92,246,.52),rgba(52,211,153,.18));background-size:cover;background-position:center}.avatar.big{width:98px;height:98px;margin-top:-50px;border-radius:24px}.profile-form{display:grid;grid-template-columns:1fr 1fr;gap:14px}.profile-form .full{grid-column:1/-1}.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.about-grid p{color:var(--soft);line-height:1.65}
+.jc40-head p{
+  margin:6px 0 0!important;
+  color:#aeb1cf!important;
+  font:500 14px/1.45 Inter,Segoe UI,Arial,sans-serif!important;
+}
 
-body.player-fullscreen .player-frame{border-radius:0;height:100dvh;min-height:100dvh}.player-frame:fullscreen{border-radius:0;width:100vw;height:100vh}.player-frame:fullscreen .player-bottom-controls{bottom:max(20px,env(safe-area-inset-bottom))}
+.jc40-close{
+  width:46px!important;
+  height:46px!important;
+  min-height:46px!important;
+  border-radius:16px!important;
+  display:grid!important;
+  place-items:center!important;
+  background:rgba(255,255,255,.07)!important;
+  border:1px solid rgba(255,255,255,.13)!important;
+  color:#fff!important;
+  font:900 28px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  cursor:pointer!important;
+}
 
-@media(max-width:1360px){:root{--chat-w:350px}.dashboard-grid{grid-template-columns:1fr}.app{grid-template-columns:250px minmax(0,1fr)}}
-@media(max-width:1080px){.auth-screen,.app,.profile-grid,.about-grid{grid-template-columns:1fr}.rail{position:static;height:auto}.active-room-shell{grid-template-columns:1fr}.room-chat-column{height:42dvh}.player-frame{height:56dvh;min-height:320px}.source-grid{grid-template-columns:1fr}.room-topline{align-items:flex-start;flex-direction:column}.room-status-line span{max-width:90vw}.topbar{position:sticky}}
-@media(max-width:760px){:root{--topbar-h:72px}.topbar{padding:12px 14px;align-items:flex-start;gap:10px;flex-direction:column}.top-actions{width:100%;justify-content:space-between;flex-wrap:wrap}.shell{width:min(100%,94vw)}.hero{padding:24px}.hero h1{font-size:40px}.split,.message-form,.profile-form{grid-template-columns:1fr}.user-card,.room-card{grid-template-columns:48px 1fr}.card-actions{grid-column:1/-1;justify-content:flex-start}.brand-title{font-size:20px;letter-spacing:.04em}.active-room-shell{padding-top:8px}.player-bottom-controls{gap:8px;padding:8px}.control-btn{width:44px;height:44px}.source-panel-embedded{left:10px;width:calc(100% - 20px)}.room-chat-column{height:44dvh}}
+.jc40-close:hover{
+  background:rgba(255,255,255,.13)!important;
+  transform:translateY(-1px)!important;
+}
 
-.bg,.aurora,.grid-bg,.grain{pointer-events:none!important}.topbar,.shell,.auth-screen,.app,.rail,.content,.section,.panel,.card,.btn,button,input,select,textarea,a{pointer-events:auto!important}.topbar,.shell{position:relative;z-index:2}button,.btn,.nav-btn,[role="button"]{cursor:pointer!important;user-select:none;-webkit-tap-highlight-color:transparent}
+.jc40-scroll{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+  padding:20px 24px 24px!important;
+}
+
+.jc40-source-grid{
+  display:grid!important;
+  grid-template-columns:repeat(4, minmax(0,1fr))!important;
+  gap:14px!important;
+  margin-bottom:18px!important;
+}
+
+.jc40-source-card{
+  min-width:0!important;
+  min-height:124px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  padding:18px!important;
+  border-radius:22px!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.032))!important;
+  border:1px solid rgba(255,255,255,.11)!important;
+  color:#fff!important;
+  text-align:left!important;
+  cursor:pointer!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+
+.jc40-source-card:hover,
+.jc40-source-card.active{
+  border-color:rgba(251,113,133,.55)!important;
+  background:
+    radial-gradient(circle at 18% 16%,rgba(251,113,133,.16),transparent 42%),
+    linear-gradient(180deg,rgba(255,255,255,.085),rgba(255,255,255,.04))!important;
+  box-shadow:0 18px 42px rgba(0,0,0,.22),0 0 0 1px rgba(251,113,133,.10) inset!important;
+}
+
+.jc40-card-icon{
+  width:44px!important;
+  height:44px!important;
+  flex:0 0 auto!important;
+  display:grid!important;
+  place-items:center!important;
+  border-radius:15px!important;
+  background:rgba(255,255,255,.11)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  color:#fff!important;
+  font:900 15px/1 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+.jc40-source-card strong{
+  display:block!important;
+  margin:0!important;
+  color:#fff!important;
+  font:900 17px/1.1 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+.jc40-source-card small{
+  display:block!important;
+  color:#aeb1cf!important;
+  font:600 13px/1.25 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+.jc40-runbox,
+.jc40-searchbox,
+.jc40-help-grid > div{
+  border:1px solid rgba(255,255,255,.10)!important;
+  border-radius:22px!important;
+  background:rgba(255,255,255,.035)!important;
+}
+
+.jc40-runbox{
+  padding:16px!important;
+  margin-bottom:16px!important;
+}
+
+.jc40-input-row{
+  display:grid!important;
+  grid-template-columns:minmax(240px,1.35fr) minmax(180px,.7fr) 150px!important;
+  gap:10px!important;
+  align-items:center!important;
+}
+
+#jc40CatalogRoot input{
+  width:100%!important;
+  min-width:0!important;
+  height:48px!important;
+  border-radius:15px!important;
+  border:1px solid rgba(255,255,255,.11)!important;
+  background:rgba(5,8,18,.74)!important;
+  color:#fff!important;
+  padding:0 15px!important;
+  outline:none!important;
+  font:600 14px/1 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+#jc40CatalogRoot input:focus{
+  border-color:rgba(192,132,252,.58)!important;
+  box-shadow:0 0 0 3px rgba(192,132,252,.14)!important;
+}
+
+.jc40-run,
+.jc40-actions button,
+.jc40-searchbox button{
+  min-width:0!important;
+  min-height:44px!important;
+  border-radius:15px!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  background:rgba(255,255,255,.07)!important;
+  color:#fff!important;
+  padding:0 15px!important;
+  font:900 14px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  cursor:pointer!important;
+}
+
+.jc40-run{
+  height:48px!important;
+  background:linear-gradient(135deg,#ef6f87,#a855f7)!important;
+  border-color:transparent!important;
+}
+
+.jc40-actions{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:10px!important;
+  margin-top:12px!important;
+}
+
+.jc40-actions button{
+  flex:1 1 170px!important;
+}
+
+.jc40-tip{
+  margin:12px 0 0!important;
+  color:#b8bbd5!important;
+  font:500 13px/1.5 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+.jc40-tip b{color:#fff!important}
+
+.jc40-searchbox{
+  display:grid!important;
+  grid-template-columns:minmax(260px,1fr) 150px 130px!important;
+  gap:10px!important;
+  align-items:center!important;
+  padding:16px!important;
+  margin-bottom:16px!important;
+}
+
+.jc40-help-grid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:14px!important;
+}
+
+.jc40-help-grid > div{
+  padding:16px!important;
+}
+
+.jc40-help-grid b{
+  display:block!important;
+  margin-bottom:8px!important;
+  color:#fff!important;
+  font:900 16px/1.15 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+.jc40-help-grid span{
+  display:block!important;
+  color:#b8bbd5!important;
+  font:500 13px/1.45 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+@media(max-width:980px){
+  .jc40-source-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .jc40-input-row,.jc40-searchbox{grid-template-columns:1fr!important}
+  .jc40-help-grid{grid-template-columns:1fr!important}
+}
+
+@media(max-width:560px){
+  #jc40CatalogRoot{padding:8px!important;align-items:stretch!important}
+  .jc40-modal{width:calc(100vw - 16px)!important;max-height:calc(100vh - 16px)!important;border-radius:22px!important}
+  .jc40-head{grid-template-columns:44px minmax(0,1fr) 40px!important;gap:10px!important;padding:16px!important}
+  .jc40-logo{width:44px!important;height:44px!important;border-radius:15px!important}
+  .jc40-close{width:40px!important;height:40px!important;min-height:40px!important;border-radius:14px!important}
+  .jc40-scroll{padding:14px!important}
+  .jc40-source-grid{grid-template-columns:1fr!important;gap:10px!important}
+  .jc40-source-card{min-height:94px!important;padding:14px!important}
+}
+
+
+/* =========================================================
+   JustClover Stage 45 — Active View Clean Player Dock
+   В просмотре больше нет page scroll: колесо работает только внутри чата/списков/каталога.
+   ========================================================= */
+
+html.jc40-watch-mode,
+body.jc40-watch-mode{
+  height:100%!important;
+  max-height:100%!important;
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+}
+
+body.jc40-watch-mode{
+  position:static!important;
+  top:auto!important;
+  left:auto!important;
+  width:auto!important;
+}
+
+body.jc40-watch-mode .topbar{
+  display:none!important;
+}
+
+body.jc40-watch-mode .shell{
+  width:min(1880px,98vw)!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  margin:0 auto!important;
+  padding:10px 0!important;
+  overflow:hidden!important;
+}
+
+body.jc40-watch-mode #appView.app{
+  height:calc(100vh - 20px)!important;
+  max-height:calc(100vh - 20px)!important;
+  display:grid!important;
+  grid-template-columns:278px minmax(0,1fr)!important;
+  gap:18px!important;
+  align-items:stretch!important;
+  overflow:hidden!important;
+  min-height:0!important;
+}
+
+body.jc40-watch-mode .rail{
+  position:relative!important;
+  top:auto!important;
+  height:100%!important;
+  max-height:100%!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  min-height:0!important;
+}
+
+body.jc40-watch-mode .content,
+body.jc40-watch-mode #watchSection,
+body.jc40-watch-mode .watch-layout,
+body.jc40-watch-mode .watch-main,
+body.jc40-watch-mode .watch-stage{
+  height:100%!important;
+  max-height:100%!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+body.jc40-watch-mode #watchSection.active{
+  display:block!important;
+}
+
+body.jc40-watch-mode .watch-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 350px!important;
+  gap:18px!important;
+  align-items:stretch!important;
+}
+
+body.jc40-watch-mode .watch-stage{
+  display:flex!important;
+  flex-direction:column!important;
+}
+
+body.jc40-watch-mode .watch-brandbar,
+body.jc40-watch-mode .watch-header,
+body.jc40-watch-mode .source-strip,
+body.jc40-watch-mode .watch-footer-meta{
+  flex:0 0 auto!important;
+}
+
+body.jc40-watch-mode .watch-header{
+  padding-top:14px!important;
+  padding-bottom:8px!important;
+}
+
+body.jc40-watch-mode .watch-header h2{
+  font-size:clamp(25px,2.15vw,34px)!important;
+  margin:6px 0 8px!important;
+}
+
+body.jc40-watch-mode .watch-header .status,
+body.jc40-watch-mode .watch-header p{
+  margin-bottom:0!important;
+}
+
+body.jc40-watch-mode .player-card-redesign,
+body.jc40-watch-mode .player-card,
+body.jc40-watch-mode .player-shell{
+  flex:0 0 auto!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+body.jc40-watch-mode .player-frame{
+  aspect-ratio:auto!important;
+  height:clamp(310px,48vh,560px)!important;
+  max-height:52vh!important;
+  min-height:260px!important;
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+}
+
+body.jc40-watch-mode .player-frame iframe,
+body.jc40-watch-mode .player-frame video,
+body.jc40-watch-mode .embed-box{
+  width:100%!important;
+  height:100%!important;
+}
+
+body.jc40-watch-mode .watch-sidebar{
+  height:100%!important;
+  max-height:100%!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  display:grid!important;
+  grid-template-rows:auto auto minmax(0,1fr)!important;
+  gap:16px!important;
+}
+
+body.jc40-watch-mode .side-card,
+body.jc40-watch-mode .members-card,
+body.jc40-watch-mode .voice-card,
+body.jc40-watch-mode .chat-card{
+  min-height:0!important;
+}
+
+body.jc40-watch-mode .members-card .list,
+body.jc40-watch-mode .voice-card,
+body.jc40-watch-mode .messages,
+body.jc40-watch-mode #chatMessages,
+body.jc40-watch-mode #dmMessages{
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+}
+
+body.jc40-watch-mode .chat-card{
+  height:100%!important;
+  max-height:100%!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+
+body.jc40-watch-mode .chat-card .side-card-head,
+body.jc40-watch-mode .chat-card .message-form,
+body.jc40-watch-mode .chat-card #chatForm{
+  flex:0 0 auto!important;
+}
+
+body.jc40-watch-mode .chat-card .messages,
+body.jc40-watch-mode #chatMessages{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+}
+
+body.jc40-watch-mode .reactions-dock{
+  margin-top:10px!important;
+  margin-bottom:8px!important;
+}
+
+body.jc40-watch-mode .source-history,
+body.jc40-watch-mode .queue-card,
+body.jc40-watch-mode [class*="history"],
+body.jc40-watch-mode [class*="queue"]{
+  max-height:120px!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+}
+
+@media(max-width:1280px){
+  body.jc40-watch-mode #appView.app{
+    grid-template-columns:1fr!important;
+  }
+  body.jc40-watch-mode .rail{
+    display:none!important;
+  }
+  body.jc40-watch-mode .watch-layout{
+    grid-template-columns:1fr!important;
+  }
+  body.jc40-watch-mode .watch-sidebar{
+    display:none!important;
+  }
+  body.jc40-watch-mode .player-frame{
+    height:clamp(300px,58vh,620px)!important;
+    max-height:62vh!important;
+  }
+}
+
+/* =========================================================
+   JustClover Stage 45 — Active View Clean Player Dock
+   Большой плеер + чат + микрофон, без лишних полос над плеером.
+   ========================================================= */
+
+html::after{
+  content:'75 PLAYERSCALE'!important;
+  background:rgba(34,197,94,.94)!important;
+}
+
+#jc41RaveToggle{
+  border-color:rgba(52,211,153,.32)!important;
+  background:linear-gradient(180deg,rgba(52,211,153,.14),rgba(255,255,255,.045))!important;
+}
+
+#jc41RaveToggle.active{
+  color:#03130a!important;
+  background:linear-gradient(135deg,#34d399,#a7f3d0)!important;
+  border-color:transparent!important;
+  box-shadow:0 14px 36px rgba(52,211,153,.20)!important;
+}
+
+#jc41RaveFloating{
+  position:fixed!important;
+  left:18px!important;
+  top:16px!important;
+  z-index:2147482500!important;
+  display:none!important;
+  align-items:center!important;
+  gap:8px!important;
+  flex-wrap:wrap!important;
+  max-width:min(620px,calc(100vw - 24px))!important;
+  padding:8px!important;
+  border-radius:22px!important;
+  background:rgba(5,7,14,.62)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  box-shadow:0 22px 70px rgba(0,0,0,.42)!important;
+  backdrop-filter:blur(16px)!important;
+}
+
+#jc41RaveFloating button{
+  min-height:38px!important;
+  border-radius:15px!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  background:rgba(255,255,255,.075)!important;
+  color:#fff!important;
+  padding:0 13px!important;
+  font:900 13px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  cursor:pointer!important;
+}
+
+#jc41RaveFloating button:hover{
+  background:rgba(255,255,255,.14)!important;
+  transform:translateY(-1px)!important;
+}
+
+#jc41RaveFloating [data-jc41-exit]{
+  background:linear-gradient(135deg,#ef6f87,#a855f7)!important;
+  border-color:transparent!important;
+}
+
+#jc41RaveFloating [data-jc41-full]{
+  background:linear-gradient(135deg,#22d3ee,#34d399)!important;
+  border-color:transparent!important;
+  color:#03130a!important;
+  min-width:70px!important;
+}
+
+body.jc41-rave-focus #jc41RaveFloating{
+  display:flex!important;
+}
+
+body.jc41-rave-focus #jc41RaveFloating{
+  position:relative!important;
+  left:auto!important;
+  top:auto!important;
+  z-index:auto!important;
+  display:flex!important;
+  width:100%!important;
+  max-width:none!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  justify-content:flex-start!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock{
+  flex:0 0 auto!important;
+  display:block!important;
+  width:100%!important;
+  padding:12px 18px 14px!important;
+  background:#03040a!important;
+  border-top:1px solid rgba(255,255,255,.09)!important;
+}
+
+body.jc41-rave-focus #jc41RaveFloating button{
+  min-height:40px!important;
+}
+
+/* Главный активный просмотр: только плеер слева и чат/микрофон справа. */
+html.jc41-rave-focus,
+body.jc41-rave-focus{
+  height:100%!important;
+  max-height:100%!important;
+  overflow:hidden!important;
+  background:#03040a!important;
+}
+
+body.jc41-rave-focus .topbar{
+  display:none!important;
+}
+
+body.jc41-rave-focus .shell{
+  width:100vw!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
+
+body.jc41-rave-focus #appView.app{
+  width:100vw!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:0!important;
+  overflow:hidden!important;
+  min-height:0!important;
+}
+
+body.jc41-rave-focus .rail{
+  display:none!important;
+}
+
+body.jc41-rave-focus .content,
+body.jc41-rave-focus #watchSection,
+body.jc41-rave-focus .watch-layout,
+body.jc41-rave-focus .watch-main,
+body.jc41-rave-focus .watch-stage{
+  height:100vh!important;
+  max-height:100vh!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+body.jc41-rave-focus .watch-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) clamp(330px,24vw,430px)!important;
+  gap:0!important;
+  align-items:stretch!important;
+}
+
+body.jc41-rave-focus .watch-main{
+  min-width:0!important;
+}
+
+body.jc41-rave-focus .watch-main{
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+body.jc41-rave-focus .watch-stage{
+  display:flex!important;
+  flex-direction:column!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#03040a!important;
+  box-shadow:none!important;
+}
+
+/* Убираем всё, что мешает над плеером: заголовок, описание, полоску источников и лишний toolbar. */
+body.jc41-rave-focus .watch-brandbar,
+body.jc41-rave-focus .watch-header,
+body.jc41-rave-focus .source-strip,
+body.jc41-rave-focus .source-panel-embedded,
+body.jc41-rave-focus .reactions-dock,
+body.jc41-rave-focus .watch-footer-meta{
+  display:none!important;
+}
+
+body.jc41-rave-focus .player-card-redesign,
+body.jc41-rave-focus .player-card,
+body.jc41-rave-focus .player-shell{
+  flex:1 1 auto!important;
+  display:flex!important;
+  flex-direction:column!important;
+  width:100%!important;
+  height:100%!important;
+  max-height:100%!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:#000!important;
+  overflow:hidden!important;
+}
+
+body.jc41-rave-focus .player-frame{
+  width:100%!important;
+  flex:1 1 auto!important;
+  height:auto!important;
+  max-height:none!important;
+  min-height:0!important;
+  aspect-ratio:auto!important;
+  border-radius:0!important;
+  background:#000!important;
+  overflow:hidden!important;
+}
+
+body.jc41-rave-focus .player-frame iframe,
+body.jc41-rave-focus .player-frame video,
+body.jc41-rave-focus .embed-box{
+  width:100%!important;
+  height:100%!important;
+  border:0!important;
+  object-fit:contain!important;
+  background:#000!important;
+}
+
+body.jc41-rave-focus .watch-sidebar{
+  height:100vh!important;
+  max-height:100vh!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-rows:auto minmax(0,1fr)!important;
+  gap:10px!important;
+  padding:12px!important;
+  overflow:hidden!important;
+  border-left:1px solid rgba(255,255,255,.12)!important;
+  background:
+    radial-gradient(circle at top right,rgba(251,113,133,.17),transparent 42%),
+    linear-gradient(180deg,rgba(20,16,30,.92),rgba(9,9,18,.96))!important;
+  backdrop-filter:blur(16px)!important;
+}
+
+/* В фокусе участники не занимают место; чат всё равно виден. */
+body.jc41-rave-focus .members-card{
+  display:none!important;
+}
+
+body.jc41-rave-focus .voice-card{
+  min-height:0!important;
+  padding:12px!important;
+  border-radius:20px!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:10px!important;
+  align-items:center!important;
+  box-shadow:none!important;
+}
+
+body.jc41-rave-focus .voice-card .side-card-head{
+  display:none!important;
+}
+
+body.jc41-rave-focus .voice-card::before{
+  content:'Микрофон'!important;
+  color:#fff!important;
+  font:900 15px/1 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+body.jc41-rave-focus .voice-card #voiceBtn{
+  min-height:38px!important;
+  padding:0 13px!important;
+  border-radius:14px!important;
+  white-space:nowrap!important;
+}
+
+body.jc41-rave-focus .voice-card #voiceStatus,
+body.jc41-rave-focus .voice-card .status,
+body.jc41-rave-focus .voice-card .voice-wave,
+body.jc41-rave-focus .voice-card #remoteAudio{
+  display:none!important;
+}
+
+body.jc41-rave-focus .chat-card{
+  height:100%!important;
+  max-height:100%!important;
+  min-height:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  padding:14px!important;
+  border-radius:22px!important;
+  overflow:hidden!important;
+  box-shadow:none!important;
+}
+
+body.jc41-rave-focus .chat-card .side-card-head{
+  flex:0 0 auto!important;
+  margin-bottom:10px!important;
+}
+
+body.jc41-rave-focus .chat-card .side-card-head h3{
+  font-size:20px!important;
+}
+
+body.jc41-rave-focus #chatMessages,
+body.jc41-rave-focus .chat-card .messages{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+}
+
+body.jc41-rave-focus #chatForm,
+body.jc41-rave-focus .chat-card .message-form{
+  flex:0 0 auto!important;
+  margin-top:10px!important;
+}
+
+/* Низ под плеером в фокусе скрыт, чтобы видео было выше и больше. */
+body.jc41-rave-focus .watch-main [class*="history"],
+body.jc41-rave-focus .watch-main [class*="queue"]{
+  display:none!important;
+}
+
+
+@media(max-width:980px){
+  body.jc41-rave-focus .watch-layout{
+    grid-template-columns:1fr!important;
+    grid-template-rows:minmax(0,1fr) 38vh!important;
+  }
+  body.jc41-rave-focus .player-frame{
+    height:62vh!important;
+  }
+  body.jc41-rave-focus .watch-sidebar{
+    height:38vh!important;
+    max-height:38vh!important;
+    border-left:0!important;
+    border-top:1px solid rgba(255,255,255,.12)!important;
+    grid-template-rows:auto minmax(0,1fr)!important;
+  }
+  #jc41RaveFloating{
+    max-width:calc(100vw - 16px)!important;
+    overflow-x:auto!important;
+  }
+  body.jc41-rave-focus #jc45ActiveDock{
+    padding:10px 10px 12px!important;
+  }
+  #jc41RaveFloating button{
+    white-space:nowrap!important;
+  }
+}
+
+
+/* Stage 43: fullscreen target is the whole left player column, so the exit button stays visible. */
+#jc45ActiveFullscreenTarget:fullscreen,
+#jc45ActiveFullscreenTarget:-webkit-full-screen{
+  width:100vw!important;
+  height:100vh!important;
+  background:#000!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen .watch-sidebar,
+#jc45ActiveFullscreenTarget:-webkit-full-screen .watch-sidebar{
+  display:none!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock{
+  position:relative!important;
+  z-index:2!important;
+  background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.85))!important;
+}
+
+
+/* =========================================================
+   JustClover Stage 45 — Active View Clean Player Dock OVERRIDES
+   Панель сразу под плеером; история/очередь скрыты в активном просмотре.
+   ========================================================= */
+
+html::after{
+  content:'75 PLAYERSCALE'!important;
+}
+
+body.jc41-rave-focus .watch-stage{
+  display:flex!important;
+  flex-direction:column!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+/* В активном просмотре оставляем только плеер и dock. Всё остальное внутри stage прячем. */
+body.jc41-rave-focus .watch-stage > :not(.player-card):not(.player-card-redesign):not(#jc45ActiveDock){
+  display:none!important;
+}
+
+body.jc41-rave-focus .jc45-active-hidden-panel{
+  display:none!important;
+}
+
+body.jc41-rave-focus .player-card-redesign,
+body.jc41-rave-focus .player-card{
+  order:1!important;
+  flex:1 1 auto!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock{
+  order:2!important;
+  flex:0 0 auto!important;
+  display:block!important;
+  width:100%!important;
+  min-height:56px!important;
+  padding:10px 18px 12px!important;
+  background:#03040a!important;
+  border-top:1px solid rgba(255,255,255,.10)!important;
+  z-index:6!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
+  position:relative!important;
+  left:auto!important;
+  top:auto!important;
+  z-index:7!important;
+  display:flex!important;
+  width:100%!important;
+  max-width:none!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+}
+
+/* Fullscreen открывается на watch-stage, поэтому кнопка Выйти остаётся видимой под плеером. */
+#jc45ActiveFullscreenTarget:fullscreen,
+#jc45ActiveFullscreenTarget:-webkit-full-screen{
+  width:100vw!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  display:flex!important;
+  flex-direction:column!important;
+  background:#000!important;
+  overflow:hidden!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen > :not(.player-card):not(.player-card-redesign):not(#jc45ActiveDock),
+#jc45ActiveFullscreenTarget:-webkit-full-screen > :not(.player-card):not(.player-card-redesign):not(#jc45ActiveDock){
+  display:none!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen .player-card,
+#jc45ActiveFullscreenTarget:fullscreen .player-card-redesign,
+#jc45ActiveFullscreenTarget:-webkit-full-screen .player-card,
+#jc45ActiveFullscreenTarget:-webkit-full-screen .player-card-redesign{
+  flex:1 1 auto!important;
+  min-height:0!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock{
+  flex:0 0 auto!important;
+  min-height:56px!important;
+  background:linear-gradient(180deg,rgba(0,0,0,.20),rgba(0,0,0,.90))!important;
+}
+
+
+/* =========================================================
+   JustClover Stage 45 — Active Player Restore OVERRIDES
+   Не прячем watch-main/player. Прячем только историю и очередь.
+   ========================================================= */
+
+html::after{
+  content:'75 PLAYERSCALE'!important;
+}
+
+body.jc41-rave-focus .watch-main,
+body.jc41-rave-focus .watch-stage,
+body.jc41-rave-focus .player-card,
+body.jc41-rave-focus .player-card-redesign,
+body.jc41-rave-focus .player-shell,
+body.jc41-rave-focus .player-frame{
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
+body.jc41-rave-focus .watch-stage{
+  flex-direction:column!important;
+}
+
+body.jc41-rave-focus .player-frame{
+  display:block!important;
+}
+
+body.jc41-rave-focus .player-frame iframe,
+body.jc41-rave-focus .player-frame video,
+body.jc41-rave-focus .embed-box{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
+/* Скрывать можно только явно помеченные панели истории/очереди, но не каркас и не плеер. */
+body.jc41-rave-focus .jc45-active-hidden-panel:not(.watch-main):not(.watch-stage):not(.player-card):not(.player-card-redesign):not(.player-shell):not(.player-frame),
+body.jc41-rave-focus .watch-main [class*="history"],
+body.jc41-rave-focus .watch-main [class*="queue"]{
+  display:none!important;
+}
+
+body.jc41-rave-focus .watch-stage > :not(.player-card):not(.player-card-redesign):not(#jc45ActiveDock){
+  display:none!important;
+}
+
+body.jc41-rave-focus .watch-stage > .player-card,
+body.jc41-rave-focus .watch-stage > .player-card-redesign,
+body.jc41-rave-focus .watch-stage > #jc45ActiveDock{
+  display:flex!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock{
+  order:2!important;
+  flex:0 0 auto!important;
+  display:block!important;
+  width:100%!important;
+  min-height:56px!important;
+  padding:10px 18px 12px!important;
+  background:#03040a!important;
+  border-top:1px solid rgba(255,255,255,.10)!important;
+  z-index:6!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen,
+#jc45ActiveFullscreenTarget:-webkit-full-screen{
+  width:100vw!important;
+  height:100vh!important;
+  display:flex!important;
+  flex-direction:column!important;
+  background:#000!important;
+  overflow:hidden!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen .player-card,
+#jc45ActiveFullscreenTarget:fullscreen .player-card-redesign,
+#jc45ActiveFullscreenTarget:-webkit-full-screen .player-card,
+#jc45ActiveFullscreenTarget:-webkit-full-screen .player-card-redesign{
+  display:flex!important;
+  flex:1 1 auto!important;
+  min-height:0!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock{
+  display:block!important;
+  flex:0 0 auto!important;
+  min-height:56px!important;
+}
+
+
+/* =========================================================
+   JustClover Stage 46 — Active Overlay Controls
+   Убираем нижнюю отдельную панель, приближаем плеер к чату,
+   оставляем компактные кнопки поверх плеера.
+   ========================================================= */
+
+html::after{
+  content:'75 PLAYERSCALE'!important;
+}
+
+body.jc41-rave-focus .watch-layout{
+  grid-template-columns:minmax(0,1fr) clamp(300px,22vw,390px)!important;
+  gap:0!important;
+}
+
+body.jc41-rave-focus .watch-stage{
+  position:relative!important;
+}
+
+body.jc41-rave-focus .watch-sidebar{
+  padding:8px!important;
+  border-left:1px solid rgba(255,255,255,.08)!important;
+}
+
+body.jc41-rave-focus .player-card-redesign,
+body.jc41-rave-focus .player-card,
+body.jc41-rave-focus .player-shell,
+body.jc41-rave-focus .player-frame{
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock{
+  position:absolute!important;
+  left:12px!important;
+  bottom:12px!important;
+  right:auto!important;
+  width:auto!important;
+  min-height:0!important;
+  padding:0!important;
+  margin:0!important;
+  background:transparent!important;
+  border:0!important;
+  z-index:30!important;
+  pointer-events:none!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
+  width:auto!important;
+  max-width:min(calc(100vw - 32px), 560px)!important;
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:8px!important;
+  padding:8px!important;
+  border-radius:18px!important;
+  background:rgba(9,12,20,.82)!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.28)!important;
+  backdrop-filter:blur(14px)!important;
+  pointer-events:auto!important;
+}
+
+body.jc41-rave-focus #jc41RaveFloating button{
+  min-height:38px!important;
+  padding:0 13px!important;
+}
+
+/* В активном просмотре убираем отдельную нижнюю панель-растяжку. */
+body.jc41-rave-focus #jc45ActiveDock::before,
+body.jc41-rave-focus #jc45ActiveDock::after{
+  display:none!important;
+  content:none!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock{
+  position:absolute!important;
+  left:12px!important;
+  bottom:12px!important;
+  width:auto!important;
+  min-height:0!important;
+  background:transparent!important;
+  border:0!important;
+  z-index:40!important;
+  pointer-events:none!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock #jc41RaveFloating,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock #jc41RaveFloating{
+  pointer-events:auto!important;
+}
+
+@media(max-width:980px){
+  body.jc41-rave-focus .watch-layout{
+    grid-template-columns:1fr!important;
+    grid-template-rows:minmax(0,1fr) 34vh!important;
+  }
+  body.jc41-rave-focus #jc45ActiveDock{
+    left:8px!important;
+    bottom:8px!important;
+  }
+  body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
+    max-width:calc(100vw - 16px)!important;
+  }
+}
+
+
+/* =========================================================
+   JustClover Stage 48 — Restore Player + Compact Bottom Controls
+   Откат опасного переноса DOM из Stage47: плеер снова большой,
+   верхняя плашка источника скрывается, снизу — только компактные кнопки.
+   ========================================================= */
+
+html::after{ content:'75 PLAYERSCALE'!important; }
+
+body.jc41-rave-focus .watch-layout{
+  width:min(100vw,1540px)!important;
+  margin:0 auto!important;
+  grid-template-columns:minmax(0,1fr) clamp(310px,21vw,360px)!important;
+  gap:0!important;
+}
+
+body.jc41-rave-focus .watch-main,
+body.jc41-rave-focus .watch-stage{
+  min-width:0!important;
+  overflow:hidden!important;
+}
+
+body.jc41-rave-focus .watch-stage{
+  display:flex!important;
+  flex-direction:column!important;
+  background:#03040a!important;
+}
+
+/* Гарантированно восстанавливаем размер плеера после Stage47. */
+body.jc41-rave-focus .player-card-redesign,
+body.jc41-rave-focus .player-card,
+body.jc41-rave-focus .player-shell{
+  order:1!important;
+  flex:1 1 auto!important;
+  display:flex!important;
+  flex-direction:column!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  background:#000!important;
+  border:0!important;
+  border-radius:0!important;
+  overflow:hidden!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
+body.jc41-rave-focus .player-frame{
+  flex:1 1 auto!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-height:none!important;
+  aspect-ratio:auto!important;
+  background:#000!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
+body.jc41-rave-focus .player-frame iframe,
+body.jc41-rave-focus .player-frame video,
+body.jc41-rave-focus .embed-box{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
+/* Верхняя плашка над видео скрыта, но сам iframe/video не трогаем. */
+body.jc41-rave-focus .jc48-top-source-hidden{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock{
+  order:2!important;
+  flex:0 0 auto!important;
+  position:relative!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:auto!important;
+  min-height:0!important;
+  align-self:flex-start!important;
+  margin:8px 0 10px 12px!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  z-index:20!important;
+  pointer-events:auto!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock .jc48-dock-inner{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  gap:8px!important;
+  padding:8px!important;
+  border-radius:18px!important;
+  background:rgba(7,10,18,.86)!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  box-shadow:0 12px 30px rgba(0,0,0,.32)!important;
+  backdrop-filter:blur(14px)!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock .jc48-actions-slot,
+body.jc41-rave-focus #jc45ActiveDock .jc48-source-row,
+body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:8px!important;
+  width:auto!important;
+  max-width:min(760px,calc(100vw - 36px))!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock button,
+body.jc41-rave-focus #jc45ActiveDock a{
+  min-height:36px!important;
+  border-radius:14px!important;
+  font-size:13px!important;
+  white-space:nowrap!important;
+}
+
+body.jc41-rave-focus .watch-sidebar{
+  padding:6px!important;
+  border-left:1px solid rgba(255,255,255,.08)!important;
+}
+
+body.jc41-rave-focus .chat-card{
+  border-radius:18px!important;
+  padding:12px!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock{
+  position:absolute!important;
+  left:12px!important;
+  bottom:12px!important;
+  margin:0!important;
+  z-index:50!important;
+}
+
+@media(max-width:980px){
+  body.jc41-rave-focus .watch-layout{
+    width:100vw!important;
+    grid-template-columns:1fr!important;
+    grid-template-rows:minmax(0,1fr) 34vh!important;
+  }
+  body.jc41-rave-focus #jc45ActiveDock{
+    margin:8px 0 8px 8px!important;
+  }
+}
+
+
+/* =========================================================
+   JustClover Stage 50 — Edge-to-Edge Active View
+   Убираем боковые пустые поля, прижимаем чат к плееру и делаем
+   плеер 16:9 без лишней чёрной шапки от растянутого контейнера.
+   ========================================================= */
+
+html::after{ content:'75 PLAYERSCALE'!important; }
+
+html.jc41-rave-focus,
+body.jc41-rave-focus{
+  width:100vw!important;
+  height:100vh!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:#03040a!important;
+}
+
+body.jc41-rave-focus .shell,
+body.jc41-rave-focus #appView.app,
+body.jc41-rave-focus .content,
+body.jc41-rave-focus #watchSection,
+body.jc41-rave-focus .watch-layout{
+  width:100vw!important;
+  max-width:100vw!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  margin:0!important;
+  padding:0!important;
+  left:0!important;
+  right:auto!important;
+  transform:none!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+
+body.jc41-rave-focus #appView.app{
+  display:block!important;
+}
+
+body.jc41-rave-focus .content{
+  display:block!important;
+}
+
+body.jc41-rave-focus .rail,
+body.jc41-rave-focus aside.rail{
+  display:none!important;
+  width:0!important;
+  min-width:0!important;
+  max-width:0!important;
+}
+
+body.jc41-rave-focus .watch-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) clamp(300px,20vw,350px)!important;
+  gap:0!important;
+  align-items:stretch!important;
+  justify-items:stretch!important;
+  margin:0!important;
+}
+
+body.jc41-rave-focus .watch-main,
+body.jc41-rave-focus .watch-stage{
+  width:100%!important;
+  max-width:none!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:#03040a!important;
+}
+
+body.jc41-rave-focus .watch-stage{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  justify-content:flex-start!important;
+}
+
+/* Восстановить плеер как главную большую 16:9-зону, без верхней пустой шапки. */
+body.jc41-rave-focus .player-card-redesign,
+body.jc41-rave-focus .player-card,
+body.jc41-rave-focus .player-shell{
+  order:1!important;
+  flex:0 0 auto!important;
+  display:flex!important;
+  width:100%!important;
+  max-width:none!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  aspect-ratio:16/9!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  overflow:hidden!important;
+  box-shadow:none!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
+body.jc41-rave-focus .player-frame{
+  flex:1 1 auto!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-height:none!important;
+  aspect-ratio:16/9!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  overflow:hidden!important;
+}
+
+body.jc41-rave-focus .player-frame iframe,
+body.jc41-rave-focus .player-frame video,
+body.jc41-rave-focus .embed-box{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  border:0!important;
+  background:#000!important;
+  object-fit:contain!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
+/* Нижний dock компактный, но не растягивает плеер и не создаёт лишнюю панель. */
+body.jc41-rave-focus #jc45ActiveDock{
+  order:2!important;
+  flex:0 0 auto!important;
+  position:relative!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  align-self:flex-start!important;
+  width:auto!important;
+  max-width:calc(100vw - 370px)!important;
+  min-height:0!important;
+  margin:6px 0 0 8px!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  z-index:40!important;
+  pointer-events:auto!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock .jc48-dock-inner{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  gap:6px!important;
+  padding:6px!important;
+  border-radius:16px!important;
+  background:rgba(7,10,18,.78)!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+  box-shadow:0 10px 24px rgba(0,0,0,.28)!important;
+  backdrop-filter:blur(12px)!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock .jc48-actions-slot,
+body.jc41-rave-focus #jc45ActiveDock .jc48-source-row,
+body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:6px!important;
+  width:auto!important;
+  max-width:min(650px,calc(100vw - 390px))!important;
+  margin:0!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock button,
+body.jc41-rave-focus #jc45ActiveDock a{
+  min-height:32px!important;
+  padding:0 11px!important;
+  border-radius:12px!important;
+  font-size:12px!important;
+}
+
+/* Правая колонка без внешней пустой зоны: чат начинается сразу после плеера. */
+body.jc41-rave-focus .watch-sidebar{
+  width:100%!important;
+  max-width:none!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  margin:0!important;
+  padding:6px!important;
+  border-left:1px solid rgba(255,255,255,.08)!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+
+body.jc41-rave-focus .chat-card{
+  width:100%!important;
+  height:100%!important;
+  max-height:100%!important;
+  margin:0!important;
+  border-radius:16px!important;
+  padding:10px!important;
+}
+
+/* Если старые/верхние source-контролы нашли себя внутри player-card — прячем только их, не плеер. */
+body.jc41-rave-focus .player-card > header,
+body.jc41-rave-focus .player-card > nav,
+body.jc41-rave-focus .player-card-redesign > header,
+body.jc41-rave-focus .player-card-redesign > nav,
+body.jc41-rave-focus .player-shell > header,
+body.jc41-rave-focus .player-shell > nav{
+  display:none!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen,
+#jc45ActiveFullscreenTarget:-webkit-full-screen{
+  width:100vw!important;
+  height:100vh!important;
+  display:flex!important;
+  flex-direction:column!important;
+  background:#000!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen .player-card,
+#jc45ActiveFullscreenTarget:fullscreen .player-card-redesign,
+#jc45ActiveFullscreenTarget:-webkit-full-screen .player-card,
+#jc45ActiveFullscreenTarget:-webkit-full-screen .player-card-redesign{
+  flex:1 1 auto!important;
+  aspect-ratio:auto!important;
+  height:auto!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock{
+  position:absolute!important;
+  left:10px!important;
+  bottom:10px!important;
+  max-width:calc(100vw - 20px)!important;
+  margin:0!important;
+  z-index:60!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock .jc48-actions-slot,
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock .jc48-source-row,
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock #jc41RaveFloating,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock .jc48-actions-slot,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock .jc48-source-row,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock #jc41RaveFloating{
+  max-width:calc(100vw - 32px)!important;
+}
+
+@media(max-width:980px){
+  body.jc41-rave-focus .watch-layout{
+    grid-template-columns:1fr!important;
+    grid-template-rows:minmax(0,1fr) 34vh!important;
+  }
+  body.jc41-rave-focus #jc45ActiveDock,
+  body.jc41-rave-focus #jc45ActiveDock .jc48-actions-slot,
+  body.jc41-rave-focus #jc45ActiveDock .jc48-source-row,
+  body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
+    max-width:calc(100vw - 16px)!important;
+  }
+}
+
+
+/* =========================================================
+   JustClover Stage 50 — Rave-like Active View
+   Не изобретаем новый UI: плеер слева до края, чат справа как в Rave,
+   кнопки компактным оверлеем поверх плеера снизу.
+   ========================================================= */
+
+html::after{
+  content:'75 PLAYERSCALE'!important;
+}
+
+html.jc41-rave-focus,
+body.jc41-rave-focus{
+  width:100vw!important;
+  height:100vh!important;
+  max-width:100vw!important;
+  max-height:100vh!important;
+  overflow:hidden!important;
+  background:#05060b!important;
+}
+
+body.jc41-rave-focus .shell,
+body.jc41-rave-focus #appView.app,
+body.jc41-rave-focus .content,
+body.jc41-rave-focus #watchSection,
+body.jc41-rave-focus .watch-layout{
+  width:100vw!important;
+  max-width:100vw!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+
+body.jc41-rave-focus #appView.app{
+  display:block!important;
+}
+
+body.jc41-rave-focus .content,
+body.jc41-rave-focus #watchSection{
+  display:block!important;
+}
+
+body.jc41-rave-focus .watch-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) clamp(285px,17.5vw,340px)!important;
+  gap:0!important;
+  align-items:stretch!important;
+  background:#05060b!important;
+}
+
+body.jc41-rave-focus .watch-main,
+body.jc41-rave-focus .watch-stage{
+  width:100%!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  overflow:hidden!important;
+  background:#000!important;
+  box-shadow:none!important;
+}
+
+body.jc41-rave-focus .watch-stage{
+  position:relative!important;
+  display:block!important;
+}
+
+/* Убираем все декоративные/служебные блоки вокруг видео: остаётся только сам плеер и overlay-меню. */
+body.jc41-rave-focus .watch-brandbar,
+body.jc41-rave-focus .watch-header,
+body.jc41-rave-focus .source-strip,
+body.jc41-rave-focus .source-panel-embedded,
+body.jc41-rave-focus .watch-footer-meta,
+body.jc41-rave-focus .members-card,
+body.jc41-rave-focus .voice-card,
+body.jc41-rave-focus .reactions-dock,
+body.jc41-rave-focus .jc48-top-source-hidden,
+body.jc41-rave-focus .jc45-active-hidden-panel,
+body.jc41-rave-focus .watch-main [class*="history"],
+body.jc41-rave-focus .watch-main [class*="queue"]{
+  display:none!important;
+}
+
+body.jc41-rave-focus .player-card-redesign,
+body.jc41-rave-focus .player-card,
+body.jc41-rave-focus .player-shell,
+body.jc41-rave-focus .player-frame{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+  aspect-ratio:auto!important;
+  transform:none!important;
+}
+
+body.jc41-rave-focus .player-frame iframe,
+body.jc41-rave-focus .player-frame video,
+body.jc41-rave-focus .embed-box,
+body.jc41-rave-focus #iframePlayer,
+body.jc41-rave-focus #videoPlayer,
+body.jc41-rave-focus #youtubePlayer,
+body.jc41-rave-focus #youtubePlayer iframe{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  object-fit:cover!important;
+}
+
+/* Чат — прямо у края плеера, без пустой полосы между ними. */
+body.jc41-rave-focus .watch-sidebar{
+  width:100%!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border-left:1px solid rgba(255,255,255,.16)!important;
+  border-radius:0!important;
+  display:block!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(circle at 0% 12%, rgba(255,255,255,.08), transparent 30%),
+    linear-gradient(180deg,rgba(86,54,45,.82),rgba(40,28,36,.92))!important;
+  backdrop-filter:blur(10px)!important;
+}
+
+body.jc41-rave-focus .chat-card{
+  width:100%!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:12px 10px 10px!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:rgba(8,9,18,.42)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+
+body.jc41-rave-focus .chat-card .side-card-head{
+  flex:0 0 auto!important;
+  margin:0 0 8px!important;
+  padding:0!important;
+}
+
+body.jc41-rave-focus .chat-card .side-card-head h3{
+  font-size:18px!important;
+}
+
+body.jc41-rave-focus #chatMessages,
+body.jc41-rave-focus .chat-card .messages{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  padding-right:2px!important;
+}
+
+body.jc41-rave-focus #chatForm,
+body.jc41-rave-focus .chat-card .message-form{
+  flex:0 0 auto!important;
+  margin:8px 0 0!important;
+}
+
+/* Rave-подобное меню: не отдельная нижняя панель, а плавающий компактный overlay поверх видео. */
+body.jc41-rave-focus #jc45ActiveDock{
+  position:absolute!important;
+  left:14px!important;
+  bottom:14px!important;
+  right:auto!important;
+  top:auto!important;
+  width:auto!important;
+  max-width:min(720px,calc(100% - 28px))!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  z-index:80!important;
+  pointer-events:none!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock .jc48-dock-inner{
+  width:auto!important;
+  max-width:100%!important;
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  flex-wrap:wrap!important;
+  gap:8px!important;
+  padding:7px!important;
+  border-radius:18px!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  background:rgba(6,7,12,.68)!important;
+  box-shadow:0 16px 52px rgba(0,0,0,.38)!important;
+  backdrop-filter:blur(16px)!important;
+  pointer-events:auto!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock .jc48-actions-slot,
+body.jc41-rave-focus #jc45ActiveDock .jc48-source-row,
+body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
+  display:flex!important;
+  flex:0 0 auto!important;
+  flex-wrap:wrap!important;
+  width:auto!important;
+  max-width:none!important;
+  gap:7px!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock button,
+body.jc41-rave-focus #jc45ActiveDock a{
+  min-height:34px!important;
+  height:34px!important;
+  padding:0 12px!important;
+  border-radius:14px!important;
+  font:900 12px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  white-space:nowrap!important;
+}
+
+/* Скрываем внутренние верхние панели плеера, если base их снова дорисовал. */
+body.jc41-rave-focus .player-card > header,
+body.jc41-rave-focus .player-card > nav,
+body.jc41-rave-focus .player-card-redesign > header,
+body.jc41-rave-focus .player-card-redesign > nav,
+body.jc41-rave-focus .player-shell > header,
+body.jc41-rave-focus .player-shell > nav{
+  display:none!important;
+}
+
+/* Fullscreen: левый экран остаётся как Rave — плеер + overlay-меню. */
+#jc45ActiveFullscreenTarget:fullscreen,
+#jc45ActiveFullscreenTarget:-webkit-full-screen{
+  width:100vw!important;
+  height:100vh!important;
+  background:#000!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock{
+  position:absolute!important;
+  left:14px!important;
+  bottom:14px!important;
+}
+
+@media(max-width:980px){
+  body.jc41-rave-focus .watch-layout{
+    grid-template-columns:1fr!important;
+    grid-template-rows:minmax(0,1fr) 34vh!important;
+  }
+  body.jc41-rave-focus .watch-sidebar,
+  body.jc41-rave-focus .chat-card{
+    height:34vh!important;
+    max-height:34vh!important;
+  }
+  body.jc41-rave-focus #jc45ActiveDock{
+    left:8px!important;
+    bottom:8px!important;
+    max-width:calc(100% - 16px)!important;
+  }
+}
+
+
+/* =========================================================
+   JustClover Stage 52 — Rave Clean Shell
+   Берём не код Rave, а саму проверенную схему: верхняя панель,
+   слева большой плеер, справа узкий чат, без дыр и декоративных полей.
+   ========================================================= */
+
+html::after{
+  content:'75 PLAYERSCALE'!important;
+}
+
+body.jc41-rave-focus{
+  --jc51-top:64px;
+  --jc51-chat:clamp(300px,17.5vw,360px);
+  background:#050506!important;
+}
+
+body.jc41-rave-focus #jc51RaveTopbar{
+  position:fixed!important;
+  left:0!important;
+  top:0!important;
+  right:0!important;
+  height:var(--jc51-top)!important;
+  z-index:2147482600!important;
+  display:grid!important;
+  grid-template-columns:minmax(260px,1fr) auto minmax(260px,1fr)!important;
+  align-items:center!important;
+  gap:12px!important;
+  padding:0 18px!important;
+  box-sizing:border-box!important;
+  color:#fff!important;
+  background:linear-gradient(180deg,rgba(76,50,43,.96),rgba(44,32,39,.92))!important;
+  border-bottom:1px solid rgba(255,255,255,.18)!important;
+  box-shadow:0 8px 30px rgba(0,0,0,.26)!important;
+  backdrop-filter:blur(14px)!important;
+}
+
+body.jc41-rave-focus #jc51RaveTopbar button{
+  width:44px!important;
+  height:44px!important;
+  min-width:44px!important;
+  min-height:44px!important;
+  border:0!important;
+  border-radius:999px!important;
+  background:transparent!important;
+  color:#fff!important;
+  display:grid!important;
+  place-items:center!important;
+  font:900 30px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  cursor:pointer!important;
+  opacity:.96!important;
+  box-shadow:none!important;
+}
+
+body.jc41-rave-focus #jc51RaveTopbar button:hover{
+  background:rgba(255,255,255,.11)!important;
+}
+
+body.jc41-rave-focus #jc51RaveTopbar [data-jc51-mic],
+body.jc41-rave-focus #jc51RaveTopbar [data-jc51-chat],
+body.jc41-rave-focus #jc51RaveTopbar [data-jc51-full]{
+  font-size:22px!important;
+}
+
+body.jc41-rave-focus .jc51-rave-left,
+body.jc41-rave-focus .jc51-rave-right{
+  display:flex!important;
+  align-items:center!important;
+  gap:clamp(18px,4vw,78px)!important;
+}
+
+body.jc41-rave-focus .jc51-rave-left{ justify-content:flex-start!important; }
+body.jc41-rave-focus .jc51-rave-right{ justify-content:flex-end!important; }
+
+body.jc41-rave-focus .jc51-rave-logo{
+  white-space:nowrap!important;
+  text-align:center!important;
+  color:#fff!important;
+  font:1000 clamp(24px,2.4vw,42px)/1 Inter,Segoe UI,Arial,sans-serif!important;
+  letter-spacing:.08em!important;
+  text-transform:uppercase!important;
+  text-shadow:0 2px 14px rgba(0,0,0,.45)!important;
+}
+
+body.jc41-rave-focus .shell,
+body.jc41-rave-focus #appView.app,
+body.jc41-rave-focus .content,
+body.jc41-rave-focus #watchSection{
+  width:100vw!important;
+  max-width:100vw!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+
+body.jc41-rave-focus .watch-layout{
+  position:fixed!important;
+  left:0!important;
+  right:0!important;
+  top:var(--jc51-top)!important;
+  bottom:0!important;
+  width:100vw!important;
+  max-width:100vw!important;
+  height:calc(100vh - var(--jc51-top))!important;
+  max-height:calc(100vh - var(--jc51-top))!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) var(--jc51-chat)!important;
+  gap:0!important;
+  margin:0!important;
+  padding:0!important;
+  background:#050506!important;
+  overflow:hidden!important;
+}
+
+body.jc41-rave-focus .watch-main,
+body.jc41-rave-focus .watch-stage{
+  position:relative!important;
+  width:100%!important;
+  height:calc(100vh - var(--jc51-top))!important;
+  max-height:calc(100vh - var(--jc51-top))!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  overflow:hidden!important;
+}
+
+/* Видео как в Rave: область слева без отступов; если источник отдаёт iframe с собственными плашками, мы не двигаем его DOM, только обрамление убрано. */
+body.jc41-rave-focus .player-card-redesign,
+body.jc41-rave-focus .player-card,
+body.jc41-rave-focus .player-shell,
+body.jc41-rave-focus .player-frame{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+  aspect-ratio:auto!important;
+}
+
+body.jc41-rave-focus .player-frame iframe,
+body.jc41-rave-focus .player-frame video,
+body.jc41-rave-focus .embed-box,
+body.jc41-rave-focus #iframePlayer,
+body.jc41-rave-focus #videoPlayer,
+body.jc41-rave-focus #youtubePlayer,
+body.jc41-rave-focus #youtubePlayer iframe{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  object-fit:cover!important;
+}
+
+/* Правая колонка как в Rave: сразу рядом с видео, без промежуточных фонов/дыр. */
+body.jc41-rave-focus .watch-sidebar{
+  position:relative!important;
+  width:var(--jc51-chat)!important;
+  min-width:var(--jc51-chat)!important;
+  height:calc(100vh - var(--jc51-top))!important;
+  max-height:calc(100vh - var(--jc51-top))!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border-left:2px solid rgba(255,255,255,.22)!important;
+  border-radius:0!important;
+  display:block!important;
+  overflow:hidden!important;
+  background:linear-gradient(180deg,rgba(112,80,67,.92),rgba(55,42,48,.95))!important;
+  box-shadow:none!important;
+}
+
+body.jc41-rave-focus .chat-card{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-height:100%!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:14px 10px 10px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:rgba(12,11,18,.24)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+  box-shadow:none!important;
+}
+
+body.jc41-rave-focus .chat-card .side-card-head{
+  min-height:36px!important;
+  margin:0 0 8px!important;
+  padding:0!important;
+  flex:0 0 auto!important;
+}
+
+body.jc41-rave-focus .chat-card .side-card-head h3{
+  color:#fff!important;
+  font:900 18px/1.1 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+body.jc41-rave-focus #chatMessages,
+body.jc41-rave-focus .chat-card .messages{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  padding:0 2px 0 0!important;
+  margin:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+}
+
+body.jc41-rave-focus #chatForm,
+body.jc41-rave-focus .chat-card .message-form{
+  flex:0 0 auto!important;
+  margin:8px 0 0!important;
+}
+
+/* Лишние панели и дубли источников не показываем в Rave-клоне. */
+body.jc41-rave-focus .watch-brandbar,
+body.jc41-rave-focus .watch-header,
+body.jc41-rave-focus .source-strip,
+body.jc41-rave-focus .source-panel-embedded,
+body.jc41-rave-focus .watch-footer-meta,
+body.jc41-rave-focus .members-card,
+body.jc41-rave-focus .voice-card,
+body.jc41-rave-focus .reactions-dock,
+body.jc41-rave-focus .jc48-top-source-hidden,
+body.jc41-rave-focus .jc45-active-hidden-panel,
+body.jc41-rave-focus .watch-main [class*="history"],
+body.jc41-rave-focus .watch-main [class*="queue"],
+body.jc41-rave-focus #jc45ActiveDock .jc48-source-row,
+body.jc41-rave-focus #jc41RaveFloating [data-jc41-exit],
+body.jc41-rave-focus #jc41RaveFloating [data-jc41-catalog]{
+  display:none!important;
+}
+
+/* Нижнее управление оставляем только микрофон/чат/экран, по центру как у Rave. */
+body.jc41-rave-focus #jc45ActiveDock{
+  position:absolute!important;
+  left:50%!important;
+  bottom:14px!important;
+  right:auto!important;
+  top:auto!important;
+  transform:translateX(-50%)!important;
+  width:auto!important;
+  max-width:calc(100% - 28px)!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  z-index:90!important;
+  pointer-events:none!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock .jc48-dock-inner,
+body.jc41-rave-focus #jc45ActiveDock .jc48-actions-slot,
+body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex-wrap:nowrap!important;
+  gap:8px!important;
+  width:auto!important;
+  max-width:100%!important;
+  margin:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  pointer-events:auto!important;
+}
+
+body.jc41-rave-focus #jc45ActiveDock .jc48-dock-inner{
+  padding:0!important;
+}
+
+body.jc41-rave-focus #jc41RaveFloating{
+  padding:6px!important;
+  border-radius:999px!important;
+  background:rgba(7,8,13,.68)!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  box-shadow:0 14px 48px rgba(0,0,0,.38)!important;
+  backdrop-filter:blur(16px)!important;
+}
+
+body.jc41-rave-focus #jc41RaveFloating button{
+  min-width:48px!important;
+  min-height:32px!important;
+  height:32px!important;
+  padding:0 12px!important;
+  border-radius:999px!important;
+  font:900 12px/1 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen,
+#jc45ActiveFullscreenTarget:-webkit-full-screen{
+  width:100vw!important;
+  height:100vh!important;
+  background:#000!important;
+}
+
+#jc45ActiveFullscreenTarget:fullscreen #jc45ActiveDock,
+#jc45ActiveFullscreenTarget:-webkit-full-screen #jc45ActiveDock{
+  position:absolute!important;
+  left:50%!important;
+  bottom:14px!important;
+  transform:translateX(-50%)!important;
+}
+
+@media(max-width:980px){
+  body.jc41-rave-focus{ --jc51-top:56px; --jc51-chat:34vh; }
+  body.jc41-rave-focus #jc51RaveTopbar{
+    height:var(--jc51-top)!important;
+    grid-template-columns:1fr auto 1fr!important;
+    padding:0 8px!important;
+  }
+  body.jc41-rave-focus .jc51-rave-left,
+  body.jc41-rave-focus .jc51-rave-right{ gap:4px!important; }
+  body.jc41-rave-focus #jc51RaveTopbar button{
+    width:34px!important; min-width:34px!important; height:34px!important; min-height:34px!important; font-size:22px!important;
+  }
+  body.jc41-rave-focus .jc51-rave-logo{ font-size:18px!important; letter-spacing:.05em!important; }
+  body.jc41-rave-focus .watch-layout{
+    grid-template-columns:1fr!important;
+    grid-template-rows:minmax(0,1fr) var(--jc51-chat)!important;
+  }
+  body.jc41-rave-focus .watch-main,
+  body.jc41-rave-focus .watch-stage{
+    height:calc(100vh - var(--jc51-top) - var(--jc51-chat))!important;
+    max-height:calc(100vh - var(--jc51-top) - var(--jc51-chat))!important;
+  }
+  body.jc41-rave-focus .watch-sidebar,
+  body.jc41-rave-focus .chat-card{
+    width:100vw!important;
+    min-width:0!important;
+    height:var(--jc51-chat)!important;
+    max-height:var(--jc51-chat)!important;
+  }
+}
+
+
+/* =========================================================
+   JustClover Stage 52 — Rave Clean Shell
+   Не изобретаем велосипед: оставляем схему Rave — topbar + видео слева + чат справа.
+   Убираем нижний дубль-контролы и насильно прибиваем чат/плеер без промежутков.
+   ========================================================= */
+
+html::after{
+  content:'75 PLAYERSCALE'!important;
+}
+
+body.jc41-rave-focus{
+  --jc51-top:58px!important;
+  --jc51-chat:clamp(318px,18vw,380px)!important;
+  background:#050506!important;
+}
+
+body.jc41-rave-focus #jc51RaveTopbar{
+  height:var(--jc51-top)!important;
+  padding:0 14px!important;
+  background:linear-gradient(180deg,rgba(73,49,43,.97),rgba(42,32,39,.96))!important;
+  box-shadow:none!important;
+}
+
+body.jc41-rave-focus #jc51RaveTopbar button{
+  width:40px!important;
+  min-width:40px!important;
+  height:40px!important;
+  min-height:40px!important;
+  font-size:27px!important;
+}
+
+body.jc41-rave-focus #jc51RaveTopbar [data-jc51-mic],
+body.jc41-rave-focus #jc51RaveTopbar [data-jc51-chat],
+body.jc41-rave-focus #jc51RaveTopbar [data-jc51-full]{
+  font-size:21px!important;
+}
+
+body.jc41-rave-focus .jc51-rave-logo{
+  font-size:clamp(24px,2.2vw,38px)!important;
+  letter-spacing:.075em!important;
+}
+
+body.jc41-rave-focus .watch-layout{
+  position:fixed!important;
+  left:0!important;
+  right:0!important;
+  top:var(--jc51-top)!important;
+  bottom:0!important;
+  width:100vw!important;
+  height:calc(100vh - var(--jc51-top))!important;
+  max-height:calc(100vh - var(--jc51-top))!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,calc(100vw - var(--jc51-chat))) var(--jc51-chat)!important;
+  gap:0!important;
+  margin:0!important;
+  padding:0!important;
+  background:#050506!important;
+  overflow:hidden!important;
+}
+
+body.jc41-rave-focus .watch-main,
+body.jc41-rave-focus .watch-stage{
+  position:relative!important;
+  grid-column:1!important;
+  width:100%!important;
+  height:calc(100vh - var(--jc51-top))!important;
+  max-height:calc(100vh - var(--jc51-top))!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  overflow:hidden!important;
+  transform:none!important;
+}
+
+body.jc41-rave-focus .watch-stage > :not(.player-card-redesign):not(.player-card):not(.player-shell):not(#jc45ActiveDock){
+  display:none!important;
+}
+
+body.jc41-rave-focus .player-card-redesign,
+body.jc41-rave-focus .player-card,
+body.jc41-rave-focus .player-shell,
+body.jc41-rave-focus .player-frame{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+  transform:none!important;
+  aspect-ratio:auto!important;
+}
+
+body.jc41-rave-focus .player-frame iframe,
+body.jc41-rave-focus .player-frame video,
+body.jc41-rave-focus .embed-box,
+body.jc41-rave-focus #iframePlayer,
+body.jc41-rave-focus #videoPlayer,
+body.jc41-rave-focus #youtubePlayer,
+body.jc41-rave-focus #youtubePlayer iframe{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  object-fit:cover!important;
+}
+
+/* Чат в стиле Rave: колонка начинается сразу от topbar и вплотную к видео. */
+body.jc41-rave-focus .watch-sidebar{
+  position:relative!important;
+  grid-column:2!important;
+  width:var(--jc51-chat)!important;
+  min-width:var(--jc51-chat)!important;
+  max-width:var(--jc51-chat)!important;
+  height:calc(100vh - var(--jc51-top))!important;
+  max-height:calc(100vh - var(--jc51-top))!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-left:2px solid rgba(255,255,255,.24)!important;
+  border-radius:0!important;
+  display:block!important;
+  overflow:hidden!important;
+  background:linear-gradient(180deg,rgba(118,82,68,.96),rgba(55,42,48,.98))!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+
+body.jc41-rave-focus .watch-sidebar > :not(.chat-card){
+  display:none!important;
+}
+
+body.jc41-rave-focus .watch-sidebar .chat-card,
+body.jc41-rave-focus .chat-card{
+  position:absolute!important;
+  inset:0!important;
+  top:0!important;
+  right:0!important;
+  bottom:0!important;
+  left:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:12px 9px 8px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+
+body.jc41-rave-focus .chat-card .side-card-head{
+  min-height:34px!important;
+  margin:0 0 8px!important;
+  padding:0!important;
+  flex:0 0 auto!important;
+}
+
+body.jc41-rave-focus #chatMessages,
+body.jc41-rave-focus .chat-card .messages{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0 2px 0 0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+}
+
+body.jc41-rave-focus #chatForm,
+body.jc41-rave-focus .chat-card .message-form{
+  flex:0 0 auto!important;
+  margin:8px 0 0!important;
+}
+
+/* Убираем нижние дубли кнопок: управление теперь в topbar и в самом плеере. */
+body.jc41-rave-focus #jc45ActiveDock,
+body.jc41-rave-focus #jc41RaveFloating{
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  opacity:0!important;
+}
+
+/* Fullscreen теперь вызывается на documentElement, поэтому topbar и кнопка выхода остаются видимыми. */
+html:fullscreen body.jc41-rave-focus #jc51RaveTopbar,
+html:-webkit-full-screen body.jc41-rave-focus #jc51RaveTopbar{
+  display:grid!important;
+  position:fixed!important;
+  top:0!important;
+  left:0!important;
+  right:0!important;
+  z-index:2147482600!important;
+}
+
+@media(max-width:980px){
+  body.jc41-rave-focus{ --jc51-top:54px!important; --jc51-chat:34vh!important; }
+  body.jc41-rave-focus #jc51RaveTopbar{ height:var(--jc51-top)!important; padding:0 8px!important; }
+  body.jc41-rave-focus .watch-layout{
+    grid-template-columns:1fr!important;
+    grid-template-rows:minmax(0,1fr) var(--jc51-chat)!important;
+  }
+  body.jc41-rave-focus .watch-main,
+  body.jc41-rave-focus .watch-stage{
+    grid-column:1!important;
+    height:calc(100vh - var(--jc51-top) - var(--jc51-chat))!important;
+    max-height:calc(100vh - var(--jc51-top) - var(--jc51-chat))!important;
+  }
+  body.jc41-rave-focus .watch-sidebar{
+    grid-column:1!important;
+    width:100vw!important;
+    min-width:0!important;
+    max-width:100vw!important;
+    height:var(--jc51-chat)!important;
+    max-height:var(--jc51-chat)!important;
+    border-left:0!important;
+    border-top:2px solid rgba(255,255,255,.24)!important;
+  }
+}
+
+
+/* Stage 53 — remove top-right mic/chat/fullscreen icons and rebalance topbar */
+html::after{ content:'75 PLAYERSCALE'!important; }
+body.jc41-rave-focus #jc51RaveTopbar{
+  grid-template-columns:minmax(260px,1fr) auto minmax(120px,1fr)!important;
+}
+body.jc41-rave-focus #jc51RaveTopbar .jc53-rave-right-spacer,
+body.jc41-rave-focus #jc51RaveTopbar .jc51-rave-right{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  min-height:1px!important;
+}
+body.jc41-rave-focus #jc51RaveTopbar [data-jc51-mic],
+body.jc41-rave-focus #jc51RaveTopbar [data-jc51-chat],
+body.jc41-rave-focus #jc51RaveTopbar [data-jc51-full]{
+  display:none!important;
+}
+@media(max-width:980px){
+  body.jc41-rave-focus #jc51RaveTopbar{
+    grid-template-columns:minmax(160px,1fr) auto minmax(40px,1fr)!important;
+  }
+}
+
+
+/* Stage 54 — Rave Polish: remove top black strip feel, darken chat, tighten proportions. */
+html::after{ content:'75 PLAYERSCALE'!important; }
+body.jc41-rave-focus{
+  --jc54-chat:clamp(292px,17.2vw,330px)!important;
+}
+body.jc41-rave-focus #jc51RaveTopbar{
+  background:linear-gradient(180deg,rgba(66,44,41,.97),rgba(34,27,35,.97))!important;
+  border-bottom:1px solid rgba(255,255,255,.08)!important;
+}
+body.jc41-rave-focus .watch-layout{
+  grid-template-columns:minmax(0,calc(100vw - var(--jc54-chat))) var(--jc54-chat)!important;
+  background:#050507!important;
+}
+/* Small crop to hide the dead strip above some embeds without changing layout logic. */
+body.jc41-rave-focus .player-frame{
+  top:-8px!important;
+  left:0!important;
+  right:0!important;
+  bottom:0!important;
+  width:100%!important;
+  height:calc(100% + 8px)!important;
+}
+body.jc41-rave-focus .player-frame iframe,
+body.jc41-rave-focus .player-frame video,
+body.jc41-rave-focus .embed-box,
+body.jc41-rave-focus #iframePlayer,
+body.jc41-rave-focus #videoPlayer,
+body.jc41-rave-focus #youtubePlayer,
+body.jc41-rave-focus #youtubePlayer iframe{
+  top:0!important;
+}
+body.jc41-rave-focus .watch-sidebar{
+  border-left:1px solid rgba(255,255,255,.10)!important;
+  background:linear-gradient(180deg,rgba(39,28,34,.98),rgba(18,16,24,.99))!important;
+  box-shadow:inset 1px 0 0 rgba(255,255,255,.03)!important;
+}
+body.jc41-rave-focus .chat-card{
+  background:linear-gradient(180deg,rgba(15,14,22,.52),rgba(10,10,16,.68))!important;
+  padding:10px 10px 8px!important;
+}
+body.jc41-rave-focus .chat-card .side-card-head{
+  margin:0 0 6px!important;
+}
+body.jc41-rave-focus .chat-card .side-card-head h3{
+  font-size:17px!important;
+  color:#f6edf0!important;
+}
+body.jc41-rave-focus #chatMessages,
+body.jc41-rave-focus .chat-card .messages{
+  padding-right:1px!important;
+}
+body.jc41-rave-focus #chatForm,
+body.jc41-rave-focus .chat-card .message-form{
+  margin:6px 0 0!important;
+}
+@media(max-width:980px){
+  body.jc41-rave-focus{ --jc54-chat:100vw!important; }
+}
+
+
+/* Stage 62: auth screen must stay untouched and clickable. */
+body:not(.jc40-watch-mode):not(.jc41-rave-focus) #jc41RaveFloating,
+body:not(.jc40-watch-mode):not(.jc41-rave-focus) #jc45ActiveDock,
+body:not(.jc40-watch-mode):not(.jc41-rave-focus) #jc51RaveTopbar,
+body:not(.jc40-watch-mode):not(.jc41-rave-focus) #jc40CatalogRoot{
+  display:none!important;
+  pointer-events:none!important;
+}
+body:not(.jc40-watch-mode):not(.jc41-rave-focus) .jc-catalog-layer,
+body:not(.jc40-watch-mode):not(.jc41-rave-focus) .jc-catalog-layer.open{
+  display:none!important;
+  pointer-events:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+}
+
+/* =========================================================
+   Stage 64 — Active First Stable
+   Один главный экран после входа: topbar + большой плеер + чат справа.
+   Auth-экран не затрагивается. Чат не переносится в DOM.
+   ========================================================= */
+
+html::after{
+  content:'75 PLAYERSCALE'!important;
+  background:rgba(56,189,248,.96)!important;
+  color:#02150d!important;
+}
+
+html.jc64-active-first,
+body.jc64-active-first{
+  --jc64-topbar-h:58px;
+  --jc64-chat-w:clamp(305px,17.5vw,350px);
+  --jc64-bottom-safe:max(14px, env(safe-area-inset-bottom, 0px));
+  height:100dvh!important;
+  max-height:100dvh!important;
+  overflow:hidden!important;
+  background:#000!important;
+}
+
+/* Старый обычный интерфейс просмотра больше не нужен. */
+body.jc64-active-first .topbar,
+body.jc64-active-first .rail,
+body.jc64-active-first #jc41RaveToggle,
+body.jc64-active-first .watch-brandbar,
+body.jc64-active-first .watch-header,
+body.jc64-active-first .source-strip,
+body.jc64-active-first .source-panel-embedded,
+body.jc64-active-first .reactions-dock,
+body.jc64-active-first .watch-footer-meta,
+body.jc64-active-first .members-card,
+body.jc64-active-first .voice-card,
+body.jc64-active-first .watch-main [class*="history"],
+body.jc64-active-first .watch-main [class*="queue"],
+body.jc64-active-first [data-jc64-hidden-cinema="1"]{
+  display:none!important;
+}
+
+body.jc64-active-first .shell,
+body.jc64-active-first #appView.app,
+body.jc64-active-first .content,
+body.jc64-active-first #watchSection,
+body.jc64-active-first .watch-layout,
+body.jc64-active-first .watch-main,
+body.jc64-active-first .watch-stage{
+  width:100vw!important;
+  height:100dvh!important;
+  max-height:100dvh!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:#000!important;
+}
+
+/* Сетка без дыр: плеер слева, чат справа, верхняя панель общая. */
+body.jc64-active-first .watch-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,calc(100vw - var(--jc64-chat-w))) var(--jc64-chat-w)!important;
+  grid-template-rows:100dvh!important;
+  gap:0!important;
+  align-items:stretch!important;
+}
+
+body.jc64-active-first .watch-main{
+  grid-column:1!important;
+  padding-top:var(--jc64-topbar-h)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  min-width:0!important;
+}
+
+body.jc64-active-first .watch-stage{
+  flex:1 1 auto!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+
+/* Topbar как постоянная шапка основного режима. */
+body.jc64-active-first #jc51RaveTopbar{
+  position:fixed!important;
+  inset:0 0 auto 0!important;
+  height:var(--jc64-topbar-h)!important;
+  z-index:2147482100!important;
+  display:grid!important;
+  grid-template-columns:minmax(220px,1fr) auto minmax(220px,1fr)!important;
+  align-items:center!important;
+  gap:12px!important;
+  padding:0 18px!important;
+  border-bottom:1px solid rgba(255,255,255,.10)!important;
+  background:linear-gradient(180deg,rgba(54,38,43,.98),rgba(25,21,30,.98))!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.22)!important;
+}
+
+body.jc64-active-first #jc51RaveTopbar .jc51-rave-logo{
+  font-size:clamp(24px,2.15vw,34px)!important;
+  line-height:1!important;
+  letter-spacing:.10em!important;
+  color:#fff!important;
+  text-shadow:0 2px 18px rgba(0,0,0,.36)!important;
+}
+
+body.jc64-active-first #jc51RaveTopbar .jc51-rave-left{
+  display:flex!important;
+  align-items:center!important;
+  gap:18px!important;
+  min-width:0!important;
+}
+
+body.jc64-active-first #jc51RaveTopbar .jc51-rave-right{
+  min-width:0!important;
+}
+
+body.jc64-active-first #jc51RaveTopbar button{
+  width:34px!important;
+  height:34px!important;
+  min-height:34px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:12px!important;
+  background:transparent!important;
+  color:#fff!important;
+  font:900 24px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  opacity:.95!important;
+  box-shadow:none!important;
+}
+
+body.jc64-active-first #jc51RaveTopbar button:hover{
+  background:rgba(255,255,255,.08)!important;
+}
+
+/* Плеер занимает всю левую область, без чёрной "полки" и без старых карточек. */
+body.jc64-active-first .player-card-redesign,
+body.jc64-active-first .player-card,
+body.jc64-active-first .player-shell{
+  flex:1 1 auto!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+
+body.jc64-active-first .player-frame{
+  position:relative!important;
+  flex:1 1 auto!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-height:none!important;
+  aspect-ratio:auto!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  overflow:hidden!important;
+}
+
+body.jc64-active-first .player-frame iframe,
+body.jc64-active-first .player-frame video,
+body.jc64-active-first .player-frame .embed-box,
+body.jc64-active-first .player-frame #youtubePlayer,
+body.jc64-active-first .player-frame #youtubePlayer iframe,
+body.jc64-active-first #iframePlayer,
+body.jc64-active-first #videoPlayer,
+body.jc64-active-first #youtubePlayer,
+body.jc64-active-first #youtubePlayer iframe,
+body.jc64-active-first .jc64-youtube-fallback{
+  position:absolute!important;
+  inset:0!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:100%!important;
+  min-height:100%!important;
+  border:0!important;
+  opacity:1!important;
+  visibility:visible!important;
+  background:#000!important;
+  object-fit:contain!important;
+}
+
+/* Низ под плеером: компактный dock поверх видео, не мешает Windows taskbar. */
+body.jc64-active-first #jc45ActiveDock,
+body.jc64-active-first #jc43ActiveDock{
+  position:fixed!important;
+  left:0!important;
+  right:var(--jc64-chat-w)!important;
+  bottom:calc(var(--jc64-bottom-safe) + 4px)!important;
+  z-index:2147482050!important;
+  width:auto!important;
+  max-width:none!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  background:transparent!important;
+  pointer-events:none!important;
+}
+
+body.jc64-active-first #jc45ActiveDock .jc48-dock-inner,
+body.jc64-active-first #jc43ActiveDock .jc48-dock-inner{
+  width:max-content!important;
+  max-width:calc(100vw - var(--jc64-chat-w) - 28px)!important;
+  margin:0 auto!important;
+  padding:6px!important;
+  border-radius:999px!important;
+  background:rgba(8,10,18,.66)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  box-shadow:0 14px 42px rgba(0,0,0,.34)!important;
+  backdrop-filter:blur(16px)!important;
+  pointer-events:auto!important;
+}
+
+body.jc64-active-first #jc41RaveFloating{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+}
+
+body.jc64-active-first #jc41RaveFloating [data-jc41-exit]{
+  display:none!important;
+}
+
+body.jc64-active-first #jc41RaveFloating button,
+body.jc64-active-first .jc48-source-row button{
+  min-height:30px!important;
+  height:30px!important;
+  padding:0 10px!important;
+  border-radius:999px!important;
+  font:900 11px/1 Inter,Segoe UI,Arial,sans-serif!important;
+}
+
+body.jc64-active-first .jc48-source-row{
+  display:none!important;
+}
+
+/* Чат: фиксированная правая колонка от шапки до низа, без смещения вниз. */
+body.jc64-active-first .watch-sidebar{
+  position:fixed!important;
+  top:var(--jc64-topbar-h)!important;
+  right:0!important;
+  bottom:0!important;
+  width:var(--jc64-chat-w)!important;
+  height:calc(100dvh - var(--jc64-topbar-h))!important;
+  max-height:calc(100dvh - var(--jc64-topbar-h))!important;
+  min-height:0!important;
+  display:block!important;
+  padding:0!important;
+  margin:0!important;
+  overflow:hidden!important;
+  border-left:1px solid rgba(255,255,255,.10)!important;
+  background:linear-gradient(180deg,rgba(35,25,36,.98),rgba(16,14,22,.99))!important;
+  box-shadow:inset 1px 0 0 rgba(255,255,255,.035)!important;
+}
+
+body.jc64-active-first .watch-sidebar > :not(.chat-card){
+  display:none!important;
+}
+
+body.jc64-active-first .watch-sidebar .chat-card,
+body.jc64-active-first .chat-card{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:12px 10px calc(var(--jc64-bottom-safe) + 10px)!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+
+body.jc64-active-first .chat-card .side-card-head{
+  flex:0 0 auto!important;
+  margin:0 0 8px!important;
+  padding:0!important;
+}
+
+body.jc64-active-first .chat-card .side-card-head h3{
+  margin:0!important;
+  color:#fff!important;
+  font-size:17px!important;
+  line-height:1.15!important;
+}
+
+body.jc64-active-first .chat-card .side-card-head .pill,
+body.jc64-active-first .chat-card .side-card-head .badge{
+  transform:scale(.92)!important;
+  transform-origin:right center!important;
+}
+
+body.jc64-active-first #chatMessages,
+body.jc64-active-first .chat-card .messages{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  padding:0 2px 8px 0!important;
+}
+
+body.jc64-active-first #chatForm,
+body.jc64-active-first .chat-card .message-form{
+  flex:0 0 auto!important;
+  margin:8px 0 0!important;
+  padding:8px 0 0!important;
+  position:sticky!important;
+  bottom:0!important;
+  background:linear-gradient(180deg,rgba(16,14,22,0),rgba(16,14,22,.96) 24%,rgba(16,14,22,.98))!important;
+}
+
+/* GIF/стикеры/emoji/инпут не должны упираться в системную панель. */
+body.jc64-active-first .chat-card [class*="emoji"],
+body.jc64-active-first .chat-card [class*="gif"],
+body.jc64-active-first .chat-card [class*="sticker"],
+body.jc64-active-first .chat-card .message-actions,
+body.jc64-active-first .chat-card .composer-actions{
+  margin-bottom:0!important;
+}
+
+body.jc64-active-first .chat-card input,
+body.jc64-active-first .chat-card textarea{
+  min-height:38px!important;
+}
+
+/* Fullscreen: сохраняем Rave-like схему и safe-bottom. */
+html:fullscreen body.jc64-active-first,
+body.jc64-active-first:fullscreen{
+  --jc64-bottom-safe:18px;
+}
+
+/* Ноутбуки/окна пониже: делаем chat и dock компактнее. */
+@media(max-height:760px){
+  html.jc64-active-first,
+  body.jc64-active-first{
+    --jc64-topbar-h:52px;
+    --jc64-bottom-safe:10px;
+  }
+  body.jc64-active-first #jc51RaveTopbar .jc51-rave-logo{
+    font-size:26px!important;
+  }
+  body.jc64-active-first .watch-sidebar .chat-card,
+  body.jc64-active-first .chat-card{
+    padding-top:9px!important;
+  }
+  body.jc64-active-first .chat-card .side-card-head{
+    margin-bottom:5px!important;
+  }
+}
+
+/* Узкий экран: чат снизу, инпут всё равно выше safe-area. */
+@media(max-width:980px){
+  html.jc64-active-first,
+  body.jc64-active-first{
+    --jc64-chat-w:100vw;
+    --jc64-topbar-h:52px;
+  }
+
+  body.jc64-active-first .watch-layout{
+    grid-template-columns:1fr!important;
+    grid-template-rows:minmax(0,62dvh) minmax(0,38dvh)!important;
+  }
+
+  body.jc64-active-first .watch-main{
+    padding-top:var(--jc64-topbar-h)!important;
+    height:62dvh!important;
+  }
+
+  body.jc64-active-first .watch-sidebar{
+    top:62dvh!important;
+    left:0!important;
+    width:100vw!important;
+    height:38dvh!important;
+    max-height:38dvh!important;
+    border-left:0!important;
+    border-top:1px solid rgba(255,255,255,.10)!important;
+  }
+
+  body.jc64-active-first #jc45ActiveDock,
+  body.jc64-active-first #jc43ActiveDock{
+    right:0!important;
+    bottom:calc(38dvh + var(--jc64-bottom-safe))!important;
+  }
+
+  body.jc64-active-first #jc51RaveTopbar{
+    grid-template-columns:minmax(100px,1fr) auto minmax(40px,1fr)!important;
+    padding:0 10px!important;
+  }
+}
+
+
+
+/* =========================================================
+   Stage 65 — Player Load Repair.
+   Keep native source controls alive offscreen and provide a direct player slot
+   for YouTube/VK when active-first hides the old UI.
+   ========================================================= */
+html::after{
+  content:'75 PLAYERSCALE'!important;
+  background:rgba(56,189,248,.96)!important;
+  color:#031018!important;
+}
+
+/* Do not kill the native source form; the catalog relies on its handlers. */
+body.jc64-active-first .source-panel-embedded[data-jc65-keepalive],
+body.jc64-active-first .source-panel-embedded{
+  display:block!important;
+  position:absolute!important;
+  left:-9999px!important;
+  top:0!important;
+  width:1px!important;
+  height:1px!important;
+  min-width:1px!important;
+  min-height:1px!important;
+  max-width:1px!important;
+  max-height:1px!important;
+  overflow:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+/* Direct fallback player sits above the empty native slot, but only inside the player. */
+body.jc64-active-first .player-frame #jc65DirectPlayer,
+body.jc64-active-first #jc65DirectPlayer{
+  position:absolute!important;
+  inset:0!important;
+  z-index:8!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:100%!important;
+  min-height:100%!important;
+  border:0!important;
+  opacity:1!important;
+  visibility:visible!important;
+  background:#000!important;
+  object-fit:contain!important;
+}
+
+/* Keep native embeds visible too; fallback is only a safety layer. */
+body.jc64-active-first .player-frame #youtubePlayer,
+body.jc64-active-first .player-frame #youtubePlayer iframe,
+body.jc64-active-first .player-frame iframe[src*="youtube"],
+body.jc64-active-first .player-frame iframe[src*="youtube-nocookie"],
+body.jc64-active-first .player-frame iframe[src*="vk.com"],
+body.jc64-active-first .player-frame iframe[src*="vkvideo"]{
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:100%!important;
+  min-height:100%!important;
+  opacity:1!important;
+  visibility:visible!important;
+  border:0!important;
+}
+
+/* Chat/composer stays above Windows taskbar. */
+body.jc64-active-first{
+  --jc64-bottom-safe:max(22px, env(safe-area-inset-bottom, 0px))!important;
+}
+@media(max-height:760px){
+  body.jc64-active-first{
+    --jc64-bottom-safe:18px!important;
+  }
+}
+
+
+/* Stage 71 — stable persistent player.
+   Direct iframe/video is the active-view player, not a hidden fallback. Native source form remains offscreen for app state. */
+html::after{
+  content:'75 PLAYERSCALE'!important;
+  background:rgba(34,211,238,.96)!important;
+  color:#02131a!important;
+}
+body.jc64-active-first .player-frame{
+  background:#000!important;
+  isolation:isolate!important;
+}
+body.jc64-active-first #jc65DirectPlayer,
+body.jc64-active-first .jc67-main-player{
+  position:absolute!important;
+  inset:0!important;
+  z-index:30!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:100%!important;
+  min-height:100%!important;
+  border:0!important;
+  opacity:1!important;
+  visibility:visible!important;
+  background:#000!important;
+  object-fit:contain!important;
+  pointer-events:auto!important;
+}
+body.jc64-active-first.jc67-main-player-active .player-frame > iframe:not(#jc65DirectPlayer),
+body.jc64-active-first.jc67-main-player-active .player-frame > video:not(#jc65DirectPlayer),
+body.jc64-active-first.jc67-main-player-active .player-frame > .embed-box:not(#jc65DirectPlayer){
+  z-index:1!important;
+}
+body.jc64-active-first .source-panel-embedded[data-jc65-keepalive],
+body.jc64-active-first .source-panel-embedded{
+  display:block!important;
+  position:fixed!important;
+  left:-10000px!important;
+  top:0!important;
+  width:2px!important;
+  height:2px!important;
+  min-width:2px!important;
+  min-height:2px!important;
+  max-width:2px!important;
+  max-height:2px!important;
+  overflow:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+/* Keep chat composer above Windows taskbar. */
+body.jc64-active-first{
+  --jc64-bottom-safe:max(24px, env(safe-area-inset-bottom, 0px))!important;
+}
+@media(max-height:760px){
+  body.jc64-active-first{ --jc64-bottom-safe:18px!important; }
+}
+
+
+/* Stage 71 — stable player. No JS geometry loop, no repeated iframe reflow. */
+html::after{
+  content:'75 PLAYERSCALE'!important;
+  background:rgba(20,184,166,.96)!important;
+  color:#031513!important;
+}
+body.jc64-active-first .player-frame,
+body.jc64-active-first .player-card-redesign,
+body.jc64-active-first .player-card,
+body.jc64-active-first .player-shell,
+body.jc64-active-first [data-jc71-stable-frame='1']{
+  background:#000!important;
+  overflow:hidden!important;
+}
+body.jc64-active-first #jc65DirectPlayer,
+body.jc64-active-first .jc67-main-player,
+body.jc64-active-first #jc65DirectPlayer[data-jc71-stable='1']{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  transform:none!important;
+  border:0!important;
+  background:#000!important;
+  opacity:1!important;
+  visibility:visible!important;
+  z-index:30!important;
+  pointer-events:auto!important;
+}
+body.jc64-active-first video#jc65DirectPlayer{
+  object-fit:contain!important;
+}
+/* Hide native empty/old player under the direct shell so it cannot flash white/gray. */
+body.jc64-active-first.jc67-main-player-active .player-frame > :not(#jc65DirectPlayer):not(.jc65-direct-player):not(.jc67-main-player){
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+/* Avoid chat/toast pills jumping over the video while testing stable player. */
+body.jc64-active-first .player-frame .message,
+body.jc64-active-first .player-frame .chat-message,
+body.jc64-active-first .player-frame [data-chat-message]{
+  display:none!important;
+}
+
+
+/* Stage 72 — small auto-update notice. */
+html::after{
+  content:'75 PLAYERSCALE'!important;
+  background:rgba(168,85,247,.96)!important;
+  color:#fff!important;
+}
+
+#jc72UpdateNotice{
+  position:fixed!important;
+  left:50%!important;
+  top:74px!important;
+  transform:translateX(-50%) translateY(-14px)!important;
+  z-index:2147483600!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:3px!important;
+  min-width:min(440px,calc(100vw - 28px))!important;
+  max-width:calc(100vw - 28px)!important;
+  padding:12px 16px!important;
+  border-radius:18px!important;
+  background:rgba(12,10,18,.92)!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  box-shadow:0 18px 70px rgba(0,0,0,.42)!important;
+  color:#fff!important;
+  font:600 14px/1.25 Inter,Segoe UI,Arial,sans-serif!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  transition:opacity .18s ease, transform .18s ease!important;
+}
+#jc72UpdateNotice span{
+  color:rgba(235,230,255,.78)!important;
+  font-weight:500!important;
+  font-size:12px!important;
+}
+#jc72UpdateNotice.show{
+  opacity:1!important;
+  transform:translateX(-50%) translateY(0)!important;
+}
+
+
+
+
+/* =========================================================
+   JustClover Stage 75 — Player Scale Only Fix
+   Version: stage75-player-scale-only-20260502-1
+
+   Сохраняет дизайн Stage74/Active First. Меняет только геометрию видео:
+   - больше нет fixed viewport-player slot;
+   - iframe/video держатся в стабильном 16:9 окне;
+   - без cover/overscan crop;
+   - без постоянных interval-пересчётов.
+   ========================================================= */
+
+html::after{
+  content:'75 PLAYERSCALE'!important;
+  background:rgba(34,197,94,.96)!important;
+  color:#03130a!important;
+}
+
+body.jc64-active-first.jc75-player-scale-only .watch-main{
+  position:relative!important;
+  padding-top:var(--jc64-topbar-h)!important;
+}
+
+body.jc64-active-first.jc75-player-scale-only .watch-stage,
+body.jc64-active-first.jc75-player-scale-only .player-card-redesign,
+body.jc64-active-first.jc75-player-scale-only .player-card,
+body.jc64-active-first.jc75-player-scale-only .player-shell{
+  position:relative!important;
+  flex:1 1 auto!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+}
+
+body.jc64-active-first.jc75-player-scale-only .player-frame,
+body.jc64-active-first.jc75-player-scale-only .player-frame[data-jc75-scale-frame='1']{
+  position:absolute!important;
+  right:0!important;
+  top:0!important;
+  left:auto!important;
+  bottom:auto!important;
+  display:block!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#000!important;
+  overflow:hidden!important;
+  aspect-ratio:auto!important;
+  contain:layout paint!important;
+  isolation:isolate!important;
+  z-index:10!important;
+}
+
+body.jc64-active-first.jc75-player-scale-only .player-frame iframe,
+body.jc64-active-first.jc75-player-scale-only .player-frame video,
+body.jc64-active-first.jc75-player-scale-only .player-frame .embed-box,
+body.jc64-active-first.jc75-player-scale-only .player-frame #youtubePlayer,
+body.jc64-active-first.jc75-player-scale-only .player-frame #youtubePlayer iframe,
+body.jc64-active-first.jc75-player-scale-only .player-frame #iframePlayer,
+body.jc64-active-first.jc75-player-scale-only .player-frame #videoPlayer,
+body.jc64-active-first.jc75-player-scale-only .player-frame #jc65DirectPlayer,
+body.jc64-active-first.jc75-player-scale-only .player-frame .jc67-main-player{
+  position:absolute!important;
+  inset:0!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  transform:none!important;
+  background:#000!important;
+  opacity:1!important;
+  visibility:visible!important;
+  object-fit:contain!important;
+}
+
+body.jc64-active-first.jc75-player-scale-only .player-frame #emptyPlayer,
+body.jc64-active-first.jc75-player-scale-only .player-frame .empty-player,
+body.jc64-active-first.jc75-player-scale-only .player-frame .placeholder,
+body.jc64-active-first.jc75-player-scale-only .player-frame .player-empty{
+  position:absolute!important;
+  inset:0!important;
+  display:grid!important;
+  place-items:center!important;
+  width:100%!important;
+  height:100%!important;
+}
+
+body.jc64-active-first.jc75-player-scale-only.jc67-main-player-active .player-frame > :not(#jc65DirectPlayer):not(.jc65-direct-player):not(.jc67-main-player):not(#emptyPlayer):not(.empty-player):not(.placeholder):not(.player-empty){
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+
+body.jc64-active-first.jc75-player-scale-only #jc45ActiveDock,
+body.jc64-active-first.jc75-player-scale-only #jc43ActiveDock{
+  right:var(--jc64-chat-w)!important;
+  bottom:calc(var(--jc64-bottom-safe) + 8px)!important;
+  z-index:2147482050!important;
+}
+
+@media(max-width:980px){
+  body.jc64-active-first.jc75-player-scale-only .player-frame,
+  body.jc64-active-first.jc75-player-scale-only .player-frame[data-jc75-scale-frame='1']{
+    left:0!important;
+    right:auto!important;
+  }
+}
