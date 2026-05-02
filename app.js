@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 67 — Main Player Shell
-   Version: stage67-main-player-shell-20260502-1
+   JustClover Stage 68 — Player Geometry Fix
+   Version: stage68-player-geometry-fix-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage67-main-player-shell-20260502-1";
+const JC40_BUILD = "stage68-player-geometry-fix-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 67 MAINPLAYER loader:", JC40_BUILD);
+console.log("JustClover Stage 68 PLAYERGEOMETRY loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 67: base app import failed", e);
+  console.error("JustClover Stage 68: base app import failed", e);
   throw e;
 }
 
@@ -625,11 +625,11 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 67 — Main Player Shell
-   Version: stage67-main-player-shell-20260502-1
+   JustClover Stage 68 — Player Geometry Fix
+   Version: stage68-player-geometry-fix-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage67-main-player-shell-20260502-1";
+  const BUILD = "stage68-player-geometry-fix-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1151,12 +1151,12 @@ try{
 }catch(_){}
 
 /* =========================================================
-   JustClover Stage 67 — Main Player Shell
+   JustClover Stage 68 — Player Geometry Fix
    Главная идея: после входа в комнату показываем только active-view.
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage67-main-player-shell-20260502-1";
+  const BUILD = "stage68-player-geometry-fix-20260502-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1393,7 +1393,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage67-main-player-shell-20260502-1";
+  const BUILD = "stage68-player-geometry-fix-20260502-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1682,3 +1682,148 @@ try{
     return d;
   };
 }catch(_){}
+
+
+/* =========================================================
+   Stage 68 — Player Geometry Fix.
+   Главный плеер остаётся рабочим direct-shell, но геометрия больше не
+   растягивает iframe на кривой контейнер. Для YouTube/VK держим чистый
+   16:9 внутри левой области, центрируем и не залезаем под чат.
+   ========================================================= */
+(function(){
+  const BUILD = "stage68-player-geometry-fix-20260502-1";
+
+  function isAuthScreen(){
+    return !!window.__jc62IsAuthScreen?.();
+  }
+
+  function isActiveMain(){
+    return !isAuthScreen() && document.body.classList.contains('jc64-active-first');
+  }
+
+  function frame(){
+    return document.querySelector('.player-frame');
+  }
+
+  function mainPlayer(){
+    return document.getElementById('jc65DirectPlayer') ||
+      document.querySelector('.jc67-main-player') ||
+      document.querySelector('.player-frame iframe[src*="youtube"], .player-frame iframe[src*="vk.com"], .player-frame iframe[src*="vkvideo"], .player-frame video');
+  }
+
+  function playerKind(el){
+    const kind = String(el?.getAttribute?.('data-jc65-kind') || '').toLowerCase();
+    const src = String(el?.src || '').toLowerCase();
+    if(kind) return kind;
+    if(src.includes('youtube') || src.includes('youtu.be')) return 'youtube';
+    if(src.includes('vk.com') || src.includes('vkvideo')) return 'vk';
+    if(el?.tagName === 'VIDEO') return 'video';
+    return '';
+  }
+
+  function fitPlayer(){
+    if(!isActiveMain()) return false;
+    const fr = frame();
+    const el = mainPlayer();
+    if(!fr || !el) return false;
+
+    const r = fr.getBoundingClientRect();
+    if(!r.width || !r.height) return false;
+
+    fr.style.setProperty('position','relative','important');
+    fr.style.setProperty('overflow','hidden','important');
+    fr.style.setProperty('background','#000','important');
+
+    const kind = playerKind(el);
+    const isEmbed = kind === 'youtube' || kind === 'vk' || el.tagName === 'IFRAME';
+
+    // Для embed-плееров лучше 16:9, иначе YouTube/VK сами рисуют кривые поля.
+    // Для direct video можно растянуть в contain на весь контейнер.
+    if(isEmbed){
+      const aspect = 16 / 9;
+      let w = r.width;
+      let h = w / aspect;
+
+      if(h > r.height){
+        h = r.height;
+        w = h * aspect;
+      }
+
+      // Чуть ниже центра не опускаем: место под dock уже снаружи, плеер должен выглядеть ровно.
+      const left = Math.round((r.width - w) / 2);
+      const top = Math.round((r.height - h) / 2);
+
+      el.style.setProperty('position','absolute','important');
+      el.style.setProperty('left', left + 'px', 'important');
+      el.style.setProperty('top', top + 'px', 'important');
+      el.style.setProperty('right','auto','important');
+      el.style.setProperty('bottom','auto','important');
+      el.style.setProperty('width', Math.round(w) + 'px', 'important');
+      el.style.setProperty('height', Math.round(h) + 'px', 'important');
+      el.style.setProperty('min-width','0','important');
+      el.style.setProperty('min-height','0','important');
+      el.style.setProperty('max-width','none','important');
+      el.style.setProperty('max-height','none','important');
+      el.style.setProperty('transform','none','important');
+      el.style.setProperty('border','0','important');
+      el.style.setProperty('background','#000','important');
+      el.style.setProperty('z-index','30','important');
+      el.style.setProperty('opacity','1','important');
+      el.style.setProperty('visibility','visible','important');
+    } else {
+      el.style.setProperty('position','absolute','important');
+      el.style.setProperty('inset','0','important');
+      el.style.setProperty('width','100%','important');
+      el.style.setProperty('height','100%','important');
+      el.style.setProperty('object-fit','contain','important');
+      el.style.setProperty('background','#000','important');
+      el.style.setProperty('z-index','30','important');
+    }
+
+    document.body.classList.add('jc68-player-geometry');
+    fr.setAttribute('data-jc68-fit','1');
+    return true;
+  }
+
+  function tick(){
+    try{ fitPlayer(); }catch(e){}
+  }
+
+  window.addEventListener('resize', tick, {passive:true});
+  window.addEventListener('orientationchange', () => setTimeout(tick, 120), {passive:true});
+  document.addEventListener('fullscreenchange', () => setTimeout(tick, 80), true);
+  document.addEventListener('webkitfullscreenchange', () => setTimeout(tick, 80), true);
+  document.addEventListener('click', () => setTimeout(tick, 80), true);
+
+  const mo = new MutationObserver(() => setTimeout(tick, 0));
+  mo.observe(document.documentElement || document.body, {
+    subtree:true,
+    childList:true,
+    attributes:true,
+    attributeFilter:['src','style','class','data-jc65-kind']
+  });
+
+  tick();
+  setTimeout(tick, 250);
+  setTimeout(tick, 900);
+  setInterval(tick, 1200);
+
+  window.jc68FitPlayer = fitPlayer;
+  window.jc68PlayerDebug = function(){
+    const fr = frame();
+    const el = mainPlayer();
+    const frR = fr?.getBoundingClientRect?.();
+    const elR = el?.getBoundingClientRect?.();
+    return {
+      build: BUILD,
+      active: isActiveMain(),
+      hasFrame: !!fr,
+      hasPlayer: !!el,
+      kind: playerKind(el),
+      frame: frR ? {x:Math.round(frR.x), y:Math.round(frR.y), w:Math.round(frR.width), h:Math.round(frR.height)} : null,
+      player: elR ? {x:Math.round(elR.x), y:Math.round(elR.y), w:Math.round(elR.width), h:Math.round(elR.height)} : null,
+      src: el?.src || '',
+      fitted: fr?.getAttribute?.('data-jc68-fit') === '1'
+    };
+  };
+})();
