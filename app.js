@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 76 — Player Scale + Dock Restore
-   Version: stage77-player-strip-dock-20260502-1
+   JustClover Stage 74 — Fixed Viewport Player
+   Version: stage78-no-jitter-player-dock-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage77-player-strip-dock-20260502-1";
+const JC40_BUILD = "stage78-no-jitter-player-dock-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 77 STRIPDOCK loader:", JC40_BUILD);
+console.log("JustClover Stage 78 NOJITTER loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 76: base app import failed", e);
+  console.error("JustClover Stage 74: base app import failed", e);
   throw e;
 }
 
@@ -625,11 +625,11 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 76 — Player Scale + Dock Restore
-   Version: stage77-player-strip-dock-20260502-1
+   JustClover Stage 74 — Fixed Viewport Player
+   Version: stage78-no-jitter-player-dock-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage77-player-strip-dock-20260502-1";
+  const BUILD = "stage78-no-jitter-player-dock-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1120,7 +1120,7 @@ try {
 } catch(_) {}
 
 
-// Stage 52 public aliases — clean Rave-like shell.
+// Stage 78 public aliases — clean Rave-like shell.
 try {
   window.jc52ActiveViewDebug = function(){ return window.jc41RaveDebug ? window.jc41RaveDebug() : { build: window.JUSTCLOVER_BUILD }; };
   window.jc52ToggleActiveView = window.jc51ToggleActiveView || window.jc50ToggleActiveView || window.jc49ToggleActiveView || window.jc48ToggleActiveView || window.jc41ToggleRaveMode;
@@ -1151,12 +1151,12 @@ try{
 }catch(_){}
 
 /* =========================================================
-   JustClover Stage 76 — Player Scale + Dock Restore
+   JustClover Stage 74 — Fixed Viewport Player
    Главная идея: после входа в комнату показываем только active-view.
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage77-player-strip-dock-20260502-1";
+  const BUILD = "stage78-no-jitter-player-dock-20260502-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1393,7 +1393,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage77-player-strip-dock-20260502-1";
+  const BUILD = "stage78-no-jitter-player-dock-20260502-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1691,7 +1691,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage77-player-strip-dock-20260502-1';
+  const BUILD = 'stage78-no-jitter-player-dock-20260502-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1872,7 +1872,7 @@ try{
    когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
    ========================================================= */
 (function(){
-  const BUILD = "stage77-player-strip-dock-20260502-1";
+  const BUILD = "stage78-no-jitter-player-dock-20260502-1";
   const CHECK_EVERY_MS = 15000;
   const FIRST_CHECK_MS = 4500;
   const RELOAD_DELAY_MS = 1800;
@@ -1980,280 +1980,21 @@ try{
 })();
 
 
-
 /* =========================================================
-   JustClover Stage 76 — Player Scale + Dock Restore Fix
-   Version: stage77-player-strip-dock-20260502-1
+   JustClover Stage 78 — No-Jitter Player Dock
+   Version: stage78-no-jitter-player-dock-20260502-1
 
-   Scope: only player geometry. No auth changes, no chat DOM move,
-   no new room layout, no auto guest login, no interval resize loop.
+   Scope:
+   - no JS player resizing / no cover-fit loops;
+   - stable top-aligned video area;
+   - bottom dock sits in the free strip under the video;
+   - auth/chat/catalog/source logic stays untouched.
    ========================================================= */
 (function(){
-  const BUILD = 'stage77-player-strip-dock-20260502-1';
-  const ASPECT = 16 / 9;
+  const BUILD = 'stage78-no-jitter-player-dock-20260502-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+
   let raf = 0;
-  let lastKey = '';
-  let frameObserver = null;
-  let mainObserver = null;
-
-  window.JUSTCLOVER_BUILD = BUILD;
-
-  function isAuth(){ return !!window.__jc62IsAuthScreen?.(); }
-  function isActive(){ return !isAuth() && document.body?.classList?.contains('jc64-active-first'); }
-  function qs(sel, root=document){ return root.querySelector(sel); }
-  function frame(){ return qs('.player-frame'); }
-  function main(){ return qs('.watch-main'); }
-  function stage(){ return qs('.watch-stage'); }
-  function playerCard(){ return qs('.player-card-redesign') || qs('.player-card') || qs('.player-shell'); }
-  function chat(){ return qs('.watch-sidebar'); }
-
-  function pxVar(name, fallback){
-    const raw = getComputedStyle(document.body).getPropertyValue(name).trim();
-    const n = parseFloat(raw);
-    return Number.isFinite(n) ? n : fallback;
-  }
-
-  function viewport(){
-    const w = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-    const h = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-    return {w, h};
-  }
-
-  function leftArea(){
-    const vp = viewport();
-    const ch = chat();
-    const cr = ch?.getBoundingClientRect?.();
-    const chatW = cr && cr.width > 20 ? cr.width : pxVar('--jc64-chat-w', 330);
-    const topbarH = pxVar('--jc64-topbar-h', 58);
-    return {
-      w: Math.max(240, vp.w - chatW),
-      h: Math.max(180, vp.h - topbarH),
-      topbarH,
-      chatW
-    };
-  }
-
-  function activePlayers(fr){
-    if(!fr) return [];
-    const list = [
-      document.getElementById('jc65DirectPlayer'),
-      fr.querySelector('#jc65DirectPlayer'),
-      fr.querySelector('.jc67-main-player'),
-      fr.querySelector('#youtubePlayer'),
-      fr.querySelector('#youtubePlayer iframe'),
-      fr.querySelector('#iframePlayer'),
-      fr.querySelector('#videoPlayer'),
-      ...Array.from(fr.querySelectorAll('iframe,video'))
-    ].filter(Boolean);
-
-    return [...new Set(list)].filter(el => {
-      if(el.id === 'emptyPlayer') return false;
-      if(el.classList?.contains('hidden')) return false;
-      if(el.closest?.('.hidden')) return false;
-      const src = String(el.src || el.getAttribute('data-jc65-url') || '');
-      if(el.tagName === 'IFRAME' && (!src || src === 'about:blank')) return false;
-      return true;
-    });
-  }
-
-  function setImportant(el, prop, value){
-    if(!el) return;
-    el.style.setProperty(prop, value, 'important');
-  }
-
-  function clearOldFit(fr){
-    if(!fr) return;
-    fr.removeAttribute('data-jc74-fixed-frame');
-    fr.removeAttribute('data-jc74-fit');
-    fr.removeAttribute('data-jc73-player-frame');
-    document.body.classList.remove('jc74-fixed-player','jc73-player-cover');
-  }
-
-  function sizeForArea(area){
-    let w = area.w;
-    let h = Math.round(w / ASPECT);
-    if(h > area.h){
-      h = area.h;
-      w = Math.round(h * ASPECT);
-    }
-    return {
-      w: Math.max(240, Math.round(w)),
-      h: Math.max(135, Math.round(h)),
-      // Right-align: video touches the chat column, so no empty gap near chat.
-      x: Math.max(0, Math.round(area.w - w)),
-      y: 0
-    };
-  }
-
-  function normalizeContainers(fr, size){
-    const card = playerCard();
-    const st = stage();
-    const mn = main();
-
-    [mn, st, card, qs('.player-shell')].filter(Boolean).forEach(el => {
-      setImportant(el, 'position', el === mn ? 'relative' : 'relative');
-      setImportant(el, 'min-width', '0');
-      setImportant(el, 'min-height', '0');
-      setImportant(el, 'overflow', 'hidden');
-      setImportant(el, 'background', '#000');
-      if(el !== mn){
-        setImportant(el, 'margin', '0');
-        setImportant(el, 'padding', '0');
-        setImportant(el, 'border', '0');
-        setImportant(el, 'border-radius', '0');
-        setImportant(el, 'box-shadow', 'none');
-      }
-    });
-
-    setImportant(fr, 'position', 'absolute');
-    setImportant(fr, 'left', size.x + 'px');
-    setImportant(fr, 'right', 'auto');
-    setImportant(fr, 'top', size.y + 'px');
-    setImportant(fr, 'bottom', 'auto');
-    setImportant(fr, 'width', size.w + 'px');
-    setImportant(fr, 'height', size.h + 'px');
-    setImportant(fr, 'min-width', '0');
-    setImportant(fr, 'min-height', '0');
-    setImportant(fr, 'max-width', 'none');
-    setImportant(fr, 'max-height', 'none');
-    setImportant(fr, 'margin', '0');
-    setImportant(fr, 'padding', '0');
-    setImportant(fr, 'border', '0');
-    setImportant(fr, 'border-radius', '0');
-    setImportant(fr, 'background', '#000');
-    setImportant(fr, 'overflow', 'hidden');
-    setImportant(fr, 'aspect-ratio', 'auto');
-    setImportant(fr, 'contain', 'layout paint');
-    setImportant(fr, 'isolation', 'isolate');
-    fr.setAttribute('data-jc75-scale-frame','1');
-  }
-
-  function normalizePlayer(el){
-    setImportant(el, 'position', 'absolute');
-    setImportant(el, 'inset', '0');
-    setImportant(el, 'left', '0');
-    setImportant(el, 'top', '0');
-    setImportant(el, 'right', 'auto');
-    setImportant(el, 'bottom', 'auto');
-    setImportant(el, 'width', '100%');
-    setImportant(el, 'height', '100%');
-    setImportant(el, 'min-width', '0');
-    setImportant(el, 'min-height', '0');
-    setImportant(el, 'max-width', 'none');
-    setImportant(el, 'max-height', 'none');
-    setImportant(el, 'margin', '0');
-    setImportant(el, 'padding', '0');
-    setImportant(el, 'border', '0');
-    setImportant(el, 'border-radius', '0');
-    setImportant(el, 'transform', 'none');
-    setImportant(el, 'background', '#000');
-    setImportant(el, 'opacity', '1');
-    setImportant(el, 'visibility', 'visible');
-    setImportant(el, 'z-index', '30');
-    if(el.tagName === 'VIDEO') setImportant(el, 'object-fit', 'contain');
-    el.removeAttribute('data-jc73-fit');
-    el.removeAttribute('data-jc73-fit-mode');
-    el.removeAttribute('data-jc74-fit');
-    el.setAttribute('data-jc75-fit','contain-16x9-slot');
-  }
-
-  function apply(){
-    raf = 0;
-    if(!isActive()) return false;
-    const fr = frame();
-    if(!fr) return false;
-
-    document.body.classList.add('jc75-player-scale-only');
-    clearOldFit(fr);
-
-    const area = leftArea();
-    const size = sizeForArea(area);
-    const key = `${area.w}x${area.h}|${size.x},${size.y},${size.w},${size.h}|${activePlayers(fr).map(el => el.id + ':' + el.tagName + ':' + (el.src || el.getAttribute('data-jc65-url') || '')).join('|')}`;
-
-    normalizeContainers(fr, size);
-    activePlayers(fr).forEach(normalizePlayer);
-    lastKey = key;
-    return true;
-  }
-
-  function schedule(){
-    if(raf) return;
-    raf = requestAnimationFrame(apply);
-  }
-
-  function observeFrame(){
-    const fr = frame();
-    if(!fr) return;
-    if(frameObserver) frameObserver.disconnect();
-    frameObserver = new MutationObserver(schedule);
-    frameObserver.observe(fr, {childList:true, subtree:true, attributes:true, attributeFilter:['src','class','style','data-jc65-url','data-jc65-kind']});
-
-    const mn = main();
-    if(window.ResizeObserver && mn){
-      if(mainObserver) mainObserver.disconnect();
-      mainObserver = new ResizeObserver(schedule);
-      mainObserver.observe(mn);
-      const ch = chat();
-      if(ch) mainObserver.observe(ch);
-    }
-  }
-
-  const prev65 = window.jc65RenderSource;
-  if(typeof prev65 === 'function' && !prev65.__jc75Wrapped){
-    const wrapped = function(){
-      const out = prev65.apply(this, arguments);
-      schedule();
-      setTimeout(schedule, 120);
-      setTimeout(schedule, 420);
-      return out;
-    };
-    wrapped.__jc75Wrapped = true;
-    window.jc65RenderSource = wrapped;
-    window.jc67RenderSource = wrapped;
-  }
-
-  window.addEventListener('resize', schedule, {passive:true});
-  window.addEventListener('orientationchange', schedule, {passive:true});
-  document.addEventListener('fullscreenchange', schedule, true);
-  document.addEventListener('visibilitychange', schedule, true);
-  document.addEventListener('click', function(e){
-    if(e.target?.closest?.('#jc41RaveFloating,#jc45ActiveDock,.source-panel-embedded,#jc40CatalogRoot')) setTimeout(schedule, 40);
-  }, true);
-
-  [0,80,260,700,1400].forEach(ms => setTimeout(()=>{ observeFrame(); schedule(); }, ms));
-
-  window.jc75FitPlayer = function(){ schedule(); return true; };
-  window.jc75PlayerDebug = function(){
-    const fr = frame();
-    const rr = fr?.getBoundingClientRect?.();
-    return {
-      build: BUILD,
-      active: isActive(),
-      classOn: document.body.classList.contains('jc75-player-scale-only'),
-      area:leftArea(),
-      frame: rr ? {x:Math.round(rr.x), y:Math.round(rr.y), w:Math.round(rr.width), h:Math.round(rr.height)} : null,
-      players: activePlayers(fr).map(el => {
-        const r = el.getBoundingClientRect?.();
-        return {tag:el.tagName, id:el.id || '', fit:el.getAttribute('data-jc75-fit') || '', rect:r ? {x:Math.round(r.x), y:Math.round(r.y), w:Math.round(r.width), h:Math.round(r.height)} : null, src:el.src || el.getAttribute('data-jc65-url') || ''};
-      }),
-      lastKey
-    };
-  };
-})();
-
-
-/* =========================================================
-   JustClover Stage 76 — Bottom Dock Restore
-   Version: stage77-player-strip-dock-20260502-1
-
-   Fixes missing bottom mic/chat/source/fullscreen dock without changing
-   auth, chat DOM, room layout, source handlers, or Firebase flow.
-   ========================================================= */
-(function(){
-  const BUILD = "stage77-player-strip-dock-20260502-1";
-  window.JUSTCLOVER_BUILD = BUILD;
-
-  let scheduled = false;
   let bodyObserver = null;
   let watchObserver = null;
 
@@ -2281,45 +2022,47 @@ try{
     ));
   }
 
+  function main(){ return document.querySelector('.watch-main'); }
+  function frame(){ return document.querySelector('.player-frame'); }
+
   function ensureDock(){
-    let dock = document.getElementById('jc76BottomDock');
-    if(dock) return dock;
-
-    dock = document.createElement('div');
-    dock.id = 'jc76BottomDock';
-    dock.setAttribute('aria-label','Нижняя панель комнаты');
-    dock.innerHTML = `
-      <div class="jc76-dock-inner">
-        <button type="button" data-jc76-mic title="Микрофон" aria-label="Микрофон">🎙 Микро</button>
-        <button type="button" data-jc76-chat title="Чат" aria-label="Чат">💬 Чат</button>
-        <button type="button" data-jc76-source title="Источники" aria-label="Источники">▦ Источники</button>
-        <button type="button" data-jc76-full title="Fullscreen" aria-label="Fullscreen">⛶ Экран</button>
-      </div>`;
-
-    dock.addEventListener('click', function(e){
-      const btn = e.target.closest('button');
-      if(!btn) return;
-      e.preventDefault();
-      e.stopPropagation();
-      if(btn.hasAttribute('data-jc76-mic')) toggleMic();
-      if(btn.hasAttribute('data-jc76-chat')) focusChat();
-      if(btn.hasAttribute('data-jc76-source')) openSources();
-      if(btn.hasAttribute('data-jc76-full')) toggleFullscreen();
-    });
-
-    document.body.appendChild(dock);
+    let dock = document.getElementById('jc78PlayerDock');
+    if(!dock){
+      dock = document.createElement('div');
+      dock.id = 'jc78PlayerDock';
+      dock.setAttribute('aria-label','Панель управления комнатой');
+      dock.innerHTML = `
+        <div class="jc78-dock-inner">
+          <button type="button" data-jc78-mic title="Микрофон" aria-label="Микрофон">🎙 Микро</button>
+          <button type="button" data-jc78-chat title="Чат" aria-label="Чат">💬 Чат</button>
+          <button type="button" data-jc78-source title="Источники" aria-label="Источники">▦ Источники</button>
+          <button type="button" data-jc78-full title="Fullscreen" aria-label="Fullscreen">⛶ Экран</button>
+        </div>`;
+      dock.addEventListener('click', function(e){
+        const btn = e.target.closest('button');
+        if(!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if(btn.hasAttribute('data-jc78-mic')) toggleMic();
+        if(btn.hasAttribute('data-jc78-chat')) focusChat();
+        if(btn.hasAttribute('data-jc78-source')) openSources();
+        if(btn.hasAttribute('data-jc78-full')) toggleFullscreen();
+      });
+    }
+    const host = main() || document.body;
+    if(dock.parentNode !== host) host.appendChild(dock);
     return dock;
   }
 
   function toggleMic(){
-    const b = document.getElementById('voiceBtn');
-    if(b) b.click();
+    document.getElementById('voiceBtn')?.click?.();
   }
 
   function focusChat(){
     const input = document.getElementById('chatInput');
     if(input){
-      try { input.focus({preventScroll:true}); } catch(_) { input.focus(); }
+      try { input.focus({preventScroll:true}); }
+      catch(_) { input.focus(); }
     }
   }
 
@@ -2329,7 +2072,7 @@ try{
       if(typeof fn === 'function') return fn('youtube');
     }catch(_){ }
     const candidates = Array.from(document.querySelectorAll('button,.btn,[role="button"],a'));
-    const b = candidates.find(el => /каталог|источники|sources?/i.test((el.textContent || el.title || el.getAttribute('aria-label') || '').trim()) && !el.closest('#jc76BottomDock'));
+    const b = candidates.find(el => /каталог|источники|sources?/i.test((el.textContent || el.title || el.getAttribute('aria-label') || '').trim()) && !el.closest('#jc78PlayerDock'));
     b?.click?.();
   }
 
@@ -2341,7 +2084,7 @@ try{
         if(document.webkitExitFullscreen) return document.webkitExitFullscreen();
         if(document.msExitFullscreen) return document.msExitFullscreen();
       }
-      const target = document.querySelector('.player-frame') || document.getElementById('jc45ActiveFullscreenTarget') || document.querySelector('.watch-stage') || document.documentElement;
+      const target = frame() || document.getElementById('jc45ActiveFullscreenTarget') || document.querySelector('.watch-stage') || document.documentElement;
       if(target.requestFullscreen) return await target.requestFullscreen({navigationUI:'hide'});
       if(target.webkitRequestFullscreen) return target.webkitRequestFullscreen();
       if(target.msRequestFullscreen) return target.msRequestFullscreen();
@@ -2350,7 +2093,7 @@ try{
 
   function syncFullscreenText(){
     const on = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
-    const btn = document.querySelector('#jc76BottomDock [data-jc76-full]');
+    const btn = document.querySelector('#jc78PlayerDock [data-jc78-full]');
     if(btn){
       btn.textContent = on ? '× Выйти' : '⛶ Экран';
       btn.title = on ? 'Выйти из fullscreen' : 'Fullscreen';
@@ -2358,23 +2101,37 @@ try{
     }
   }
 
-  function sync(){
-    scheduled = false;
-    const dock = ensureDock();
-    const on = activeRoomView();
-    document.body?.classList?.toggle('jc76-dock-restore', on);
-    if(dock){
-      dock.hidden = !on;
-      dock.setAttribute('aria-hidden', on ? 'false' : 'true');
+  function clearBadFitFlags(){
+    document.body?.classList?.remove('jc73-player-cover','jc74-fixed-player');
+    const fr = frame();
+    if(fr){
+      fr.removeAttribute('data-jc73-player-frame');
+      fr.removeAttribute('data-jc74-fixed-frame');
+      fr.removeAttribute('data-jc74-fit');
+      fr.setAttribute('data-jc78-frame','top-aligned-no-js-fit');
     }
+    document.querySelectorAll('[data-jc73-fit],[data-jc73-fit-mode],[data-jc74-fit]').forEach(el => {
+      el.removeAttribute('data-jc73-fit');
+      el.removeAttribute('data-jc73-fit-mode');
+      el.removeAttribute('data-jc74-fit');
+    });
+  }
+
+  function sync(){
+    raf = 0;
+    const on = activeRoomView();
+    const dock = ensureDock();
+    document.body?.classList?.toggle('jc78-no-jitter-player', on);
+    dock.hidden = !on;
+    dock.setAttribute('aria-hidden', on ? 'false' : 'true');
+    if(on) clearBadFitFlags();
     syncFullscreenText();
     attachObservers();
   }
 
   function schedule(){
-    if(scheduled) return;
-    scheduled = true;
-    requestAnimationFrame(sync);
+    if(raf) return;
+    raf = requestAnimationFrame(sync);
   }
 
   function attachObservers(){
@@ -2389,265 +2146,33 @@ try{
     }
   }
 
-  document.addEventListener('click', function(){ setTimeout(schedule, 30); }, true);
-  document.addEventListener('fullscreenchange', schedule, true);
-  document.addEventListener('webkitfullscreenchange', schedule, true);
-  window.addEventListener('resize', schedule, {passive:true});
-  window.addEventListener('orientationchange', schedule, {passive:true});
-
-  window.jc76DockDebug = function(){
-    const dock = document.getElementById('jc76BottomDock');
-    const r = dock?.getBoundingClientRect?.();
-    return {
-      build: BUILD,
-      auth: isAuth(),
-      appOpen: appOpen(),
-      watchActive: watchActive(),
-      activeRoomView: activeRoomView(),
-      bodyClasses: document.body?.className || '',
-      dockExists: !!dock,
-      dockHidden: !!dock?.hidden,
-      dockRect: r ? {x:Math.round(r.x), y:Math.round(r.y), w:Math.round(r.width), h:Math.round(r.height)} : null,
-      hasVoiceBtn: !!document.getElementById('voiceBtn'),
-      hasChatInput: !!document.getElementById('chatInput'),
-      hasCatalogFn: typeof (window.jc40OpenCatalog || window.jc39OpenCatalog || window.jcStage8OpenCatalog) === 'function'
-    };
-  };
-
-  [0,80,250,600,1200,2500,5000].forEach(ms => setTimeout(schedule, ms));
-})();
-
-
-/* =========================================================
-   JustClover Stage 77 — Player Strip Dock
-   Version: stage77-player-strip-dock-20260502-1
-
-   Goal: keep the dock in the free bottom strip under the player,
-   not on top of the video. Do not change auth/chat/source logic.
-   ========================================================= */
-(function(){
-  const BUILD = 'stage77-player-strip-dock-20260502-1';
-  const DOCK_RESERVE_DESKTOP = 58;
-  const DOCK_RESERVE_MOBILE = 54;
-  let raf = 0;
-  let bodyObserver = null;
-  let watchObserver = null;
-  let resizeObserver = null;
-
-  window.JUSTCLOVER_BUILD = BUILD;
-
-  function isAuth(){
-    try { return !!window.__jc62IsAuthScreen?.(); } catch(_) { return false; }
-  }
-  function appOpen(){
-    const app = document.getElementById('appView');
-    return !!(app && !app.classList.contains('hidden'));
-  }
-  function watchActive(){
-    const watch = document.getElementById('watchSection');
-    return !!(watch && watch.classList.contains('active'));
-  }
-  function activeRoomView(){
-    if(isAuth() || !appOpen() || !watchActive()) return false;
-    const b = document.body;
-    return !!(b && (b.classList.contains('jc64-active-first') || b.classList.contains('jc41-rave-focus') || b.classList.contains('jc40-watch-mode')));
-  }
-  function main(){ return document.querySelector('.watch-main'); }
-  function chat(){ return document.querySelector('.watch-sidebar'); }
-  function frame(){ return document.querySelector('.player-frame'); }
-  function viewport(){
-    const w = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-    const h = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-    return {w,h};
-  }
-  function dockReserve(){
-    const mobile = (viewport().w <= 980);
-    const dock = document.getElementById('jc76BottomDock');
-    const measured = dock?.firstElementChild?.getBoundingClientRect?.().height || dock?.getBoundingClientRect?.().height || 0;
-    const base = mobile ? DOCK_RESERVE_MOBILE : DOCK_RESERVE_DESKTOP;
-    return Math.max(base, Math.round(measured || 0) + 12);
-  }
-  function leftArea(){
-    const mn = main();
-    const rect = mn?.getBoundingClientRect?.();
-    if(rect && rect.width > 80 && rect.height > 80){
-      return {
-        w: Math.max(240, Math.round(rect.width)),
-        h: Math.max(180, Math.round(rect.height - dockReserve())),
-        x: 0,
-        y: 0,
-        reserve: dockReserve()
-      };
-    }
-    const vp = viewport();
-    const ch = chat();
-    const cr = ch?.getBoundingClientRect?.();
-    const chatW = cr && cr.width > 20 ? cr.width : 330;
-    return {
-      w: Math.max(240, vp.w - chatW),
-      h: Math.max(180, vp.h - 58 - dockReserve()),
-      x: 0,
-      y: 0,
-      reserve: dockReserve()
-    };
-  }
-  function sizeForArea(area){
-    let w = area.w;
-    let h = Math.round(w / (16/9));
-    if(h > area.h){
-      h = area.h;
-      w = Math.round(h * (16/9));
-    }
-    return { w: Math.max(240, Math.round(w)), h: Math.max(135, Math.round(h)), x: Math.max(0, Math.round(area.w - w)), y: 0 };
-  }
-  function setImportant(el, prop, value){ if(el) el.style.setProperty(prop, value, 'important'); }
-  function activePlayers(fr){
-    if(!fr) return [];
-    const list = [
-      document.getElementById('jc65DirectPlayer'), fr.querySelector('#jc65DirectPlayer'), fr.querySelector('.jc67-main-player'), fr.querySelector('#youtubePlayer'), fr.querySelector('#youtubePlayer iframe'), fr.querySelector('#iframePlayer'), fr.querySelector('#videoPlayer'), ...Array.from(fr.querySelectorAll('iframe,video'))
-    ].filter(Boolean);
-    return [...new Set(list)].filter(el => {
-      if(el.id === 'emptyPlayer') return false;
-      if(el.classList?.contains('hidden')) return false;
-      if(el.closest?.('.hidden')) return false;
-      const src = String(el.src || el.getAttribute('data-jc65-url') || '');
-      if(el.tagName === 'IFRAME' && (!src || src === 'about:blank')) return false;
-      return true;
-    });
-  }
-  function normalizePlayer(el){
-    setImportant(el, 'position', 'absolute');
-    setImportant(el, 'inset', '0');
-    setImportant(el, 'width', '100%');
-    setImportant(el, 'height', '100%');
-    setImportant(el, 'margin', '0');
-    setImportant(el, 'padding', '0');
-    setImportant(el, 'border', '0');
-    setImportant(el, 'background', '#000');
-    setImportant(el, 'opacity', '1');
-    setImportant(el, 'visibility', 'visible');
-    if(el.tagName === 'VIDEO') setImportant(el, 'object-fit', 'contain');
-    el.setAttribute('data-jc77-fit', 'top-strip-dock');
-  }
-  function ensureDock(){
-    let dock = document.getElementById('jc76BottomDock');
-    if(!dock){
-      dock = document.createElement('div');
-      dock.id = 'jc76BottomDock';
-      dock.setAttribute('aria-label','Нижняя панель комнаты');
-      dock.innerHTML = `
-        <div class="jc76-dock-inner">
-          <button type="button" data-jc76-mic title="Микрофон" aria-label="Микрофон">🎙 Микро</button>
-          <button type="button" data-jc76-chat title="Чат" aria-label="Чат">💬 Чат</button>
-          <button type="button" data-jc76-source title="Источники" aria-label="Источники">▦ Источники</button>
-          <button type="button" data-jc76-full title="Fullscreen" aria-label="Fullscreen">⛶ Экран</button>
-        </div>`;
-      dock.addEventListener('click', function(e){
-        const btn = e.target.closest('button');
-        if(!btn) return;
-        e.preventDefault(); e.stopPropagation();
-        if(btn.hasAttribute('data-jc76-mic')) document.getElementById('voiceBtn')?.click?.();
-        if(btn.hasAttribute('data-jc76-chat')) {
-          const input = document.getElementById('chatInput');
-          if(input){ try{ input.focus({preventScroll:true}); }catch(_){ input.focus(); } }
-        }
-        if(btn.hasAttribute('data-jc76-source')) {
-          const fn = window.jc40OpenCatalog || window.jc39OpenCatalog || window.jcStage8OpenCatalog;
-          if(typeof fn === 'function') fn('youtube');
-        }
-        if(btn.hasAttribute('data-jc76-full')) toggleFullscreen();
-      });
-    }
-    const host = main() || document.body;
-    if(dock.parentNode !== host) host.appendChild(dock);
-    return dock;
-  }
-  async function toggleFullscreen(){
-    const current = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
-    try{
-      if(current){
-        if(document.exitFullscreen) return await document.exitFullscreen();
-        if(document.webkitExitFullscreen) return document.webkitExitFullscreen();
-        if(document.msExitFullscreen) return document.msExitFullscreen();
-      }
-      const target = document.querySelector('.player-frame') || document.getElementById('jc45ActiveFullscreenTarget') || document.querySelector('.watch-stage') || document.documentElement;
-      if(target.requestFullscreen) return await target.requestFullscreen({navigationUI:'hide'});
-      if(target.webkitRequestFullscreen) return target.webkitRequestFullscreen();
-      if(target.msRequestFullscreen) return target.msRequestFullscreen();
-    }catch(_){ }
-  }
-  function syncFullscreenText(){
-    const on = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
-    const btn = document.querySelector('#jc76BottomDock [data-jc76-full]');
-    if(btn) btn.textContent = on ? '× Выйти' : '⛶ Экран';
-  }
-  function fitPlayer(){
-    const fr = frame();
-    if(!fr || !activeRoomView()) return;
-    const area = leftArea();
-    const size = sizeForArea(area);
-    setImportant(fr, 'position', 'absolute');
-    setImportant(fr, 'left', size.x + 'px');
-    setImportant(fr, 'top', '0px');
-    setImportant(fr, 'width', size.w + 'px');
-    setImportant(fr, 'height', size.h + 'px');
-    setImportant(fr, 'margin', '0');
-    setImportant(fr, 'padding', '0');
-    setImportant(fr, 'border', '0');
-    setImportant(fr, 'background', '#000');
-    setImportant(fr, 'overflow', 'hidden');
-    fr.setAttribute('data-jc77-strip-frame', '1');
-    activePlayers(fr).forEach(normalizePlayer);
-  }
-  function attachObservers(){
-    if(document.body && !bodyObserver){
-      bodyObserver = new MutationObserver(schedule);
-      bodyObserver.observe(document.body, {attributes:true, attributeFilter:['class']});
-    }
-    const watch = document.getElementById('watchSection');
-    if(watch && !watchObserver){
-      watchObserver = new MutationObserver(schedule);
-      watchObserver.observe(watch, {attributes:true, attributeFilter:['class']});
-    }
-    const mn = main();
-    if(window.ResizeObserver && mn){
-      if(resizeObserver) resizeObserver.disconnect();
-      resizeObserver = new ResizeObserver(schedule);
-      resizeObserver.observe(mn);
-    }
-  }
-  function sync(){
-    raf = 0;
-    const on = activeRoomView();
-    const dock = ensureDock();
-    document.body?.classList?.toggle('jc77-player-strip-dock', on);
-    dock.hidden = !on;
-    dock.setAttribute('aria-hidden', on ? 'false' : 'true');
-    if(on) fitPlayer();
-    syncFullscreenText();
-    attachObservers();
-  }
-  function schedule(){ if(!raf) raf = requestAnimationFrame(sync); }
   document.addEventListener('fullscreenchange', schedule, true);
   document.addEventListener('webkitfullscreenchange', schedule, true);
   document.addEventListener('click', function(){ setTimeout(schedule, 30); }, true);
   window.addEventListener('resize', schedule, {passive:true});
   window.addEventListener('orientationchange', schedule, {passive:true});
+
   [0,80,260,700,1400].forEach(ms => setTimeout(schedule, ms));
-  window.jc77DockDebug = function(){
-    const dock = document.getElementById('jc76BottomDock');
+
+  window.jc78PlayerDebug = function(){
+    const dock = document.getElementById('jc78PlayerDock');
     const dr = dock?.getBoundingClientRect?.();
     const fr = frame();
     const rr = fr?.getBoundingClientRect?.();
+    const player = document.getElementById('jc65DirectPlayer') || document.querySelector('.player-frame .jc67-main-player,#youtubePlayer,#iframePlayer,#videoPlayer');
+    const pr = player?.getBoundingClientRect?.();
     return {
       build: BUILD,
       activeRoomView: activeRoomView(),
-      classOn: document.body?.classList?.contains('jc77-player-strip-dock'),
-      reserve: dockReserve(),
+      classOn: document.body?.classList?.contains('jc78-no-jitter-player'),
+      bodyHasOldFit: document.body?.classList?.contains('jc73-player-cover') || document.body?.classList?.contains('jc74-fixed-player'),
+      dockExists: !!dock,
+      dockHidden: !!dock?.hidden,
       dockParent: dock?.parentElement?.className || dock?.parentElement?.id || '',
       dockRect: dr ? {x:Math.round(dr.x), y:Math.round(dr.y), w:Math.round(dr.width), h:Math.round(dr.height)} : null,
+      frameAttr: fr?.getAttribute('data-jc78-frame') || '',
       frame: rr ? {x:Math.round(rr.x), y:Math.round(rr.y), w:Math.round(rr.width), h:Math.round(rr.height)} : null,
-      area: leftArea(),
+      player: pr ? {x:Math.round(pr.x), y:Math.round(pr.y), w:Math.round(pr.width), h:Math.round(pr.height)} : null,
       hasVoiceBtn: !!document.getElementById('voiceBtn'),
       hasChatInput: !!document.getElementById('chatInput')
     };
