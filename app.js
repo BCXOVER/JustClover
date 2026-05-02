@@ -1,22 +1,22 @@
 /* =========================================================
-   JustClover Stage 65 — Active First Player Repair
-   Version: stage65-active-first-player-repair-20260502-1
+   JustClover Stage 66 — Native Player Shell
+   Version: stage66-native-player-shell-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage65-active-first-player-repair-20260502-1";
+const JC40_BUILD = "stage66-native-player-shell-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
 window.JUSTCLOVER_BUILD = JC40_BUILD;
-console.log("JustClover Stage 65 PLAYERFIX loader:", JC40_BUILD);
+console.log("JustClover Stage 66 NATIVEPLAYER loader:", JC40_BUILD);
 
 try {
   await import(JC40_BASE_APP + `?base=stage37&stage45=${Date.now()}`);
 } catch (e) {
-  console.error("JustClover Stage 65: base app import failed", e);
+  console.error("JustClover Stage 66: base app import failed", e);
   throw e;
 }
 
@@ -625,11 +625,11 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 })();
 
 /* =========================================================
-   JustClover Stage 65 — Active First Player Repair
-   Version: stage65-active-first-player-repair-20260502-1
+   JustClover Stage 66 — Native Player Shell
+   Version: stage66-native-player-shell-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage65-active-first-player-repair-20260502-1";
+  const BUILD = "stage66-native-player-shell-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1151,12 +1151,12 @@ try{
 }catch(_){}
 
 /* =========================================================
-   JustClover Stage 65 — Active First Player Repair
+   JustClover Stage 66 — Native Player Shell
    Главная идея: после входа в комнату показываем только active-view.
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage65-active-first-player-repair-20260502-1";
+  const BUILD = "stage66-native-player-shell-20260502-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1387,13 +1387,13 @@ try{
 
 
 /* =========================================================
-   JustClover Stage 65 — Player Load Repair
+   JustClover Stage 66 — Native Player Shell
    Active-first stays main. Auth is untouched.
-   Fix: source controls remain alive offscreen, and YouTube/VK are rendered
-   into the player slot immediately after setting a source.
+   Fix: source controls remain alive offscreen, but video stays in the native app player.
+   Direct fallback is disabled by default to avoid weird duplicate/unsynced players.
    ========================================================= */
 (function(){
-  const BUILD = "stage65-active-first-player-repair-20260502-1";
+  const BUILD = "stage66-native-player-shell-20260502-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1501,6 +1501,7 @@ try{
   }
 
   function ensureDirectPlayer(url, type){
+    if(!window.__jc66AllowFallback) return false;
     if(!isWatchMode()) return false;
     url = normalizeUrl(url || getNativeSourceUrl());
     type = String(type || getNativeSourceType() || '').toLowerCase();
@@ -1559,7 +1560,7 @@ try{
     el.setAttribute('data-jc65-kind', kind);
 
     frame.appendChild(el);
-    document.body.classList.add('jc65-direct-player-active');
+    document.body.classList.add('jc65-direct-player-active','jc66-fallback-active');
     return true;
   }
 
@@ -1663,6 +1664,87 @@ try{
       sourceType: document.getElementById('sourceType')?.value || '',
       frame: frame ? {w: frame.getBoundingClientRect().width, h: frame.getBoundingClientRect().height} : null,
       iframes: frame ? Array.from(frame.querySelectorAll('iframe')).map(i => i.src).slice(0,5) : []
+    };
+  };
+})();
+
+
+/* Stage 66 — native player only by default.
+   The direct Stage65 fallback looked wrong and can desync; keep it manual only. */
+(function(){
+  function isAuthScreen(){
+    return !!(window.__jc62IsAuthScreen ? window.__jc62IsAuthScreen() :
+      (document.getElementById('appView')?.classList.contains('hidden')));
+  }
+  function isWatchMode(){
+    const app = document.getElementById('appView');
+    const watch = document.getElementById('watchSection');
+    return !!(watch && watch.classList.contains('active') && !app?.classList.contains('hidden') && !isAuthScreen());
+  }
+  function frame(){ return document.querySelector('.player-frame,.player-shell,.player-card-redesign,.player-card'); }
+  function keepNativeSourceAlive(){
+    if(!isWatchMode()) return false;
+    const panel = document.querySelector('.source-panel-embedded');
+    if(!panel) return false;
+    panel.setAttribute('data-jc66-keepalive','1');
+    panel.style.setProperty('display','block','important');
+    panel.style.setProperty('position','fixed','important');
+    panel.style.setProperty('left','-10000px','important');
+    panel.style.setProperty('top','0','important');
+    panel.style.setProperty('width','2px','important');
+    panel.style.setProperty('height','2px','important');
+    panel.style.setProperty('overflow','hidden','important');
+    panel.style.setProperty('opacity','0','important');
+    panel.style.setProperty('pointer-events','none','important');
+    return true;
+  }
+  function removeAutoFallback(){
+    if(window.__jc66AllowFallback) return;
+    document.getElementById('jc65DirectPlayer')?.remove?.();
+    document.body?.classList?.remove('jc65-direct-player-active','jc66-fallback-active');
+  }
+  function keepEmbedsVisible(){
+    const f = frame();
+    if(!f) return;
+    f.querySelectorAll('#youtubePlayer,#youtubePlayer iframe,#iframePlayer,#videoPlayer,iframe,video,.embed-box').forEach(el=>{
+      el.style.setProperty('display','block','important');
+      el.style.setProperty('visibility','visible','important');
+      el.style.setProperty('opacity','1','important');
+      el.style.setProperty('width','100%','important');
+      el.style.setProperty('height','100%','important');
+      el.style.setProperty('max-width','100%','important');
+      el.style.setProperty('max-height','100%','important');
+    });
+  }
+  function tick(){
+    if(isAuthScreen()) return;
+    keepNativeSourceAlive();
+    removeAutoFallback();
+    keepEmbedsVisible();
+  }
+  tick();
+  setTimeout(tick,250);
+  setTimeout(tick,900);
+  setInterval(tick,1200);
+  window.jc66RepairNativePlayer = tick;
+  window.jc66RenderFallback = function(url,type){
+    window.__jc66AllowFallback = true;
+    document.body?.classList?.add('jc66-fallback-active');
+    try{ return window.jc65RenderSource ? window.jc65RenderSource(url,type) : false; }
+    finally{ setTimeout(()=>{ window.__jc66AllowFallback=false; }, 1500); }
+  };
+  window.jc66PlayerDebug = function(){
+    const f = frame();
+    return {
+      build: window.JUSTCLOVER_BUILD,
+      watchMode: isWatchMode(),
+      sourcePanelAlive: !!document.querySelector('.source-panel-embedded[data-jc66-keepalive],.source-panel-embedded[data-jc65-keepalive]'),
+      directFallback: !!document.getElementById('jc65DirectPlayer'),
+      fallbackAllowed: !!window.__jc66AllowFallback,
+      sourceType: document.getElementById('sourceType')?.value || '',
+      sourceUrl: document.getElementById('sourceUrl')?.value || '',
+      frame: f ? {w:Math.round(f.getBoundingClientRect().width), h:Math.round(f.getBoundingClientRect().height)} : null,
+      embeds: f ? Array.from(f.querySelectorAll('iframe,video')).map(el=>el.src || el.currentSrc || el.id || el.tagName).slice(0,8) : []
     };
   };
 })();
