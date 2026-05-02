@@ -1,12 +1,12 @@
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage85-guarded-fullscreen-mic-20260502-1
+   Version: stage86-safe-fullscreen-controls-20260502-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage85-guarded-fullscreen-mic-20260502-1";
+const JC40_BUILD = "stage86-safe-fullscreen-controls-20260502-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
@@ -626,10 +626,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage85-guarded-fullscreen-mic-20260502-1
+   Version: stage86-safe-fullscreen-controls-20260502-1
    ========================================================= */
 (function(){
-  const BUILD = "stage85-guarded-fullscreen-mic-20260502-1";
+  const BUILD = "stage86-safe-fullscreen-controls-20260502-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1156,7 +1156,7 @@ try{
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage85-guarded-fullscreen-mic-20260502-1";
+  const BUILD = "stage86-safe-fullscreen-controls-20260502-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1393,7 +1393,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage85-guarded-fullscreen-mic-20260502-1";
+  const BUILD = "stage86-safe-fullscreen-controls-20260502-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1691,7 +1691,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage85-guarded-fullscreen-mic-20260502-1';
+  const BUILD = 'stage86-safe-fullscreen-controls-20260502-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1872,7 +1872,7 @@ try{
    когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
    ========================================================= */
 (function(){
-  const BUILD = "stage85-guarded-fullscreen-mic-20260502-1";
+  const BUILD = "stage86-safe-fullscreen-controls-20260502-1";
   const CHECK_EVERY_MS = 15000;
   const FIRST_CHECK_MS = 4500;
   const RELOAD_DELAY_MS = 1800;
@@ -1985,13 +1985,13 @@ try{
 
 /* =========================================================
    JustClover Stage 81 — Real Stable Player Dock
-   Version: stage85-guarded-fullscreen-mic-20260502-1
+   Version: stage86-safe-fullscreen-controls-20260502-1
 
    No player resize loop. No fixed/cover iframe fighting.
    JS only creates bottom buttons and toggles the stable CSS class.
    ========================================================= */
 (function(){
-  const BUILD = 'stage85-guarded-fullscreen-mic-20260502-1';
+  const BUILD = 'stage86-safe-fullscreen-controls-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2189,13 +2189,13 @@ try{
 
 /* =========================================================
    JustClover Stage 81 — Player Mic Overlay
-   Version: stage85-guarded-fullscreen-mic-20260502-1
+   Version: stage86-safe-fullscreen-controls-20260502-1
 
    Adds a clear mic toggle inside the player and removes the chat action from
    the bottom dock. Does not change auth, chat DOM, source logic, or player fit.
    ========================================================= */
 (function(){
-  const BUILD = 'stage85-guarded-fullscreen-mic-20260502-1';
+  const BUILD = 'stage86-safe-fullscreen-controls-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2360,14 +2360,14 @@ try{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage85-guarded-fullscreen-mic-20260502-1
+   Version: stage86-safe-fullscreen-controls-20260502-1
 
    Adds a robust mic control mounted on .watch-main. It is not a child of the
    YouTube iframe/player element and therefore remains visible in JustClover
    site fullscreen. No player scale/fit logic is changed.
    ========================================================= */
 (function(){
-  const BUILD = 'stage85-guarded-fullscreen-mic-20260502-1';
+  const BUILD = 'stage86-safe-fullscreen-controls-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2560,7 +2560,7 @@ try{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage85-guarded-fullscreen-mic-20260502-1
+   Version: stage86-safe-fullscreen-controls-20260502-1
 
    Keep Stage80 layout. Put mic back into the bottom dock next to sources and
    fullscreen, keep chat hidden, and mirror voice state on the dock button.
@@ -2568,7 +2568,7 @@ try{
    inside the YouTube/VK iframe cannot show external DOM controls.
    ========================================================= */
 (function(){
-  const BUILD = 'stage85-guarded-fullscreen-mic-20260502-1';
+  const BUILD = 'stage86-safe-fullscreen-controls-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2732,14 +2732,14 @@ try{
 
 /* =========================================================
    JustClover Stage 84 — No Native Iframe Fullscreen + Dock Mic
-   Version: stage85-guarded-fullscreen-mic-20260502-1
+   Version: stage86-safe-fullscreen-controls-20260502-1
 
    Fix: users were entering native YouTube/VK iframe fullscreen, where external
    site controls cannot be shown. Route the bottom-right fullscreen click to
    JustClover fullscreen and keep the dock mic visible there.
    ========================================================= */
 (function(){
-  const BUILD = 'stage85-guarded-fullscreen-mic-20260502-1';
+  const BUILD = 'stage86-safe-fullscreen-controls-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2926,7 +2926,7 @@ try{
 
 /* =========================================================
    JustClover Stage 85 — Guarded Fullscreen Mic
-   Version: stage85-guarded-fullscreen-mic-20260502-1
+   Version: stage86-safe-fullscreen-controls-20260502-1
 
    Fix native iframe fullscreen leakage: hide YouTube native fullscreen via fs=0,
    strip iframe fullscreen permission, cover the hot corner with a larger
@@ -2934,7 +2934,7 @@ try{
    fullscreen. Does not change player sizing/auth/chat/source logic.
    ========================================================= */
 (function(){
-  const BUILD = 'stage85-guarded-fullscreen-mic-20260502-1';
+  const BUILD = 'stage86-safe-fullscreen-controls-20260502-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -3198,6 +3198,213 @@ try{
       micText: dockMic()?.textContent || '',
       chatHidden: !!dockChat()?.hidden,
       iframes: Array.from(frame()?.querySelectorAll('iframe') || []).map(ifr => ({src:ifr.src, allow:ifr.getAttribute('allow') || '', allowfullscreen: ifr.hasAttribute('allowfullscreen'), fs0:/[?&]fs=0\b/.test(ifr.src)}))
+    };
+  };
+})();
+
+
+/* =========================================================
+   JustClover Stage 86 — Safe Fullscreen Controls
+   Version: stage86-safe-fullscreen-controls-20260502-1
+
+   Polish on top of Stage85: keep the dock visible, make mic status clearer,
+   and replace the dangerous YouTube/VK bottom-right native exit/fullscreen hot
+   corner with a JustClover-safe exit button. No player sizing/auth/chat/source changes.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage86-safe-fullscreen-controls-20260502-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+
+  let scheduled = false;
+  let bodyObserver = null;
+  let dockObserver = null;
+  let voiceObserver = null;
+  let statusObserver = null;
+
+  function isAuth(){ try { return !!window.__jc62IsAuthScreen?.(); } catch(_) { return false; } }
+  function appOpen(){ const app = document.getElementById('appView'); return !!(app && !app.classList.contains('hidden')); }
+  function watchActive(){ const watch = document.getElementById('watchSection'); return !!(watch && watch.classList.contains('active')); }
+  function activeRoomView(){ return !isAuth() && appOpen() && watchActive(); }
+  function main(){ return document.querySelector('.watch-main') || document.getElementById('watchSection') || document.documentElement; }
+  function dock(){ return document.getElementById('jc80Dock'); }
+  function dockMic(){ return document.querySelector('#jc80Dock [data-jc80-mic]'); }
+  function dockChat(){ return document.querySelector('#jc80Dock [data-jc80-chat]'); }
+  function dockFull(){ return document.querySelector('#jc80Dock [data-jc80-full]'); }
+  function proxy(){ return document.getElementById('jc84FullscreenProxy'); }
+  function voiceBtn(){ return document.getElementById('voiceBtn'); }
+  function voiceStatus(){ return document.getElementById('voiceStatus'); }
+  function fsEl(){ return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null; }
+
+  function isSiteFullscreen(){
+    const cur = fsEl();
+    const target = main();
+    return !!cur && (cur === target || cur === document.documentElement || cur === document.body || cur.id === 'jc45ActiveFullscreenTarget');
+  }
+
+  function readVoiceState(){
+    const b = voiceBtn();
+    const s = voiceStatus();
+    const text = `${b?.textContent || ''} ${s?.textContent || ''} ${b?.getAttribute('aria-pressed') || ''}`.toLowerCase();
+    if(/ошибка|недоступ|запрещ|denied|error|failed/.test(text)) return 'error';
+    if(/выключить|включ[её]н|enabled|on|true/.test(text)) return 'on';
+    if(/загрузка|подключ|разреш|ожидан|pending|loading/.test(text)) return 'pending';
+    return 'off';
+  }
+
+  function micLabel(state){
+    if(state === 'on') return '🎙 Микро вкл';
+    if(state === 'pending') return '🎙 Микро…';
+    if(state === 'error') return '🎙 Ошибка';
+    return '🎙 Микро выкл';
+  }
+
+  async function exitFs(){
+    try{
+      if(document.exitFullscreen) return await document.exitFullscreen();
+      if(document.webkitExitFullscreen) return document.webkitExitFullscreen();
+      if(document.msExitFullscreen) return document.msExitFullscreen();
+    }catch(_){ }
+  }
+
+  async function requestOrExitSiteFullscreen(){
+    const cur = fsEl();
+    if(cur) return exitFs();
+    const target = main();
+    try{
+      if(target?.requestFullscreen) return await target.requestFullscreen({navigationUI:'hide'});
+      if(target?.webkitRequestFullscreen) return target.webkitRequestFullscreen();
+      if(target?.msRequestFullscreen) return target.msRequestFullscreen();
+    }catch(_){ }
+  }
+
+  function bindSafeProxy(){
+    const p = proxy();
+    if(!p || p.__jc86Bound) return;
+    const handler = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      requestOrExitSiteFullscreen();
+      return false;
+    };
+    ['pointerdown','mousedown','touchstart','click','dblclick'].forEach(type => {
+      p.addEventListener(type, handler, {capture:true, passive:false});
+    });
+    p.__jc86Bound = true;
+  }
+
+  function syncMic(){
+    const mic = dockMic();
+    if(!mic) return;
+    const state = readVoiceState();
+    mic.hidden = false;
+    mic.removeAttribute('hidden');
+    mic.setAttribute('aria-hidden','false');
+    mic.tabIndex = 0;
+    mic.dataset.micState = state;
+    mic.textContent = micLabel(state);
+    mic.setAttribute('aria-pressed', state === 'on' ? 'true' : 'false');
+    mic.title = state === 'on' ? 'Микрофон включён — нажми, чтобы выключить' : 'Микрофон выключен — нажми, чтобы включить';
+  }
+
+  function syncUi(){
+    const d = dock();
+    const p = proxy();
+    const chat = dockChat();
+    const full = dockFull();
+    const on = activeRoomView();
+
+    document.body?.classList?.toggle('jc86-safe-fullscreen-controls', on);
+    document.documentElement.classList.toggle('jc86-safe-fullscreen-controls', on);
+
+    if(chat){
+      chat.hidden = true;
+      chat.setAttribute('aria-hidden','true');
+      chat.tabIndex = -1;
+    }
+
+    if(on && d){
+      d.hidden = false;
+      d.setAttribute('aria-hidden','false');
+    }
+
+    syncMic();
+
+    const fs = !!fsEl();
+    if(full){
+      full.textContent = fs ? '× Выйти' : '⛶ Экран';
+      full.title = fs ? 'Выйти из полного экрана JustClover' : 'Полный экран JustClover';
+      full.setAttribute('aria-label', full.title);
+    }
+    if(p){
+      bindSafeProxy();
+      p.hidden = !on;
+      p.setAttribute('aria-hidden', on ? 'false' : 'true');
+      p.textContent = fs ? '× Выйти' : '⛶';
+      p.title = fs ? 'Выйти из полного экрана JustClover' : 'Полный экран JustClover';
+      p.setAttribute('aria-label', p.title);
+    }
+  }
+
+  function attachObservers(){
+    if(document.body && !bodyObserver){
+      bodyObserver = new MutationObserver(schedule);
+      bodyObserver.observe(document.body, {attributes:true, attributeFilter:['class']});
+    }
+    const d = dock();
+    if(d && !dockObserver){
+      dockObserver = new MutationObserver(schedule);
+      dockObserver.observe(d, {childList:true, subtree:true, attributes:true, attributeFilter:['hidden','data-mic-state','aria-hidden']});
+    }
+    const b = voiceBtn();
+    if(b && !voiceObserver){
+      voiceObserver = new MutationObserver(schedule);
+      voiceObserver.observe(b, {childList:true, subtree:true, attributes:true, attributeFilter:['class','aria-pressed','disabled']});
+    }
+    const s = voiceStatus();
+    if(s && !statusObserver){
+      statusObserver = new MutationObserver(schedule);
+      statusObserver.observe(s, {childList:true, subtree:true, characterData:true});
+    }
+  }
+
+  function sync(){
+    scheduled = false;
+    syncUi();
+    attachObservers();
+  }
+  function schedule(){
+    if(scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(sync);
+  }
+
+  document.addEventListener('fullscreenchange', schedule, true);
+  document.addEventListener('webkitfullscreenchange', schedule, true);
+  document.addEventListener('click', function(){ setTimeout(schedule, 20); }, true);
+  window.addEventListener('resize', schedule, {passive:true});
+  window.addEventListener('orientationchange', schedule, {passive:true});
+  [0,80,250,700,1400,2400].forEach(ms => setTimeout(schedule, ms));
+
+  window.jc86FullscreenDebug = function(){
+    const p = proxy();
+    const pr = p?.getBoundingClientRect?.();
+    const dr = dock()?.getBoundingClientRect?.();
+    return {
+      build: BUILD,
+      activeRoomView: activeRoomView(),
+      classOn: document.body?.classList?.contains('jc86-safe-fullscreen-controls'),
+      fullscreen: !!fsEl(),
+      siteFullscreen: isSiteFullscreen(),
+      fullscreenElement: fsEl()?.className || fsEl()?.id || fsEl()?.tagName || '',
+      dockHidden: !!dock()?.hidden,
+      dockRect: dr ? {x:Math.round(dr.x), y:Math.round(dr.y), w:Math.round(dr.width), h:Math.round(dr.height)} : null,
+      micHidden: !!dockMic()?.hidden,
+      micText: dockMic()?.textContent || '',
+      micState: dockMic()?.dataset?.micState || '',
+      proxyHidden: !!p?.hidden,
+      proxyText: p?.textContent || '',
+      proxyRect: pr ? {x:Math.round(pr.x), y:Math.round(pr.y), w:Math.round(pr.width), h:Math.round(pr.height)} : null
     };
   };
 })();

@@ -6,7 +6,7 @@
    ========================================================= */
 
 html::after{
-  content:'85 GUARD'!important;
+  content:'86 SAFEFS'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -565,7 +565,7 @@ body.jc40-watch-mode [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'85 GUARD'!important;
+  content:'86 SAFEFS'!important;
   background:rgba(34,197,94,.94)!important;
 }
 
@@ -943,7 +943,7 @@ body.jc41-rave-focus .watch-main [class*="queue"]{
    ========================================================= */
 
 html::after{
-  content:'85 GUARD'!important;
+  content:'86 SAFEFS'!important;
 }
 
 body.jc41-rave-focus .watch-stage{
@@ -1040,7 +1040,7 @@ body.jc41-rave-focus #jc45ActiveDock #jc41RaveFloating{
    ========================================================= */
 
 html::after{
-  content:'85 GUARD'!important;
+  content:'86 SAFEFS'!important;
 }
 
 body.jc41-rave-focus .watch-main,
@@ -1133,7 +1133,7 @@ body.jc41-rave-focus #jc45ActiveDock{
    ========================================================= */
 
 html::after{
-  content:'85 GUARD'!important;
+  content:'86 SAFEFS'!important;
 }
 
 body.jc41-rave-focus .watch-layout{
@@ -1239,7 +1239,7 @@ body.jc41-rave-focus #jc45ActiveDock::after{
    верхняя плашка источника скрывается, снизу — только компактные кнопки.
    ========================================================= */
 
-html::after{ content:'85 GUARD'!important; }
+html::after{ content:'86 SAFEFS'!important; }
 
 body.jc41-rave-focus .watch-layout{
   width:min(100vw,1540px)!important;
@@ -1406,7 +1406,7 @@ body.jc41-rave-focus .chat-card{
    плеер 16:9 без лишней чёрной шапки от растянутого контейнера.
    ========================================================= */
 
-html::after{ content:'85 GUARD'!important; }
+html::after{ content:'86 SAFEFS'!important; }
 
 html.jc41-rave-focus,
 body.jc41-rave-focus{
@@ -1682,7 +1682,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'85 GUARD'!important;
+  content:'86 SAFEFS'!important;
 }
 
 html.jc41-rave-focus,
@@ -1983,7 +1983,7 @@ body.jc41-rave-focus .player-shell > nav{
    ========================================================= */
 
 html::after{
-  content:'85 GUARD'!important;
+  content:'86 SAFEFS'!important;
 }
 
 body.jc41-rave-focus{
@@ -2350,7 +2350,7 @@ body.jc41-rave-focus #jc41RaveFloating button{
    ========================================================= */
 
 html::after{
-  content:'85 GUARD'!important;
+  content:'86 SAFEFS'!important;
 }
 
 body.jc41-rave-focus{
@@ -2591,7 +2591,7 @@ html:-webkit-full-screen body.jc41-rave-focus #jc51RaveTopbar{
 
 
 /* Stage 53 — remove top-right mic/chat/fullscreen icons and rebalance topbar */
-html::after{ content:'85 GUARD'!important; }
+html::after{ content:'86 SAFEFS'!important; }
 body.jc41-rave-focus #jc51RaveTopbar{
   grid-template-columns:minmax(260px,1fr) auto minmax(120px,1fr)!important;
 }
@@ -2615,7 +2615,7 @@ body.jc41-rave-focus #jc51RaveTopbar [data-jc51-full]{
 
 
 /* Stage 54 — Rave Polish: remove top black strip feel, darken chat, tighten proportions. */
-html::after{ content:'85 GUARD'!important; }
+html::after{ content:'86 SAFEFS'!important; }
 body.jc41-rave-focus{
   --jc54-chat:clamp(292px,17.2vw,330px)!important;
 }
@@ -2697,7 +2697,7 @@ body:not(.jc40-watch-mode):not(.jc41-rave-focus) .jc-catalog-layer.open{
    ========================================================= */
 
 html::after{
-  content:'85 GUARD'!important;
+  content:'86 SAFEFS'!important;
   background:rgba(56,189,248,.96)!important;
   color:#02150d!important;
 }
@@ -3115,7 +3115,7 @@ body.jc64-active-first:fullscreen{
    for YouTube/VK when active-first hides the old UI.
    ========================================================= */
 html::after{
-  content:'85 GUARD'!important;
+  content:'86 SAFEFS'!important;
   background:rgba(56,189,248,.96)!important;
   color:#031018!important;
 }
@@ -3189,7 +3189,7 @@ body.jc64-active-first{
 /* Stage 71 — stable persistent player.
    Direct iframe/video is the active-view player, not a hidden fallback. Native source form remains offscreen for app state. */
 html::after{
-  content:'85 GUARD'!important;
+  content:'86 SAFEFS'!important;
   background:rgba(34,211,238,.96)!important;
   color:#02131a!important;
 }
@@ -3246,7 +3246,7 @@ body.jc64-active-first{
 
 /* Stage 71 — stable player. No JS geometry loop, no repeated iframe reflow. */
 html::after{
-  content:'85 GUARD'!important;
+  content:'86 SAFEFS'!important;
   background:rgba(20,184,166,.96)!important;
   color:#031513!important;
 }
@@ -3296,7 +3296,7 @@ body.jc64-active-first .player-frame [data-chat-message]{
 
 /* Stage 72 — small auto-update notice. */
 html::after{
-  content:'85 GUARD'!important;
+  content:'86 SAFEFS'!important;
   background:rgba(168,85,247,.96)!important;
   color:#fff!important;
 }
@@ -3337,7 +3337,7 @@ html::after{
 
 /* =========================================================
    JustClover Stage 81 — Real Stable Player Dock
-   Version: stage85-guarded-fullscreen-mic-20260502-1
+   Version: stage86-safe-fullscreen-controls-20260502-1
 
    One stable active-room layout:
    topbar / player / real bottom controls / chat.
@@ -3345,7 +3345,7 @@ html::after{
    ========================================================= */
 
 html::after{
-  content:'85 GUARD'!important;
+  content:'86 SAFEFS'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -3746,14 +3746,14 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
 
 /* =========================================================
    JustClover Stage 81 — Player Mic Overlay
-   Version: stage85-guarded-fullscreen-mic-20260502-1
+   Version: stage86-safe-fullscreen-controls-20260502-1
 
    Keep Stage80 stable layout. Remove chat button from the lower dock and move
    mic control inside the player so it remains available in fullscreen.
    ========================================================= */
 
 html::after{
-  content:'85 GUARD'!important;
+  content:'86 SAFEFS'!important;
   background:rgba(34,197,94,.96)!important;
   color:#03130a!important;
 }
@@ -3895,7 +3895,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc81PlayerMic{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage85-guarded-fullscreen-mic-20260502-1
+   Version: stage86-safe-fullscreen-controls-20260502-1
 
    Keep Stage80 layout. Mic is mounted on .watch-main, not inside the iframe
    and not hidden by old jc67 player-child rules, so it remains visible in
@@ -3903,7 +3903,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc81PlayerMic{
    ========================================================= */
 
 html::after{
-  content:'85 GUARD'!important;
+  content:'86 SAFEFS'!important;
   background:rgba(34,197,94,.96)!important;
   color:#03130a!important;
 }
@@ -4068,10 +4068,10 @@ body.jc80-real-dock .watch-main #jc82PlayerMic[hidden]{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage85-guarded-fullscreen-mic-20260502-1
+   Version: stage86-safe-fullscreen-controls-20260502-1
    Put mic back into bottom dock; hide overlay mic; hide chat.
    ========================================================= */
-html::after{ content:'85 GUARD'!important; }
+html::after{ content:'86 SAFEFS'!important; }
 
 body.jc83-dock-mic #jc82PlayerMic,
 body.jc83-dock-mic #jc81PlayerMic{
@@ -4137,9 +4137,9 @@ body.jc80-real-dock.jc83-dock-mic .watch-main:-webkit-full-screen #jc80Dock [dat
 
 /* =========================================================
    JustClover Stage 84 — No Native Iframe Fullscreen + Dock Mic
-   Version: stage85-guarded-fullscreen-mic-20260502-1
+   Version: stage86-safe-fullscreen-controls-20260502-1
    ========================================================= */
-html::after{ content:'85 GUARD'!important; }
+html::after{ content:'86 SAFEFS'!important; }
 
 body.jc84-no-native-fullscreen #jc80Dock{
   z-index:2147483400!important;
@@ -4233,10 +4233,10 @@ body.jc80-real-dock.jc84-no-native-fullscreen .watch-main:-webkit-full-screen #j
 
 /* =========================================================
    JustClover Stage 85 — Guarded Fullscreen Mic
-   Version: stage85-guarded-fullscreen-mic-20260502-1
+   Version: stage86-safe-fullscreen-controls-20260502-1
    Larger native-fullscreen shield and forced dock visibility in site fullscreen.
    ========================================================= */
-html::after{ content:'85 GUARD'!important; }
+html::after{ content:'86 SAFEFS'!important; }
 
 body.jc85-guarded-fullscreen #jc80Dock{
   z-index:2147483400!important;
@@ -4332,5 +4332,143 @@ body.jc80-real-dock.jc85-guarded-fullscreen .watch-main:-webkit-full-screen #jc8
     width:112px!important;
     height:92px!important;
     padding:0 14px 14px 0!important;
+  }
+}
+
+
+/* =========================================================
+   JustClover Stage 86 — Safe Fullscreen Controls
+   Version: stage86-safe-fullscreen-controls-20260502-1
+   Keep the current working fullscreen+dock, but replace the dangerous native
+   YouTube/VK bottom-right x with a clear JustClover safe exit button.
+   ========================================================= */
+html::after{ content:'86 SAFEFS'!important; }
+
+body.jc86-safe-fullscreen-controls #jc80Dock{
+  z-index:2147483500!important;
+}
+
+body.jc80-real-dock.jc86-safe-fullscreen-controls #jc80Dock [data-jc80-chat]{
+  display:none!important;
+}
+
+body.jc80-real-dock.jc86-safe-fullscreen-controls #jc80Dock [data-jc80-mic]{
+  display:inline-flex!important;
+  min-width:156px!important;
+  justify-content:center!important;
+  font-weight:950!important;
+}
+
+body.jc80-real-dock.jc86-safe-fullscreen-controls #jc80Dock [data-jc80-mic][data-mic-state='off']{
+  background:rgba(13,16,28,.92)!important;
+  border-color:rgba(255,255,255,.22)!important;
+  color:#fff!important;
+}
+body.jc80-real-dock.jc86-safe-fullscreen-controls #jc80Dock [data-jc80-mic][data-mic-state='on']{
+  background:linear-gradient(135deg,rgba(34,197,94,.96),rgba(45,212,191,.90))!important;
+  color:#03130a!important;
+  border-color:transparent!important;
+}
+body.jc80-real-dock.jc86-safe-fullscreen-controls #jc80Dock [data-jc80-mic][data-mic-state='pending']{
+  background:linear-gradient(135deg,rgba(251,191,36,.96),rgba(251,113,133,.78))!important;
+  color:#150c03!important;
+  border-color:transparent!important;
+}
+body.jc80-real-dock.jc86-safe-fullscreen-controls #jc80Dock [data-jc80-mic][data-mic-state='error']{
+  background:linear-gradient(135deg,rgba(239,68,68,.96),rgba(190,18,60,.90))!important;
+  color:#fff!important;
+  border-color:transparent!important;
+}
+
+/* Use the old proxy id, but make it an explicit safe exit overlay in fullscreen. */
+body.jc86-safe-fullscreen-controls #jc84FullscreenProxy{
+  position:absolute!important;
+  right:14px!important;
+  bottom:calc(var(--jc80-dock-h, 62px) + var(--jc80-safe-bottom, 0px) + 14px)!important;
+  z-index:2147483646!important;
+  width:auto!important;
+  min-width:48px!important;
+  height:42px!important;
+  padding:0 13px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border:1px solid rgba(255,255,255,.18)!important;
+  border-radius:999px!important;
+  background:rgba(9,12,20,.74)!important;
+  color:#fff!important;
+  font:950 13px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  box-shadow:0 12px 30px rgba(0,0,0,.38),0 0 0 1px rgba(255,255,255,.04) inset!important;
+  backdrop-filter:blur(14px)!important;
+  cursor:pointer!important;
+  pointer-events:auto!important;
+  opacity:.88!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+
+body.jc86-safe-fullscreen-controls #jc84FullscreenProxy:hover{
+  opacity:1!important;
+  background:rgba(12,14,24,.92)!important;
+  transform:translateY(-1px)!important;
+}
+
+body.jc80-real-dock.jc86-safe-fullscreen-controls .watch-main:fullscreen,
+body.jc80-real-dock.jc86-safe-fullscreen-controls .watch-main:-webkit-full-screen{
+  display:grid!important;
+  grid-template-rows:minmax(0,1fr) calc(var(--jc80-dock-h, 62px) + var(--jc80-safe-bottom, 0px))!important;
+  background:#000!important;
+}
+
+body.jc80-real-dock.jc86-safe-fullscreen-controls .watch-main:fullscreen #jc80Dock,
+body.jc80-real-dock.jc86-safe-fullscreen-controls .watch-main:-webkit-full-screen #jc80Dock{
+  display:flex!important;
+  position:relative!important;
+  grid-row:2!important;
+  width:100%!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  z-index:2147483500!important;
+}
+
+body.jc80-real-dock.jc86-safe-fullscreen-controls .watch-main:fullscreen #jc80Dock [data-jc80-mic],
+body.jc80-real-dock.jc86-safe-fullscreen-controls .watch-main:-webkit-full-screen #jc80Dock [data-jc80-mic]{
+  display:inline-flex!important;
+}
+
+body.jc80-real-dock.jc86-safe-fullscreen-controls .watch-main:fullscreen #jc84FullscreenProxy,
+body.jc80-real-dock.jc86-safe-fullscreen-controls .watch-main:-webkit-full-screen #jc84FullscreenProxy{
+  display:flex!important;
+  right:14px!important;
+  bottom:calc(var(--jc80-dock-h, 62px) + var(--jc80-safe-bottom, 0px) + 14px)!important;
+  min-width:96px!important;
+  height:42px!important;
+  background:rgba(9,12,20,.88)!important;
+  opacity:1!important;
+}
+
+/* cover any remaining iframe native x/fullsreen hot corner below the visible safe-exit label */
+body.jc80-real-dock.jc86-safe-fullscreen-controls .watch-main:fullscreen #jc84FullscreenProxy::before,
+body.jc80-real-dock.jc86-safe-fullscreen-controls .watch-main:-webkit-full-screen #jc84FullscreenProxy::before{
+  content:''!important;
+  position:absolute!important;
+  right:-20px!important;
+  bottom:-20px!important;
+  width:170px!important;
+  height:130px!important;
+  z-index:-1!important;
+  background:linear-gradient(135deg,transparent 0%,rgba(0,0,0,.24) 100%)!important;
+  border-radius:0!important;
+}
+
+@media(max-width:980px){
+  body.jc80-real-dock.jc86-safe-fullscreen-controls #jc80Dock [data-jc80-mic]{
+    min-width:132px!important;
+  }
+  body.jc86-safe-fullscreen-controls #jc84FullscreenProxy{
+    right:10px!important;
+    bottom:calc(var(--jc80-dock-h, 58px) + var(--jc80-safe-bottom, 0px) + 10px)!important;
+    height:38px!important;
+    font-size:12px!important;
   }
 }
