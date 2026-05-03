@@ -1,8 +1,17 @@
-
-self.addEventListener('install', function(event) {
-    event.waitUntil(self.skipWaiting());
+/* JustClover Stage121 emergency no-cache worker */
+const BUILD = "stage121-restore-appjs-and-browser-tests-20260503-1";
+self.addEventListener('install', event => {
+  self.skipWaiting();
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
 });
-self.addEventListener('activate', function(event) {
-    event.waitUntil(self.clients.claim());
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => caches.delete(k)));
+    if (self.registration && self.registration.unregister) await self.registration.unregister();
+    await self.clients.claim();
+  })());
 });
-    
+self.addEventListener('fetch', event => {
+  event.respondWith(fetch(event.request, { cache: 'no-store' }));
+});
