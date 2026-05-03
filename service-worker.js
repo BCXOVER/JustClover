@@ -1,4 +1,4 @@
-/* JustClover cache killer stage93-player-recovery-safe-glass-20260502-1 */
+/* JustClover cache killer stage94-room-appearance-wallpaper-20260503-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));

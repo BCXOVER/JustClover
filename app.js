@@ -1,12 +1,12 @@
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage93-player-recovery-safe-glass-20260502-1
+   Version: stage94-room-appearance-wallpaper-20260503-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage93-player-recovery-safe-glass-20260502-1";
+const JC40_BUILD = "stage94-room-appearance-wallpaper-20260503-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
@@ -626,10 +626,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage93-player-recovery-safe-glass-20260502-1
+   Version: stage94-room-appearance-wallpaper-20260503-1
    ========================================================= */
 (function(){
-  const BUILD = "stage93-player-recovery-safe-glass-20260502-1";
+  const BUILD = "stage94-room-appearance-wallpaper-20260503-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1156,7 +1156,7 @@ try{
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage93-player-recovery-safe-glass-20260502-1";
+  const BUILD = "stage94-room-appearance-wallpaper-20260503-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1394,7 +1394,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage93-player-recovery-safe-glass-20260502-1";
+  const BUILD = "stage94-room-appearance-wallpaper-20260503-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1692,7 +1692,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage93-player-recovery-safe-glass-20260502-1';
+  const BUILD = 'stage94-room-appearance-wallpaper-20260503-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1873,7 +1873,7 @@ try{
    когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
    ========================================================= */
 (function(){
-  const BUILD = "stage93-player-recovery-safe-glass-20260502-1";
+  const BUILD = "stage94-room-appearance-wallpaper-20260503-1";
   const CHECK_EVERY_MS = 15000;
   const FIRST_CHECK_MS = 4500;
   const RELOAD_DELAY_MS = 1800;
@@ -1985,14 +1985,14 @@ try{
 
 
 /* =========================================================
-   JustClover Stage 81 — Real Stable Player Dock
-   Version: stage93-player-recovery-safe-glass-20260502-1
+   JustClover Stage 94 — Real Stable Player Dock
+   Version: stage94-room-appearance-wallpaper-20260503-1
 
    No player resize loop. No fixed/cover iframe fighting.
    JS only creates bottom buttons and toggles the stable CSS class.
    ========================================================= */
 (function(){
-  const BUILD = 'stage93-player-recovery-safe-glass-20260502-1';
+  const BUILD = 'stage94-room-appearance-wallpaper-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2189,14 +2189,14 @@ try{
 
 
 /* =========================================================
-   JustClover Stage 81 — Player Mic Overlay
-   Version: stage93-player-recovery-safe-glass-20260502-1
+   JustClover Stage 94 — Player Mic Overlay
+   Version: stage94-room-appearance-wallpaper-20260503-1
 
    Adds a clear mic toggle inside the player and removes the chat action from
    the bottom dock. Does not change auth, chat DOM, source logic, or player fit.
    ========================================================= */
 (function(){
-  const BUILD = 'stage93-player-recovery-safe-glass-20260502-1';
+  const BUILD = 'stage94-room-appearance-wallpaper-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2361,14 +2361,14 @@ try{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage93-player-recovery-safe-glass-20260502-1
+   Version: stage94-room-appearance-wallpaper-20260503-1
 
    Adds a robust mic control mounted on .watch-main. It is not a child of the
    YouTube iframe/player element and therefore remains visible in JustClover
    site fullscreen. No player scale/fit logic is changed.
    ========================================================= */
 (function(){
-  const BUILD = 'stage93-player-recovery-safe-glass-20260502-1';
+  const BUILD = 'stage94-room-appearance-wallpaper-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2561,7 +2561,7 @@ try{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage93-player-recovery-safe-glass-20260502-1
+   Version: stage94-room-appearance-wallpaper-20260503-1
 
    Keep Stage80 layout. Put mic back into the bottom dock next to sources and
    fullscreen, keep chat hidden, and mirror voice state on the dock button.
@@ -2569,7 +2569,7 @@ try{
    inside the YouTube/VK iframe cannot show external DOM controls.
    ========================================================= */
 (function(){
-  const BUILD = 'stage93-player-recovery-safe-glass-20260502-1';
+  const BUILD = 'stage94-room-appearance-wallpaper-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2738,11 +2738,11 @@ try{
 
 /* =========================================================
    JustClover Stage 89 — Glass Chat + Dock Transparency
-   Version: stage93-player-recovery-safe-glass-20260502-1
+   Version: stage94-room-appearance-wallpaper-20260503-1
    Small runtime marker/debug only; no layout JS hacks added.
    ========================================================= */
 (()=>{
-  const BUILD = 'stage93-player-recovery-safe-glass-20260502-1';
+  const BUILD = 'stage94-room-appearance-wallpaper-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc89GlassDebug = function(){
     const dock = document.getElementById('jc80Dock');
@@ -2767,12 +2767,12 @@ try{
 })();
 
 /* =========================================================
-   JustClover Stage 93 — Player Recovery Safe Glass
-   Version: stage93-player-recovery-safe-glass-20260502-1
+   JustClover Stage 94 — Player Recovery Safe Glass
+   Version: stage94-room-appearance-wallpaper-20260503-1
    Debug marker only. No background/player mutation.
    ========================================================= */
 (()=>{
-  const BUILD = 'stage93-player-recovery-safe-glass-20260502-1';
+  const BUILD = 'stage94-room-appearance-wallpaper-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc93RecoveryDebug = function(){
     const q = s => document.querySelector(s);
@@ -2787,6 +2787,280 @@ try{
       dockVisible: visible(q('#jc80Dock')),
       micVisible: visible(q('#jc80Dock [data-jc80-mic]')),
       chatVisible: visible(q('.chat-card'))
+    };
+  };
+})();
+
+/* =========================================================
+   JustClover Stage 94 — Room Appearance Wallpapers
+   Version: stage94-room-appearance-wallpaper-20260503-1
+
+   Adds “Оформление комнаты” settings. Safe only: no iframe/video/player-frame
+   mutation, no background layers over the player. Uses CSS variables and
+   localStorage to paint dock/chat/topbar/watch-main surfaces.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage94-room-appearance-wallpaper-20260503-1';
+  const LS = {
+    enabled:'jc94-room-wallpaper-enabled',
+    wallpaper:'jc94-room-wallpaper',
+    dim:'jc94-room-wallpaper-dim',
+    blur:'jc94-room-wallpaper-blur',
+    glass:'jc94-room-wallpaper-glass',
+    preset:'jc94-room-wallpaper-preset'
+  };
+  const PRESETS = {
+    menu: {
+      title:'Меню',
+      value:'radial-gradient(circle at 42% 16%, rgba(139,92,246,.32), transparent 36%), radial-gradient(circle at 82% 72%, rgba(236,72,153,.22), transparent 42%), linear-gradient(135deg, rgba(8,10,22,.96), rgba(24,14,33,.94))'
+    },
+    aurora: {
+      title:'Aurora',
+      value:'radial-gradient(circle at 20% 24%, rgba(34,211,238,.30), transparent 38%), radial-gradient(circle at 74% 18%, rgba(168,85,247,.34), transparent 36%), radial-gradient(circle at 82% 82%, rgba(34,197,94,.18), transparent 44%), linear-gradient(135deg, #050816, #160d23)'
+    },
+    crimson: {
+      title:'Crimson',
+      value:'radial-gradient(circle at 22% 28%, rgba(244,63,94,.34), transparent 38%), radial-gradient(circle at 76% 72%, rgba(168,85,247,.22), transparent 42%), linear-gradient(135deg, #09070c, #241018)'
+    },
+    clover: {
+      title:'Clover',
+      value:'radial-gradient(circle at 18% 22%, rgba(34,197,94,.26), transparent 38%), radial-gradient(circle at 80% 70%, rgba(20,184,166,.24), transparent 44%), linear-gradient(135deg, #040b0b, #111827)'
+    }
+  };
+
+  window.JUSTCLOVER_BUILD = BUILD;
+
+  function get(k, fallback=''){
+    try { return localStorage.getItem(k) ?? fallback; } catch(_) { return fallback; }
+  }
+  function set(k,v){
+    try { localStorage.setItem(k,v); return true; } catch(_) { return false; }
+  }
+  function del(k){ try { localStorage.removeItem(k); } catch(_){} }
+  function cssUrl(url){
+    const raw = String(url || '').trim();
+    if(!raw) return '';
+    if(raw.startsWith('radial-gradient') || raw.startsWith('linear-gradient')) return raw;
+    return `url("${raw.replace(/\\/g,'\\\\').replace(/"/g,'\\"')}")`;
+  }
+  function activeRoom(){
+    const app = document.getElementById('appView');
+    const watch = document.getElementById('watchSection');
+    const auth = window.__jc62IsAuthScreen?.();
+    return !auth && !!app && !app.classList.contains('hidden') && !!watch && watch.classList.contains('active');
+  }
+  function currentWallpaper(){
+    const saved = get(LS.wallpaper, '');
+    if(saved) return saved;
+    const preset = get(LS.preset, 'menu');
+    return PRESETS[preset]?.value || PRESETS.menu.value;
+  }
+  function applyStyle(){
+    const enabled = get(LS.enabled, '1') !== '0';
+    const root = document.documentElement;
+    const wallpaper = currentWallpaper();
+    const dim = Math.min(.82, Math.max(.05, Number(get(LS.dim, '.34')) || .34));
+    const blur = Math.min(28, Math.max(0, Number(get(LS.blur, '14')) || 14));
+    const glass = Math.min(.88, Math.max(.12, Number(get(LS.glass, '.38')) || .38));
+    root.style.setProperty('--jc94-room-wallpaper', cssUrl(wallpaper));
+    root.style.setProperty('--jc94-room-dim', String(dim));
+    root.style.setProperty('--jc94-room-blur', `${blur}px`);
+    root.style.setProperty('--jc94-room-glass', `rgba(8,10,18,${glass})`);
+    root.style.setProperty('--jc94-room-glass-strong', `rgba(8,10,18,${Math.min(.92, glass + .14)})`);
+    document.body?.classList?.toggle('jc94-room-wallpaper', enabled && activeRoom());
+    syncForm();
+  }
+  function setPreset(key){
+    const p = PRESETS[key] || PRESETS.menu;
+    set(LS.enabled, '1');
+    set(LS.preset, key);
+    del(LS.wallpaper);
+    applyStyle();
+    status(`Применён пресет: ${p.title}`);
+  }
+  function status(text){
+    const el = document.getElementById('jc94RoomStyleStatus');
+    if(el) el.textContent = text || '';
+  }
+  function syncForm(){
+    const enabled = get(LS.enabled, '1') !== '0';
+    const url = get(LS.wallpaper, '');
+    const preset = get(LS.preset, 'menu');
+    const dim = get(LS.dim, '.34');
+    const blur = get(LS.blur, '14');
+    const glass = get(LS.glass, '.38');
+    const enabledEl = document.getElementById('jc94RoomEnabled');
+    const urlEl = document.getElementById('jc94RoomUrl');
+    const dimEl = document.getElementById('jc94RoomDim');
+    const blurEl = document.getElementById('jc94RoomBlur');
+    const glassEl = document.getElementById('jc94RoomGlass');
+    if(enabledEl) enabledEl.checked = enabled;
+    if(urlEl && document.activeElement !== urlEl) urlEl.value = url;
+    if(dimEl && document.activeElement !== dimEl) dimEl.value = String(dim);
+    if(blurEl && document.activeElement !== blurEl) blurEl.value = String(blur);
+    if(glassEl && document.activeElement !== glassEl) glassEl.value = String(glass);
+    document.querySelectorAll('.jc94-preset').forEach(btn => btn.classList.toggle('active', btn.dataset.preset === preset && !url));
+  }
+  function renderSettings(){
+    const section = document.getElementById('appearanceSection');
+    if(!section || document.getElementById('jc94RoomStyleCard')) return;
+    const card = document.createElement('div');
+    card.id = 'jc94RoomStyleCard';
+    card.className = 'card panel jc94-room-style-card';
+    card.innerHTML = `
+      <div class="jc94-room-style-head">
+        <div>
+          <span class="kicker">Room style</span>
+          <h3>Оформление в комнате</h3>
+          <p class="status">Отдельные живые обои для режима просмотра. Это не трогает плеер: фон применяется только к нижней панели, чату, верхней панели и пустым зонам комнаты.</p>
+        </div>
+        <span class="soft-badge">Safe CSS</span>
+      </div>
+      <div class="jc94-room-style-grid">
+        <div class="jc94-room-style-form">
+          <label class="jc94-check"><span><input id="jc94RoomEnabled" type="checkbox" /> Включить фон комнаты</span><small>Можно выключить, если захочешь оставить строгий тёмный режим.</small></label>
+          <div class="jc94-preset-row">
+            <button type="button" class="jc94-preset" data-preset="menu" style="--jc94-preset-bg:${PRESETS.menu.value}">Меню</button>
+            <button type="button" class="jc94-preset" data-preset="aurora" style="--jc94-preset-bg:${PRESETS.aurora.value}">Aurora</button>
+            <button type="button" class="jc94-preset" data-preset="crimson" style="--jc94-preset-bg:${PRESETS.crimson.value}">Crimson</button>
+            <button type="button" class="jc94-preset" data-preset="clover" style="--jc94-preset-bg:${PRESETS.clover.value}">Clover</button>
+          </div>
+          <label>Своя ссылка на живые обои / GIF / WebP / PNG
+            <input id="jc94RoomUrl" placeholder="https://...gif или https://...webp" />
+            <small>Лучше использовать прямую ссылку на картинку или GIF. YouTube/VK тут не нужны — это именно фон.</small>
+          </label>
+          <label>Загрузить файл с компьютера
+            <input id="jc94RoomFile" type="file" accept="image/gif,image/webp,image/png,image/jpeg,image/*" />
+            <small>Небольшие GIF/WebP сохраняются в браузере. Большие файлы могут примениться только до перезагрузки.</small>
+          </label>
+          <label>Затемнение фона
+            <input id="jc94RoomDim" type="range" min="0.05" max="0.82" step="0.01" />
+          </label>
+          <label>Прозрачность glass-панелей
+            <input id="jc94RoomGlass" type="range" min="0.12" max="0.88" step="0.01" />
+          </label>
+          <label>Размытие glass
+            <input id="jc94RoomBlur" type="range" min="0" max="28" step="1" />
+          </label>
+          <div class="jc94-room-style-actions">
+            <button id="jc94ApplyRoomStyle" class="btn primary" type="button">Применить</button>
+            <button id="jc94ResetRoomStyle" class="btn soft" type="button">Сбросить</button>
+            <button id="jc94OpenWatch" class="btn soft" type="button">К просмотру</button>
+          </div>
+          <p id="jc94RoomStyleStatus" class="status jc94-room-status"></p>
+        </div>
+        <div class="jc94-room-preview" aria-label="Превью оформления комнаты">
+          <div class="jc94-room-preview-player">PLAYER</div>
+          <div class="jc94-room-preview-chat"></div>
+          <div class="jc94-room-preview-dock"></div>
+        </div>
+      </div>`;
+    const themes = section.querySelector('.themes-grid') || section.lastElementChild;
+    if(themes) themes.insertAdjacentElement('afterend', card); else section.appendChild(card);
+    bindSettings(card);
+    syncForm();
+  }
+  function bindSettings(card){
+    card.querySelectorAll('.jc94-preset').forEach(btn => btn.addEventListener('click', () => setPreset(btn.dataset.preset)));
+    const enabled = card.querySelector('#jc94RoomEnabled');
+    const url = card.querySelector('#jc94RoomUrl');
+    const dim = card.querySelector('#jc94RoomDim');
+    const blur = card.querySelector('#jc94RoomBlur');
+    const glass = card.querySelector('#jc94RoomGlass');
+    enabled?.addEventListener('change', () => { set(LS.enabled, enabled.checked ? '1' : '0'); applyStyle(); status(enabled.checked ? 'Фон комнаты включён.' : 'Фон комнаты выключен.'); });
+    url?.addEventListener('change', () => {
+      const v = url.value.trim();
+      if(v){ set(LS.enabled,'1'); set(LS.wallpaper, v); set(LS.preset, 'custom'); status('Своя ссылка применена.'); }
+      applyStyle();
+    });
+    [dim, blur, glass].forEach(el => el?.addEventListener('input', () => {
+      if(dim) set(LS.dim, dim.value);
+      if(blur) set(LS.blur, blur.value);
+      if(glass) set(LS.glass, glass.value);
+      set(LS.enabled,'1');
+      applyStyle();
+    }));
+    card.querySelector('#jc94ApplyRoomStyle')?.addEventListener('click', () => {
+      const v = url?.value?.trim() || '';
+      if(v){ set(LS.wallpaper, v); set(LS.preset, 'custom'); }
+      set(LS.enabled,'1');
+      if(dim) set(LS.dim, dim.value);
+      if(blur) set(LS.blur, blur.value);
+      if(glass) set(LS.glass, glass.value);
+      applyStyle();
+      status('Оформление комнаты применено.');
+    });
+    card.querySelector('#jc94ResetRoomStyle')?.addEventListener('click', () => {
+      Object.values(LS).forEach(del);
+      set(LS.enabled,'1');
+      set(LS.preset,'menu');
+      applyStyle();
+      status('Сброшено к фону меню.');
+    });
+    card.querySelector('#jc94OpenWatch')?.addEventListener('click', () => {
+      document.querySelector('[data-section="watchSection"]')?.click?.();
+      setTimeout(applyStyle, 80);
+    });
+    card.querySelector('#jc94RoomFile')?.addEventListener('change', e => {
+      const file = e.target.files?.[0];
+      if(!file) return;
+      if(!file.type.startsWith('image/')){ status('Выбери изображение/GIF/WebP.'); return; }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const data = String(reader.result || '');
+        set(LS.enabled,'1');
+        set(LS.preset,'custom-file');
+        const ok = set(LS.wallpaper, data);
+        if(!ok){
+          window.__jc94SessionWallpaper = data;
+          document.documentElement.style.setProperty('--jc94-room-wallpaper', cssUrl(data));
+          status('Файл применён на текущую сессию. Для постоянного хранения нужен файл поменьше или ссылка.');
+        }else{
+          status('Файл применён и сохранён в браузере.');
+        }
+        applyStyle();
+      };
+      reader.onerror = () => status('Не удалось прочитать файл.');
+      reader.readAsDataURL(file);
+    });
+  }
+  let raf = 0;
+  function schedule(){
+    if(raf) return;
+    raf = requestAnimationFrame(() => { raf = 0; renderSettings(); applyStyle(); });
+  }
+  document.addEventListener('DOMContentLoaded', schedule);
+  document.addEventListener('click', () => setTimeout(schedule, 40), true);
+  window.addEventListener('storage', schedule);
+  const obsTargets = () => [document.body, document.getElementById('appView'), document.getElementById('watchSection')].filter(Boolean);
+  function attachObservers(){
+    obsTargets().forEach(el => {
+      if(el.__jc94RoomObs) return;
+      const mo = new MutationObserver(schedule);
+      mo.observe(el, {attributes:true, attributeFilter:['class','style']});
+      el.__jc94RoomObs = mo;
+    });
+  }
+  [0,120,400,1000,1800].forEach(ms => setTimeout(() => { attachObservers(); schedule(); }, ms));
+  window.jc94RoomAppearanceDebug = function(){
+    const q = s => document.querySelector(s);
+    const visible = el => !!el && getComputedStyle(el).display !== 'none' && getComputedStyle(el).visibility !== 'hidden' && getComputedStyle(el).opacity !== '0';
+    const css = el => el ? getComputedStyle(el) : null;
+    const iframe = q('.player-frame iframe, #youtubePlayer iframe, #jc65DirectPlayer');
+    return {
+      build: BUILD,
+      activeRoom: activeRoom(),
+      wallpaperOn: document.body?.classList?.contains('jc94-room-wallpaper'),
+      settingsExists: !!q('#jc94RoomStyleCard'),
+      savedEnabled: get(LS.enabled,'1'),
+      savedPreset: get(LS.preset,'menu'),
+      hasCustomWallpaper: !!get(LS.wallpaper,''),
+      playerFrameVisible: visible(q('.player-frame')),
+      iframeVisible: visible(iframe),
+      iframeSrc: iframe?.src || '',
+      dockBg: css(q('#jc80Dock'))?.backgroundImage || '',
+      sidebarBg: css(q('.watch-sidebar'))?.backgroundImage || '',
+      bodyClass: document.body?.className || ''
     };
   };
 })();
