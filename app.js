@@ -27,7 +27,7 @@ import {
   equalTo
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
-const BUILD = "stage122-rave-anime-ui-custom-wallpaper-20260503-1";
+const BUILD = "stage123-rave-anime-room-customizer-20260503-1";
 console.log("JustClover loaded:", BUILD, "— Stage122 anime glass shell with safe local wallpaper customization");
 window.JUSTCLOVER_BUILD = BUILD;
 
@@ -1310,7 +1310,7 @@ try {
    No wallpaper code, no reload loop, no CDN index loader.
    ========================================================= */
 (function(){
-  const BUILD = "stage122-rave-anime-ui-custom-wallpaper-20260503-1";
+  const BUILD = "stage123-rave-anime-room-customizer-20260503-1";
   window.JUSTCLOVER_BUILD = BUILD;
   function cleanupOldWallpaper(){
     document.querySelectorAll('[id^="jc90"],[id^="jc91"],[id^="jc92"],[id^="jc93"],[id^="jc94"],[id^="jc95"],[id^="jc96"],[id^="jc97"],[id^="jc98"],[id^="jc99"],[id^="jc100"],[id^="jc101"],[id^="jc102"],[id^="jc103"],[id^="jc104"],[id^="jc105"],[id^="jc106"],[id^="jc107"],[id^="jc108"],[id^="jc109"],[id^="jc110"],[id^="jc111"],[id^="jc112"],[id^="jc113"],.jc101SurfaceBg,.jc99SurfaceBg,.jc-room-bg,.jc-chat-bg').forEach(el => {
@@ -1343,7 +1343,7 @@ try {
    GIF is chat message only. No wallpapers, no player changes.
    ========================================================= */
 (function(){
-  const BUILD = 'stage122-rave-anime-ui-custom-wallpaper-20260503-1';
+  const BUILD = 'stage123-rave-anime-room-customizer-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc115GifChatDebug = function(){
     return {
@@ -1365,7 +1365,7 @@ try {
    older cached handlers or DOM re-renders are present.
    ========================================================= */
 (function(){
-  const BUILD = 'stage122-rave-anime-ui-custom-wallpaper-20260503-1';
+  const BUILD = 'stage123-rave-anime-room-customizer-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   function bootGifButton(){
     try { ensureGifButton(); } catch (_) {}
@@ -1400,7 +1400,7 @@ try {
    JustClover Stage 117 — Giphy picker restore debug
    ========================================================= */
 (function(){
-  const BUILD = 'stage122-rave-anime-ui-custom-wallpaper-20260503-1';
+  const BUILD = 'stage123-rave-anime-room-customizer-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc117GiphyDebug = function(){
     return {
@@ -1424,7 +1424,7 @@ try {
    Does not touch auth/player/source/fullscreen/wallpapers.
    ========================================================= */
 (function(){
-  const BUILD = 'stage122-rave-anime-ui-custom-wallpaper-20260503-1';
+  const BUILD = 'stage123-rave-anime-room-customizer-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const GIFS = [
@@ -1640,7 +1640,7 @@ try {
    No copied assets or third-party code from Rave.
    ========================================================= */
 (function(){
-  const BUILD = 'stage122-rave-anime-ui-custom-wallpaper-20260503-1';
+  const BUILD = 'stage123-rave-anime-room-customizer-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const DB_NAME = 'justclover-stage122-customization';
@@ -1901,8 +1901,8 @@ try {
 })();
 
 
-/* Stage122 guard: app.js restored from real app code, not workflow YAML. */
-window.JUSTCLOVER_BUILD = "stage122-rave-anime-ui-custom-wallpaper-20260503-1";
+/* Stage123 guard: app.js restored from real app code, not workflow YAML. */
+window.JUSTCLOVER_BUILD = "stage123-rave-anime-room-customizer-20260503-1";
 window.jc121AppFixDebug = function(){
   return {
     build: window.JUSTCLOVER_BUILD,
@@ -1916,3 +1916,140 @@ window.jc121AppFixDebug = function(){
     chatForm: !!document.getElementById('chatForm')
   };
 };
+
+
+/* Stage123: Rave-inspired anime/glass desktop shell. */
+(() => {
+  const BUILD = 'stage123-rave-anime-room-customizer-20260503-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+  function ensureRoomBar(){
+    const watch = $('#watchSection');
+    if (!watch || $('#jc123RaveRoomBar')) return;
+    const bar = document.createElement('div');
+    bar.id = 'jc123RaveRoomBar';
+    bar.className = 'jc123-rave-room-bar';
+    bar.innerHTML = `
+      <button class="jc123-icon" data-section-jump="lobbySection" title="Выйти в лобби">×</button>
+      <button class="jc123-icon" data-jc123-toggle-chat title="Чат">☰</button>
+      <button class="jc123-icon" data-jc123-open-theme title="Оформление">⚙</button>
+      <div class="jc123-rave-logo" aria-label="JustClover Rave mode">rΛve <span>clover</span></div>
+      <button class="jc123-icon" title="Поиск источника">⌕</button>
+      <button class="jc123-icon" title="Друзья">👥</button>
+      <button class="jc123-icon" title="На весь экран">⛶</button>
+    `;
+    watch.prepend(bar);
+    bar.addEventListener('click', event => {
+      const target = event.target.closest('[data-section-jump],[data-jc123-open-theme],[data-jc123-toggle-chat]');
+      if (!target) return;
+      if (target.dataset.sectionJump) {
+        const btn = document.querySelector(`.nav-btn[data-section="${target.dataset.sectionJump}"]`);
+        btn?.click();
+      }
+      if (target.dataset.jc123OpenTheme !== undefined) {
+        document.querySelector('.nav-btn[data-section="themeSection"]')?.click();
+      }
+      if (target.dataset.jc123ToggleChat !== undefined) {
+        document.body.classList.toggle('jc123-chat-collapsed');
+      }
+    });
+  }
+
+  function ensureLobbyHero(){
+    const lobby = $('#lobbySection');
+    if (!lobby || $('#jc123LobbyHero')) return;
+    const hero = document.createElement('div');
+    hero.id = 'jc123LobbyHero';
+    hero.className = 'jc123-lobby-hero glass-panel';
+    hero.innerHTML = `
+      <div>
+        <div class="jc123-kicker">anime watch party</div>
+        <h2>Rave-like лобби с живыми обоями</h2>
+        <p>Создавай комнаты, выбирай источник и меняй прозрачность интерфейса под свои обои.</p>
+      </div>
+      <div class="jc123-source-logos" aria-label="Источники">
+        <span>YouTube</span><span>VK Видео</span><span>Drive</span><span>Я.Диск</span><span>WEB</span><span>Local</span>
+      </div>
+    `;
+    const h1 = lobby.querySelector('.section-title, h1');
+    if (h1?.parentElement) h1.parentElement.insertBefore(hero, h1.nextSibling);
+    else lobby.prepend(hero);
+  }
+
+  function enhanceThemePanel(){
+    const theme = $('#themeSection');
+    if (!theme || $('#jc123ThemeUpgrade')) return;
+    const panel = document.createElement('div');
+    panel.id = 'jc123ThemeUpgrade';
+    panel.className = 'glass-panel jc123-theme-upgrade';
+    panel.innerHTML = `
+      <div class="jc123-kicker">главная фишка</div>
+      <h2>Полная кастомизация</h2>
+      <p>Загрузи живые обои/картинку, настрой прозрачность стекла и масштаб интерфейса. Данные хранятся локально в браузере.</p>
+      <div class="jc123-theme-grid">
+        <button data-jc123-preset="anime">Anime neon</button>
+        <button data-jc123-preset="rave">Rave dark</button>
+        <button data-jc123-preset="soft">Soft glass</button>
+      </div>
+    `;
+    theme.prepend(panel);
+    panel.addEventListener('click', event => {
+      const btn = event.target.closest('[data-jc123-preset]');
+      if (!btn) return;
+      const p = btn.dataset.jc123Preset;
+      const map = {
+        anime: ['#ff5f93', '.50', '1'],
+        rave: ['#ffffff', '.40', '.96'],
+        soft: ['#b98cff', '.68', '1.02']
+      };
+      const [primary, alpha, scale] = map[p] || map.anime;
+      document.documentElement.style.setProperty('--primary', primary);
+      document.documentElement.style.setProperty('--jc122-glass-alpha', alpha);
+      document.documentElement.style.setProperty('--jc122-ui-scale', scale);
+      localStorage.setItem('jc122Primary', primary);
+      localStorage.setItem('jc122GlassAlpha', alpha);
+      localStorage.setItem('jc122UiScale', scale);
+      document.body.dataset.jc123Preset = p;
+    });
+  }
+
+  function routeClasses(){
+    const watchActive = $('#watchSection')?.classList.contains('active');
+    const lobbyActive = $('#lobbySection')?.classList.contains('active');
+    const themeActive = $('#themeSection')?.classList.contains('active');
+    document.body.classList.toggle('jc123-room-mode', !!watchActive);
+    document.body.classList.toggle('jc123-lobby-mode', !!lobbyActive);
+    document.body.classList.toggle('jc123-theme-mode', !!themeActive);
+  }
+
+  function apply(){
+    document.body.classList.add('jc123-shell');
+    document.documentElement.dataset.jc123Build = BUILD;
+    ensureRoomBar();
+    ensureLobbyHero();
+    enhanceThemePanel();
+    routeClasses();
+  }
+
+  const mo = new MutationObserver(apply);
+  function boot(){
+    apply();
+    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once:true });
+  else boot();
+
+  window.jc123UiDebug = function(){
+    return {
+      build: window.JUSTCLOVER_BUILD,
+      roomBar: !!document.getElementById('jc123RaveRoomBar'),
+      lobbyHero: !!document.getElementById('jc123LobbyHero'),
+      themeUpgrade: !!document.getElementById('jc123ThemeUpgrade'),
+      sourceOptions: Array.from(document.querySelectorAll('#sourceType option')).map(o => o.value),
+      bodyClass: document.body.className
+    };
+  };
+})();

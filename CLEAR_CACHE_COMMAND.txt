@@ -1,0 +1,3 @@
+Вставь в DevTools Console на сайте и нажми Enter:
+
+(async()=>{try{if('serviceWorker'in navigator){const r=await navigator.serviceWorker.getRegistrations();await Promise.all(r.map(x=>x.unregister()));}if('caches'in window){const k=await caches.keys();await Promise.all(k.map(x=>caches.delete(x)));}localStorage.removeItem('jc-last-build');sessionStorage.clear();location.href=location.origin+location.pathname+'?v=stage123-rave-anime-room-customizer-20260503-1&t='+Date.now();}catch(e){console.error(e);location.reload(true);}})();

@@ -837,7 +837,7 @@ body.jc122-shell .profile-form{
   border-radius:32px;
 }
 body.jc122-shell::after{
-  content:"122 RAVE UI";
+  content:"123 RAVE DESKTOP";
   position:fixed;
   left:12px;
   bottom:10px;
@@ -865,4 +865,200 @@ body.jc122-shell::after{
   body.jc122-shell .room-chat-column{padding:12px}
   body.jc122-shell.active-room .player-frame{height:62vh;min-height:420px;border-radius:0 0 28px 28px}
   body.jc122-shell.active-room .room-topline{position:relative;top:auto;left:auto;width:auto;padding:92px 16px 10px}
+}
+
+
+/* Stage123 desktop-first Rave-inspired anime shell */
+body.jc123-shell{
+  --jc123-bar: rgba(14,14,18,.72);
+  --jc123-panel: rgba(18,18,26,var(--jc122-glass-alpha,.50));
+  --jc123-stroke: rgba(255,255,255,.16);
+  --jc123-shadow: 0 28px 90px rgba(0,0,0,.46);
+  background:#050509;
+}
+body.jc123-shell::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--primary) 28%, transparent), transparent 32%),
+    radial-gradient(circle at 92% 10%, rgba(103,232,249,.16), transparent 34%),
+    linear-gradient(120deg, rgba(255,255,255,.03), transparent 45%);
+  z-index:0;
+}
+body.jc123-shell .topbar{
+  justify-content:center;
+  min-height:74px;
+  background:linear-gradient(180deg, rgba(24,24,32,.82), rgba(8,8,12,.52));
+  backdrop-filter:blur(28px) saturate(145%);
+  border-bottom:1px solid var(--jc123-stroke);
+}
+body.jc123-shell .brand{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  text-align:center;
+}
+body.jc123-shell .brand h1,
+body.jc123-shell .brand-title{letter-spacing:.12em;text-transform:uppercase}
+body.jc123-shell .user-chip{position:absolute;right:210px}
+body.jc123-shell .top-actions{position:absolute;right:28px}
+body.jc123-shell .glass-panel,
+body.jc123-shell .card,
+body.jc123-shell .profile-card,
+body.jc123-shell .dashboard-card,
+body.jc123-shell .chat-card,
+body.jc123-shell .player-frame,
+body.jc123-shell .rail{
+  background:var(--jc123-panel)!important;
+  backdrop-filter:blur(30px) saturate(150%)!important;
+  border:1px solid var(--jc123-stroke)!important;
+  box-shadow:var(--jc123-shadow);
+}
+.jc123-lobby-hero{
+  margin:18px 0 20px;
+  padding:24px;
+  border-radius:34px;
+  display:grid;
+  grid-template-columns:minmax(280px,1fr) minmax(320px,1.2fr);
+  gap:24px;
+  align-items:center;
+}
+.jc123-kicker{
+  color:var(--primary);
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.35em;
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+.jc123-lobby-hero h2,
+.jc123-theme-upgrade h2{
+  margin:0 0 10px;
+  font-size:clamp(30px,4.2vw,74px);
+  line-height:.92;
+  letter-spacing:-.07em;
+}
+.jc123-lobby-hero p,.jc123-theme-upgrade p{color:var(--muted);max-width:620px;line-height:1.6}
+.jc123-source-logos{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+.jc123-source-logos span,
+.jc123-theme-grid button{
+  min-height:72px;
+  border-radius:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.13);
+  color:#fff;
+}
+body.jc123-shell.jc123-room-mode .topbar{display:none!important}
+body.jc123-shell.jc123-room-mode .app{
+  display:block!important;
+  transform:none!important;
+  min-height:100vh;
+  padding:0!important;
+}
+body.jc123-shell.jc123-room-mode .rail{display:none!important}
+body.jc123-shell.jc123-room-mode .content{padding:0!important;max-width:none!important}
+body.jc123-shell.jc123-room-mode .active-room-shell{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 340px!important;
+  gap:0!important;
+  min-height:100vh;
+  padding-top:75px;
+}
+.jc123-rave-room-bar{
+  position:fixed;
+  top:0;left:0;right:0;
+  height:75px;
+  z-index:80;
+  display:grid;
+  grid-template-columns:82px 82px 82px 1fr 82px 82px 82px;
+  align-items:center;
+  background:linear-gradient(180deg, rgba(45,35,34,.74), rgba(14,14,18,.50));
+  border-bottom:1px solid rgba(255,255,255,.24);
+  backdrop-filter:blur(28px) saturate(145%);
+}
+.jc123-rave-logo{
+  justify-self:center;
+  font-size:44px;
+  font-weight:1000;
+  letter-spacing:-.07em;
+  text-transform:lowercase;
+  text-shadow:0 0 28px rgba(255,255,255,.25);
+}
+.jc123-rave-logo span{font-size:14px;letter-spacing:.22em;text-transform:uppercase;color:var(--primary);margin-left:8px}
+.jc123-icon{
+  width:100%;height:75px;
+  border:0;
+  background:transparent;
+  color:#fff;
+  font-size:30px;
+  cursor:pointer;
+  text-shadow:0 8px 22px rgba(0,0,0,.5);
+}
+.jc123-icon:hover{background:rgba(255,255,255,.08)}
+body.jc123-shell.jc123-room-mode .room-player-column{padding:0!important}
+body.jc123-shell.jc123-room-mode .room-topline{
+  position:absolute!important;
+  top:90px!important;left:26px!important;right:372px!important;
+  z-index:20;
+  padding:0!important;
+  pointer-events:none;
+}
+body.jc123-shell.jc123-room-mode .player-frame{
+  height:calc(100vh - 75px)!important;
+  min-height:520px!important;
+  border-radius:0!important;
+  border-left:0!important;
+  border-bottom:0!important;
+}
+body.jc123-shell.jc123-room-mode .player-toolbar{
+  bottom:28px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  background:rgba(20,18,20,.58)!important;
+  border:1px solid rgba(255,255,255,.18)!important;
+  border-radius:999px!important;
+  backdrop-filter:blur(22px)!important;
+}
+body.jc123-shell.jc123-room-mode .room-chat-column{
+  padding:0!important;
+  min-height:calc(100vh - 75px)!important;
+  border-left:1px solid rgba(255,255,255,.18);
+}
+body.jc123-shell.jc123-room-mode .chat-card{
+  height:calc(100vh - 75px)!important;
+  min-height:0!important;
+  border-radius:0!important;
+  border-right:0!important;
+  border-top:0!important;
+  border-bottom:0!important;
+  background:rgba(22,18,24,.48)!important;
+}
+body.jc123-chat-collapsed .room-chat-column{display:none!important}
+body.jc123-chat-collapsed .active-room-shell{grid-template-columns:1fr!important}
+.jc123-theme-upgrade{padding:24px;margin-bottom:18px;border-radius:32px}
+.jc123-theme-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}
+.jc123-theme-grid button{cursor:pointer;font-size:16px}
+.jc123-theme-grid button:hover{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary) inset}
+body.jc123-shell::after{content:"123 RAVE DESKTOP"!important;}
+@media (max-width:1180px){
+  body.jc123-shell.jc123-room-mode .active-room-shell{grid-template-columns:minmax(0,1fr) 310px!important}
+  .jc123-lobby-hero{grid-template-columns:1fr}.jc123-source-logos{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:900px){
+  body.jc123-shell.jc123-room-mode .active-room-shell{display:block!important;padding-top:64px}
+  .jc123-rave-room-bar{height:64px;grid-template-columns:56px 56px 56px 1fr 56px 56px 56px}
+  .jc123-rave-logo{font-size:32px}.jc123-rave-logo span{display:none}.jc123-icon{height:64px;font-size:22px}
+  body.jc123-shell.jc123-room-mode .player-frame{height:62vh!important}
+  body.jc123-shell.jc123-room-mode .chat-card{height:38vh!important}
+  .jc123-theme-grid{grid-template-columns:1fr}.jc123-source-logos{grid-template-columns:1fr}
 }
