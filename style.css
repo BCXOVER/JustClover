@@ -3336,8 +3336,8 @@ html::after{
 
 
 /* =========================================================
-   JustClover Stage 112 — Real Stable Player Dock
-   Version: stage112-chat-wallpaper-reset-stable-20260503-1
+   JustClover Stage 113 — Real Stable Player Dock
+   Version: stage113-emergency-rollback-player-stable-20260503-1
 
    One stable active-room layout:
    topbar / player / real bottom controls / chat.
@@ -3745,8 +3745,8 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
 
 
 /* =========================================================
-   JustClover Stage 112 — Player Mic Overlay
-   Version: stage112-chat-wallpaper-reset-stable-20260503-1
+   JustClover Stage 113 — Player Mic Overlay
+   Version: stage113-emergency-rollback-player-stable-20260503-1
 
    Keep Stage80 stable layout. Remove chat button from the lower dock and move
    mic control inside the player so it remains available in fullscreen.
@@ -3895,7 +3895,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc81PlayerMic{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage112-chat-wallpaper-reset-stable-20260503-1
+   Version: stage113-emergency-rollback-player-stable-20260503-1
 
    Keep Stage80 layout. Mic is mounted on .watch-main, not inside the iframe
    and not hidden by old jc67 player-child rules, so it remains visible in
@@ -4068,7 +4068,7 @@ body.jc80-real-dock .watch-main #jc82PlayerMic[hidden]{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage112-chat-wallpaper-reset-stable-20260503-1
+   Version: stage113-emergency-rollback-player-stable-20260503-1
    Put mic back into bottom dock; hide overlay mic; hide chat.
    ========================================================= */
 html::after{ content:'88 ICONMIC'!important; }
@@ -4231,7 +4231,7 @@ body.jc88-icon-mic-dock #jc86FullscreenProxy{
 
 /* =========================================================
    JustClover Stage 89 — Glass Chat + Dock Transparency
-   Version: stage112-chat-wallpaper-reset-stable-20260503-1
+   Version: stage113-emergency-rollback-player-stable-20260503-1
 
    Keep Stage88 active layout and mic dock behavior.
    Make the strip under the player translucent so the live background can show
@@ -4352,7 +4352,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
 
 /* =========================================================
    JustClover Stage 93 — Player Recovery Safe Glass
-   Version: stage112-chat-wallpaper-reset-stable-20260503-1
+   Version: stage113-emergency-rollback-player-stable-20260503-1
 
    Recovery from Stage92: do not add background JS, do not touch iframe/video,
    do not create extra live background layers over/under the player. Only safe
@@ -4427,188 +4427,26 @@ body.jc80-real-dock .chat-card [contenteditable="true"]{
   border-color:rgba(255,255,255,.14)!important;
 }
 
-/* =========================================================
-   JustClover Stage 112 — Chat Wallpaper Reset Stable
-   Version: stage112-chat-wallpaper-reset-stable-20260503-1
-
-   Clean implementation: wallpaper only in the right chat column.
-   No room/dock/topbar/player wallpaper. No video wallpaper. No intervals.
-   ========================================================= */
+/* Stage113 emergency rollback badge / cleanup */
 html::after{
-  content:'112 RESETBG'!important;
+  content:'113 ROLLBACK'!important;
   position:fixed!important;
   left:12px!important;
   bottom:10px!important;
   z-index:2147483647!important;
-  padding:5px 10px!important;
+  padding:4px 10px!important;
   border-radius:999px!important;
   background:#22c55e!important;
-  color:#02130a!important;
-  font:800 12px/1.1 Inter,Segoe UI,Arial,sans-serif!important;
-  box-shadow:0 8px 24px rgba(0,0,0,.28)!important;
-  pointer-events:none!important;
+  color:#031207!important;
+  font:800 12px/1.2 Inter,Segoe UI,Arial,sans-serif!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.25)!important;
 }
-
-:root{
-  --jc112-chat-bg-image:none;
-  --jc112-chat-dim:.26;
-  --jc112-chat-alpha:.20;
-  --jc112-chat-form-alpha:.24;
-  --jc112-chat-blur:12px;
-}
-
-/* hard cleanup for previous failed wallpaper stages if browser cached CSS/classes */
-#jc90RoomBg,#jc91RoomBg,#jc92RoomBg,#jc95RoomVideoBg,#jc96RoomBg,#jc98RoomBg,#jc105RoomBg,
-#jc111ChatWallpaperLayer,#jc110ChatWallpaperLayer,#jc112UnusedLayer,
-.jc99SurfaceBg,.jc101SurfaceBg,.jc110ChatWallpaperLayer,.jc111ChatWallpaperLayer{
+#jc90RoomBg,#jc91RoomBg,#jc92RoomBg,#jc96RoomBg,#jc98RoomBg,#jc105RoomBg,
+#jc109ChatBg,#jc110ChatBg,#jc111ChatBg,#jc112ChatBg,
+.jc99SurfaceBg,.jc101SurfaceBg,.jc105SurfaceBg,.jc109ChatWallpaperLayer,
+.jc110ChatWallpaperLayer,.jc111ChatWallpaperLayer,.jc112ChatWallpaperLayer{
   display:none!important;
   visibility:hidden!important;
   opacity:0!important;
   pointer-events:none!important;
-}
-
-/* Never paint room wallpaper around or inside the playback surface. */
-body.jc112-chat-bg-active #watchSection,
-body.jc112-chat-bg-active .watch-layout,
-body.jc112-chat-bg-active .watch-main,
-body.jc112-chat-bg-active .watch-stage,
-body.jc112-chat-bg-active .player-shell,
-body.jc112-chat-bg-active .player-card,
-body.jc112-chat-bg-active .player-card-redesign{
-  background:transparent!important;
-  background-image:none!important;
-}
-body.jc112-chat-bg-active #jc80Dock,
-body.jc112-chat-bg-active #jc80Dock .jc80-dock-inner{
-  background-image:none!important;
-}
-body.jc112-chat-bg-active #jc80Dock{
-  background:rgba(5,7,14,.88)!important;
-  border-top:1px solid rgba(255,255,255,.08)!important;
-  backdrop-filter:blur(8px) saturate(120%)!important;
-  -webkit-backdrop-filter:blur(8px) saturate(120%)!important;
-}
-body.jc112-chat-bg-active .topbar,
-body.jc112-chat-bg-active #jc51RaveTopbar{
-  background-image:none!important;
-}
-body.jc112-chat-bg-active .player-frame,
-body.jc112-chat-bg-active .player-frame iframe,
-body.jc112-chat-bg-active .player-frame video,
-body.jc112-chat-bg-active .player-frame .embed-box,
-body.jc112-chat-bg-active #youtubePlayer,
-body.jc112-chat-bg-active #iframePlayer,
-body.jc112-chat-bg-active #videoPlayer{
-  background:#000!important;
-  background-image:none!important;
-  backdrop-filter:none!important;
-  -webkit-backdrop-filter:none!important;
-  filter:none!important;
-}
-
-/* The only surface that receives the wallpaper: the right chat column. */
-body.jc112-chat-bg-active .watch-sidebar{
-  background-image:
-    linear-gradient(180deg, rgba(5,8,18,var(--jc112-chat-dim)), rgba(5,8,18,calc(var(--jc112-chat-dim) + .16))),
-    var(--jc112-chat-bg-image)!important;
-  background-size:cover!important;
-  background-position:center center!important;
-  background-repeat:no-repeat!important;
-  background-attachment:scroll!important;
-  border-left:1px solid rgba(255,255,255,.12)!important;
-  backdrop-filter:blur(var(--jc112-chat-blur)) saturate(140%)!important;
-  -webkit-backdrop-filter:blur(var(--jc112-chat-blur)) saturate(140%)!important;
-  overflow:hidden!important;
-  isolation:isolate!important;
-}
-body.jc112-chat-bg-active .watch-sidebar .chat-card,
-body.jc112-chat-bg-active .watch-sidebar .side-card{
-  background:rgba(6,9,18,var(--jc112-chat-alpha))!important;
-  background-image:none!important;
-  border:1px solid rgba(255,255,255,.14)!important;
-  box-shadow:0 16px 40px rgba(0,0,0,.18)!important;
-  backdrop-filter:blur(calc(var(--jc112-chat-blur) * .8)) saturate(135%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc112-chat-blur) * .8)) saturate(135%)!important;
-}
-body.jc112-chat-bg-active .chat-card .side-card-head,
-body.jc112-chat-bg-active .chat-card .messages,
-body.jc112-chat-bg-active .chat-card #chatMessages,
-body.jc112-chat-bg-active .chat-card .empty-state,
-body.jc112-chat-bg-active .chat-card .message-list{
-  background:transparent!important;
-  background-image:none!important;
-}
-body.jc112-chat-bg-active .chat-card #chatForm,
-body.jc112-chat-bg-active .chat-card .message-form{
-  background:rgba(6,9,18,var(--jc112-chat-form-alpha))!important;
-  background-image:none!important;
-  border-color:rgba(255,255,255,.13)!important;
-  backdrop-filter:blur(calc(var(--jc112-chat-blur) * .7)) saturate(130%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc112-chat-blur) * .7)) saturate(130%)!important;
-}
-body.jc112-chat-bg-active .chat-card input,
-body.jc112-chat-bg-active .chat-card textarea,
-body.jc112-chat-bg-active .chat-card [contenteditable="true"],
-body.jc112-chat-bg-active .chat-card .message-input{
-  background:rgba(255,255,255,.08)!important;
-  border-color:rgba(255,255,255,.15)!important;
-}
-
-/* Settings block */
-#jc112ChatWallpaperCard{
-  margin-top:18px;
-  overflow:hidden;
-}
-#jc112ChatWallpaperCard .jc112-grid{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(280px,.82fr);
-  gap:18px;
-  align-items:stretch;
-}
-#jc112ChatWallpaperCard .jc112-controls{
-  display:grid;
-  gap:12px;
-}
-#jc112ChatWallpaperCard .jc112-row{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-#jc112ChatWallpaperCard .jc112-preview{
-  min-height:180px;
-  border-radius:22px;
-  border:1px solid rgba(255,255,255,.12);
-  background-image:linear-gradient(180deg, rgba(5,8,18,.26), rgba(5,8,18,.48)), var(--jc112-chat-bg-image);
-  background-size:cover;
-  background-position:center;
-  display:grid;
-  place-items:center;
-  overflow:hidden;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04), 0 20px 44px rgba(0,0,0,.20);
-}
-#jc112ChatWallpaperCard .jc112-preview span{
-  padding:8px 12px;
-  border-radius:999px;
-  background:rgba(0,0,0,.38);
-  color:#fff;
-  font-weight:800;
-}
-#jc112ChatWallpaperCard input[type="text"]{
-  width:100%;
-}
-#jc112ChatWallpaperCard input[type="range"]{
-  min-width:220px;
-  flex:1 1 220px;
-}
-#jc112ChatWallpaperCard .jc112-status{
-  min-height:20px;
-  color:var(--muted,#a5a8c7);
-  font-size:13px;
-}
-#jc112ChatWallpaperCard .jc112-warning{
-  color:#fca5a5;
-}
-@media(max-width:980px){
-  #jc112ChatWallpaperCard .jc112-grid{grid-template-columns:1fr;}
 }
