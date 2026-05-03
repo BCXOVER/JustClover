@@ -1,4 +1,4 @@
-/* JustClover cache killer stage111-clean-chat-wallpaper-final-20260503-1 */
+/* JustClover cache killer stage112-chat-wallpaper-reset-stable-20260503-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));

@@ -6,7 +6,7 @@
   <title>JustClover</title>
   <meta name="theme-color" content="#080912" />
   <script>
-    window.JUSTCLOVER_BUILD = "stage111-clean-chat-wallpaper-final-20260503-1";
+    window.JUSTCLOVER_BUILD = "stage112-chat-wallpaper-reset-stable-20260503-1";
   </script>
   <style>
     html,body{margin:0;min-height:100%;background:#06070d;color:#f5f7ff;font-family:Inter,Segoe UI,Arial,sans-serif}
@@ -18,8 +18,8 @@
 <body>
   <div class="jc40-loader">
     <div class="jc40-loader-card">
-      <b>JustClover Stage 94</b>
-      <p>Загружаю стабильную версию: активный просмотр и чистое оформление чата без нагрузки на плеер…</p>
+      <b>JustClover Stage 112</b>
+      <p>Загружаю стабильную версию: активный просмотр, чат и нижняя панель без JS-дергания плеера…</p>
     </div>
   </div>
 
@@ -27,7 +27,7 @@
     (async function(){
       const BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
       const BASE_VERSION = "stage37-catalog-hard-scroll-fix-20260502-1";
-      const BUILD = "stage111-clean-chat-wallpaper-final-20260503-1";
+      const BUILD = "stage112-chat-wallpaper-reset-stable-20260503-1";
       const BASE_INDEX = "https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@" + BASE_COMMIT + "/index.html";
 
       try {
@@ -51,15 +51,15 @@
         if (!res.ok) throw new Error("Не удалось загрузить базовый index: " + res.status);
         let html = await res.text();
         html = html.replaceAll(BASE_VERSION, BUILD);
-        html = html.replace(/37 HARD/g, "74 FIXEDPLAYER");
+        html = html.replace(/37 HARD/g, "112 CHATBG");
         html = html.replace(/Stage 37 HARD/g, "Stage 50 ACTIVE");
 
         document.open();
         document.write(html);
         document.close();
       } catch (e) {
-        console.error("JustClover Stage 94 boot failed", e);
-        document.body.innerHTML = '<div class="jc40-loader"><div class="jc40-loader-card"><b>Stage 94 не загрузился</b><p>' + String(e.message || e) + '</p><p>Проверь интернет/CDN или загрузи предыдущий архив.</p></div></div>';
+        console.error("JustClover Stage 112 boot failed", e);
+        document.body.innerHTML = '<div class="jc40-loader"><div class="jc40-loader-card"><b>Stage 112 не загрузился</b><p>' + String(e.message || e) + '</p><p>Проверь интернет/CDN или загрузи предыдущий архив.</p></div></div>';
       }
     })();
   </script>
