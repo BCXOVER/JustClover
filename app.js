@@ -1,12 +1,12 @@
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage95-room-local-wallpaper-fix-20260503-1
+   Version: stage96-room-wallpaper-apply-fix-20260503-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage95-room-local-wallpaper-fix-20260503-1";
+const JC40_BUILD = "stage96-room-wallpaper-apply-fix-20260503-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
@@ -626,10 +626,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage95-room-local-wallpaper-fix-20260503-1
+   Version: stage96-room-wallpaper-apply-fix-20260503-1
    ========================================================= */
 (function(){
-  const BUILD = "stage95-room-local-wallpaper-fix-20260503-1";
+  const BUILD = "stage96-room-wallpaper-apply-fix-20260503-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1156,7 +1156,7 @@ try{
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage95-room-local-wallpaper-fix-20260503-1";
+  const BUILD = "stage96-room-wallpaper-apply-fix-20260503-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1394,7 +1394,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage95-room-local-wallpaper-fix-20260503-1";
+  const BUILD = "stage96-room-wallpaper-apply-fix-20260503-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1692,7 +1692,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage95-room-local-wallpaper-fix-20260503-1';
+  const BUILD = 'stage96-room-wallpaper-apply-fix-20260503-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1873,7 +1873,7 @@ try{
    когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
    ========================================================= */
 (function(){
-  const BUILD = "stage95-room-local-wallpaper-fix-20260503-1";
+  const BUILD = "stage96-room-wallpaper-apply-fix-20260503-1";
   const CHECK_EVERY_MS = 15000;
   const FIRST_CHECK_MS = 4500;
   const RELOAD_DELAY_MS = 1800;
@@ -1986,13 +1986,13 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Real Stable Player Dock
-   Version: stage95-room-local-wallpaper-fix-20260503-1
+   Version: stage96-room-wallpaper-apply-fix-20260503-1
 
    No player resize loop. No fixed/cover iframe fighting.
    JS only creates bottom buttons and toggles the stable CSS class.
    ========================================================= */
 (function(){
-  const BUILD = 'stage95-room-local-wallpaper-fix-20260503-1';
+  const BUILD = 'stage96-room-wallpaper-apply-fix-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2190,13 +2190,13 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Player Mic Overlay
-   Version: stage95-room-local-wallpaper-fix-20260503-1
+   Version: stage96-room-wallpaper-apply-fix-20260503-1
 
    Adds a clear mic toggle inside the player and removes the chat action from
    the bottom dock. Does not change auth, chat DOM, source logic, or player fit.
    ========================================================= */
 (function(){
-  const BUILD = 'stage95-room-local-wallpaper-fix-20260503-1';
+  const BUILD = 'stage96-room-wallpaper-apply-fix-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2361,14 +2361,14 @@ try{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage95-room-local-wallpaper-fix-20260503-1
+   Version: stage96-room-wallpaper-apply-fix-20260503-1
 
    Adds a robust mic control mounted on .watch-main. It is not a child of the
    YouTube iframe/player element and therefore remains visible in JustClover
    site fullscreen. No player scale/fit logic is changed.
    ========================================================= */
 (function(){
-  const BUILD = 'stage95-room-local-wallpaper-fix-20260503-1';
+  const BUILD = 'stage96-room-wallpaper-apply-fix-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2561,7 +2561,7 @@ try{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage95-room-local-wallpaper-fix-20260503-1
+   Version: stage96-room-wallpaper-apply-fix-20260503-1
 
    Keep Stage80 layout. Put mic back into the bottom dock next to sources and
    fullscreen, keep chat hidden, and mirror voice state on the dock button.
@@ -2569,7 +2569,7 @@ try{
    inside the YouTube/VK iframe cannot show external DOM controls.
    ========================================================= */
 (function(){
-  const BUILD = 'stage95-room-local-wallpaper-fix-20260503-1';
+  const BUILD = 'stage96-room-wallpaper-apply-fix-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2738,11 +2738,11 @@ try{
 
 /* =========================================================
    JustClover Stage 89 — Glass Chat + Dock Transparency
-   Version: stage95-room-local-wallpaper-fix-20260503-1
+   Version: stage96-room-wallpaper-apply-fix-20260503-1
    Small runtime marker/debug only; no layout JS hacks added.
    ========================================================= */
 (()=>{
-  const BUILD = 'stage95-room-local-wallpaper-fix-20260503-1';
+  const BUILD = 'stage96-room-wallpaper-apply-fix-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc89GlassDebug = function(){
     const dock = document.getElementById('jc80Dock');
@@ -2768,11 +2768,11 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Player Recovery Safe Glass
-   Version: stage95-room-local-wallpaper-fix-20260503-1
+   Version: stage96-room-wallpaper-apply-fix-20260503-1
    Debug marker only. No background/player mutation.
    ========================================================= */
 (()=>{
-  const BUILD = 'stage95-room-local-wallpaper-fix-20260503-1';
+  const BUILD = 'stage96-room-wallpaper-apply-fix-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc93RecoveryDebug = function(){
     const q = s => document.querySelector(s);
@@ -2793,14 +2793,14 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Room Appearance Wallpapers
-   Version: stage95-room-local-wallpaper-fix-20260503-1
+   Version: stage96-room-wallpaper-apply-fix-20260503-1
 
    Adds “Оформление комнаты” settings. Safe only: no iframe/video/player-frame
    mutation, no background layers over the player. Uses CSS variables and
    localStorage to paint dock/chat/topbar/watch-main surfaces.
    ========================================================= */
 (function(){
-  const BUILD = 'stage95-room-local-wallpaper-fix-20260503-1';
+  const BUILD = 'stage96-room-wallpaper-apply-fix-20260503-1';
   const LS = {
     enabled:'jc94-room-wallpaper-enabled',
     wallpaper:'jc94-room-wallpaper',
@@ -3067,7 +3067,7 @@ try{
 
 /* =========================================================
    JustClover Stage 95 — Local Room Wallpaper Fix
-   Version: stage95-room-local-wallpaper-fix-20260503-1
+   Version: stage96-room-wallpaper-apply-fix-20260503-1
 
    Fixes local file upload in “Оформление в комнате”. Supports:
    - images: GIF / WebP / PNG / JPG / SVG
@@ -3077,7 +3077,7 @@ try{
    video is a separate muted fixed layer behind room UI surfaces only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage95-room-local-wallpaper-fix-20260503-1';
+  const BUILD = 'stage96-room-wallpaper-apply-fix-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS = {
@@ -3297,6 +3297,187 @@ try{
       dockBg: css(document.getElementById('jc80Dock'))?.backgroundImage || '',
       sidebarBg: css(document.querySelector('.watch-sidebar'))?.backgroundImage || '',
       playerFrameVisible: (() => { const el = document.querySelector('.player-frame'); return !!el && css(el).display !== 'none' && css(el).visibility !== 'hidden'; })()
+    };
+  };
+})();
+
+/* =========================================================
+   JustClover Stage 96 — Room Wallpaper Apply Fix
+   Version: stage96-room-wallpaper-apply-fix-20260503-1
+
+   Mount selected room wallpaper inside the active watch layout. This fixes the
+   case where a local file appears in the Appearance preview but not in the room.
+   No player iframe/video/source/auth/chat handlers are touched.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage96-room-wallpaper-apply-fix-20260503-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+
+  const LS = {
+    enabled:'jc94-room-wallpaper-enabled',
+    wallpaper:'jc94-room-wallpaper',
+    preset:'jc94-room-wallpaper-preset',
+    localKind:'jc95-room-local-kind',
+    localName:'jc95-room-local-name',
+    dim:'jc94-room-wallpaper-dim',
+    blur:'jc94-room-wallpaper-blur',
+    glass:'jc94-room-wallpaper-glass'
+  };
+
+  const PRESET_BG = {
+    menu:'radial-gradient(circle at 42% 16%, rgba(139,92,246,.32), transparent 36%), radial-gradient(circle at 82% 72%, rgba(236,72,153,.22), transparent 42%), linear-gradient(135deg, rgba(8,10,22,.96), rgba(24,14,33,.94))',
+    aurora:'radial-gradient(circle at 20% 24%, rgba(34,211,238,.30), transparent 38%), radial-gradient(circle at 74% 18%, rgba(168,85,247,.34), transparent 36%), radial-gradient(circle at 82% 82%, rgba(34,197,94,.18), transparent 44%), linear-gradient(135deg, #050816, #160d23)',
+    crimson:'radial-gradient(circle at 22% 28%, rgba(244,63,94,.34), transparent 38%), radial-gradient(circle at 76% 72%, rgba(168,85,247,.22), transparent 42%), linear-gradient(135deg, #09070c, #241018)',
+    clover:'radial-gradient(circle at 18% 22%, rgba(34,197,94,.26), transparent 38%), radial-gradient(circle at 80% 70%, rgba(20,184,166,.24), transparent 44%), linear-gradient(135deg, #040b0b, #111827)'
+  };
+
+  let lastVideoSrc = '';
+  let raf = 0;
+
+  function get(k, fallback=''){
+    try { return localStorage.getItem(k) ?? fallback; } catch(_) { return fallback; }
+  }
+  function set(k,v){
+    try { localStorage.setItem(k,v); return true; } catch(_) { return false; }
+  }
+  function cssUrl(value){
+    const raw = String(value || '').trim();
+    if(!raw) return '';
+    if(raw.startsWith('radial-gradient') || raw.startsWith('linear-gradient')) return raw;
+    return `url("${raw.replace(/\\/g,'\\\\').replace(/"/g,'\\"')}")`;
+  }
+  function activeRoom(){
+    const app = document.getElementById('appView');
+    const watch = document.getElementById('watchSection');
+    const auth = window.__jc62IsAuthScreen?.();
+    return !auth && !!app && !app.classList.contains('hidden') && !!watch && watch.classList.contains('active');
+  }
+  function enabled(){ return get(LS.enabled,'1') !== '0'; }
+  function presetBg(){ return PRESET_BG[get(LS.preset,'menu')] || PRESET_BG.menu; }
+  function currentKind(){ return window.__jc95RoomWallpaperKind || get(LS.localKind,'') || ''; }
+  function currentUrl(){
+    return window.__jc95RoomWallpaperUrl || get(LS.wallpaper,'') || '';
+  }
+  function currentImage(){
+    const url = currentUrl();
+    const kind = currentKind();
+    if(url && kind !== 'video') return url;
+    return get(LS.wallpaper,'') || presetBg();
+  }
+  function ensureLayer(){
+    const layout = document.querySelector('.watch-layout');
+    if(!layout) return null;
+    let layer = document.getElementById('jc96RoomBg');
+    if(!layer){
+      layer = document.createElement('div');
+      layer.id = 'jc96RoomBg';
+      layer.setAttribute('aria-hidden','true');
+      layer.innerHTML = '<video id="jc96RoomBgVideo" muted loop autoplay playsinline></video>';
+    }
+    if(layer.parentNode !== layout) layout.prepend(layer);
+    const v = layer.querySelector('#jc96RoomBgVideo');
+    if(v){
+      v.muted = true;
+      v.loop = true;
+      v.autoplay = true;
+      v.playsInline = true;
+      v.setAttribute('muted','');
+      v.setAttribute('playsinline','');
+      v.setAttribute('aria-hidden','true');
+      v.tabIndex = -1;
+    }
+    return layer;
+  }
+  function syncVars(){
+    const root = document.documentElement;
+    const dim = Math.min(.82, Math.max(.05, Number(get(LS.dim,'.34')) || .34));
+    const blur = Math.min(28, Math.max(0, Number(get(LS.blur,'14')) || 14));
+    const glass = Math.min(.88, Math.max(.12, Number(get(LS.glass,'.38')) || .38));
+    root.style.setProperty('--jc94-room-dim', String(dim));
+    root.style.setProperty('--jc94-room-blur', `${blur}px`);
+    root.style.setProperty('--jc94-room-glass', `rgba(8,10,18,${glass})`);
+    root.style.setProperty('--jc96-room-image', cssUrl(currentImage()));
+  }
+  function syncVideo(layer){
+    const kind = currentKind();
+    const url = currentUrl();
+    const v = layer?.querySelector?.('#jc96RoomBgVideo');
+    const on = enabled() && activeRoom() && kind === 'video' && !!url;
+    document.body?.classList?.toggle('jc96-room-video-on', on);
+    if(!v) return;
+    if(on){
+      if(lastVideoSrc !== url){
+        lastVideoSrc = url;
+        v.src = url;
+        try { v.load(); } catch(_) {}
+      }
+      v.play?.().catch(()=>{});
+    }else{
+      try { v.pause(); } catch(_) {}
+    }
+  }
+  function sync(){
+    raf = 0;
+    syncVars();
+    const on = enabled() && activeRoom();
+    document.body?.classList?.toggle('jc96-room-bg-on', on);
+    document.body?.classList?.toggle('jc94-room-wallpaper', on);
+    document.body?.classList?.toggle('jc95-room-local-wallpaper', on && !!currentUrl());
+    const layer = ensureLayer();
+    if(layer) layer.hidden = !on;
+    syncVideo(layer);
+  }
+  function schedule(){
+    if(!raf) raf = requestAnimationFrame(sync);
+  }
+
+  // After Stage95 processes a selected file, it exposes window.__jc95RoomWallpaperUrl.
+  // We sync after the same user action instead of listening to the file event directly,
+  // because Stage95 intentionally stops the old image-only handler.
+  document.addEventListener('click', () => setTimeout(schedule, 80), true);
+  document.addEventListener('change', () => setTimeout(schedule, 120), true);
+  document.addEventListener('input', e => {
+    if(e.target?.closest?.('#jc94RoomDim,#jc94RoomBlur,#jc94RoomGlass,#jc94RoomEnabled,#jc94RoomUrl')) setTimeout(schedule, 40);
+  }, true);
+  window.addEventListener('storage', schedule);
+  window.addEventListener('resize', schedule, {passive:true});
+  document.addEventListener('visibilitychange', schedule, true);
+  const observe = () => {
+    [document.body, document.getElementById('appView'), document.getElementById('watchSection')].filter(Boolean).forEach(el => {
+      if(el.__jc96RoomBgObs) return;
+      const mo = new MutationObserver(schedule);
+      mo.observe(el, {attributes:true, attributeFilter:['class','style']});
+      el.__jc96RoomBgObs = mo;
+    });
+  };
+  [0,80,240,700,1300,2200].forEach(ms => setTimeout(() => { observe(); schedule(); }, ms));
+
+  window.jc96RoomWallpaperDebug = function(){
+    const q = s => document.querySelector(s);
+    const css = el => el ? getComputedStyle(el) : null;
+    const iframe = q('.player-frame iframe, #youtubePlayer iframe, #jc65DirectPlayer');
+    const layer = q('#jc96RoomBg');
+    const video = q('#jc96RoomBgVideo');
+    return {
+      build: BUILD,
+      activeRoom: activeRoom(),
+      enabled: enabled(),
+      bodyClassOn: document.body?.classList?.contains('jc96-room-bg-on'),
+      videoClassOn: document.body?.classList?.contains('jc96-room-video-on'),
+      kind: currentKind(),
+      url: currentUrl(),
+      localName: window.__jc95RoomWallpaperName || get(LS.localName,''),
+      layerExists: !!layer,
+      layerParent: layer?.parentElement?.className || layer?.parentElement?.id || '',
+      layerHidden: !!layer?.hidden,
+      layerBg: css(layer)?.backgroundImage || '',
+      videoExists: !!video,
+      videoSrc: video?.src || '',
+      videoPaused: video?.paused ?? null,
+      dockBg: css(q('#jc80Dock'))?.backgroundColor + ' / ' + (css(q('#jc80Dock'))?.backgroundImage || ''),
+      sidebarBg: css(q('.watch-sidebar'))?.backgroundColor + ' / ' + (css(q('.watch-sidebar'))?.backgroundImage || ''),
+      playerFrameVisible: (() => { const el = q('.player-frame'); const s = css(el); return !!el && s.display !== 'none' && s.visibility !== 'hidden'; })(),
+      iframeVisible: (() => { const s = css(iframe); return !!iframe && s.display !== 'none' && s.visibility !== 'hidden'; })()
     };
   };
 })();

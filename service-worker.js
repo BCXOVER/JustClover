@@ -1,4 +1,4 @@
-/* JustClover cache killer stage95-room-local-wallpaper-fix-20260503-1 */
+/* JustClover cache killer stage96-room-wallpaper-apply-fix-20260503-1 */
 self.addEventListener('install', event => { self.skipWaiting(); });
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
