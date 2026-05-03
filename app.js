@@ -27,7 +27,7 @@ import {
   equalTo
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
-const BUILD = "stage116-gif-button-dialog-stable-20260503-1";
+const BUILD = "stage117-giphy-picker-restore-stable-20260503-1";
 console.log("JustClover loaded:", BUILD, "— emergency static build, no CDN loader, no wallpaper experiments");
 window.JUSTCLOVER_BUILD = BUILD;
 
@@ -809,37 +809,70 @@ async function applyPlayback(playback) {
 
 function isChatImageUrl(value) {
   try {
-    const url = new URL(String(value || '').trim());
+    const raw = String(value || '').trim();
+    const url = new URL(raw);
     if (!['http:', 'https:', 'blob:', 'data:'].includes(url.protocol)) return false;
     if (url.protocol === 'data:') return /^data:image\/(gif|webp|png|jpe?g);base64,/i.test(url.href);
-    return /\.(gif|webp|png|jpe?g|bmp|svg)(\?|#|$)/i.test(url.pathname) || /media\.tenor\.com|c.tenor\.com|giphy\.com|media\.giphy\.com|i\.imgur\.com/i.test(url.hostname);
+    const host = url.hostname.toLowerCase();
+    const path = url.pathname.toLowerCase();
+    if (/\.(gif|webp|png|jpe?g|bmp|svg)(\?|#|$)/i.test(url.pathname)) return true;
+    return /(^|\.)giphy\.com$/i.test(host)
+      || /(^|\.)tenor\.com$/i.test(host)
+      || /(^|\.)imgur\.com$/i.test(host)
+      || /(^|\.)gifer\.com$/i.test(host)
+      || /media\d*\.giphy\.com$/i.test(host)
+      || /media\.tenor\.com$/i.test(host)
+      || /c\.tenor\.com$/i.test(host)
+      || /i\.imgur\.com$/i.test(host)
+      || path.includes('/media/');
   } catch (_) {
     return false;
   }
+}
+function extractGiphyId(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  try {
+    const url = new URL(raw);
+    const host = url.hostname.toLowerCase();
+    const parts = url.pathname.split('/').filter(Boolean).map(part => decodeURIComponent(part));
+    const mediaIndex = parts.indexOf('media');
+    if (mediaIndex >= 0 && parts[mediaIndex + 1]) return parts[mediaIndex + 1].replace(/[^A-Za-z0-9_-]/g, '');
+    const embedIndex = parts.indexOf('embed');
+    if (embedIndex >= 0 && parts[embedIndex + 1]) return parts[embedIndex + 1].replace(/[^A-Za-z0-9_-]/g, '');
+    if ((host === 'giphy.com' || host.endsWith('.giphy.com')) && parts.length) {
+      const last = parts[parts.length - 1].split('?')[0].split('#')[0];
+      const byDash = last.match(/-([A-Za-z0-9_-]{6,})$/);
+      if (byDash) return byDash[1];
+      const plain = last.match(/^([A-Za-z0-9_-]{6,})$/);
+      if (plain) return plain[1];
+    }
+    const textMatch = raw.match(/(?:giphy\.com\/(?:gifs|clips|embed|media)\/|media\d*\.giphy\.com\/media\/)([A-Za-z0-9_-]{6,})/i);
+    if (textMatch) return textMatch[1];
+  } catch (_) {
+    const textMatch = raw.match(/(?:giphy\.com\/(?:gifs|clips|embed|media)\/|media\d*\.giphy\.com\/media\/)([A-Za-z0-9_-]{6,})/i);
+    if (textMatch) return textMatch[1];
+  }
+  return '';
 }
 function normalizeChatMediaUrl(value) {
   let raw = String(value || '').trim();
   if (!raw) return '';
   try {
+    // Giphy page/embed/media URL -> direct GIF URL.
+    const giphyId = extractGiphyId(raw);
+    if (giphyId) raw = `https://media.giphy.com/media/${giphyId}/giphy.gif`;
+
     const url = new URL(raw);
     if (!['http:', 'https:', 'blob:', 'data:'].includes(url.protocol)) return '';
-    if (url.protocol === 'http:' || url.protocol === 'https:') {
-      const host = url.hostname.toLowerCase();
-      const path = url.pathname;
-      // Giphy page URL -> direct GIF URL. Example: https://giphy.com/gifs/name-ABC123
-      if ((host === 'giphy.com' || host.endsWith('.giphy.com')) && path.includes('/gifs/')) {
-        const last = decodeURIComponent(path.split('/').filter(Boolean).pop() || '');
-        const id = (last.match(/-([A-Za-z0-9]+)$/) || last.match(/^([A-Za-z0-9]+)$/) || [])[1];
-        if (id) raw = `https://media.giphy.com/media/${id}/giphy.gif`;
-      }
-      // Giphy media URL without direct file -> direct GIF URL.
-      const mediaMatch = raw.match(/giphy\.com\/media\/([A-Za-z0-9]+)(?:\/|$)/i);
-      if (mediaMatch && !/\.gif(?:\?|#|$)/i.test(raw)) raw = `https://media.giphy.com/media/${mediaMatch[1]}/giphy.gif`;
+    const host = url.hostname.toLowerCase();
+    // Normalize media0/media1/etc to the stable media.giphy host only when needed.
+    if (/media\d+\.giphy\.com$/i.test(host)) {
+      const id = extractGiphyId(url.href);
+      if (id) return `https://media.giphy.com/media/${id}/giphy.gif`;
     }
-    const finalUrl = new URL(raw);
-    if (!['http:', 'https:', 'blob:', 'data:'].includes(finalUrl.protocol)) return '';
-    if (!isChatImageUrl(finalUrl.href)) return '';
-    return finalUrl.href;
+    if (!isChatImageUrl(url.href)) return '';
+    return url.href;
   } catch (_) {
     return '';
   }
@@ -910,19 +943,73 @@ function ensureGifDialog() {
     <div class="jc116-gif-modal" role="dialog" aria-modal="true" aria-label="Отправить GIF">
       <button type="button" class="jc116-gif-x" data-jc116-gif-close aria-label="Закрыть">×</button>
       <h3>Отправить GIF</h3>
-      <p>Вставь прямую ссылку на GIF / WebP / PNG / JPG. Ссылки Giphy вида giphy.com/gifs/... тоже поддерживаются.</p>
+      <p>Вставь ссылку Giphy или прямую ссылку на GIF / WebP / PNG / JPG. Giphy теперь автоматически конвертируется в рабочий GIF.</p>
       <input id="jc116GifInput" placeholder="https://media.giphy.com/media/.../giphy.gif" autocomplete="off" />
-      <div class="jc116-gif-preview" id="jc116GifPreview">Preview</div>
+      <div class="jc116-gif-row"><input id="jc117GiphySearch" placeholder="Поиск Giphy: funny, cat, anime..." autocomplete="off" /><button type="button" class="btn soft" id="jc117GiphySearchBtn">Найти</button></div><div class="jc117-giphy-grid" id="jc117GiphyGrid" aria-label="Giphy picker"></div><div class="jc116-gif-preview" id="jc116GifPreview">Preview</div>
       <div class="jc116-gif-actions">
         <button type="button" class="btn soft" data-jc116-gif-close>Отмена</button>
         <button type="button" class="btn primary" id="jc116GifSend">Отправить GIF</button>
       </div>
-      <p class="status" id="jc116GifStatus"></p>
+      <p class="status" id="jc116GifStatus">Можно вставить giphy.com/gifs/... или выбрать GIF ниже.</p>
     </div>`;
   document.body.appendChild(root);
   const input = root.querySelector('#jc116GifInput');
   const preview = root.querySelector('#jc116GifPreview');
   const stat = root.querySelector('#jc116GifStatus');
+  const searchInput = root.querySelector('#jc117GiphySearch');
+  const searchBtn = root.querySelector('#jc117GiphySearchBtn');
+  const grid = root.querySelector('#jc117GiphyGrid');
+  const fallbackGifs = [
+    'https://media.giphy.com/media/111ebonMs90YLu/giphy.gif',
+    'https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif',
+    'https://media.giphy.com/media/13CoXDiaCcCoyk/giphy.gif',
+    'https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif',
+    'https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif',
+    'https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif',
+    'https://media.giphy.com/media/5GoVLqeAOo6PK/giphy.gif',
+    'https://media.giphy.com/media/xT0xeJpnrWC4XWblEk/giphy.gif'
+  ];
+  function pickGif(url) {
+    const mediaUrl = normalizeChatMediaUrl(url);
+    if (!mediaUrl) return;
+    input.value = mediaUrl;
+    renderPreview();
+  }
+  function renderGrid(urls, note = '') {
+    if (!grid) return;
+    const clean = [...new Set((urls || []).map(normalizeChatMediaUrl).filter(Boolean))].slice(0, 12);
+    grid.innerHTML = clean.map((url) => `<button type="button" class="jc117-giphy-tile" data-gif-url="${esc(url)}"><img src="${esc(url)}" alt="GIF" loading="lazy" decoding="async" referrerpolicy="no-referrer"></button>`).join('') || '<div class="status">GIF не найдены.</div>';
+    if (note) stat.textContent = note;
+  }
+  async function searchGiphy(query = '') {
+    const q = String(query || '').trim();
+    if (!q) {
+      renderGrid(fallbackGifs, 'Быстрые GIF готовы. Можно выбрать или вставить ссылку выше.');
+      return;
+    }
+    stat.textContent = 'Ищу GIF...';
+    try {
+      // Public beta key used only as a convenience. If Giphy rejects it, fallback stays working.
+      const url = `https://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&q=${encodeURIComponent(q)}&limit=12&rating=pg-13`;
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error('giphy failed');
+      const data = await res.json();
+      const urls = (data?.data || []).map((item) => item?.images?.fixed_height?.url || item?.images?.downsized_medium?.url || item?.images?.original?.url).filter(Boolean);
+      renderGrid(urls.length ? urls : fallbackGifs, urls.length ? 'Выбери GIF ниже.' : 'Giphy не ответил, показал быстрые GIF.');
+    } catch (_) {
+      renderGrid(fallbackGifs, 'Giphy сейчас недоступен, показал быстрые GIF.');
+    }
+  }
+  grid?.addEventListener('click', (event) => {
+    const tile = event.target?.closest?.('[data-gif-url]');
+    if (!tile) return;
+    pickGif(tile.dataset.gifUrl || '');
+  });
+  searchBtn?.addEventListener('click', () => searchGiphy(searchInput?.value || ''));
+  searchInput?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') { event.preventDefault(); searchGiphy(searchInput.value || ''); }
+  });
+  searchGiphy('');
   function renderPreview() {
     const mediaUrl = normalizeChatMediaUrl(input.value || '');
     if (mediaUrl) {
@@ -945,7 +1032,7 @@ function ensureGifDialog() {
     }
     const mediaUrl = normalizeChatMediaUrl(input.value || '');
     if (!mediaUrl) {
-      stat.textContent = 'Нужна ссылка на GIF / WebP / PNG / JPG. Для Tenor лучше копируй прямую ссылку media.tenor.com.';
+      stat.textContent = 'Нужна ссылка Giphy или прямая ссылка на GIF / WebP / PNG / JPG.';
       return;
     }
     await sendChat('', { mediaUrl });
@@ -1207,7 +1294,7 @@ try {
    No wallpaper code, no reload loop, no CDN index loader.
    ========================================================= */
 (function(){
-  const BUILD = "stage116-gif-button-dialog-stable-20260503-1";
+  const BUILD = "stage117-giphy-picker-restore-stable-20260503-1";
   window.JUSTCLOVER_BUILD = BUILD;
   function cleanupOldWallpaper(){
     document.querySelectorAll('[id^="jc90"],[id^="jc91"],[id^="jc92"],[id^="jc93"],[id^="jc94"],[id^="jc95"],[id^="jc96"],[id^="jc97"],[id^="jc98"],[id^="jc99"],[id^="jc100"],[id^="jc101"],[id^="jc102"],[id^="jc103"],[id^="jc104"],[id^="jc105"],[id^="jc106"],[id^="jc107"],[id^="jc108"],[id^="jc109"],[id^="jc110"],[id^="jc111"],[id^="jc112"],[id^="jc113"],.jc101SurfaceBg,.jc99SurfaceBg,.jc-room-bg,.jc-chat-bg').forEach(el => {
@@ -1240,7 +1327,7 @@ try {
    GIF is chat message only. No wallpapers, no player changes.
    ========================================================= */
 (function(){
-  const BUILD = 'stage116-gif-button-dialog-stable-20260503-1';
+  const BUILD = 'stage117-giphy-picker-restore-stable-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc115GifChatDebug = function(){
     return {
@@ -1262,7 +1349,7 @@ try {
    older cached handlers or DOM re-renders are present.
    ========================================================= */
 (function(){
-  const BUILD = 'stage116-gif-button-dialog-stable-20260503-1';
+  const BUILD = 'stage117-giphy-picker-restore-stable-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   function bootGifButton(){
     try { ensureGifButton(); } catch (_) {}
@@ -1287,6 +1374,28 @@ try {
       chatForm: !!document.getElementById('chatForm'),
       chatInput: !!document.getElementById('chatInput'),
       roomId: currentRoomId || '',
+      playerFrameVisible: !!document.querySelector('.player-frame'),
+      iframeVisible: !!document.querySelector('#youtubePlayer, #iframePlayer, #videoPlayer')
+    };
+  };
+})();
+
+/* =========================================================
+   JustClover Stage 117 — Giphy picker restore debug
+   ========================================================= */
+(function(){
+  const BUILD = 'stage117-giphy-picker-restore-stable-20260503-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+  window.jc117GiphyDebug = function(){
+    return {
+      build: BUILD,
+      gifButton: !!document.querySelector('[data-jc116-gif], [data-jc115-gif-url], .gif-tool'),
+      dialogExists: !!document.getElementById('jc116GifDialog'),
+      giphySearch: !!document.getElementById('jc117GiphySearch'),
+      giphyGrid: !!document.getElementById('jc117GiphyGrid'),
+      normalizeGiphyPage: typeof normalizeChatMediaUrl === 'function' ? normalizeChatMediaUrl('https://giphy.com/gifs/cat-kitten-ICOgUNjpvO0PC') : '',
+      chatForm: !!document.getElementById('chatForm'),
+      roomId: (typeof currentRoomId !== 'undefined' ? currentRoomId : ''),
       playerFrameVisible: !!document.querySelector('.player-frame'),
       iframeVisible: !!document.querySelector('#youtubePlayer, #iframePlayer, #videoPlayer')
     };

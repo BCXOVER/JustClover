@@ -113,7 +113,7 @@ body.player-fullscreen .player-frame{border-radius:0;height:100dvh;min-height:10
    JustClover Stage 114 — emergency static rollback
    ========================================================= */
 html::after{
-  content:'116 GIFOK'!important;
+  content:'117 GIPHY'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -141,7 +141,7 @@ html::after{
    JustClover Stage 115 — safe GIF messages in chat
    ========================================================= */
 html::after{
-  content:'116 GIFOK'!important;
+  content:'117 GIPHY'!important;
   background:rgba(34,197,94,.96)!important;
   color:#03130a!important;
 }
@@ -180,7 +180,7 @@ html::after{
    JustClover Stage 116 — robust GIF dialog
    ========================================================= */
 html::after{
-  content:'116 GIFOK'!important;
+  content:'117 GIPHY'!important;
   background:rgba(34,211,238,.96)!important;
   color:#041016!important;
 }
@@ -270,3 +270,69 @@ html::after{
   border-radius:16px!important;
 }
 .chat-media-link{display:inline-block!important;margin-top:8px!important}
+
+/* =========================================================
+   JustClover Stage 117 — Giphy picker restore
+   ========================================================= */
+html::after{
+  content:'117 GIPHY'!important;
+  background:rgba(168,85,247,.96)!important;
+  color:#fff!important;
+}
+.jc116-gif-row{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:10px!important;
+  margin:10px 0 12px!important;
+}
+#jc117GiphySearch{
+  width:100%!important;
+  min-width:0!important;
+  height:42px!important;
+  border-radius:14px!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  background:rgba(5,8,18,.72)!important;
+  color:#fff!important;
+  padding:0 12px!important;
+  outline:none!important;
+  font:700 13px/1 Inter,Segoe UI,Arial,sans-serif!important;
+}
+#jc117GiphySearch:focus{
+  border-color:rgba(168,85,247,.70)!important;
+  box-shadow:0 0 0 3px rgba(168,85,247,.16)!important;
+}
+.jc117-giphy-grid{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:8px!important;
+  margin:0 0 12px!important;
+  max-height:178px!important;
+  overflow:auto!important;
+  overscroll-behavior:contain!important;
+  padding:2px 2px 4px!important;
+}
+.jc117-giphy-tile{
+  display:block!important;
+  width:100%!important;
+  aspect-ratio:1.15/1!important;
+  overflow:hidden!important;
+  border-radius:14px!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  background:rgba(255,255,255,.06)!important;
+  padding:0!important;
+  cursor:pointer!important;
+}
+.jc117-giphy-tile:hover{
+  border-color:rgba(34,211,238,.65)!important;
+  transform:translateY(-1px)!important;
+}
+.jc117-giphy-tile img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+}
+@media(max-width:560px){
+  .jc116-gif-row{grid-template-columns:1fr!important}
+  .jc117-giphy-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-height:150px!important}
+}
