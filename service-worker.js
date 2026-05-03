@@ -1,4 +1,4 @@
-/* JustClover cache killer stage102-room-glass-tuning-20260503-1 */
+/* JustClover cache killer stage103-persistent-room-wallpaper-20260503-1 */
 self.addEventListener('install', event => { self.skipWaiting(); });
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
