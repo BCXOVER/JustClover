@@ -1,12 +1,12 @@
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage99-room-wallpaper-surfaces-20260503-1";
+const JC40_BUILD = "stage100-topbar-recovery-safe-surfaces-20260503-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
@@ -626,10 +626,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
    ========================================================= */
 (function(){
-  const BUILD = "stage99-room-wallpaper-surfaces-20260503-1";
+  const BUILD = "stage100-topbar-recovery-safe-surfaces-20260503-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1156,7 +1156,7 @@ try{
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage99-room-wallpaper-surfaces-20260503-1";
+  const BUILD = "stage100-topbar-recovery-safe-surfaces-20260503-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1394,7 +1394,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage99-room-wallpaper-surfaces-20260503-1";
+  const BUILD = "stage100-topbar-recovery-safe-surfaces-20260503-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1692,7 +1692,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage99-room-wallpaper-surfaces-20260503-1';
+  const BUILD = 'stage100-topbar-recovery-safe-surfaces-20260503-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1873,7 +1873,7 @@ try{
    когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
    ========================================================= */
 (function(){
-  const BUILD = "stage99-room-wallpaper-surfaces-20260503-1";
+  const BUILD = "stage100-topbar-recovery-safe-surfaces-20260503-1";
   const CHECK_EVERY_MS = 15000;
   const FIRST_CHECK_MS = 4500;
   const RELOAD_DELAY_MS = 1800;
@@ -1986,13 +1986,13 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Real Stable Player Dock
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    No player resize loop. No fixed/cover iframe fighting.
    JS only creates bottom buttons and toggles the stable CSS class.
    ========================================================= */
 (function(){
-  const BUILD = 'stage99-room-wallpaper-surfaces-20260503-1';
+  const BUILD = 'stage100-topbar-recovery-safe-surfaces-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2190,13 +2190,13 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Player Mic Overlay
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Adds a clear mic toggle inside the player and removes the chat action from
    the bottom dock. Does not change auth, chat DOM, source logic, or player fit.
    ========================================================= */
 (function(){
-  const BUILD = 'stage99-room-wallpaper-surfaces-20260503-1';
+  const BUILD = 'stage100-topbar-recovery-safe-surfaces-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2361,14 +2361,14 @@ try{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Adds a robust mic control mounted on .watch-main. It is not a child of the
    YouTube iframe/player element and therefore remains visible in JustClover
    site fullscreen. No player scale/fit logic is changed.
    ========================================================= */
 (function(){
-  const BUILD = 'stage99-room-wallpaper-surfaces-20260503-1';
+  const BUILD = 'stage100-topbar-recovery-safe-surfaces-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2561,7 +2561,7 @@ try{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Keep Stage80 layout. Put mic back into the bottom dock next to sources and
    fullscreen, keep chat hidden, and mirror voice state on the dock button.
@@ -2569,7 +2569,7 @@ try{
    inside the YouTube/VK iframe cannot show external DOM controls.
    ========================================================= */
 (function(){
-  const BUILD = 'stage99-room-wallpaper-surfaces-20260503-1';
+  const BUILD = 'stage100-topbar-recovery-safe-surfaces-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2738,11 +2738,11 @@ try{
 
 /* =========================================================
    JustClover Stage 89 — Glass Chat + Dock Transparency
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
    Small runtime marker/debug only; no layout JS hacks added.
    ========================================================= */
 (()=>{
-  const BUILD = 'stage99-room-wallpaper-surfaces-20260503-1';
+  const BUILD = 'stage100-topbar-recovery-safe-surfaces-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc89GlassDebug = function(){
     const dock = document.getElementById('jc80Dock');
@@ -2768,11 +2768,11 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Player Recovery Safe Glass
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
    Debug marker only. No background/player mutation.
    ========================================================= */
 (()=>{
-  const BUILD = 'stage99-room-wallpaper-surfaces-20260503-1';
+  const BUILD = 'stage100-topbar-recovery-safe-surfaces-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc93RecoveryDebug = function(){
     const q = s => document.querySelector(s);
@@ -2793,14 +2793,14 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Room Appearance Wallpapers
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Adds “Оформление комнаты” settings. Safe only: no iframe/video/player-frame
    mutation, no background layers over the player. Uses CSS variables and
    localStorage to paint dock/chat/topbar/watch-main surfaces.
    ========================================================= */
 (function(){
-  const BUILD = 'stage99-room-wallpaper-surfaces-20260503-1';
+  const BUILD = 'stage100-topbar-recovery-safe-surfaces-20260503-1';
   const LS = {
     enabled:'jc94-room-wallpaper-enabled',
     wallpaper:'jc94-room-wallpaper',
@@ -3068,7 +3068,7 @@ try{
 
 /* =========================================================
    JustClover Stage 95 — Local Room Wallpaper Fix
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Fixes local file upload in “Оформление в комнате”. Supports:
    - images: GIF / WebP / PNG / JPG / SVG
@@ -3078,7 +3078,7 @@ try{
    video is a separate muted fixed layer behind room UI surfaces only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage99-room-wallpaper-surfaces-20260503-1';
+  const BUILD = 'stage100-topbar-recovery-safe-surfaces-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS = {
@@ -3305,14 +3305,14 @@ try{
 
 /* =========================================================
    JustClover Stage 96 — Room Wallpaper Apply Fix
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Mount selected room wallpaper inside the active watch layout. This fixes the
    case where a local file appears in the Appearance preview but not in the room.
    No player iframe/video/source/auth/chat handlers are touched.
    ========================================================= */
 (function(){
-  const BUILD = 'stage99-room-wallpaper-surfaces-20260503-1';
+  const BUILD = 'stage100-topbar-recovery-safe-surfaces-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS = {
@@ -3487,12 +3487,12 @@ try{
 
 /* =========================================================
    JustClover Stage 97 — Room BG Layout Fix
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
    Runtime safeguard only: keep the room background layer attached to body so
    it can never push .watch-layout / player / chat down.
    ========================================================= */
 (()=>{
-  const BUILD='stage99-room-wallpaper-surfaces-20260503-1';
+  const BUILD='stage100-topbar-recovery-safe-surfaces-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   function activeRoom(){
     const app=document.getElementById('appView');
@@ -3543,14 +3543,14 @@ try{
 
 /* =========================================================
    JustClover Stage 98 — Room Wallpaper Surface Fix
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Fix: the wallpaper/video selected in Appearance is mounted as a fixed room
    background and also pushed into safe glass surfaces. It never participates
    in .watch-layout flow and never touches player iframe/video/source logic.
    ========================================================= */
 (()=>{
-  const BUILD='stage99-room-wallpaper-surfaces-20260503-1';
+  const BUILD='stage100-topbar-recovery-safe-surfaces-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS={
@@ -3724,7 +3724,7 @@ try{
 
 /* =========================================================
    JustClover Stage 99 — Room Wallpaper Surfaces
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Fix for the case where the preview shows the selected local wallpaper/video,
    but the room/chat/dock stay black. We paint the chosen background directly
@@ -3732,7 +3732,7 @@ try{
    Player iframe/video/source logic is not touched.
    ========================================================= */
 (()=>{
-  const BUILD='stage99-room-wallpaper-surfaces-20260503-1';
+  const BUILD='stage100-topbar-recovery-safe-surfaces-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS={
@@ -3978,6 +3978,121 @@ try{
       dock:rect(q('#jc80Dock')),
       playerFrameVisible:(()=>{ const s=css(q('.player-frame')); return !!q('.player-frame') && s.display!=='none' && s.visibility!=='hidden'; })(),
       iframeVisible:(()=>{ const s=css(iframe); return !!iframe && s.display!=='none' && s.visibility!=='hidden'; })()
+    };
+  };
+})();
+
+/* =========================================================
+   JustClover Stage 100 — Topbar Recovery + Safe Surfaces
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
+
+   Do not touch player iframe/video. Remove only Stage99 topbar surface layer and
+   force the active-room topbar back to fixed/visible. Wallpaper surfaces remain
+   limited to dock + chat.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage100-topbar-recovery-safe-surfaces-20260503-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+  let raf = 0;
+  let observer = null;
+
+  function isAuth(){ try { return !!window.__jc62IsAuthScreen?.(); } catch(_) { return false; } }
+  function appOpen(){ const app=document.getElementById('appView'); return !!(app && !app.classList.contains('hidden')); }
+  function watchActive(){ const w=document.getElementById('watchSection'); return !!(w && w.classList.contains('active')); }
+  function activeRoom(){ return !isAuth() && appOpen() && watchActive(); }
+  function q(s){ return document.querySelector(s); }
+  function topbar(){ return document.getElementById('jc51RaveTopbar'); }
+
+  function removeTopbarSurface(){
+    document.querySelectorAll('.jc99SurfaceBg[data-jc99="topbar"], #jc51RaveTopbar .jc99SurfaceBg').forEach(el => el.remove());
+  }
+
+  function ensureFallbackExit(){
+    let b = document.getElementById('jc100FallbackExit');
+    if(!b){
+      b = document.createElement('button');
+      b.id = 'jc100FallbackExit';
+      b.type = 'button';
+      b.title = 'Комнаты';
+      b.setAttribute('aria-label','Комнаты');
+      b.textContent = '×';
+      b.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        const native = topbar()?.querySelector('[data-jc51-exit]');
+        if(native){ native.click(); return; }
+        const candidates = Array.from(document.querySelectorAll('button,a,[role="button"]'));
+        const rooms = candidates.find(x => /комнаты|создать комнату|rooms/i.test((x.textContent || x.title || x.getAttribute('aria-label') || '').trim()));
+        if(rooms) rooms.click();
+      });
+      document.body.appendChild(b);
+    }
+    return b;
+  }
+
+  function restoreTopbar(){
+    const bar = topbar();
+    const on = activeRoom();
+    document.body?.classList?.toggle('jc100-topbar-recovery', on);
+    removeTopbarSurface();
+    ensureFallbackExit();
+    document.body?.classList?.toggle('jc100-no-topbar', on && !bar);
+    if(!on || !bar) return;
+
+    bar.style.setProperty('position','fixed','important');
+    bar.style.setProperty('inset','0 0 auto 0','important');
+    bar.style.setProperty('height','var(--jc80-topbar-h,var(--jc64-topbar-h,58px))','important');
+    bar.style.setProperty('z-index','2147483200','important');
+    bar.style.setProperty('display','grid','important');
+    bar.style.setProperty('opacity','1','important');
+    bar.style.setProperty('visibility','visible','important');
+    bar.style.setProperty('pointer-events','auto','important');
+    bar.style.setProperty('transform','none','important');
+    bar.removeAttribute('hidden');
+    bar.setAttribute('aria-hidden','false');
+
+    const exit = bar.querySelector('[data-jc51-exit]');
+    if(exit){
+      exit.title = 'Комнаты';
+      exit.setAttribute('aria-label','Комнаты');
+      exit.style.setProperty('display','inline-flex','important');
+      exit.style.setProperty('visibility','visible','important');
+      exit.style.setProperty('opacity','1','important');
+    }
+  }
+
+  function sync(){ raf = 0; restoreTopbar(); }
+  function schedule(){ if(!raf) raf = requestAnimationFrame(sync); }
+
+  if(document.body && !observer){
+    observer = new MutationObserver(schedule);
+    observer.observe(document.body, {childList:true, subtree:true, attributes:true, attributeFilter:['class','style','hidden']});
+  }
+  document.addEventListener('click', () => setTimeout(schedule, 20), true);
+  window.addEventListener('resize', schedule, {passive:true});
+  [0,80,250,700,1400].forEach(ms => setTimeout(schedule, ms));
+
+  window.jc100TopbarDebug = function(){
+    const bar = topbar();
+    const br = bar?.getBoundingClientRect?.();
+    const surf = q('.jc99SurfaceBg[data-jc99="topbar"], #jc51RaveTopbar .jc99SurfaceBg');
+    const iframe = q('.player-frame iframe, #youtubePlayer iframe, #jc65DirectPlayer');
+    const dock = document.getElementById('jc80Dock');
+    return {
+      build: BUILD,
+      activeRoom: activeRoom(),
+      bodyClassOn: document.body?.classList?.contains('jc100-topbar-recovery'),
+      topbarExists: !!bar,
+      topbarSurfaceExists: !!surf,
+      topbarRect: br ? {x:Math.round(br.x), y:Math.round(br.y), w:Math.round(br.width), h:Math.round(br.height)} : null,
+      topbarDisplay: bar ? getComputedStyle(bar).display : '',
+      topbarPosition: bar ? getComputedStyle(bar).position : '',
+      topbarZ: bar ? getComputedStyle(bar).zIndex : '',
+      exitExists: !!bar?.querySelector('[data-jc51-exit]'),
+      fallbackVisible: getComputedStyle(document.getElementById('jc100FallbackExit') || document.body).display,
+      playerFrameVisible: !!q('.player-frame') && getComputedStyle(q('.player-frame')).visibility !== 'hidden',
+      iframeVisible: !!iframe && getComputedStyle(iframe).visibility !== 'hidden',
+      dockVisible: !!dock && getComputedStyle(dock).display !== 'none'
     };
   };
 })();

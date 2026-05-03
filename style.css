@@ -3337,7 +3337,7 @@ html::after{
 
 /* =========================================================
    JustClover Stage 94 — Real Stable Player Dock
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    One stable active-room layout:
    topbar / player / real bottom controls / chat.
@@ -3746,7 +3746,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
 
 /* =========================================================
    JustClover Stage 94 — Player Mic Overlay
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Keep Stage80 stable layout. Remove chat button from the lower dock and move
    mic control inside the player so it remains available in fullscreen.
@@ -3895,7 +3895,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc81PlayerMic{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Keep Stage80 layout. Mic is mounted on .watch-main, not inside the iframe
    and not hidden by old jc67 player-child rules, so it remains visible in
@@ -4068,7 +4068,7 @@ body.jc80-real-dock .watch-main #jc82PlayerMic[hidden]{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
    Put mic back into bottom dock; hide overlay mic; hide chat.
    ========================================================= */
 html::after{ content:'88 ICONMIC'!important; }
@@ -4231,7 +4231,7 @@ body.jc88-icon-mic-dock #jc86FullscreenProxy{
 
 /* =========================================================
    JustClover Stage 89 — Glass Chat + Dock Transparency
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Keep Stage88 active layout and mic dock behavior.
    Make the strip under the player translucent so the live background can show
@@ -4352,7 +4352,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
 
 /* =========================================================
    JustClover Stage 94 — Player Recovery Safe Glass
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Recovery from Stage92: do not add background JS, do not touch iframe/video,
    do not create extra live background layers over/under the player. Only safe
@@ -4429,7 +4429,7 @@ body.jc80-real-dock .chat-card [contenteditable="true"]{
 
 /* =========================================================
    JustClover Stage 94 — Room Appearance Wallpapers
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Safe path: no iframe/video/player-frame mutations. Adds a dedicated
    “Оформление комнаты” block and applies wallpaper only to safe UI surfaces:
@@ -4696,7 +4696,7 @@ body.jc94-room-wallpaper #videoPlayer{
 
 /* =========================================================
    JustClover Stage 95 — Local Room Wallpaper Fix
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
    Local file support for room wallpaper. No player selectors except read-only
    recovery rules inherited from previous safe stage.
    ========================================================= */
@@ -4797,7 +4797,7 @@ body.jc95-room-local-wallpaper:not(.jc95-room-video-wallpaper) #jc51RaveTopbar{
 
 /* =========================================================
    JustClover Stage 96 — Room Wallpaper Apply Fix
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Fix: local room wallpaper/video selected in Appearance now actually renders
    inside the active watch room. It is mounted behind the room UI, not inside
@@ -4934,7 +4934,7 @@ body.jc96-room-bg-on #videoPlayer{
 
 /* =========================================================
    JustClover Stage 97 — Room BG Layout Fix
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Fix Stage96: the room wallpaper layer must never participate in
    .watch-layout flow. It is a fixed background layer under the room UI.
@@ -5160,7 +5160,7 @@ body.jc80-real-dock.jc96-room-bg-on #videoPlayer{
 
 /* =========================================================
    JustClover Stage 98 — Room Wallpaper Surface Fix
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Real fix for room wallpaper visibility:
    - background is a fixed non-layout layer under the room UI;
@@ -5168,7 +5168,7 @@ body.jc80-real-dock.jc96-room-bg-on #videoPlayer{
    - player iframe/video geometry is not touched.
    ========================================================= */
 html::after{
-  content:'99 SURFACES'!important;
+  content:'100 TOPBAR'!important;
   background:rgba(168,85,247,.96)!important;
   color:#fff!important;
 }
@@ -5367,14 +5367,14 @@ body.jc98-room-bg-on #jc51RaveTopbar{
 
 /* =========================================================
    JustClover Stage 99 — Room Wallpaper Surfaces
-   Version: stage99-room-wallpaper-surfaces-20260503-1
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
 
    Real surface fix: do not rely on a background behind black containers.
    The selected room wallpaper/video is painted directly inside safe UI surfaces:
    sidebar/chat/dock/topbar. Player iframe/video geometry remains untouched.
    ========================================================= */
 html::after{
-  content:'99 SURFACES'!important;
+  content:'100 TOPBAR'!important;
   background:rgba(34,211,238,.96)!important;
   color:#03130a!important;
 }
@@ -5533,4 +5533,140 @@ body.jc99-room-surfaces #videoPlayer{
   background-color:#000!important;
   opacity:1!important;
   visibility:visible!important;
+}
+
+/* =========================================================
+   JustClover Stage 100 — Topbar Recovery + Safe Surfaces
+   Version: stage100-topbar-recovery-safe-surfaces-20260503-1
+
+   Recovery from Stage99: do not paint/mutate the topbar surface. Keep room
+   wallpaper only in safe surfaces: bottom dock + right chat column. Restore the
+   native active-room topbar so exit/catalog controls are always available.
+   ========================================================= */
+html::after{
+  content:'100 TOPBAR'!important;
+  background:rgba(34,211,238,.96)!important;
+  color:#03130a!important;
+}
+
+body.jc100-topbar-recovery #jc51RaveTopbar .jc99SurfaceBg,
+body.jc100-topbar-recovery .topbar .jc99SurfaceBg[data-jc99='topbar']{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+/* Undo Stage99's position:relative on the active topbar. */
+body.jc100-topbar-recovery #jc51RaveTopbar{
+  position:fixed!important;
+  inset:0 0 auto 0!important;
+  height:var(--jc80-topbar-h,var(--jc64-topbar-h,58px))!important;
+  z-index:2147483200!important;
+  display:grid!important;
+  grid-template-columns:minmax(220px,1fr) auto minmax(220px,1fr)!important;
+  align-items:center!important;
+  gap:12px!important;
+  padding:0 18px!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  transform:none!important;
+  isolation:auto!important;
+  overflow:visible!important;
+  border-bottom:1px solid rgba(255,255,255,.10)!important;
+  background:linear-gradient(180deg,rgba(54,38,43,.96),rgba(18,16,25,.96))!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.24)!important;
+  backdrop-filter:blur(14px) saturate(148%)!important;
+  -webkit-backdrop-filter:blur(14px) saturate(148%)!important;
+}
+
+body.jc100-topbar-recovery #jc51RaveTopbar > :not(.jc99SurfaceBg){
+  position:relative!important;
+  z-index:2!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+
+body.jc100-topbar-recovery #jc51RaveTopbar .jc51-rave-logo{
+  display:block!important;
+  font-size:clamp(24px,2.15vw,34px)!important;
+  line-height:1!important;
+  letter-spacing:.10em!important;
+  color:#fff!important;
+  text-align:center!important;
+  text-shadow:0 2px 18px rgba(0,0,0,.36)!important;
+}
+
+body.jc100-topbar-recovery #jc51RaveTopbar .jc51-rave-left{
+  display:flex!important;
+  align-items:center!important;
+  gap:18px!important;
+  min-width:0!important;
+}
+
+body.jc100-topbar-recovery #jc51RaveTopbar .jc51-rave-right{
+  min-width:0!important;
+  display:block!important;
+}
+
+body.jc100-topbar-recovery #jc51RaveTopbar button{
+  width:34px!important;
+  height:34px!important;
+  min-height:34px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:12px!important;
+  background:transparent!important;
+  color:#fff!important;
+  font:900 24px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  opacity:.95!important;
+  box-shadow:none!important;
+  cursor:pointer!important;
+}
+
+body.jc100-topbar-recovery #jc51RaveTopbar button:hover{
+  background:rgba(255,255,255,.10)!important;
+}
+
+/* Stage99 should only surface-paint chat/dock now, never the topbar. */
+body.jc100-topbar-recovery.jc99-room-surfaces .topbar,
+body.jc100-topbar-recovery.jc99-room-surfaces #jc51RaveTopbar{
+  background:linear-gradient(180deg,rgba(54,38,43,.96),rgba(18,16,25,.96))!important;
+  backdrop-filter:blur(14px) saturate(148%)!important;
+  -webkit-backdrop-filter:blur(14px) saturate(148%)!important;
+}
+
+body.jc100-topbar-recovery .watch-sidebar{
+  background:rgba(4,5,12,.22)!important;
+}
+body.jc100-topbar-recovery.jc99-room-surfaces .watch-sidebar{
+  background:rgba(5,7,16,.10)!important;
+}
+body.jc100-topbar-recovery.jc99-room-surfaces .watch-sidebar .chat-card,
+body.jc100-topbar-recovery.jc99-room-surfaces .watch-sidebar .side-card{
+  background:rgba(7,9,18,var(--jc99-card-alpha,.16))!important;
+}
+
+/* Make the emergency fallback tiny and only visible if topbar is absent. */
+#jc100FallbackExit{
+  position:fixed!important;
+  left:12px!important;
+  top:10px!important;
+  z-index:2147483300!important;
+  width:38px!important;
+  height:38px!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  border-radius:13px!important;
+  background:rgba(12,14,24,.68)!important;
+  color:#fff!important;
+  font:900 24px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  display:none!important;
+  align-items:center!important;
+  justify-content:center!important;
+  backdrop-filter:blur(12px)!important;
+  -webkit-backdrop-filter:blur(12px)!important;
+}
+body.jc100-topbar-recovery.jc100-no-topbar #jc100FallbackExit{
+  display:flex!important;
 }

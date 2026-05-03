@@ -1,4 +1,4 @@
-/* JustClover cache killer stage99-room-wallpaper-surfaces-20260503-1 */
+/* JustClover cache killer stage100-topbar-recovery-safe-surfaces-20260503-1 */
 self.addEventListener('install', event => { self.skipWaiting(); });
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
