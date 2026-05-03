@@ -3337,7 +3337,7 @@ html::after{
 
 /* =========================================================
    JustClover Stage 94 — Real Stable Player Dock
-   Version: stage97-room-bg-layout-fix-20260503-1
+   Version: stage98-room-wallpaper-surface-fix-20260503-1
 
    One stable active-room layout:
    topbar / player / real bottom controls / chat.
@@ -3746,7 +3746,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
 
 /* =========================================================
    JustClover Stage 94 — Player Mic Overlay
-   Version: stage97-room-bg-layout-fix-20260503-1
+   Version: stage98-room-wallpaper-surface-fix-20260503-1
 
    Keep Stage80 stable layout. Remove chat button from the lower dock and move
    mic control inside the player so it remains available in fullscreen.
@@ -3895,7 +3895,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc81PlayerMic{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage97-room-bg-layout-fix-20260503-1
+   Version: stage98-room-wallpaper-surface-fix-20260503-1
 
    Keep Stage80 layout. Mic is mounted on .watch-main, not inside the iframe
    and not hidden by old jc67 player-child rules, so it remains visible in
@@ -4068,7 +4068,7 @@ body.jc80-real-dock .watch-main #jc82PlayerMic[hidden]{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage97-room-bg-layout-fix-20260503-1
+   Version: stage98-room-wallpaper-surface-fix-20260503-1
    Put mic back into bottom dock; hide overlay mic; hide chat.
    ========================================================= */
 html::after{ content:'88 ICONMIC'!important; }
@@ -4231,7 +4231,7 @@ body.jc88-icon-mic-dock #jc86FullscreenProxy{
 
 /* =========================================================
    JustClover Stage 89 — Glass Chat + Dock Transparency
-   Version: stage97-room-bg-layout-fix-20260503-1
+   Version: stage98-room-wallpaper-surface-fix-20260503-1
 
    Keep Stage88 active layout and mic dock behavior.
    Make the strip under the player translucent so the live background can show
@@ -4352,7 +4352,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
 
 /* =========================================================
    JustClover Stage 94 — Player Recovery Safe Glass
-   Version: stage97-room-bg-layout-fix-20260503-1
+   Version: stage98-room-wallpaper-surface-fix-20260503-1
 
    Recovery from Stage92: do not add background JS, do not touch iframe/video,
    do not create extra live background layers over/under the player. Only safe
@@ -4429,7 +4429,7 @@ body.jc80-real-dock .chat-card [contenteditable="true"]{
 
 /* =========================================================
    JustClover Stage 94 — Room Appearance Wallpapers
-   Version: stage97-room-bg-layout-fix-20260503-1
+   Version: stage98-room-wallpaper-surface-fix-20260503-1
 
    Safe path: no iframe/video/player-frame mutations. Adds a dedicated
    “Оформление комнаты” block and applies wallpaper only to safe UI surfaces:
@@ -4696,7 +4696,7 @@ body.jc94-room-wallpaper #videoPlayer{
 
 /* =========================================================
    JustClover Stage 95 — Local Room Wallpaper Fix
-   Version: stage97-room-bg-layout-fix-20260503-1
+   Version: stage98-room-wallpaper-surface-fix-20260503-1
    Local file support for room wallpaper. No player selectors except read-only
    recovery rules inherited from previous safe stage.
    ========================================================= */
@@ -4797,7 +4797,7 @@ body.jc95-room-local-wallpaper:not(.jc95-room-video-wallpaper) #jc51RaveTopbar{
 
 /* =========================================================
    JustClover Stage 96 — Room Wallpaper Apply Fix
-   Version: stage97-room-bg-layout-fix-20260503-1
+   Version: stage98-room-wallpaper-surface-fix-20260503-1
 
    Fix: local room wallpaper/video selected in Appearance now actually renders
    inside the active watch room. It is mounted behind the room UI, not inside
@@ -4934,7 +4934,7 @@ body.jc96-room-bg-on #videoPlayer{
 
 /* =========================================================
    JustClover Stage 97 — Room BG Layout Fix
-   Version: stage97-room-bg-layout-fix-20260503-1
+   Version: stage98-room-wallpaper-surface-fix-20260503-1
 
    Fix Stage96: the room wallpaper layer must never participate in
    .watch-layout flow. It is a fixed background layer under the room UI.
@@ -5156,4 +5156,211 @@ body.jc80-real-dock.jc96-room-bg-on #videoPlayer{
     height:38dvh!important;
     max-height:38dvh!important;
   }
+}
+
+/* =========================================================
+   JustClover Stage 98 — Room Wallpaper Surface Fix
+   Version: stage98-room-wallpaper-surface-fix-20260503-1
+
+   Real fix for room wallpaper visibility:
+   - background is a fixed non-layout layer under the room UI;
+   - chat and dock are true glass surfaces;
+   - player iframe/video geometry is not touched.
+   ========================================================= */
+html::after{
+  content:'98 SURFACEBG'!important;
+  background:rgba(168,85,247,.96)!important;
+  color:#fff!important;
+}
+
+#jc98RoomBg{
+  display:none!important;
+  position:fixed!important;
+  left:0!important;
+  right:0!important;
+  top:var(--jc80-topbar-h,58px)!important;
+  bottom:0!important;
+  width:100vw!important;
+  height:calc(100dvh - var(--jc80-topbar-h,58px))!important;
+  z-index:1!important;
+  pointer-events:none!important;
+  overflow:hidden!important;
+  contain:paint!important;
+  background-image:var(--jc98-room-image, var(--jc96-room-image, var(--jc95-room-image, var(--jc94-room-wallpaper))))!important;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  opacity:1!important;
+  transform:translateZ(0)!important;
+}
+
+#jc98RoomBg::after{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  z-index:2!important;
+  background:rgba(0,0,0,var(--jc98-room-dim,var(--jc94-room-dim,.30)))!important;
+  pointer-events:none!important;
+}
+
+#jc98RoomBgVideo{
+  display:none!important;
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  z-index:1!important;
+  pointer-events:none!important;
+  opacity:.96!important;
+  filter:saturate(1.05) brightness(.88)!important;
+}
+
+body.jc98-room-bg-on #jc98RoomBg{
+  display:block!important;
+}
+
+body.jc98-room-video-on #jc98RoomBgVideo{
+  display:block!important;
+}
+
+body.jc98-room-bg-on #jc96RoomBg,
+body.jc98-room-bg-on #jc95RoomVideoBg{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+body.jc98-room-bg-on #appView,
+body.jc98-room-bg-on .content,
+body.jc98-room-bg-on #watchSection,
+body.jc98-room-bg-on .watch-layout,
+body.jc98-room-bg-on .watch-main{
+  background:transparent!important;
+}
+
+body.jc98-room-bg-on #appView,
+body.jc98-room-bg-on .content,
+body.jc98-room-bg-on #watchSection,
+body.jc98-room-bg-on .watch-layout,
+body.jc98-room-bg-on .watch-main,
+body.jc98-room-bg-on .watch-sidebar,
+body.jc98-room-bg-on #jc80Dock{
+  position:relative!important;
+}
+
+body.jc98-room-bg-on #appView,
+body.jc98-room-bg-on .content,
+body.jc98-room-bg-on #watchSection,
+body.jc98-room-bg-on .watch-layout{
+  z-index:2!important;
+}
+
+body.jc98-room-bg-on .watch-main,
+body.jc98-room-bg-on .watch-sidebar{
+  z-index:3!important;
+}
+
+/* Keep the video/player itself solid. Only the areas around it become glass. */
+body.jc98-room-bg-on .watch-stage,
+body.jc98-room-bg-on .player-card-redesign,
+body.jc98-room-bg-on .player-card,
+body.jc98-room-bg-on .player-shell,
+body.jc98-room-bg-on .player-frame,
+body.jc98-room-bg-on .player-frame iframe,
+body.jc98-room-bg-on .player-frame video,
+body.jc98-room-bg-on .player-frame .embed-box,
+body.jc98-room-bg-on #youtubePlayer,
+body.jc98-room-bg-on #iframePlayer,
+body.jc98-room-bg-on #videoPlayer{
+  background-color:#000!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+
+/* Bottom strip: now it is actually glass, not a black slab. */
+body.jc98-room-bg-on #jc80Dock{
+  z-index:8!important;
+  background-color:rgba(3,5,12,.04)!important;
+  background-image:
+    linear-gradient(180deg,rgba(3,5,12,.02),rgba(3,5,12,.08)),
+    var(--jc98-room-image, var(--jc96-room-image, var(--jc95-room-image, var(--jc94-room-wallpaper))))!important;
+  background-size:cover!important;
+  background-position:center bottom!important;
+  border-top:1px solid rgba(255,255,255,.10)!important;
+  backdrop-filter:blur(var(--jc98-room-blur,var(--jc94-room-blur,14px))) saturate(156%)!important;
+  -webkit-backdrop-filter:blur(var(--jc98-room-blur,var(--jc94-room-blur,14px))) saturate(156%)!important;
+}
+
+body.jc98-room-video-on #jc80Dock{
+  background-image:linear-gradient(180deg,rgba(3,5,12,.02),rgba(3,5,12,.08))!important;
+}
+
+body.jc98-room-bg-on #jc80Dock .jc80-dock-inner{
+  background:rgba(8,10,18,var(--jc98-inner-alpha,.30))!important;
+  border-color:rgba(255,255,255,.16)!important;
+  box-shadow:0 12px 28px rgba(0,0,0,.18)!important;
+  backdrop-filter:blur(calc(var(--jc98-room-blur,var(--jc94-room-blur,14px)) * .82)) saturate(150%)!important;
+  -webkit-backdrop-filter:blur(calc(var(--jc98-room-blur,var(--jc94-room-blur,14px)) * .82)) saturate(150%)!important;
+}
+
+/* Right chat column: transparent enough to see room wallpaper. */
+body.jc98-room-bg-on .watch-sidebar{
+  background-color:rgba(5,7,16,.06)!important;
+  background-image:
+    radial-gradient(circle at top right,rgba(236,72,153,.10),transparent 40%),
+    linear-gradient(180deg,rgba(5,7,16,.05),rgba(5,7,16,.14)),
+    var(--jc98-room-image, var(--jc96-room-image, var(--jc95-room-image, var(--jc94-room-wallpaper))))!important;
+  background-size:cover!important;
+  background-position:center!important;
+  border-left:1px solid rgba(255,255,255,.10)!important;
+  backdrop-filter:blur(var(--jc98-room-blur,var(--jc94-room-blur,14px))) saturate(156%)!important;
+  -webkit-backdrop-filter:blur(var(--jc98-room-blur,var(--jc94-room-blur,14px))) saturate(156%)!important;
+}
+
+body.jc98-room-video-on .watch-sidebar{
+  background-image:
+    radial-gradient(circle at top right,rgba(236,72,153,.10),transparent 40%),
+    linear-gradient(180deg,rgba(5,7,16,.05),rgba(5,7,16,.14))!important;
+}
+
+body.jc98-room-bg-on .watch-sidebar .side-card,
+body.jc98-room-bg-on .chat-card{
+  background:rgba(8,10,18,var(--jc98-card-alpha,.18))!important;
+  border-color:rgba(255,255,255,.12)!important;
+  box-shadow:0 18px 42px rgba(0,0,0,.15)!important;
+  backdrop-filter:blur(calc(var(--jc98-room-blur,var(--jc94-room-blur,14px)) * .82)) saturate(155%)!important;
+  -webkit-backdrop-filter:blur(calc(var(--jc98-room-blur,var(--jc94-room-blur,14px)) * .82)) saturate(155%)!important;
+}
+
+body.jc98-room-bg-on .chat-card .side-card-head{
+  background:rgba(255,255,255,.018)!important;
+}
+
+body.jc98-room-bg-on #chatMessages,
+body.jc98-room-bg-on .chat-card .messages{
+  background:transparent!important;
+}
+
+body.jc98-room-bg-on .chat-card .message-form,
+body.jc98-room-bg-on .chat-card #chatForm{
+  background:rgba(255,255,255,.035)!important;
+  border-color:rgba(255,255,255,.10)!important;
+}
+
+body.jc98-room-bg-on .chat-card input,
+body.jc98-room-bg-on .chat-card textarea,
+body.jc98-room-bg-on .chat-card .message-input,
+body.jc98-room-bg-on .chat-card [contenteditable="true"]{
+  background:rgba(255,255,255,.085)!important;
+  border-color:rgba(255,255,255,.15)!important;
+}
+
+body.jc98-room-bg-on .topbar,
+body.jc98-room-bg-on #jc51RaveTopbar{
+  background:rgba(7,6,14,.42)!important;
+  border-bottom:1px solid rgba(255,255,255,.10)!important;
+  backdrop-filter:blur(var(--jc98-room-blur,var(--jc94-room-blur,14px))) saturate(156%)!important;
+  -webkit-backdrop-filter:blur(var(--jc98-room-blur,var(--jc94-room-blur,14px))) saturate(156%)!important;
 }
