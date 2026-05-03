@@ -4567,3 +4567,185 @@ try{
     };
   };
 })();
+
+/* =========================================================
+   JustClover Stage 105 — Room Wallpaper Performance + Clean Glass
+   Version: stage105-room-performance-glass-20260503-1
+   One fixed wallpaper layer for the room. Transparent chat/sidebar/dock like
+   the lobby, no fragmented surface backgrounds, better performance.
+   ========================================================= */
+(function(){
+  const BUILD='stage105-room-performance-glass-20260503-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+  const LS={
+    enabled:'jc94-room-wallpaper-enabled',
+    wallpaper:'jc94-room-wallpaper',
+    dim:'jc94-room-wallpaper-dim',
+    blur:'jc94-room-wallpaper-blur',
+    glass:'jc94-room-wallpaper-glass'
+  };
+  const q=(s,r=document)=>r.querySelector(s);
+  const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
+  const get=(k,d='')=>{ try{ const v=localStorage.getItem(k); return v==null?d:v; }catch(_){ return d; } };
+  const isBlob=u=>String(u||'').startsWith('blob:');
+  function activeRoom(){
+    const watch=q('#watchSection');
+    const app=q('#appView');
+    if(!watch) return false;
+    const active=watch.classList.contains('active') || !!watch.closest('.active');
+    const hidden=app?.classList?.contains('hidden');
+    return !!(active && !hidden);
+  }
+  function enabled(){ return get(LS.enabled,'1') !== '0'; }
+  function currentUrl(){ return window.__jc95RoomWallpaperUrl || get(LS.wallpaper,'') || ''; }
+  function currentKind(){
+    return window.__jc95RoomWallpaperKind || get('jc95-room-local-kind','') || (/\.(mp4|webm|ogg)(\?|#|$)/i.test(currentUrl()) ? 'video' : 'image');
+  }
+  function currentCssWallpaper(){
+    const raw=(getComputedStyle(document.documentElement).getPropertyValue('--jc94-room-wallpaper')||'').trim();
+    return raw;
+  }
+  function currentSpec(){
+    const url=currentUrl();
+    const kind=currentKind();
+    if(url) return {type:kind==='video'?'video':'image', value:url};
+    const css=currentCssWallpaper();
+    if(css) return {type:'css', value:css};
+    return {type:'none', value:''};
+  }
+  function numeric(name, dflt, min, max){
+    const v=parseFloat(get(name, String(dflt)));
+    return Number.isFinite(v) ? clamp(v,min,max) : dflt;
+  }
+  function ensureLayer(){
+    let layer=document.getElementById('jc105RoomBg');
+    if(!layer){
+      layer=document.createElement('div');
+      layer.id='jc105RoomBg';
+      const video=document.createElement('video');
+      video.id='jc105RoomBgVideo';
+      video.muted=true;
+      video.loop=true;
+      video.autoplay=true;
+      video.playsInline=true;
+      video.preload='metadata';
+      video.disablePictureInPicture=true;
+      video.setAttribute('aria-hidden','true');
+      video.setAttribute('playsinline','');
+      video.setAttribute('muted','');
+      layer.appendChild(video);
+      document.body.appendChild(layer);
+    } else if(!layer.querySelector('#jc105RoomBgVideo')){
+      const video=document.createElement('video');
+      video.id='jc105RoomBgVideo';
+      video.muted=true;
+      video.loop=true;
+      video.autoplay=true;
+      video.playsInline=true;
+      video.preload='metadata';
+      video.disablePictureInPicture=true;
+      video.setAttribute('aria-hidden','true');
+      video.setAttribute('playsinline','');
+      video.setAttribute('muted','');
+      layer.appendChild(video);
+    }
+    return layer;
+  }
+  function stopVideo(video){
+    if(!video) return;
+    try{ video.pause(); }catch(_){}
+    try{ video.removeAttribute('src'); video.load(); }catch(_){}
+    video.style.display='none';
+  }
+  function normalizeGlass(){
+    const blur=numeric(LS.blur,14,0,24);
+    const dim=numeric(LS.dim,0.30,0,0.70);
+    const glass=numeric(LS.glass,0.34,0.06,0.85);
+    // Lower alpha than previous stages -> lobby-like transparency.
+    const panelAlpha=clamp(0.12 + glass * 0.24, 0.14, 0.30);
+    const cardAlpha=clamp(0.18 + glass * 0.28, 0.20, 0.36);
+    const inputAlpha=clamp(0.08 + glass * 0.15, 0.10, 0.22);
+    const root=document.documentElement;
+    root.style.setProperty('--jc105-room-dim', String(dim.toFixed(3)));
+    root.style.setProperty('--jc105-room-blur', `${blur.toFixed(2)}px`);
+    root.style.setProperty('--jc105-room-panel-alpha', String(panelAlpha.toFixed(3)));
+    root.style.setProperty('--jc105-room-card-alpha', String(cardAlpha.toFixed(3)));
+    root.style.setProperty('--jc105-room-input-alpha', String(inputAlpha.toFixed(3)));
+  }
+  function apply(){
+    normalizeGlass();
+    const on=enabled() && activeRoom();
+    const layer=ensureLayer();
+    const video=q('#jc105RoomBgVideo', layer);
+    document.body.classList.toggle('jc105-room-bg-active', on);
+    if(!on){
+      layer.style.backgroundImage='none';
+      stopVideo(video);
+      return;
+    }
+    const spec=currentSpec();
+    if(spec.type==='video' && spec.value){
+      layer.style.backgroundImage='none';
+      if(video.dataset.src !== spec.value){
+        try{ video.src=spec.value; video.dataset.src=spec.value; }catch(_){}
+      }
+      video.style.display='block';
+      const playPromise=video.play?.();
+      if(playPromise && typeof playPromise.catch==='function') playPromise.catch(()=>{});
+    } else {
+      stopVideo(video);
+      if(spec.type==='image' && spec.value){
+        layer.style.backgroundImage=`url("${String(spec.value).replace(/"/g,'\\"')}")`;
+      } else if(spec.type==='css' && spec.value){
+        layer.style.backgroundImage=spec.value;
+      } else {
+        layer.style.backgroundImage='linear-gradient(135deg, rgba(9,12,26,.94), rgba(18,10,28,.90))';
+      }
+    }
+  }
+  function tick(){
+    try{ apply(); }catch(err){ console.error('JC105 apply failed', err); }
+  }
+
+  // Observe app state and surface changes.
+  let raf=0;
+  const schedule=()=>{ if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; tick(); }); };
+  const mo=new MutationObserver(schedule);
+  const boot=()=>{
+    ensureLayer();
+    schedule();
+    mo.observe(document.documentElement,{attributes:true,childList:true,subtree:true,attributeFilter:['class','style']});
+    window.addEventListener('storage', schedule);
+    window.addEventListener('resize', schedule, {passive:true});
+    document.addEventListener('visibilitychange', ()=>{
+      const video=document.getElementById('jc105RoomBgVideo');
+      if(document.hidden){ try{ video?.pause?.(); }catch(_){} }
+      else schedule();
+    });
+    setInterval(schedule, 1200);
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
+  else boot();
+
+  window.jc105RoomPerfDebug=()=>{
+    const layer=document.getElementById('jc105RoomBg');
+    const video=document.getElementById('jc105RoomBgVideo');
+    const css=el=>el?getComputedStyle(el):null;
+    return {
+      build:BUILD,
+      roomActive:activeRoom(),
+      enabled:enabled(),
+      wallpaperUrl:currentUrl(),
+      wallpaperKind:currentKind(),
+      cssWallpaper:currentCssWallpaper(),
+      layerExists:!!layer,
+      layerBg:css(layer)?.backgroundImage || '',
+      layerOpacity:css(layer)?.opacity || '',
+      videoShown:css(video)?.display || '',
+      videoSrc:video?.currentSrc || video?.src || '',
+      sidebarBg:css(q('.watch-sidebar'))?.backgroundColor || '',
+      chatBg:css(q('.chat-card'))?.backgroundColor || '',
+      dockBg:css(q('#jc80Dock'))?.backgroundColor || ''
+    };
+  };
+})();

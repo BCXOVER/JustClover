@@ -5999,3 +5999,190 @@ body.jc101-chat-glass .jc101SurfaceBg[data-jc101="topbar"]{
   color:rgba(255,255,255,.68)!important;
   line-height:1.45!important;
 }
+
+/* =========================================================
+   JustClover Stage 105 — Room Wallpaper Performance + Clean Glass
+   Version: stage105-room-performance-glass-20260503-1
+   Single fixed room background layer + transparent glass surfaces.
+   No tiled surface wallpapers, no repeated background-attachment painting.
+   ========================================================= */
+html::after{
+  content:'105 OPTI'!important;
+  background:rgba(125,211,252,.96)!important;
+  color:#07111f!important;
+}
+
+:root{
+  --jc105-room-dim:.28;
+  --jc105-room-blur:14px;
+  --jc105-room-panel-alpha:.20;
+  --jc105-room-card-alpha:.28;
+  --jc105-room-input-alpha:.14;
+}
+
+#jc105RoomBg{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .22s ease;
+  overflow:hidden;
+  background-position:center center;
+  background-size:cover;
+  background-repeat:no-repeat;
+  background-attachment:scroll;
+  will-change:opacity,transform;
+  transform:translateZ(0);
+}
+#jc105RoomBg::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg, rgba(5,8,18, calc(var(--jc105-room-dim) * .72)), rgba(5,8,18, var(--jc105-room-dim)));
+}
+#jc105RoomBg::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 50% 18%, rgba(255,255,255,.06), rgba(255,255,255,0) 35%), radial-gradient(circle at 50% 80%, rgba(0,0,0,.12), rgba(0,0,0,0) 50%);
+}
+#jc105RoomBgVideo{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center center;
+  display:none;
+  filter:brightness(.84) saturate(1.03);
+  transform:translateZ(0);
+}
+body.jc105-room-bg-active #jc105RoomBg{ opacity:1; }
+body.jc105-room-bg-active #appView,
+body.jc105-room-bg-active .content,
+body.jc105-room-bg-active #watchSection,
+body.jc105-room-bg-active .watch-layout,
+body.jc105-room-bg-active .watch-main,
+body.jc105-room-bg-active .watch-stage,
+body.jc105-room-bg-active .watch-sidebar,
+body.jc105-room-bg-active #jc80Dock,
+body.jc105-room-bg-active .topbar,
+body.jc105-room-bg-active #jc51RaveTopbar{
+  position:relative;
+  z-index:1;
+}
+
+/* Remove expensive repeated wallpaper painting from room surfaces. */
+body.jc105-room-bg-active #watchSection,
+body.jc105-room-bg-active .watch-layout,
+body.jc105-room-bg-active .watch-main,
+body.jc105-room-bg-active .watch-stage,
+body.jc105-room-bg-active .watch-sidebar,
+body.jc105-room-bg-active #jc80Dock,
+body.jc105-room-bg-active .topbar,
+body.jc105-room-bg-active #jc51RaveTopbar,
+body.jc105-room-bg-active .chat-card,
+body.jc105-room-bg-active .watch-sidebar .side-card,
+body.jc105-room-bg-active .chat-card .side-card-head,
+body.jc105-room-bg-active .chat-card .messages,
+body.jc105-room-bg-active .chat-card .message-form,
+body.jc105-room-bg-active .chat-card #chatForm{
+  background-image:none!important;
+  background-repeat:no-repeat!important;
+  background-size:auto!important;
+  background-position:center center!important;
+  background-attachment:scroll!important;
+}
+
+/* Room layout same spirit as main menu: transparent shells + glass cards. */
+body.jc105-room-bg-active #watchSection,
+body.jc105-room-bg-active .watch-layout,
+body.jc105-room-bg-active .watch-main,
+body.jc105-room-bg-active .watch-stage{
+  background:transparent!important;
+}
+body.jc105-room-bg-active .topbar,
+body.jc105-room-bg-active #jc51RaveTopbar{
+  background:rgba(10,14,28,.24)!important;
+  border-bottom:1px solid rgba(255,255,255,.09)!important;
+  backdrop-filter:blur(calc(var(--jc105-room-blur) * .9)) saturate(140%)!important;
+  -webkit-backdrop-filter:blur(calc(var(--jc105-room-blur) * .9)) saturate(140%)!important;
+  box-shadow:none!important;
+}
+body.jc105-room-bg-active #jc80Dock{
+  background:rgba(10,14,28,.16)!important;
+  border-top:1px solid rgba(255,255,255,.08)!important;
+  backdrop-filter:blur(calc(var(--jc105-room-blur) * .95)) saturate(138%)!important;
+  -webkit-backdrop-filter:blur(calc(var(--jc105-room-blur) * .95)) saturate(138%)!important;
+  box-shadow:none!important;
+}
+body.jc105-room-bg-active #jc80Dock .jc80-dock-inner{
+  background:rgba(10,14,28,.30)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  box-shadow:0 10px 32px rgba(0,0,0,.18)!important;
+}
+body.jc105-room-bg-active .watch-sidebar{
+  background:rgba(10,14,28,var(--jc105-room-panel-alpha))!important;
+  border-left:1px solid rgba(255,255,255,.08)!important;
+  backdrop-filter:blur(var(--jc105-room-blur)) saturate(140%)!important;
+  -webkit-backdrop-filter:blur(var(--jc105-room-blur)) saturate(140%)!important;
+  box-shadow:none!important;
+}
+body.jc105-room-bg-active .chat-card,
+body.jc105-room-bg-active .watch-sidebar .side-card{
+  background:rgba(10,14,28,var(--jc105-room-card-alpha))!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  backdrop-filter:blur(calc(var(--jc105-room-blur) * .95)) saturate(138%)!important;
+  -webkit-backdrop-filter:blur(calc(var(--jc105-room-blur) * .95)) saturate(138%)!important;
+  box-shadow:none!important;
+}
+body.jc105-room-bg-active .chat-card .side-card-head,
+body.jc105-room-bg-active .chat-card .message-form,
+body.jc105-room-bg-active .chat-card #chatForm{
+  background:rgba(10,14,28,calc(var(--jc105-room-card-alpha) + .05))!important;
+  border-color:rgba(255,255,255,.08)!important;
+  backdrop-filter:blur(calc(var(--jc105-room-blur) * .8)) saturate(132%)!important;
+  -webkit-backdrop-filter:blur(calc(var(--jc105-room-blur) * .8)) saturate(132%)!important;
+}
+body.jc105-room-bg-active .chat-card .messages{
+  background:transparent!important;
+}
+body.jc105-room-bg-active .chat-card input,
+body.jc105-room-bg-active .chat-card textarea,
+body.jc105-room-bg-active .chat-card select,
+body.jc105-room-bg-active .chat-card .message-input,
+body.jc105-room-bg-active .chat-card [contenteditable="true"]{
+  background:rgba(255,255,255,var(--jc105-room-input-alpha))!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  box-shadow:none!important;
+}
+body.jc105-room-bg-active .player-shell,
+body.jc105-room-bg-active .player-card,
+body.jc105-room-bg-active .player-card-redesign{
+  background:transparent!important;
+  box-shadow:none!important;
+}
+body.jc105-room-bg-active .player-shell > header,
+body.jc105-room-bg-active .player-shell > nav{
+  background:transparent!important;
+}
+
+/* Safety: the actual player stays untouched and sharp. */
+body.jc105-room-bg-active .player-frame,
+body.jc105-room-bg-active .player-frame iframe,
+body.jc105-room-bg-active .player-frame video,
+body.jc105-room-bg-active #youtubePlayer,
+body.jc105-room-bg-active #iframePlayer,
+body.jc105-room-bg-active #videoPlayer{
+  background-color:#000!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+
+@media (max-width: 980px){
+  :root{ --jc105-room-blur:10px; }
+  body.jc105-room-bg-active .watch-sidebar{
+    background:rgba(10,14,28,.26)!important;
+  }
+}
