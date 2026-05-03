@@ -1,5 +1,8 @@
-/* JustClover cache killer stage106-no-autoreload-room-perf-20260503-1 */
-self.addEventListener('install', event => { self.skipWaiting(); });
+/* JustClover cache killer stage107-build-lock-no-reload-20260503-1 */
+const JC_SW_BUILD = "stage107-build-lock-no-reload-20260503-1";
+self.addEventListener('install', event => {
+  self.skipWaiting();
+});
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     if (self.registration.navigationPreload) {

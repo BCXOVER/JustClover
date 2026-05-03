@@ -6,7 +6,15 @@
   <title>JustClover</title>
   <meta name="theme-color" content="#080912" />
   <script>
-    window.JUSTCLOVER_BUILD = "stage106-no-autoreload-room-perf-20260503-1";
+    window.JUSTCLOVER_BUILD = "stage107-build-lock-no-reload-20260503-1";
+    window.JC_STAGE_EXPECTED_BUILD = "stage107-build-lock-no-reload-20260503-1";
+    window.JC_DISABLE_AUTO_RELOAD = true;
+    window.JC_DISABLE_UPDATE_LOOP = true;
+    try {
+      sessionStorage.removeItem('jc72ApplyingBuild');
+      sessionStorage.setItem('jc72NoReload','1');
+      localStorage.setItem('jc72AutoUpdateDisabled','1');
+    } catch (_) {}
   </script>
   <style>
     html,body{margin:0;min-height:100%;background:#06070d;color:#f5f7ff;font-family:Inter,Segoe UI,Arial,sans-serif}
@@ -18,8 +26,8 @@
 <body>
   <div class="jc40-loader">
     <div class="jc40-loader-card">
-      <b>JustClover Stage 94</b>
-      <p>Загружаю стабильную версию: активный просмотр, чат и нижняя панель без JS-дергания плеера…</p>
+      <b>JustClover Stage 107</b>
+      <p>Загружаю Stage107: без авто-перезагрузки, с фиксацией версии и безопасным room glass…</p>
     </div>
   </div>
 
@@ -27,7 +35,7 @@
     (async function(){
       const BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
       const BASE_VERSION = "stage37-catalog-hard-scroll-fix-20260502-1";
-      const BUILD = "stage106-no-autoreload-room-perf-20260503-1";
+      const BUILD = "stage107-build-lock-no-reload-20260503-1";
       try {
         const u = new URL(location.href);
         if (u.searchParams.get("v") !== BUILD) {
@@ -60,14 +68,19 @@
         if (!res.ok) throw new Error("Не удалось загрузить базовый index: " + res.status);
         let html = await res.text();
         html = html.replaceAll(BASE_VERSION, BUILD);
-        html = html.replace(/37 HARD/g, "74 FIXEDPLAYER");
-        html = html.replace(/Stage 37 HARD/g, "Stage 50 ACTIVE");
+        html = html.replace(/37 HARD/g, "107 NOLOOP");
+        html = html.replace(/Stage 37 HARD/g, "Stage 107 NOLOOP");
 
         document.open();
+        try {
+          sessionStorage.removeItem('jc72ApplyingBuild');
+          sessionStorage.setItem('jc72NoReload','1');
+          localStorage.setItem('jc72AutoUpdateDisabled','1');
+        } catch (_) {}
         document.write(html);
         document.close();
       } catch (e) {
-        console.error("JustClover Stage 94 boot failed", e);
+        console.error("JustClover Stage 107 boot failed", e);
         document.body.innerHTML = '<div class="jc40-loader"><div class="jc40-loader-card"><b>Stage 94 не загрузился</b><p>' + String(e.message || e) + '</p><p>Проверь интернет/CDN или загрузи предыдущий архив.</p></div></div>';
       }
     })();
