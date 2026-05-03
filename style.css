@@ -3337,7 +3337,7 @@ html::after{
 
 /* =========================================================
    JustClover Stage 94 — Real Stable Player Dock
-   Version: stage110-clean-chat-wallpaper-20260503-1
+   Version: stage111-clean-chat-wallpaper-final-20260503-1
 
    One stable active-room layout:
    topbar / player / real bottom controls / chat.
@@ -3746,7 +3746,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
 
 /* =========================================================
    JustClover Stage 94 — Player Mic Overlay
-   Version: stage110-clean-chat-wallpaper-20260503-1
+   Version: stage111-clean-chat-wallpaper-final-20260503-1
 
    Keep Stage80 stable layout. Remove chat button from the lower dock and move
    mic control inside the player so it remains available in fullscreen.
@@ -3895,7 +3895,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc81PlayerMic{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage110-clean-chat-wallpaper-20260503-1
+   Version: stage111-clean-chat-wallpaper-final-20260503-1
 
    Keep Stage80 layout. Mic is mounted on .watch-main, not inside the iframe
    and not hidden by old jc67 player-child rules, so it remains visible in
@@ -4068,7 +4068,7 @@ body.jc80-real-dock .watch-main #jc82PlayerMic[hidden]{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage110-clean-chat-wallpaper-20260503-1
+   Version: stage111-clean-chat-wallpaper-final-20260503-1
    Put mic back into bottom dock; hide overlay mic; hide chat.
    ========================================================= */
 html::after{ content:'88 ICONMIC'!important; }
@@ -4231,7 +4231,7 @@ body.jc88-icon-mic-dock #jc86FullscreenProxy{
 
 /* =========================================================
    JustClover Stage 89 — Glass Chat + Dock Transparency
-   Version: stage110-clean-chat-wallpaper-20260503-1
+   Version: stage111-clean-chat-wallpaper-final-20260503-1
 
    Keep Stage88 active layout and mic dock behavior.
    Make the strip under the player translucent so the live background can show
@@ -4239,7 +4239,7 @@ body.jc88-icon-mic-dock #jc86FullscreenProxy{
    ========================================================= */
 
 html::after{
-  content:'95 LOCALBG'!important;
+  content:'111 CHATBG'!important;
   background:rgba(56,189,248,.96)!important;
   color:#03130a!important;
 }
@@ -4352,7 +4352,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
 
 /* =========================================================
    JustClover Stage 94 — Player Recovery Safe Glass
-   Version: stage110-clean-chat-wallpaper-20260503-1
+   Version: stage111-clean-chat-wallpaper-final-20260503-1
 
    Recovery from Stage92: do not add background JS, do not touch iframe/video,
    do not create extra live background layers over/under the player. Only safe
@@ -4360,7 +4360,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
    ========================================================= */
 
 html::after{
-  content:'95 LOCALBG'!important;
+  content:'111 CHATBG'!important;
   background:rgba(34,197,94,.96)!important;
   color:#03130a!important;
 }
@@ -4429,7 +4429,7 @@ body.jc80-real-dock .chat-card [contenteditable="true"]{
 
 /* =========================================================
    JustClover Stage 94 — Room Appearance Wallpapers
-   Version: stage110-clean-chat-wallpaper-20260503-1
+   Version: stage111-clean-chat-wallpaper-final-20260503-1
 
    Safe path: no iframe/video/player-frame mutations. Adds a dedicated
    “Оформление комнаты” block and applies wallpaper only to safe UI surfaces:
@@ -4437,7 +4437,7 @@ body.jc80-real-dock .chat-card [contenteditable="true"]{
    ========================================================= */
 
 html::after{
-  content:'95 LOCALBG'!important;
+  content:'111 CHATBG'!important;
   background:rgba(52,211,153,.96)!important;
   color:#03130a!important;
 }
@@ -4695,1934 +4695,189 @@ body.jc94-room-wallpaper #videoPlayer{
 }
 
 /* =========================================================
-   JustClover Stage 95 — Local Room Wallpaper Fix
-   Version: stage110-clean-chat-wallpaper-20260503-1
-   Local file support for room wallpaper. No player selectors except read-only
-   recovery rules inherited from previous safe stage.
+   JustClover Stage 111 — Clean Chat Wallpaper Final
+   Version: stage111-clean-chat-wallpaper-final-20260503-1
+
+   Clean architecture: one wallpaper layer, only inside the right chat sidebar.
+   No room/dock/topbar/player wallpapers. No video wallpapers.
    ========================================================= */
 html::after{
-  content:'95 LOCALBG'!important;
-  background:rgba(45,212,191,.96)!important;
-  color:#03130a!important;
-}
-
-#jc95RoomVideoBg{
-  display:none;
-  position:fixed;
-  inset:0;
-  width:100vw;
-  height:100vh;
-  object-fit:cover;
-  z-index:0;
-  pointer-events:none;
-  opacity:.72;
-  filter:saturate(1.05) brightness(.86);
-  transform:translateZ(0);
-}
-
-body.jc95-room-video-wallpaper #jc95RoomVideoBg{
-  display:block!important;
-}
-
-body.jc95-room-local-wallpaper #appView,
-body.jc95-room-local-wallpaper .content,
-body.jc95-room-local-wallpaper #watchSection,
-body.jc95-room-local-wallpaper .watch-layout,
-body.jc95-room-local-wallpaper .watch-main,
-body.jc95-room-local-wallpaper .watch-sidebar{
-  position:relative;
-}
-
-body.jc95-room-local-wallpaper #appView,
-body.jc95-room-local-wallpaper .content,
-body.jc95-room-local-wallpaper #watchSection,
-body.jc95-room-local-wallpaper .watch-layout{
-  background:transparent!important;
-}
-
-body.jc95-room-video-wallpaper #appView{
-  z-index:1;
-}
-
-body.jc95-room-video-wallpaper #jc80Dock,
-body.jc95-room-video-wallpaper .watch-sidebar,
-body.jc95-room-video-wallpaper .topbar,
-body.jc95-room-video-wallpaper #jc51RaveTopbar{
-  background-image:linear-gradient(180deg,rgba(0,0,0,var(--jc94-room-dim,.34)),rgba(0,0,0,calc(var(--jc94-room-dim,.34) + .06)))!important;
-  background-color:rgba(8,10,18,.24)!important;
-  backdrop-filter:blur(var(--jc94-room-blur,14px)) saturate(148%)!important;
-  -webkit-backdrop-filter:blur(var(--jc94-room-blur,14px)) saturate(148%)!important;
-}
-
-body.jc95-room-video-wallpaper #jc80Dock .jc80-dock-inner,
-body.jc95-room-video-wallpaper .chat-card,
-body.jc95-room-video-wallpaper .watch-sidebar .side-card{
-  background:var(--jc94-room-glass,rgba(8,10,18,.38))!important;
-  backdrop-filter:blur(calc(var(--jc94-room-blur,14px) * .86)) saturate(145%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc94-room-blur,14px) * .86)) saturate(145%)!important;
-}
-
-body.jc95-room-local-wallpaper:not(.jc95-room-video-wallpaper) #jc80Dock,
-body.jc95-room-local-wallpaper:not(.jc95-room-video-wallpaper) .watch-sidebar,
-body.jc95-room-local-wallpaper:not(.jc95-room-video-wallpaper) .topbar,
-body.jc95-room-local-wallpaper:not(.jc95-room-video-wallpaper) #jc51RaveTopbar{
-  background-image:
-    linear-gradient(180deg,rgba(0,0,0,var(--jc94-room-dim,.34)),rgba(0,0,0,calc(var(--jc94-room-dim,.34) + .06))),
-    var(--jc95-room-image,var(--jc94-room-wallpaper))!important;
-  background-size:cover!important;
-  background-position:center!important;
-}
-
-.jc94-room-preview{
-  overflow:hidden!important;
-}
-
-.jc95-preview-video{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  z-index:0;
-  pointer-events:none;
-  filter:saturate(1.04) brightness(.86);
-}
-
-.jc94-room-preview-player,
-.jc94-room-preview-chat,
-.jc94-room-preview-dock{
-  position:relative;
-  z-index:1;
-}
-
-/* =========================================================
-   JustClover Stage 96 — Room Wallpaper Apply Fix
-   Version: stage110-clean-chat-wallpaper-20260503-1
-
-   Fix: local room wallpaper/video selected in Appearance now actually renders
-   inside the active watch room. It is mounted behind the room UI, not inside
-   player-frame and not over iframe/video.
-   ========================================================= */
-html::after{
-  content:'96 ROOMBG'!important;
-  background:rgba(34,197,94,.96)!important;
-  color:#03130a!important;
-}
-
-body.jc96-room-bg-on #appView,
-body.jc96-room-bg-on .content,
-body.jc96-room-bg-on #watchSection,
-body.jc96-room-bg-on .watch-layout{
-  background:transparent!important;
-}
-
-body.jc96-room-bg-on .watch-layout{
-  position:relative!important;
-  isolation:isolate!important;
-  overflow:hidden!important;
-}
-
-#jc96RoomBg{
-  display:none;
-  position:absolute!important;
-  inset:0!important;
-  z-index:0!important;
-  pointer-events:none!important;
-  overflow:hidden!important;
-  background-image:var(--jc96-room-image, var(--jc95-room-image, var(--jc94-room-wallpaper)))!important;
-  background-size:cover!important;
-  background-position:center!important;
-  background-repeat:no-repeat!important;
-  transform:translateZ(0)!important;
-}
-
-#jc96RoomBg::after{
-  content:""!important;
-  position:absolute!important;
-  inset:0!important;
-  background:rgba(0,0,0,var(--jc94-room-dim,.34))!important;
-  z-index:2!important;
-  pointer-events:none!important;
-}
-
-#jc96RoomBgVideo{
-  display:none;
-  position:absolute!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  object-fit:cover!important;
-  z-index:1!important;
-  opacity:.92!important;
-  filter:saturate(1.04) brightness(.88)!important;
-  pointer-events:none!important;
-}
-
-body.jc96-room-bg-on #jc96RoomBg{
-  display:block!important;
-}
-
-body.jc96-room-video-on #jc96RoomBgVideo{
-  display:block!important;
-}
-
-body.jc96-room-bg-on .watch-main,
-body.jc96-room-bg-on .watch-sidebar{
-  position:relative!important;
-  z-index:1!important;
-}
-
-body.jc96-room-bg-on .watch-main{
-  background:transparent!important;
-}
-
-body.jc96-room-bg-on #jc80Dock{
-  background:rgba(5,7,14,.16)!important;
-  border-top:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(var(--jc94-room-blur,14px)) saturate(150%)!important;
-  -webkit-backdrop-filter:blur(var(--jc94-room-blur,14px)) saturate(150%)!important;
-}
-
-body.jc96-room-bg-on #jc80Dock .jc80-dock-inner{
-  background:rgba(8,10,18,.42)!important;
-  border-color:rgba(255,255,255,.16)!important;
-  box-shadow:0 12px 28px rgba(0,0,0,.24)!important;
-}
-
-body.jc96-room-bg-on .watch-sidebar{
-  background:rgba(6,8,18,.36)!important;
-  border-left:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(var(--jc94-room-blur,14px)) saturate(150%)!important;
-  -webkit-backdrop-filter:blur(var(--jc94-room-blur,14px)) saturate(150%)!important;
-}
-
-body.jc96-room-bg-on .watch-sidebar .side-card,
-body.jc96-room-bg-on .chat-card{
-  background:rgba(8,10,18,.34)!important;
-  border-color:rgba(255,255,255,.12)!important;
-  backdrop-filter:blur(calc(var(--jc94-room-blur,14px) * .76)) saturate(145%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc94-room-blur,14px) * .76)) saturate(145%)!important;
-}
-
-body.jc96-room-bg-on .chat-card .message-form,
-body.jc96-room-bg-on .chat-card #chatForm,
-body.jc96-room-bg-on .chat-card input,
-body.jc96-room-bg-on .chat-card textarea,
-body.jc96-room-bg-on .chat-card .message-input,
-body.jc96-room-bg-on .chat-card [contenteditable="true"]{
-  background:rgba(255,255,255,.075)!important;
-  border-color:rgba(255,255,255,.14)!important;
-}
-
-body.jc96-room-bg-on .topbar,
-body.jc96-room-bg-on #jc51RaveTopbar{
-  background:rgba(7,6,14,.54)!important;
-  border-bottom:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(var(--jc94-room-blur,14px)) saturate(150%)!important;
-  -webkit-backdrop-filter:blur(var(--jc94-room-blur,14px)) saturate(150%)!important;
-}
-
-/* Do not let the room wallpaper layer touch the actual player path. */
-body.jc96-room-bg-on .player-frame,
-body.jc96-room-bg-on .player-frame iframe,
-body.jc96-room-bg-on .player-frame video,
-body.jc96-room-bg-on #youtubePlayer,
-body.jc96-room-bg-on #iframePlayer,
-body.jc96-room-bg-on #videoPlayer{
-  background-color:#000!important;
-}
-
-/* =========================================================
-   JustClover Stage 97 — Room BG Layout Fix
-   Version: stage110-clean-chat-wallpaper-20260503-1
-
-   Fix Stage96: the room wallpaper layer must never participate in
-   .watch-layout flow. It is a fixed background layer under the room UI.
-   Player geometry is restored/stabilized; chat/dock glass is stronger.
-   ========================================================= */
-html::after{
-  content:'97 BGFIX'!important;
-  background:rgba(34,211,238,.96)!important;
-  color:#03130a!important;
-}
-
-/* The background is now outside layout flow, appended to body by JS. */
-body.jc96-room-bg-on #jc96RoomBg{
-  display:block!important;
-  position:fixed!important;
-  left:0!important;
-  top:var(--jc80-topbar-h,58px)!important;
-  right:0!important;
-  bottom:0!important;
-  width:100vw!important;
-  height:calc(100dvh - var(--jc80-topbar-h,58px))!important;
-  z-index:0!important;
-  pointer-events:none!important;
-  overflow:hidden!important;
-  contain:paint!important;
-  background-image:var(--jc96-room-image, var(--jc95-room-image, var(--jc94-room-wallpaper)))!important;
-  background-size:cover!important;
-  background-position:center!important;
-  background-repeat:no-repeat!important;
-  margin:0!important;
-  padding:0!important;
-  flex:none!important;
-  order:-999!important;
-}
-
-body.jc96-room-bg-on #jc96RoomBg::after{
-  background:rgba(0,0,0,var(--jc94-room-dim,.34))!important;
-}
-
-body.jc96-room-bg-on #jc96RoomBgVideo{
-  position:absolute!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  object-fit:cover!important;
-}
-
-/* Never let the injected bg element create a row/column in the room grid. */
-body.jc96-room-bg-on .watch-layout > #jc96RoomBg{
-  position:fixed!important;
-  display:block!important;
-  grid-column:auto!important;
-  grid-row:auto!important;
-}
-
-/* Restore exact active-room geometry after Stage96. */
-body.jc80-real-dock.jc96-room-bg-on #appView.app,
-body.jc80-real-dock.jc96-room-bg-on .content,
-body.jc80-real-dock.jc96-room-bg-on #watchSection,
-body.jc80-real-dock.jc96-room-bg-on .watch-layout{
-  height:100dvh!important;
-  max-height:100dvh!important;
-  min-height:0!important;
-  padding:0!important;
-  margin:0!important;
-  overflow:hidden!important;
-  background:transparent!important;
-}
-
-body.jc80-real-dock.jc96-room-bg-on .watch-layout{
-  position:static!important;
-  display:grid!important;
-  grid-template-columns:minmax(0,calc(100vw - var(--jc80-chat-w))) var(--jc80-chat-w)!important;
-  grid-template-rows:100dvh!important;
-  gap:0!important;
-  align-items:stretch!important;
-  isolation:auto!important;
-}
-
-body.jc80-real-dock.jc96-room-bg-on .watch-main{
-  position:fixed!important;
-  left:0!important;
-  right:var(--jc80-chat-w)!important;
-  top:var(--jc80-topbar-h)!important;
-  bottom:0!important;
-  width:auto!important;
-  height:auto!important;
-  display:grid!important;
-  grid-template-rows:minmax(0,1fr) calc(var(--jc80-dock-h) + var(--jc80-safe-bottom))!important;
-  padding:0!important;
-  margin:0!important;
-  overflow:hidden!important;
-  background:transparent!important;
-  z-index:2!important;
-}
-
-body.jc80-real-dock.jc96-room-bg-on .watch-stage{
-  grid-row:1!important;
-  position:relative!important;
-  height:100%!important;
-  margin:0!important;
-  padding:0!important;
-  background:#000!important;
-  overflow:hidden!important;
-  z-index:1!important;
-}
-
-body.jc80-real-dock.jc96-room-bg-on .player-card-redesign,
-body.jc80-real-dock.jc96-room-bg-on .player-card,
-body.jc80-real-dock.jc96-room-bg-on .player-shell,
-body.jc80-real-dock.jc96-room-bg-on .player-frame{
-  position:absolute!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  margin:0!important;
-  padding:0!important;
-  background:#000!important;
-  transform:none!important;
-}
-
-body.jc80-real-dock.jc96-room-bg-on .watch-sidebar{
-  position:fixed!important;
-  top:var(--jc80-topbar-h)!important;
-  right:0!important;
-  bottom:0!important;
-  width:var(--jc80-chat-w)!important;
-  height:calc(100dvh - var(--jc80-topbar-h))!important;
-  max-height:calc(100dvh - var(--jc80-topbar-h))!important;
-  margin:0!important;
-  padding:12px 10px calc(var(--jc80-safe-bottom) + 10px)!important;
-  z-index:3!important;
-  background:rgba(5,7,16,.18)!important;
-  border-left:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(var(--jc94-room-blur,14px)) saturate(150%)!important;
-  -webkit-backdrop-filter:blur(var(--jc94-room-blur,14px)) saturate(150%)!important;
-}
-
-/* Make chat noticeably glass, not a black slab. */
-body.jc80-real-dock.jc96-room-bg-on .watch-sidebar .side-card,
-body.jc80-real-dock.jc96-room-bg-on .chat-card{
-  background:rgba(8,10,18,.20)!important;
-  border-color:rgba(255,255,255,.13)!important;
-  box-shadow:0 18px 42px rgba(0,0,0,.18)!important;
-  backdrop-filter:blur(calc(var(--jc94-room-blur,14px) * .92)) saturate(150%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc94-room-blur,14px) * .92)) saturate(150%)!important;
-}
-
-body.jc80-real-dock.jc96-room-bg-on .chat-card .side-card-head{
-  background:rgba(255,255,255,.025)!important;
-}
-
-body.jc80-real-dock.jc96-room-bg-on #chatMessages,
-body.jc80-real-dock.jc96-room-bg-on .chat-card .messages{
-  background:transparent!important;
-}
-
-body.jc80-real-dock.jc96-room-bg-on .chat-card .message-form,
-body.jc80-real-dock.jc96-room-bg-on .chat-card #chatForm{
-  background:rgba(255,255,255,.035)!important;
-  border-color:rgba(255,255,255,.10)!important;
-}
-
-body.jc80-real-dock.jc96-room-bg-on .chat-card input,
-body.jc80-real-dock.jc96-room-bg-on .chat-card textarea,
-body.jc80-real-dock.jc96-room-bg-on .chat-card .message-input,
-body.jc80-real-dock.jc96-room-bg-on .chat-card [contenteditable="true"]{
-  background:rgba(255,255,255,.09)!important;
-  border-color:rgba(255,255,255,.16)!important;
-}
-
-/* Bottom strip shows wallpaper/video behind it. */
-body.jc80-real-dock.jc96-room-bg-on #jc80Dock{
-  position:relative!important;
-  z-index:4!important;
-  background:rgba(5,7,14,.10)!important;
-  border-top:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(var(--jc94-room-blur,14px)) saturate(150%)!important;
-  -webkit-backdrop-filter:blur(var(--jc94-room-blur,14px)) saturate(150%)!important;
-}
-
-body.jc80-real-dock.jc96-room-bg-on #jc80Dock .jc80-dock-inner{
-  background:rgba(8,10,18,.34)!important;
-  border-color:rgba(255,255,255,.16)!important;
-  box-shadow:0 12px 28px rgba(0,0,0,.22)!important;
-}
-
-body.jc80-real-dock.jc96-room-bg-on .topbar,
-body.jc80-real-dock.jc96-room-bg-on #jc51RaveTopbar{
-  z-index:20!important;
-  background:rgba(7,6,14,.46)!important;
-  border-bottom:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(var(--jc94-room-blur,14px)) saturate(150%)!important;
-  -webkit-backdrop-filter:blur(var(--jc94-room-blur,14px)) saturate(150%)!important;
-}
-
-/* Keep the actual video/player fully opaque and untouched. */
-body.jc80-real-dock.jc96-room-bg-on .player-frame,
-body.jc80-real-dock.jc96-room-bg-on .player-frame iframe,
-body.jc80-real-dock.jc96-room-bg-on .player-frame video,
-body.jc80-real-dock.jc96-room-bg-on .player-frame .embed-box,
-body.jc80-real-dock.jc96-room-bg-on #youtubePlayer,
-body.jc80-real-dock.jc96-room-bg-on #iframePlayer,
-body.jc80-real-dock.jc96-room-bg-on #videoPlayer{
-  background-color:#000!important;
-  opacity:1!important;
-  visibility:visible!important;
-}
-
-@media(max-width:980px){
-  body.jc80-real-dock.jc96-room-bg-on .watch-main{
-    right:0!important;
-    bottom:38dvh!important;
-  }
-  body.jc80-real-dock.jc96-room-bg-on .watch-sidebar{
-    top:auto!important;
-    left:0!important;
-    width:100vw!important;
-    height:38dvh!important;
-    max-height:38dvh!important;
-  }
-}
-
-/* =========================================================
-   JustClover Stage 98 — Room Wallpaper Surface Fix
-   Version: stage110-clean-chat-wallpaper-20260503-1
-
-   Real fix for room wallpaper visibility:
-   - background is a fixed non-layout layer under the room UI;
-   - chat and dock are true glass surfaces;
-   - player iframe/video geometry is not touched.
-   ========================================================= */
-html::after{
-  content:'100 TOPBAR'!important;
-  background:rgba(168,85,247,.96)!important;
-  color:#fff!important;
-}
-
-#jc98RoomBg{
-  display:none!important;
-  position:fixed!important;
-  left:0!important;
-  right:0!important;
-  top:var(--jc80-topbar-h,58px)!important;
-  bottom:0!important;
-  width:100vw!important;
-  height:calc(100dvh - var(--jc80-topbar-h,58px))!important;
-  z-index:1!important;
-  pointer-events:none!important;
-  overflow:hidden!important;
-  contain:paint!important;
-  background-image:var(--jc98-room-image, var(--jc96-room-image, var(--jc95-room-image, var(--jc94-room-wallpaper))))!important;
-  background-size:cover!important;
-  background-position:center!important;
-  background-repeat:no-repeat!important;
-  opacity:1!important;
-  transform:translateZ(0)!important;
-}
-
-#jc98RoomBg::after{
-  content:""!important;
-  position:absolute!important;
-  inset:0!important;
-  z-index:2!important;
-  background:rgba(0,0,0,var(--jc98-room-dim,var(--jc94-room-dim,.30)))!important;
-  pointer-events:none!important;
-}
-
-#jc98RoomBgVideo{
-  display:none!important;
-  position:absolute!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  object-fit:cover!important;
-  z-index:1!important;
-  pointer-events:none!important;
-  opacity:.96!important;
-  filter:saturate(1.05) brightness(.88)!important;
-}
-
-body.jc98-room-bg-on #jc98RoomBg{
-  display:block!important;
-}
-
-body.jc98-room-video-on #jc98RoomBgVideo{
-  display:block!important;
-}
-
-body.jc98-room-bg-on #jc96RoomBg,
-body.jc98-room-bg-on #jc95RoomVideoBg{
-  display:none!important;
-  visibility:hidden!important;
-  opacity:0!important;
-  pointer-events:none!important;
-}
-
-body.jc98-room-bg-on #appView,
-body.jc98-room-bg-on .content,
-body.jc98-room-bg-on #watchSection,
-body.jc98-room-bg-on .watch-layout,
-body.jc98-room-bg-on .watch-main{
-  background:transparent!important;
-}
-
-body.jc98-room-bg-on #appView,
-body.jc98-room-bg-on .content,
-body.jc98-room-bg-on #watchSection,
-body.jc98-room-bg-on .watch-layout,
-body.jc98-room-bg-on .watch-main,
-body.jc98-room-bg-on .watch-sidebar,
-body.jc98-room-bg-on #jc80Dock{
-  position:relative!important;
-}
-
-body.jc98-room-bg-on #appView,
-body.jc98-room-bg-on .content,
-body.jc98-room-bg-on #watchSection,
-body.jc98-room-bg-on .watch-layout{
-  z-index:2!important;
-}
-
-body.jc98-room-bg-on .watch-main,
-body.jc98-room-bg-on .watch-sidebar{
-  z-index:3!important;
-}
-
-/* Keep the video/player itself solid. Only the areas around it become glass. */
-body.jc98-room-bg-on .watch-stage,
-body.jc98-room-bg-on .player-card-redesign,
-body.jc98-room-bg-on .player-card,
-body.jc98-room-bg-on .player-shell,
-body.jc98-room-bg-on .player-frame,
-body.jc98-room-bg-on .player-frame iframe,
-body.jc98-room-bg-on .player-frame video,
-body.jc98-room-bg-on .player-frame .embed-box,
-body.jc98-room-bg-on #youtubePlayer,
-body.jc98-room-bg-on #iframePlayer,
-body.jc98-room-bg-on #videoPlayer{
-  background-color:#000!important;
-  opacity:1!important;
-  visibility:visible!important;
-}
-
-/* Bottom strip: now it is actually glass, not a black slab. */
-body.jc98-room-bg-on #jc80Dock{
-  z-index:8!important;
-  background-color:rgba(3,5,12,.04)!important;
-  background-image:
-    linear-gradient(180deg,rgba(3,5,12,.02),rgba(3,5,12,.08)),
-    var(--jc98-room-image, var(--jc96-room-image, var(--jc95-room-image, var(--jc94-room-wallpaper))))!important;
-  background-size:cover!important;
-  background-position:center bottom!important;
-  border-top:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(var(--jc98-room-blur,var(--jc94-room-blur,14px))) saturate(156%)!important;
-  -webkit-backdrop-filter:blur(var(--jc98-room-blur,var(--jc94-room-blur,14px))) saturate(156%)!important;
-}
-
-body.jc98-room-video-on #jc80Dock{
-  background-image:linear-gradient(180deg,rgba(3,5,12,.02),rgba(3,5,12,.08))!important;
-}
-
-body.jc98-room-bg-on #jc80Dock .jc80-dock-inner{
-  background:rgba(8,10,18,var(--jc98-inner-alpha,.30))!important;
-  border-color:rgba(255,255,255,.16)!important;
-  box-shadow:0 12px 28px rgba(0,0,0,.18)!important;
-  backdrop-filter:blur(calc(var(--jc98-room-blur,var(--jc94-room-blur,14px)) * .82)) saturate(150%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc98-room-blur,var(--jc94-room-blur,14px)) * .82)) saturate(150%)!important;
-}
-
-/* Right chat column: transparent enough to see room wallpaper. */
-body.jc98-room-bg-on .watch-sidebar{
-  background-color:rgba(5,7,16,.06)!important;
-  background-image:
-    radial-gradient(circle at top right,rgba(236,72,153,.10),transparent 40%),
-    linear-gradient(180deg,rgba(5,7,16,.05),rgba(5,7,16,.14)),
-    var(--jc98-room-image, var(--jc96-room-image, var(--jc95-room-image, var(--jc94-room-wallpaper))))!important;
-  background-size:cover!important;
-  background-position:center!important;
-  border-left:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(var(--jc98-room-blur,var(--jc94-room-blur,14px))) saturate(156%)!important;
-  -webkit-backdrop-filter:blur(var(--jc98-room-blur,var(--jc94-room-blur,14px))) saturate(156%)!important;
-}
-
-body.jc98-room-video-on .watch-sidebar{
-  background-image:
-    radial-gradient(circle at top right,rgba(236,72,153,.10),transparent 40%),
-    linear-gradient(180deg,rgba(5,7,16,.05),rgba(5,7,16,.14))!important;
-}
-
-body.jc98-room-bg-on .watch-sidebar .side-card,
-body.jc98-room-bg-on .chat-card{
-  background:rgba(8,10,18,var(--jc98-card-alpha,.18))!important;
-  border-color:rgba(255,255,255,.12)!important;
-  box-shadow:0 18px 42px rgba(0,0,0,.15)!important;
-  backdrop-filter:blur(calc(var(--jc98-room-blur,var(--jc94-room-blur,14px)) * .82)) saturate(155%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc98-room-blur,var(--jc94-room-blur,14px)) * .82)) saturate(155%)!important;
-}
-
-body.jc98-room-bg-on .chat-card .side-card-head{
-  background:rgba(255,255,255,.018)!important;
-}
-
-body.jc98-room-bg-on #chatMessages,
-body.jc98-room-bg-on .chat-card .messages{
-  background:transparent!important;
-}
-
-body.jc98-room-bg-on .chat-card .message-form,
-body.jc98-room-bg-on .chat-card #chatForm{
-  background:rgba(255,255,255,.035)!important;
-  border-color:rgba(255,255,255,.10)!important;
-}
-
-body.jc98-room-bg-on .chat-card input,
-body.jc98-room-bg-on .chat-card textarea,
-body.jc98-room-bg-on .chat-card .message-input,
-body.jc98-room-bg-on .chat-card [contenteditable="true"]{
-  background:rgba(255,255,255,.085)!important;
-  border-color:rgba(255,255,255,.15)!important;
-}
-
-body.jc98-room-bg-on .topbar,
-body.jc98-room-bg-on #jc51RaveTopbar{
-  background:rgba(7,6,14,.42)!important;
-  border-bottom:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(var(--jc98-room-blur,var(--jc94-room-blur,14px))) saturate(156%)!important;
-  -webkit-backdrop-filter:blur(var(--jc98-room-blur,var(--jc94-room-blur,14px))) saturate(156%)!important;
-}
-
-/* =========================================================
-   JustClover Stage 99 — Room Wallpaper Surfaces
-   Version: stage110-clean-chat-wallpaper-20260503-1
-
-   Real surface fix: do not rely on a background behind black containers.
-   The selected room wallpaper/video is painted directly inside safe UI surfaces:
-   sidebar/chat/dock/topbar. Player iframe/video geometry remains untouched.
-   ========================================================= */
-html::after{
-  content:'100 TOPBAR'!important;
-  background:rgba(34,211,238,.96)!important;
-  color:#03130a!important;
-}
-
-body.jc99-room-surfaces #jc96RoomBg,
-body.jc99-room-surfaces #jc98RoomBg,
-body.jc99-room-surfaces #jc95RoomVideoBg{
-  display:none!important;
-  visibility:hidden!important;
-  opacity:0!important;
-  pointer-events:none!important;
-}
-
-body.jc99-room-surfaces .watch-layout,
-body.jc99-room-surfaces .watch-main,
-body.jc99-room-surfaces #jc80Dock,
-body.jc99-room-surfaces .watch-sidebar,
-body.jc99-room-surfaces .topbar,
-body.jc99-room-surfaces #jc51RaveTopbar{
-  position:relative!important;
-  isolation:isolate!important;
-}
-
-body.jc99-room-surfaces .watch-layout,
-body.jc99-room-surfaces .watch-main{
-  background:transparent!important;
-}
-
-.jc99SurfaceBg{
-  position:absolute!important;
-  inset:0!important;
-  z-index:0!important;
-  pointer-events:none!important;
-  overflow:hidden!important;
-  border-radius:inherit!important;
-  background-image:var(--jc99-room-image, none)!important;
-  background-size:cover!important;
-  background-position:center!important;
-  background-repeat:no-repeat!important;
-  opacity:1!important;
-}
-
-.jc99SurfaceBg::after{
-  content:""!important;
-  position:absolute!important;
-  inset:0!important;
-  z-index:2!important;
-  background:
-    radial-gradient(circle at 20% 16%, rgba(255,255,255,.055), transparent 32%),
-    rgba(0,0,0,var(--jc99-room-dim,.30))!important;
-  pointer-events:none!important;
-}
-
-.jc99SurfaceBg video{
-  display:none!important;
-  position:absolute!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  object-fit:cover!important;
-  z-index:1!important;
-  pointer-events:none!important;
-  opacity:.98!important;
-  filter:saturate(1.06) brightness(.90)!important;
-}
-
-body.jc99-room-video .jc99SurfaceBg video{
-  display:block!important;
-}
-
-body.jc99-room-video .jc99SurfaceBg{
-  background-image:none!important;
-}
-
-body.jc99-room-surfaces .watch-sidebar > :not(.jc99SurfaceBg),
-body.jc99-room-surfaces #jc80Dock > :not(.jc99SurfaceBg),
-body.jc99-room-surfaces .topbar > :not(.jc99SurfaceBg),
-body.jc99-room-surfaces #jc51RaveTopbar > :not(.jc99SurfaceBg){
-  position:relative!important;
-  z-index:1!important;
-}
-
-body.jc99-room-surfaces .watch-sidebar{
-  background:rgba(5,7,16,.04)!important;
-  border-left:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(var(--jc99-room-blur,14px)) saturate(160%)!important;
-  -webkit-backdrop-filter:blur(var(--jc99-room-blur,14px)) saturate(160%)!important;
-}
-
-body.jc99-room-surfaces .watch-sidebar .side-card,
-body.jc99-room-surfaces .watch-sidebar .chat-card{
-  background:rgba(7,9,18,var(--jc99-card-alpha,.18))!important;
-  border-color:rgba(255,255,255,.12)!important;
-  box-shadow:0 18px 42px rgba(0,0,0,.14)!important;
-  backdrop-filter:blur(calc(var(--jc99-room-blur,14px) * .88)) saturate(158%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc99-room-blur,14px) * .88)) saturate(158%)!important;
-}
-
-body.jc99-room-surfaces .chat-card .side-card-head,
-body.jc99-room-surfaces .chat-card #chatMessages,
-body.jc99-room-surfaces .chat-card .messages{
-  background:transparent!important;
-}
-
-body.jc99-room-surfaces .chat-card .message-form,
-body.jc99-room-surfaces .chat-card #chatForm{
-  background:rgba(255,255,255,.045)!important;
-  border-color:rgba(255,255,255,.12)!important;
-  backdrop-filter:blur(calc(var(--jc99-room-blur,14px) * .55)) saturate(145%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc99-room-blur,14px) * .55)) saturate(145%)!important;
-}
-
-body.jc99-room-surfaces .chat-card input,
-body.jc99-room-surfaces .chat-card textarea,
-body.jc99-room-surfaces .chat-card .message-input,
-body.jc99-room-surfaces .chat-card [contenteditable="true"]{
-  background:rgba(255,255,255,.085)!important;
-  border-color:rgba(255,255,255,.16)!important;
-}
-
-body.jc99-room-surfaces #jc80Dock{
-  background:rgba(3,5,12,.035)!important;
-  border-top:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(var(--jc99-room-blur,14px)) saturate(160%)!important;
-  -webkit-backdrop-filter:blur(var(--jc99-room-blur,14px)) saturate(160%)!important;
-}
-
-body.jc99-room-surfaces #jc80Dock .jc80-dock-inner{
-  background:rgba(8,10,18,var(--jc99-dock-alpha,.32))!important;
-  border-color:rgba(255,255,255,.16)!important;
-  box-shadow:0 12px 28px rgba(0,0,0,.17)!important;
-  backdrop-filter:blur(calc(var(--jc99-room-blur,14px) * .75)) saturate(150%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc99-room-blur,14px) * .75)) saturate(150%)!important;
-}
-
-body.jc99-room-surfaces .topbar,
-body.jc99-room-surfaces #jc51RaveTopbar{
-  background:rgba(7,6,14,.30)!important;
-  border-bottom:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(var(--jc99-room-blur,14px)) saturate(160%)!important;
-  -webkit-backdrop-filter:blur(var(--jc99-room-blur,14px)) saturate(160%)!important;
-}
-
-/* Never affect the actual playback area. */
-body.jc99-room-surfaces .watch-stage,
-body.jc99-room-surfaces .player-card-redesign,
-body.jc99-room-surfaces .player-card,
-body.jc99-room-surfaces .player-shell,
-body.jc99-room-surfaces .player-frame,
-body.jc99-room-surfaces .player-frame iframe,
-body.jc99-room-surfaces .player-frame video,
-body.jc99-room-surfaces .player-frame .embed-box,
-body.jc99-room-surfaces #youtubePlayer,
-body.jc99-room-surfaces #iframePlayer,
-body.jc99-room-surfaces #videoPlayer{
-  background-color:#000!important;
-  opacity:1!important;
-  visibility:visible!important;
-}
-
-/* =========================================================
-   JustClover Stage 100 — Topbar Recovery + Safe Surfaces
-   Version: stage110-clean-chat-wallpaper-20260503-1
-
-   Recovery from Stage99: do not paint/mutate the topbar surface. Keep room
-   wallpaper only in safe surfaces: bottom dock + right chat column. Restore the
-   native active-room topbar so exit/catalog controls are always available.
-   ========================================================= */
-html::after{
-  content:'100 TOPBAR'!important;
-  background:rgba(34,211,238,.96)!important;
-  color:#03130a!important;
-}
-
-body.jc100-topbar-recovery #jc51RaveTopbar .jc99SurfaceBg,
-body.jc100-topbar-recovery .topbar .jc99SurfaceBg[data-jc99='topbar']{
-  display:none!important;
-  visibility:hidden!important;
-  opacity:0!important;
-  pointer-events:none!important;
-}
-
-/* Undo Stage99's position:relative on the active topbar. */
-body.jc100-topbar-recovery #jc51RaveTopbar{
-  position:fixed!important;
-  inset:0 0 auto 0!important;
-  height:var(--jc80-topbar-h,var(--jc64-topbar-h,58px))!important;
-  z-index:2147483200!important;
-  display:grid!important;
-  grid-template-columns:minmax(220px,1fr) auto minmax(220px,1fr)!important;
-  align-items:center!important;
-  gap:12px!important;
-  padding:0 18px!important;
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-  transform:none!important;
-  isolation:auto!important;
-  overflow:visible!important;
-  border-bottom:1px solid rgba(255,255,255,.10)!important;
-  background:linear-gradient(180deg,rgba(54,38,43,.96),rgba(18,16,25,.96))!important;
-  box-shadow:0 10px 28px rgba(0,0,0,.24)!important;
-  backdrop-filter:blur(14px) saturate(148%)!important;
-  -webkit-backdrop-filter:blur(14px) saturate(148%)!important;
-}
-
-body.jc100-topbar-recovery #jc51RaveTopbar > :not(.jc99SurfaceBg){
-  position:relative!important;
-  z-index:2!important;
-  opacity:1!important;
-  visibility:visible!important;
-}
-
-body.jc100-topbar-recovery #jc51RaveTopbar .jc51-rave-logo{
-  display:block!important;
-  font-size:clamp(24px,2.15vw,34px)!important;
-  line-height:1!important;
-  letter-spacing:.10em!important;
-  color:#fff!important;
-  text-align:center!important;
-  text-shadow:0 2px 18px rgba(0,0,0,.36)!important;
-}
-
-body.jc100-topbar-recovery #jc51RaveTopbar .jc51-rave-left{
-  display:flex!important;
-  align-items:center!important;
-  gap:18px!important;
-  min-width:0!important;
-}
-
-body.jc100-topbar-recovery #jc51RaveTopbar .jc51-rave-right{
-  min-width:0!important;
-  display:block!important;
-}
-
-body.jc100-topbar-recovery #jc51RaveTopbar button{
-  width:34px!important;
-  height:34px!important;
-  min-height:34px!important;
-  padding:0!important;
-  border:0!important;
-  border-radius:12px!important;
-  background:transparent!important;
-  color:#fff!important;
-  font:900 24px/1 Inter,Segoe UI,Arial,sans-serif!important;
-  opacity:.95!important;
-  box-shadow:none!important;
-  cursor:pointer!important;
-}
-
-body.jc100-topbar-recovery #jc51RaveTopbar button:hover{
-  background:rgba(255,255,255,.10)!important;
-}
-
-/* Stage99 should only surface-paint chat/dock now, never the topbar. */
-body.jc100-topbar-recovery.jc99-room-surfaces .topbar,
-body.jc100-topbar-recovery.jc99-room-surfaces #jc51RaveTopbar{
-  background:linear-gradient(180deg,rgba(54,38,43,.96),rgba(18,16,25,.96))!important;
-  backdrop-filter:blur(14px) saturate(148%)!important;
-  -webkit-backdrop-filter:blur(14px) saturate(148%)!important;
-}
-
-body.jc100-topbar-recovery .watch-sidebar{
-  background:rgba(4,5,12,.22)!important;
-}
-body.jc100-topbar-recovery.jc99-room-surfaces .watch-sidebar{
-  background:rgba(5,7,16,.10)!important;
-}
-body.jc100-topbar-recovery.jc99-room-surfaces .watch-sidebar .chat-card,
-body.jc100-topbar-recovery.jc99-room-surfaces .watch-sidebar .side-card{
-  background:rgba(7,9,18,var(--jc99-card-alpha,.16))!important;
-}
-
-/* Make the emergency fallback tiny and only visible if topbar is absent. */
-#jc100FallbackExit{
-  position:fixed!important;
-  left:12px!important;
-  top:10px!important;
-  z-index:2147483300!important;
-  width:38px!important;
-  height:38px!important;
-  border:1px solid rgba(255,255,255,.14)!important;
-  border-radius:13px!important;
-  background:rgba(12,14,24,.68)!important;
-  color:#fff!important;
-  font:900 24px/1 Inter,Segoe UI,Arial,sans-serif!important;
-  display:none!important;
-  align-items:center!important;
-  justify-content:center!important;
-  backdrop-filter:blur(12px)!important;
-  -webkit-backdrop-filter:blur(12px)!important;
-}
-body.jc100-topbar-recovery.jc100-no-topbar #jc100FallbackExit{
-  display:flex!important;
-}
-
-/* =========================================================
-   JustClover Stage 101 — Chat Glass Room Background
-   Version: stage110-clean-chat-wallpaper-20260503-1
-
-   Recovery-safe: do NOT touch the room topbar, player-frame, iframe or source
-   video. Only paint the selected room wallpaper inside the right chat column,
-   chat card/composer and bottom dock as absolute background surfaces.
-   ========================================================= */
-html::after{
-  content:'101 CHATGLASS'!important;
-  background:rgba(192,132,252,.96)!important;
-  color:#12071f!important;
-}
-
-/* Keep Stage100 topbar stable. */
-body.jc101-chat-glass #jc51RaveTopbar,
-body.jc101-chat-glass .topbar{
-  position:fixed!important;
-  z-index:2147483200!important;
-}
-body.jc101-chat-glass #jc51RaveTopbar .jc101SurfaceBg,
-body.jc101-chat-glass .topbar .jc101SurfaceBg,
-body.jc101-chat-glass #jc51RaveTopbar .jc99SurfaceBg,
-body.jc101-chat-glass .topbar .jc99SurfaceBg{
-  display:none!important;
-  visibility:hidden!important;
-  opacity:0!important;
-  pointer-events:none!important;
-}
-
-/* Surface hosts only — no layout geometry changes. */
-body.jc101-chat-glass .watch-sidebar,
-body.jc101-chat-glass .chat-card,
-body.jc101-chat-glass #chatForm,
-body.jc101-chat-glass .chat-card .message-form,
-body.jc101-chat-glass #jc80Dock{
-  position:relative!important;
-  overflow:hidden!important;
-  isolation:isolate!important;
-}
-
-/* Selected wallpaper/video layer painted inside safe surfaces. */
-body.jc101-chat-glass .jc101SurfaceBg{
-  position:absolute!important;
-  inset:0!important;
-  z-index:0!important;
-  pointer-events:none!important;
-  border-radius:inherit!important;
-  overflow:hidden!important;
-  background-image:var(--jc101-room-image,var(--jc99-room-image,none))!important;
-  background-size:cover!important;
-  background-position:center!important;
-  background-repeat:no-repeat!important;
-  opacity:1!important;
-}
-
-body.jc101-chat-glass .jc101SurfaceBg::after{
-  content:""!important;
-  position:absolute!important;
-  inset:0!important;
-  z-index:2!important;
-  pointer-events:none!important;
-  background:
-    radial-gradient(circle at 16% 18%,rgba(255,255,255,.06),transparent 34%),
-    rgba(0,0,0,var(--jc101-room-dim,var(--jc99-room-dim,.28)))!important;
-}
-
-body.jc101-chat-glass .jc101SurfaceBg video{
-  display:none!important;
-  position:absolute!important;
-  inset:0!important;
-  z-index:1!important;
-  width:100%!important;
-  height:100%!important;
-  object-fit:cover!important;
-  pointer-events:none!important;
-  opacity:.98!important;
-  filter:saturate(1.06) brightness(.90)!important;
-}
-
-body.jc101-chat-video .jc101SurfaceBg{
-  background-image:none!important;
-}
-body.jc101-chat-video .jc101SurfaceBg video{
-  display:block!important;
-}
-
-/* Put real UI above the surface. */
-body.jc101-chat-glass .watch-sidebar > :not(.jc101SurfaceBg):not(.jc99SurfaceBg),
-body.jc101-chat-glass .chat-card > :not(.jc101SurfaceBg),
-body.jc101-chat-glass #chatForm > :not(.jc101SurfaceBg),
-body.jc101-chat-glass .chat-card .message-form > :not(.jc101SurfaceBg),
-body.jc101-chat-glass #jc80Dock > :not(.jc101SurfaceBg):not(.jc99SurfaceBg){
-  position:relative!important;
-  z-index:2!important;
-}
-
-/* Right column and chat become glass instead of black blocks. */
-body.jc101-chat-glass .watch-sidebar{
-  background:rgba(4,5,12,.08)!important;
-  border-left:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(var(--jc101-room-blur,var(--jc99-room-blur,14px))) saturate(160%)!important;
-  -webkit-backdrop-filter:blur(var(--jc101-room-blur,var(--jc99-room-blur,14px))) saturate(160%)!important;
-}
-
-body.jc101-chat-glass .watch-sidebar .chat-card,
-body.jc101-chat-glass .watch-sidebar .side-card{
-  background:rgba(6,8,18,.12)!important;
-  border-color:rgba(255,255,255,.13)!important;
-  box-shadow:0 18px 42px rgba(0,0,0,.16)!important;
-  backdrop-filter:blur(calc(var(--jc101-room-blur,var(--jc99-room-blur,14px)) * .72)) saturate(150%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc101-room-blur,var(--jc99-room-blur,14px)) * .72)) saturate(150%)!important;
-}
-
-body.jc101-chat-glass .chat-card .side-card-head,
-body.jc101-chat-glass .chat-card .messages,
-body.jc101-chat-glass .chat-card #chatMessages,
-body.jc101-chat-glass .chat-card .empty-state,
-body.jc101-chat-glass .chat-card .message-list{
-  background:transparent!important;
-}
-
-body.jc101-chat-glass .chat-card #chatForm,
-body.jc101-chat-glass .chat-card .message-form{
-  background:rgba(255,255,255,.045)!important;
-  border-color:rgba(255,255,255,.13)!important;
-  box-shadow:0 -10px 24px rgba(0,0,0,.10)!important;
-  backdrop-filter:blur(calc(var(--jc101-room-blur,var(--jc99-room-blur,14px)) * .55)) saturate(145%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc101-room-blur,var(--jc99-room-blur,14px)) * .55)) saturate(145%)!important;
-}
-
-body.jc101-chat-glass .chat-card input,
-body.jc101-chat-glass .chat-card textarea,
-body.jc101-chat-glass .chat-card [contenteditable="true"],
-body.jc101-chat-glass .chat-card .message-input{
-  background:rgba(255,255,255,.09)!important;
-  border-color:rgba(255,255,255,.16)!important;
-  box-shadow:none!important;
-}
-
-/* Bottom strip stays in place, but reads as glass. */
-body.jc101-chat-glass #jc80Dock{
-  background:rgba(4,5,12,.04)!important;
-  border-top:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(var(--jc101-room-blur,var(--jc99-room-blur,14px))) saturate(160%)!important;
-  -webkit-backdrop-filter:blur(var(--jc101-room-blur,var(--jc99-room-blur,14px))) saturate(160%)!important;
-}
-body.jc101-chat-glass #jc80Dock .jc80-dock-inner{
-  background:rgba(8,10,18,.28)!important;
-  border-color:rgba(255,255,255,.16)!important;
-}
-
-/* Absolute safety: never affect playback surface. */
-body.jc101-chat-glass .watch-stage,
-body.jc101-chat-glass .player-card-redesign,
-body.jc101-chat-glass .player-card,
-body.jc101-chat-glass .player-shell,
-body.jc101-chat-glass .player-frame,
-body.jc101-chat-glass .player-frame iframe,
-body.jc101-chat-glass .player-frame video,
-body.jc101-chat-glass #youtubePlayer,
-body.jc101-chat-glass #iframePlayer,
-body.jc101-chat-glass #videoPlayer{
-  background-color:#000!important;
-  opacity:1!important;
-  visibility:visible!important;
-}
-
-
-/* =========================================================
-   JustClover Stage 102 — Room Glass Tuning
-   Version: stage110-clean-chat-wallpaper-20260503-1
-
-   Fine-tunes readability only. Does not touch topbar geometry, player-frame,
-   YouTube/VK iframe, source video, auth, or chat handlers.
-   ========================================================= */
-html::after{
-  content:'102 TUNE'!important;
+  content:'111 CHATBG'!important;
   background:rgba(45,212,191,.96)!important;
   color:#031313!important;
 }
 
-/* Tuning class only affects the safe wallpaper surfaces created in Stage101. */
-body.jc102-glass-tuning .jc101SurfaceBg[data-jc101="sidebar"]::after,
-body.jc102-glass-tuning .jc101SurfaceBg[data-jc101="chat"]::after,
-body.jc102-glass-tuning .jc101SurfaceBg[data-jc101="composer"]::after{
-  background:
-    radial-gradient(circle at 20% 12%,rgba(255,255,255,.055),transparent 36%),
-    linear-gradient(180deg,rgba(3,5,12,.10),rgba(3,5,12,.18)),
-    rgba(0,0,0,var(--jc102-chat-dim,.54))!important;
-}
-
-body.jc102-glass-tuning .jc101SurfaceBg[data-jc101="dock"]::after{
-  background:
-    radial-gradient(circle at 50% 0%,rgba(255,255,255,.05),transparent 40%),
-    rgba(0,0,0,var(--jc102-dock-dim,.36))!important;
-}
-
-body.jc102-glass-tuning .watch-sidebar{
-  background:rgba(4,5,12,var(--jc102-chat-panel,.22))!important;
-  border-left:1px solid rgba(255,255,255,.12)!important;
-  backdrop-filter:blur(var(--jc102-chat-blur,14px)) saturate(158%)!important;
-  -webkit-backdrop-filter:blur(var(--jc102-chat-blur,14px)) saturate(158%)!important;
-}
-
-body.jc102-glass-tuning .watch-sidebar .chat-card,
-body.jc102-glass-tuning .watch-sidebar .side-card{
-  background:rgba(6,8,18,var(--jc102-chat-card-panel,.30))!important;
-  border-color:rgba(255,255,255,.14)!important;
-  box-shadow:0 18px 44px rgba(0,0,0,.22)!important;
-  backdrop-filter:blur(calc(var(--jc102-chat-blur,14px) * .76)) saturate(150%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc102-chat-blur,14px) * .76)) saturate(150%)!important;
-}
-
-body.jc102-glass-tuning .chat-card #chatForm,
-body.jc102-glass-tuning .chat-card .message-form{
-  background:rgba(8,10,18,var(--jc102-chat-composer-panel,.38))!important;
-  border-color:rgba(255,255,255,.15)!important;
-  box-shadow:0 -12px 26px rgba(0,0,0,.18)!important;
-  backdrop-filter:blur(calc(var(--jc102-chat-blur,14px) * .62)) saturate(150%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc102-chat-blur,14px) * .62)) saturate(150%)!important;
-}
-
-body.jc102-glass-tuning .chat-card input,
-body.jc102-glass-tuning .chat-card textarea,
-body.jc102-glass-tuning .chat-card [contenteditable="true"],
-body.jc102-glass-tuning .chat-card .message-input{
-  background:rgba(255,255,255,var(--jc102-chat-input-panel,.12))!important;
-  border-color:rgba(255,255,255,.18)!important;
-  color:#fff!important;
-}
-
-body.jc102-glass-tuning .chat-card .empty-state,
-body.jc102-glass-tuning .chat-card .status,
-body.jc102-glass-tuning .chat-card .muted{
-  color:rgba(235,239,255,.76)!important;
-  text-shadow:0 1px 2px rgba(0,0,0,.32)!important;
-}
-
-body.jc102-glass-tuning #jc80Dock{
-  background:rgba(4,5,12,var(--jc102-dock-panel,.14))!important;
-  border-top:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(var(--jc102-dock-blur,12px)) saturate(160%)!important;
-  -webkit-backdrop-filter:blur(var(--jc102-dock-blur,12px)) saturate(160%)!important;
-}
-
-body.jc102-glass-tuning #jc80Dock .jc80-dock-inner{
-  background:rgba(8,10,18,var(--jc102-dock-inner-panel,.30))!important;
-  border-color:rgba(255,255,255,.17)!important;
-  box-shadow:0 12px 28px rgba(0,0,0,.20)!important;
-}
-
-/* Stage102 settings block inside Оформление в комнате */
-#jc102GlassTuning{
-  margin-top:14px!important;
-  padding:14px!important;
-  border:1px solid rgba(255,255,255,.12)!important;
-  border-radius:18px!important;
-  background:rgba(5,7,14,.22)!important;
-  backdrop-filter:blur(14px) saturate(150%)!important;
-  -webkit-backdrop-filter:blur(14px) saturate(150%)!important;
-}
-
-#jc102GlassTuning .jc102-tuning-title{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  gap:10px!important;
-  margin-bottom:10px!important;
-}
-
-#jc102GlassTuning h4{
-  margin:0!important;
-  font-size:15px!important;
-  letter-spacing:.02em!important;
-}
-
-#jc102GlassTuning small{
-  color:rgba(235,239,255,.68)!important;
-}
-
-#jc102GlassTuning .jc102-tuning-grid{
-  display:grid!important;
-  grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  gap:12px 16px!important;
-}
-
-#jc102GlassTuning label{
-  display:flex!important;
-  flex-direction:column!important;
-  gap:6px!important;
-  font-size:13px!important;
-}
-
-#jc102GlassTuning input[type="range"]{
-  width:100%!important;
-}
-
-#jc102ResetGlassTuning{
-  border:1px solid rgba(255,255,255,.14)!important;
-  background:rgba(255,255,255,.06)!important;
-  color:#fff!important;
-  border-radius:12px!important;
-  padding:8px 10px!important;
-  cursor:pointer!important;
-}
-
-@media(max-width:980px){
-  #jc102GlassTuning .jc102-tuning-grid{
-    grid-template-columns:1fr!important;
-  }
-}
-
-
-/* Stage104 safety marker */
-html::after{ content:'104 SAFE'!important; background:rgba(34,197,94,.96)!important; color:#03140a!important; }
-body.jc99-room-surfaces .jc99SurfaceBg[data-jc99="topbar"],
-body.jc101-chat-glass .jc101SurfaceBg[data-jc101="topbar"]{
-  display:none!important;
-  visibility:hidden!important;
-  opacity:0!important;
-  pointer-events:none!important;
-}
-#jc104SafeNote{
-  margin-top:8px!important;
-  color:rgba(255,255,255,.68)!important;
-  line-height:1.45!important;
-}
-
-/* =========================================================
-   JustClover Stage 105 — Room Wallpaper Performance + Clean Glass
-   Version: stage110-clean-chat-wallpaper-20260503-1
-   Single fixed room background layer + transparent glass surfaces.
-   No tiled surface wallpapers, no repeated background-attachment painting.
-   ========================================================= */
-html::after{
-  content:'107 NOLOOP'!important;
-  background:rgba(125,211,252,.96)!important;
-  color:#07111f!important;
-}
-
-:root{
-  --jc105-room-dim:.28;
-  --jc105-room-blur:14px;
-  --jc105-room-panel-alpha:.20;
-  --jc105-room-card-alpha:.28;
-  --jc105-room-input-alpha:.14;
-}
-
-#jc105RoomBg{
-  position:fixed;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-  opacity:0;
-  transition:opacity .22s ease;
-  overflow:hidden;
-  background-position:center center;
-  background-size:cover;
-  background-repeat:no-repeat;
-  background-attachment:scroll;
-  will-change:opacity,transform;
-  transform:translateZ(0);
-}
-#jc105RoomBg::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:linear-gradient(180deg, rgba(5,8,18, calc(var(--jc105-room-dim) * .72)), rgba(5,8,18, var(--jc105-room-dim)));
-}
-#jc105RoomBg::after{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:radial-gradient(circle at 50% 18%, rgba(255,255,255,.06), rgba(255,255,255,0) 35%), radial-gradient(circle at 50% 80%, rgba(0,0,0,.12), rgba(0,0,0,0) 50%);
-}
-#jc105RoomBgVideo{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  object-position:center center;
-  display:none;
-  filter:brightness(.84) saturate(1.03);
-  transform:translateZ(0);
-}
-body.jc105-room-bg-active #jc105RoomBg{ opacity:1; }
-body.jc105-room-bg-active #appView,
-body.jc105-room-bg-active .content,
-body.jc105-room-bg-active #watchSection,
-body.jc105-room-bg-active .watch-layout,
-body.jc105-room-bg-active .watch-main,
-body.jc105-room-bg-active .watch-stage,
-body.jc105-room-bg-active .watch-sidebar,
-body.jc105-room-bg-active #jc80Dock,
-body.jc105-room-bg-active .topbar,
-body.jc105-room-bg-active #jc51RaveTopbar{
-  position:relative;
-  z-index:1;
-}
-
-/* Remove expensive repeated wallpaper painting from room surfaces. */
-body.jc105-room-bg-active #watchSection,
-body.jc105-room-bg-active .watch-layout,
-body.jc105-room-bg-active .watch-main,
-body.jc105-room-bg-active .watch-stage,
-body.jc105-room-bg-active .watch-sidebar,
-body.jc105-room-bg-active #jc80Dock,
-body.jc105-room-bg-active .topbar,
-body.jc105-room-bg-active #jc51RaveTopbar,
-body.jc105-room-bg-active .chat-card,
-body.jc105-room-bg-active .watch-sidebar .side-card,
-body.jc105-room-bg-active .chat-card .side-card-head,
-body.jc105-room-bg-active .chat-card .messages,
-body.jc105-room-bg-active .chat-card .message-form,
-body.jc105-room-bg-active .chat-card #chatForm{
+/* Neutralize Stage94 room-wide painting while Stage111 is active. */
+body.jc111-chat-wallpaper.jc94-room-wallpaper #appView,
+body.jc111-chat-wallpaper.jc94-room-wallpaper .content,
+body.jc111-chat-wallpaper.jc94-room-wallpaper #watchSection,
+body.jc111-chat-wallpaper.jc94-room-wallpaper .watch-layout,
+body.jc111-chat-wallpaper.jc94-room-wallpaper .watch-main,
+body.jc111-chat-wallpaper.jc94-room-wallpaper .watch-stage,
+body.jc111-chat-wallpaper #appView,
+body.jc111-chat-wallpaper .content,
+body.jc111-chat-wallpaper #watchSection,
+body.jc111-chat-wallpaper .watch-layout,
+body.jc111-chat-wallpaper .watch-main,
+body.jc111-chat-wallpaper .watch-stage{
   background-image:none!important;
-  background-repeat:no-repeat!important;
-  background-size:auto!important;
-  background-position:center center!important;
-  background-attachment:scroll!important;
-}
-
-/* Room layout same spirit as main menu: transparent shells + glass cards. */
-body.jc105-room-bg-active #watchSection,
-body.jc105-room-bg-active .watch-layout,
-body.jc105-room-bg-active .watch-main,
-body.jc105-room-bg-active .watch-stage{
-  background:transparent!important;
-}
-body.jc105-room-bg-active .topbar,
-body.jc105-room-bg-active #jc51RaveTopbar{
-  background:rgba(10,14,28,.24)!important;
-  border-bottom:1px solid rgba(255,255,255,.09)!important;
-  backdrop-filter:blur(calc(var(--jc105-room-blur) * .9)) saturate(140%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc105-room-blur) * .9)) saturate(140%)!important;
-  box-shadow:none!important;
-}
-body.jc105-room-bg-active #jc80Dock{
-  background:rgba(10,14,28,.16)!important;
-  border-top:1px solid rgba(255,255,255,.08)!important;
-  backdrop-filter:blur(calc(var(--jc105-room-blur) * .95)) saturate(138%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc105-room-blur) * .95)) saturate(138%)!important;
-  box-shadow:none!important;
-}
-body.jc105-room-bg-active #jc80Dock .jc80-dock-inner{
-  background:rgba(10,14,28,.30)!important;
-  border:1px solid rgba(255,255,255,.12)!important;
-  box-shadow:0 10px 32px rgba(0,0,0,.18)!important;
-}
-body.jc105-room-bg-active .watch-sidebar{
-  background:rgba(10,14,28,var(--jc105-room-panel-alpha))!important;
-  border-left:1px solid rgba(255,255,255,.08)!important;
-  backdrop-filter:blur(var(--jc105-room-blur)) saturate(140%)!important;
-  -webkit-backdrop-filter:blur(var(--jc105-room-blur)) saturate(140%)!important;
-  box-shadow:none!important;
-}
-body.jc105-room-bg-active .chat-card,
-body.jc105-room-bg-active .watch-sidebar .side-card{
-  background:rgba(10,14,28,var(--jc105-room-card-alpha))!important;
-  border:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(calc(var(--jc105-room-blur) * .95)) saturate(138%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc105-room-blur) * .95)) saturate(138%)!important;
-  box-shadow:none!important;
-}
-body.jc105-room-bg-active .chat-card .side-card-head,
-body.jc105-room-bg-active .chat-card .message-form,
-body.jc105-room-bg-active .chat-card #chatForm{
-  background:rgba(10,14,28,calc(var(--jc105-room-card-alpha) + .05))!important;
-  border-color:rgba(255,255,255,.08)!important;
-  backdrop-filter:blur(calc(var(--jc105-room-blur) * .8)) saturate(132%)!important;
-  -webkit-backdrop-filter:blur(calc(var(--jc105-room-blur) * .8)) saturate(132%)!important;
-}
-body.jc105-room-bg-active .chat-card .messages{
-  background:transparent!important;
-}
-body.jc105-room-bg-active .chat-card input,
-body.jc105-room-bg-active .chat-card textarea,
-body.jc105-room-bg-active .chat-card select,
-body.jc105-room-bg-active .chat-card .message-input,
-body.jc105-room-bg-active .chat-card [contenteditable="true"]{
-  background:rgba(255,255,255,var(--jc105-room-input-alpha))!important;
-  border:1px solid rgba(255,255,255,.12)!important;
-  box-shadow:none!important;
-}
-body.jc105-room-bg-active .player-shell,
-body.jc105-room-bg-active .player-card,
-body.jc105-room-bg-active .player-card-redesign{
-  background:transparent!important;
-  box-shadow:none!important;
-}
-body.jc105-room-bg-active .player-shell > header,
-body.jc105-room-bg-active .player-shell > nav{
   background:transparent!important;
 }
 
-/* Safety: the actual player stays untouched and sharp. */
-body.jc105-room-bg-active .player-frame,
-body.jc105-room-bg-active .player-frame iframe,
-body.jc105-room-bg-active .player-frame video,
-body.jc105-room-bg-active #youtubePlayer,
-body.jc105-room-bg-active #iframePlayer,
-body.jc105-room-bg-active #videoPlayer{
+/* Absolutely never paint wallpaper near the playback surface. */
+body.jc111-chat-wallpaper .player-frame,
+body.jc111-chat-wallpaper .player-frame iframe,
+body.jc111-chat-wallpaper .player-frame video,
+body.jc111-chat-wallpaper .player-frame .embed-box,
+body.jc111-chat-wallpaper #youtubePlayer,
+body.jc111-chat-wallpaper #iframePlayer,
+body.jc111-chat-wallpaper #videoPlayer,
+body.jc111-chat-wallpaper .player-shell,
+body.jc111-chat-wallpaper .player-card,
+body.jc111-chat-wallpaper .player-card-redesign{
+  background-image:none!important;
   background-color:#000!important;
+  filter:none!important;
   backdrop-filter:none!important;
   -webkit-backdrop-filter:none!important;
 }
-
-@media (max-width: 980px){
-  :root{ --jc105-room-blur:10px; }
-  body.jc105-room-bg-active .watch-sidebar{
-    background:rgba(10,14,28,.26)!important;
-  }
+body.jc111-chat-wallpaper .player-shell,
+body.jc111-chat-wallpaper .player-card,
+body.jc111-chat-wallpaper .player-card-redesign{
+  background-color:transparent!important;
+}
+body.jc111-chat-wallpaper .player-frame,
+body.jc111-chat-wallpaper .player-frame iframe,
+body.jc111-chat-wallpaper .player-frame video,
+body.jc111-chat-wallpaper .player-frame .embed-box,
+body.jc111-chat-wallpaper #youtubePlayer,
+body.jc111-chat-wallpaper #iframePlayer,
+body.jc111-chat-wallpaper #videoPlayer{
+  background-color:#000!important;
 }
 
-/* Stage106: emergency no-reload-loop safety */
-#jc72UpdateNotice{display:none!important;visibility:hidden!important;pointer-events:none!important;}
-html::after{content:'106 NOLOOP'!important;background:rgba(34,211,238,.96)!important;color:#03130a!important;}
-
-
-/* =========================================================
-   JustClover Stage 107 — Build Lock / No Reload / Clear Marker
-   Version: stage110-clean-chat-wallpaper-20260503-1
-   Final override marker so the active deployed stage is visible immediately.
-   ========================================================= */
-#jc72UpdateNotice,
-[class*="jc72"][class*="Notice"],
-[class*="update"][id*="Notice"]{
-  display:none!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-}
-html::after{
-  content:'107 NOLOOP'!important;
-  position:fixed!important;
-  left:8px!important;
-  bottom:8px!important;
-  z-index:2147483647!important;
-  padding:6px 10px!important;
-  border-radius:999px!important;
-  background:rgba(56,189,248,.96)!important;
-  color:#03130a!important;
-  font:900 12px/1 Inter,Segoe UI,Arial,sans-serif!important;
-  letter-spacing:.02em!important;
-  box-shadow:0 10px 30px rgba(0,0,0,.32)!important;
-  pointer-events:none!important;
-}
-
-/* =========================================================
-   JustClover Stage 108 — Chat-only wallpaper optimized
-   Version: stage110-clean-chat-wallpaper-20260503-1
-
-   Keep live wallpaper only in the right chat column. Remove wallpaper from the
-   bottom dock / composer nested surfaces to avoid extra repeated images and
-   reduce player lag.
-   ========================================================= */
-html::after{
-  content:'108 CHATONLY'!important;
-  background:rgba(251,191,36,.96)!important;
-  color:#1b1304!important;
-}
-
-/* Only the sidebar may own a wallpaper surface. */
-body.jc101-chat-glass .chat-card > .jc101SurfaceBg,
-body.jc101-chat-glass .chat-card > .jc99SurfaceBg,
-body.jc101-chat-glass #chatForm > .jc101SurfaceBg,
-body.jc101-chat-glass #chatForm > .jc99SurfaceBg,
-body.jc101-chat-glass .message-form > .jc101SurfaceBg,
-body.jc101-chat-glass .message-form > .jc99SurfaceBg,
-body.jc101-chat-glass #jc80Dock > .jc101SurfaceBg,
-body.jc101-chat-glass #jc80Dock > .jc99SurfaceBg{
-  display:none!important;
-  visibility:hidden!important;
-  opacity:0!important;
-}
-
-/* Sidebar gets the wallpaper. Cards stay glassy and transparent like the main menu. */
-body.jc101-chat-glass .watch-sidebar{
-  background:rgba(7,10,20,.10)!important;
-  border-left:1px solid rgba(255,255,255,.12)!important;
-  backdrop-filter:blur(16px) saturate(150%)!important;
-  -webkit-backdrop-filter:blur(16px) saturate(150%)!important;
-  overflow:hidden!important;
-}
-
-body.jc101-chat-glass .watch-sidebar > .jc101SurfaceBg[data-jc101="sidebar"]{
-  inset:0!important;
-  border-radius:0!important;
-  background-size:cover!important;
-  background-position:center center!important;
-  background-repeat:no-repeat!important;
-}
-
-body.jc101-chat-video .watch-sidebar > .jc101SurfaceBg[data-jc101="sidebar"] video{
-  object-fit:cover!important;
-  object-position:center center!important;
-  filter:saturate(1.02) brightness(.88)!important;
-}
-
-body.jc101-chat-glass .watch-sidebar .chat-card,
-body.jc101-chat-glass .watch-sidebar .side-card,
-body.jc101-chat-glass .chat-card #chatForm,
-body.jc101-chat-glass .chat-card .message-form{
-  background:rgba(7,10,20,.16)!important;
-  border-color:rgba(255,255,255,.14)!important;
-  box-shadow:0 14px 34px rgba(0,0,0,.16)!important;
-  backdrop-filter:blur(12px) saturate(145%)!important;
-  -webkit-backdrop-filter:blur(12px) saturate(145%)!important;
-}
-
-body.jc101-chat-glass .chat-card .side-card-head,
-body.jc101-chat-glass .chat-card .messages,
-body.jc101-chat-glass .chat-card #chatMessages,
-body.jc101-chat-glass .chat-card .empty-state,
-body.jc101-chat-glass .chat-card .message-list{
-  background:transparent!important;
-}
-
-body.jc101-chat-glass .chat-card input,
-body.jc101-chat-glass .chat-card textarea,
-body.jc101-chat-glass .chat-card [contenteditable="true"],
-body.jc101-chat-glass .chat-card .message-input{
-  background:rgba(255,255,255,.08)!important;
-  border-color:rgba(255,255,255,.15)!important;
-}
-
-/* Bottom dock stays simple glass without wallpaper to avoid the extra image band. */
-body.jc101-chat-glass #jc80Dock{
-  background:rgba(7,10,20,.78)!important;
-  border-top:1px solid rgba(255,255,255,.10)!important;
+/* Dock/topbar remain normal glass/dark UI. No extra picture below player. */
+body.jc111-chat-wallpaper #jc80Dock,
+body.jc111-chat-wallpaper.jc94-room-wallpaper #jc80Dock{
+  background-image:none!important;
+  background:rgba(5,7,14,.92)!important;
+  border-top:1px solid rgba(255,255,255,.08)!important;
   backdrop-filter:blur(10px) saturate(120%)!important;
   -webkit-backdrop-filter:blur(10px) saturate(120%)!important;
 }
-body.jc101-chat-glass #jc80Dock .jc80-dock-inner{
-  background:rgba(10,12,22,.36)!important;
+body.jc111-chat-wallpaper #jc80Dock .jc80-dock-inner{
+  background:rgba(10,12,22,.42)!important;
   border-color:rgba(255,255,255,.14)!important;
 }
-
-/* Safety: never paint wallpaper in player-adjacent containers. */
-body.jc101-chat-glass .watch-main,
-body.jc101-chat-glass .watch-stage,
-body.jc101-chat-glass .player-card-redesign,
-body.jc101-chat-glass .player-card,
-body.jc101-chat-glass .player-shell,
-body.jc101-chat-glass .player-frame,
-body.jc101-chat-glass .player-frame iframe,
-body.jc101-chat-glass .player-frame video,
-body.jc101-chat-glass #youtubePlayer,
-body.jc101-chat-glass #iframePlayer,
-body.jc101-chat-glass #videoPlayer{
-  background:#000!important;
+body.jc111-chat-wallpaper .topbar,
+body.jc111-chat-wallpaper #jc51RaveTopbar,
+body.jc111-chat-wallpaper.jc94-room-wallpaper .topbar,
+body.jc111-chat-wallpaper.jc94-room-wallpaper #jc51RaveTopbar{
+  background-image:none!important;
+  background:rgba(15,10,21,.88)!important;
 }
 
-
-/* =========================================================
-   JustClover Stage 109 — Chat GIF Safe / No Player Lag
-   Version: stage110-clean-chat-wallpaper-20260503-1
-
-   Final clean override for room wallpapers:
-   - wallpaper ONLY in the right chat column
-   - GIF/WebP/PNG/JPG supported
-   - MP4/WebM room wallpapers disabled to protect the player
-   - no wallpaper in dock/bottom strip/player/topbar
-   ========================================================= */
-html::after{
-  content:'109 GIFSAFE'!important;
-  background:rgba(34,197,94,.96)!important;
-  color:#03130a!important;
-}
-
-/* Kill every old wallpaper surface/layer from stages 90-108. */
-#jc90LiveBg,
-#jc91RoomBg,
-#jc92RoomBg,
-#jc95RoomVideoBg,
-#jc96RoomBg,
-#jc98RoomBg,
-#jc105RoomBg,
-.jc99SurfaceBg,
-.jc101SurfaceBg{
+/* Kill all old wallpaper surfaces from failed stages. */
+body.jc111-chat-wallpaper #jc90RoomBg,
+body.jc111-chat-wallpaper #jc91RoomBg,
+body.jc111-chat-wallpaper #jc92RoomBg,
+body.jc111-chat-wallpaper #jc95RoomVideoBg,
+body.jc111-chat-wallpaper #jc96RoomBg,
+body.jc111-chat-wallpaper #jc98RoomBg,
+body.jc111-chat-wallpaper #jc105RoomBg,
+body.jc111-chat-wallpaper .jc99SurfaceBg,
+body.jc111-chat-wallpaper .jc101SurfaceBg,
+body.jc111-chat-wallpaper .jc110ChatWallpaperLayer{
   display:none!important;
   visibility:hidden!important;
   opacity:0!important;
   pointer-events:none!important;
-  background-image:none!important;
 }
 
-/* One and only one wallpaper layer: right chat column. */
-#jc109ChatWallpaper{
+/* The only valid wallpaper surface. */
+body.jc111-chat-wallpaper .watch-sidebar{
+  position:relative!important;
+  isolation:isolate!important;
+  overflow:hidden!important;
+  background-image:none!important;
+  background:rgba(7,10,20,.18)!important;
+  border-left:1px solid rgba(255,255,255,.12)!important;
+  backdrop-filter:blur(var(--jc111-chat-blur, 14px)) saturate(145%)!important;
+  -webkit-backdrop-filter:blur(var(--jc111-chat-blur, 14px)) saturate(145%)!important;
+}
+#jc111ChatWallpaperLayer{
   position:absolute!important;
   inset:0!important;
   z-index:0!important;
   pointer-events:none!important;
-  overflow:hidden!important;
-  border-radius:inherit!important;
-  background-image:var(--jc109-chat-wallpaper, none)!important;
+  background-image:var(--jc111-chat-wallpaper, none)!important;
   background-size:cover!important;
   background-position:center center!important;
   background-repeat:no-repeat!important;
-  background-attachment:scroll!important;
   transform:translateZ(0)!important;
-  will-change:auto!important;
+  will-change:opacity!important;
 }
-
-#jc109ChatWallpaper::after{
-  content:""!important;
+#jc111ChatWallpaperLayer::after{
+  content:''!important;
   position:absolute!important;
   inset:0!important;
-  pointer-events:none!important;
   background:
-    linear-gradient(180deg, rgba(3,5,12,.24), rgba(3,5,12,.42)),
-    rgba(0,0,0,var(--jc109-chat-dim,.36))!important;
+    radial-gradient(circle at 50% 12%, rgba(255,255,255,.07), transparent 38%),
+    linear-gradient(180deg, rgba(3,5,12,.14), rgba(3,5,12,.24)),
+    rgba(0,0,0,var(--jc111-chat-dim,.38))!important;
 }
-
-/* The right chat surface is glass like the main menu. */
-body.jc109-chat-wallpaper .watch-sidebar{
-  position:relative!important;
-  overflow:hidden!important;
-  isolation:isolate!important;
-  background:rgba(7,10,20,.12)!important;
-  border-left:1px solid rgba(255,255,255,.12)!important;
-  backdrop-filter:blur(var(--jc109-chat-blur,12px)) saturate(145%)!important;
-  -webkit-backdrop-filter:blur(var(--jc109-chat-blur,12px)) saturate(145%)!important;
-}
-
-body.jc109-chat-wallpaper .watch-sidebar > :not(#jc109ChatWallpaper){
+body.jc111-chat-wallpaper .watch-sidebar > :not(#jc111ChatWallpaperLayer){
   position:relative!important;
   z-index:2!important;
 }
-
-/* Chat card/composer transparent, no second wallpaper copy. */
-body.jc109-chat-wallpaper .watch-sidebar .chat-card,
-body.jc109-chat-wallpaper .watch-sidebar .side-card{
-  background:rgba(7,10,20,.18)!important;
+body.jc111-chat-wallpaper .watch-sidebar .chat-card,
+body.jc111-chat-wallpaper .watch-sidebar .side-card{
+  background-image:none!important;
+  background:rgba(7,10,20,var(--jc111-chat-card-alpha,.24))!important;
   border-color:rgba(255,255,255,.14)!important;
-  box-shadow:0 14px 34px rgba(0,0,0,.16)!important;
-  backdrop-filter:blur(10px) saturate(135%)!important;
-  -webkit-backdrop-filter:blur(10px) saturate(135%)!important;
+  box-shadow:0 16px 38px rgba(0,0,0,.18)!important;
+  backdrop-filter:blur(calc(var(--jc111-chat-blur, 14px) * .75)) saturate(145%)!important;
+  -webkit-backdrop-filter:blur(calc(var(--jc111-chat-blur, 14px) * .75)) saturate(145%)!important;
 }
-
-body.jc109-chat-wallpaper .chat-card .side-card-head,
-body.jc109-chat-wallpaper .chat-card .messages,
-body.jc109-chat-wallpaper .chat-card #chatMessages,
-body.jc109-chat-wallpaper .chat-card .empty-state,
-body.jc109-chat-wallpaper .chat-card .message-list{
+body.jc111-chat-wallpaper .chat-card .side-card-head,
+body.jc111-chat-wallpaper .chat-card .messages,
+body.jc111-chat-wallpaper .chat-card #chatMessages,
+body.jc111-chat-wallpaper .chat-card .empty-state,
+body.jc111-chat-wallpaper .chat-card .message-list{
+  background-image:none!important;
   background:transparent!important;
 }
-
-body.jc109-chat-wallpaper .chat-card #chatForm,
-body.jc109-chat-wallpaper .chat-card .message-form{
-  background:rgba(7,10,20,.22)!important;
-  border-color:rgba(255,255,255,.14)!important;
-  box-shadow:0 -10px 24px rgba(0,0,0,.12)!important;
-  backdrop-filter:blur(10px) saturate(130%)!important;
-  -webkit-backdrop-filter:blur(10px) saturate(130%)!important;
+body.jc111-chat-wallpaper .chat-card #chatForm,
+body.jc111-chat-wallpaper .chat-card .message-form{
+  background-image:none!important;
+  background:rgba(7,10,20,var(--jc111-chat-form-alpha,.34))!important;
+  border-color:rgba(255,255,255,.13)!important;
+  box-shadow:0 -10px 26px rgba(0,0,0,.14)!important;
+  backdrop-filter:blur(calc(var(--jc111-chat-blur, 14px) * .70)) saturate(135%)!important;
+  -webkit-backdrop-filter:blur(calc(var(--jc111-chat-blur, 14px) * .70)) saturate(135%)!important;
 }
-
-body.jc109-chat-wallpaper .chat-card input,
-body.jc109-chat-wallpaper .chat-card textarea,
-body.jc109-chat-wallpaper .chat-card [contenteditable="true"],
-body.jc109-chat-wallpaper .chat-card .message-input{
-  background:rgba(255,255,255,.085)!important;
+body.jc111-chat-wallpaper .chat-card input,
+body.jc111-chat-wallpaper .chat-card textarea,
+body.jc111-chat-wallpaper .chat-card .message-input,
+body.jc111-chat-wallpaper .chat-card [contenteditable="true"]{
+  background:rgba(255,255,255,.09)!important;
   border-color:rgba(255,255,255,.16)!important;
   box-shadow:none!important;
 }
 
-/* Absolutely no wallpaper near player or bottom dock. */
-body.jc109-chat-wallpaper #jc80Dock,
-body.jc109-chat-wallpaper #jc80Dock .jc80-dock-inner,
-body.jc109-chat-wallpaper .watch-main,
-body.jc109-chat-wallpaper .watch-stage,
-body.jc109-chat-wallpaper .player-card-redesign,
-body.jc109-chat-wallpaper .player-card,
-body.jc109-chat-wallpaper .player-shell{
-  background-image:none!important;
+/* Make the existing settings card truthfully say chat-only and less risky. */
+#jc94RoomStyleCard .jc111-note{
+  margin:10px 0 0;
+  color:#b9f8ea;
+  font-size:12px;
+  line-height:1.45;
 }
-
-body.jc109-chat-wallpaper #jc80Dock{
-  background:rgba(7,10,20,.86)!important;
-  border-top:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(8px) saturate(115%)!important;
-  -webkit-backdrop-filter:blur(8px) saturate(115%)!important;
-}
-
-body.jc109-chat-wallpaper #jc80Dock .jc80-dock-inner{
-  background:rgba(10,12,22,.42)!important;
-  border-color:rgba(255,255,255,.14)!important;
-}
-
-body.jc109-chat-wallpaper .player-frame,
-body.jc109-chat-wallpaper .player-frame iframe,
-body.jc109-chat-wallpaper .player-frame video,
-body.jc109-chat-wallpaper #youtubePlayer,
-body.jc109-chat-wallpaper #iframePlayer,
-body.jc109-chat-wallpaper #videoPlayer{
-  background:#000!important;
-  background-image:none!important;
-  backdrop-filter:none!important;
-  -webkit-backdrop-filter:none!important;
-  opacity:1!important;
-  visibility:visible!important;
-}
-
-/* Emergency class for unsupported heavy local video wallpapers. */
-body.jc109-video-wallpaper-blocked #jc109ChatWallpaper{
-  background-image:linear-gradient(135deg, rgba(11,16,32,.78), rgba(26,14,34,.76))!important;
-}
-
-/* =========================================================
-   JustClover Stage 110 — Clean Chat Wallpaper
-   Version: stage110-clean-chat-wallpaper-20260503-1
-
-   Quality reset for room wallpaper: one image/GIF layer, only in chat sidebar.
-   No MP4/WebM/OGG wallpapers, no dock wallpaper, no player-adjacent wallpaper.
-   ========================================================= */
-html::after{
-  content:'110 CHATFIX'!important;
-  background:rgba(59,130,246,.96)!important;
-  color:#03142c!important;
-}
-
-/* Hard-kill all previous room wallpaper renderers. */
-#jc90LiveBg,#jc91RoomBg,#jc92RoomBg,#jc95RoomVideoBg,#jc96RoomBg,#jc98RoomBg,#jc105RoomBg,
-#jc109ChatWallpaper,.jc99SurfaceBg,.jc101SurfaceBg,#jc110BlockedVideoNotice{
+#jc94RoomStyleCard.jc111-patched .jc94-room-preview-dock{
   display:none!important;
-  visibility:hidden!important;
-  opacity:0!important;
-  pointer-events:none!important;
-  background-image:none!important;
 }
-
-/* Remove wallpaper from everything except our one sidebar layer. */
-body.jc110-chat-wallpaper #appView,
-body.jc110-chat-wallpaper #watchSection,
-body.jc110-chat-wallpaper .content,
-body.jc110-chat-wallpaper .watch-layout,
-body.jc110-chat-wallpaper .watch-main,
-body.jc110-chat-wallpaper .watch-stage,
-body.jc110-chat-wallpaper .player-shell,
-body.jc110-chat-wallpaper .player-card,
-body.jc110-chat-wallpaper .player-card-redesign,
-body.jc110-chat-wallpaper #jc80Dock,
-body.jc110-chat-wallpaper #jc80Dock .jc80-dock-inner,
-body.jc110-chat-wallpaper .topbar,
-body.jc110-chat-wallpaper #jc51RaveTopbar,
-body.jc110-chat-wallpaper .chat-card,
-body.jc110-chat-wallpaper .chat-card #chatForm,
-body.jc110-chat-wallpaper .chat-card .message-form{
-  background-image:none!important;
-  background-repeat:no-repeat!important;
-  background-attachment:scroll!important;
+#jc94RoomStyleCard.jc111-patched .jc94-room-preview-player{
+  background:#05060b!important;
 }
-
-/* The only allowed wallpaper host. */
-body.jc110-chat-wallpaper .watch-sidebar{
-  position:relative!important;
-  overflow:hidden!important;
-  isolation:isolate!important;
-  background:rgba(7,10,20,.12)!important;
-  border-left:1px solid rgba(255,255,255,.12)!important;
-  backdrop-filter:blur(var(--jc110-chat-blur,12px)) saturate(145%)!important;
-  -webkit-backdrop-filter:blur(var(--jc110-chat-blur,12px)) saturate(145%)!important;
-}
-
-#jc110ChatWallpaper{
-  position:absolute!important;
-  inset:0!important;
-  z-index:0!important;
-  pointer-events:none!important;
-  background-image:var(--jc110-chat-wallpaper, linear-gradient(135deg,rgba(8,12,28,.86),rgba(25,15,34,.82)))!important;
-  background-size:cover!important;
-  background-position:center center!important;
-  background-repeat:no-repeat!important;
-  background-attachment:scroll!important;
-  transform:translateZ(0)!important;
-  will-change:auto!important;
-}
-#jc110ChatWallpaper::after{
-  content:""!important;
-  position:absolute!important;
-  inset:0!important;
-  pointer-events:none!important;
-  background:
-    linear-gradient(180deg, rgba(3,5,12,.20), rgba(3,5,12,.44)),
-    rgba(0,0,0,var(--jc110-chat-dim,.38))!important;
-}
-body.jc110-chat-wallpaper .watch-sidebar > :not(#jc110ChatWallpaper){
-  position:relative!important;
-  z-index:2!important;
-}
-
-/* Main-menu-like glass readability. */
-body.jc110-chat-wallpaper .watch-sidebar .chat-card,
-body.jc110-chat-wallpaper .watch-sidebar .side-card{
-  background:rgba(7,10,20,.18)!important;
-  border-color:rgba(255,255,255,.14)!important;
-  box-shadow:0 16px 38px rgba(0,0,0,.16)!important;
-  backdrop-filter:blur(10px) saturate(135%)!important;
-  -webkit-backdrop-filter:blur(10px) saturate(135%)!important;
-}
-body.jc110-chat-wallpaper .chat-card .side-card-head,
-body.jc110-chat-wallpaper .chat-card .messages,
-body.jc110-chat-wallpaper .chat-card #chatMessages,
-body.jc110-chat-wallpaper .chat-card .empty-state,
-body.jc110-chat-wallpaper .chat-card .message-list{
-  background:transparent!important;
-}
-body.jc110-chat-wallpaper .chat-card #chatForm,
-body.jc110-chat-wallpaper .chat-card .message-form{
+#jc94RoomStyleCard.jc111-patched .jc94-room-preview-chat{
   background:rgba(7,10,20,.22)!important;
-  border-color:rgba(255,255,255,.14)!important;
-  box-shadow:0 -10px 24px rgba(0,0,0,.12)!important;
-  backdrop-filter:blur(10px) saturate(130%)!important;
-  -webkit-backdrop-filter:blur(10px) saturate(130%)!important;
-}
-body.jc110-chat-wallpaper .chat-card input,
-body.jc110-chat-wallpaper .chat-card textarea,
-body.jc110-chat-wallpaper .chat-card [contenteditable="true"],
-body.jc110-chat-wallpaper .chat-card .message-input{
-  background:rgba(255,255,255,.085)!important;
-  border-color:rgba(255,255,255,.16)!important;
-  box-shadow:none!important;
-}
-
-/* Bottom dock is simple dark glass, never wallpaper. */
-body.jc110-chat-wallpaper #jc80Dock{
-  background:rgba(7,10,20,.88)!important;
-  border-top:1px solid rgba(255,255,255,.10)!important;
-  backdrop-filter:blur(8px) saturate(115%)!important;
-  -webkit-backdrop-filter:blur(8px) saturate(115%)!important;
-}
-body.jc110-chat-wallpaper #jc80Dock .jc80-dock-inner{
-  background:rgba(10,12,22,.42)!important;
-  border-color:rgba(255,255,255,.14)!important;
-}
-
-/* Absolute player safety. */
-body.jc110-chat-wallpaper .player-frame,
-body.jc110-chat-wallpaper .player-frame iframe,
-body.jc110-chat-wallpaper .player-frame video,
-body.jc110-chat-wallpaper #youtubePlayer,
-body.jc110-chat-wallpaper #iframePlayer,
-body.jc110-chat-wallpaper #videoPlayer{
-  background:#000!important;
-  background-image:none!important;
-  backdrop-filter:none!important;
-  -webkit-backdrop-filter:none!important;
-  opacity:1!important;
-  visibility:visible!important;
-}
-
-body.jc110-video-blocked #jc110ChatWallpaper{
-  background-image:linear-gradient(135deg,rgba(8,12,28,.86),rgba(25,15,34,.82))!important;
 }

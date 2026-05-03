@@ -1,18 +1,16 @@
-/* JustClover cache killer stage110-clean-chat-wallpaper-20260503-1 */
-const JC_SW_BUILD = "stage110-clean-chat-wallpaper-20260503-1";
+/* JustClover cache killer stage111-clean-chat-wallpaper-final-20260503-1 */
 self.addEventListener('install', event => {
   self.skipWaiting();
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
 });
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
-    if (self.registration.navigationPreload) {
-      try { await self.registration.navigationPreload.disable(); } catch (_) {}
-    }
     const keys = await caches.keys();
-    await Promise.all(keys.map(key => caches.delete(key)));
+    await Promise.all(keys.map(k => caches.delete(k)));
+    if (self.registration && self.registration.unregister) await self.registration.unregister();
     await self.clients.claim();
   })());
 });
 self.addEventListener('fetch', event => {
-  event.respondWith(fetch(event.request, { cache: 'no-store' }).catch(() => fetch(event.request)));
+  event.respondWith(fetch(event.request, { cache: 'no-store' }));
 });
