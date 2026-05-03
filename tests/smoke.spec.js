@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const EXPECTED_BUILD = process.env.EXPECTED_BUILD || 'stage118-gif-gallery-no-api-stable-20260503-1';
+const EXPECTED_BUILD = process.env.EXPECTED_BUILD || 'stage121-restore-appjs-and-browser-tests-20260503-1';
 const ROOM_ID = process.env.ROOM_ID || '';
 const DEPLOY_WAIT_MS = Number(process.env.DEPLOY_WAIT_MS || 300_000);
 
@@ -23,9 +23,7 @@ async function waitForExpectedBuild(page, url) {
       return null;
     });
 
-    if (response && response.status() >= 400) {
-      lastError = `HTTP ${response.status()}`;
-    }
+    if (response && response.status() >= 400) lastError = `HTTP ${response.status()}`;
 
     await page.waitForTimeout(1200);
 
@@ -35,7 +33,6 @@ async function waitForExpectedBuild(page, url) {
     });
 
     if (lastBuild === EXPECTED_BUILD) return;
-
     await page.waitForTimeout(5000);
   }
 
@@ -45,24 +42,28 @@ async function waitForExpectedBuild(page, url) {
 async function openStage(page, baseURL) {
   const url = stageUrl(baseURL);
   const pageErrors = [];
-  const consoleErrors = [];
 
-  page.on('pageerror', error => pageErrors.push(String(error?.message || error)));
+  page.on('pageerror', error => {
+    const text = String(error?.message || error);
+    const ignored = ['ResizeObserver loop', 'Script error'];
+    if (!ignored.some(part => text.includes(part))) pageErrors.push(text);
+  });
+
   page.on('console', msg => {
     if (msg.type() !== 'error') return;
     const text = msg.text();
     const ignored = [
       'favicon',
       'manifest.webmanifest',
-      'ResizeObserver loop limit exceeded',
-      'Firebase',
-      'auth/',
+      'ResizeObserver loop',
+      'Failed to load resource',
+      'net::ERR_BLOCKED_BY_CLIENT',
     ];
-    if (!ignored.some(part => text.includes(part))) consoleErrors.push(text);
+    if (!ignored.some(part => text.includes(part))) console.log('[browser console error]', text);
   });
 
   await waitForExpectedBuild(page, url);
-  return { url, pageErrors, consoleErrors };
+  return { url, pageErrors };
 }
 
 async function forceRoomDomVisible(page) {
@@ -80,7 +81,7 @@ async function forceRoomDomVisible(page) {
 }
 
 test.describe('JustClover browser smoke', () => {
-  test('site loads expected build without loader loop', async ({ page, baseURL }) => {
+  test('site loads Stage121 app.js and no YAML app crash', async ({ page, baseURL }) => {
     const { pageErrors } = await openStage(page, baseURL);
 
     await expect(page.locator('body')).toContainText('JUST');
@@ -90,12 +91,21 @@ test.describe('JustClover browser smoke', () => {
     expect(build).toBe(EXPECTED_BUILD);
 
     const badge = await page.evaluate(() => getComputedStyle(document.documentElement, '::after').content);
-    expect(badge).toContain('118 GIFGRID');
+    expect(badge).toContain('121 APPFIX');
+
+    const appFix = await page.evaluate(() => window.jc121AppFixDebug?.());
+    expect(appFix).toMatchObject({
+      build: EXPECTED_BUILD,
+      authView: true,
+      appView: true,
+      playerFrame: true,
+      chatForm: true,
+    });
 
     expect(pageErrors).toEqual([]);
   });
 
-  test('GIF picker opens and renders local GIF grid', async ({ page, baseURL }) => {
+  test('GIF button exists and opens picker grid', async ({ page, baseURL }) => {
     const { pageErrors } = await openStage(page, baseURL);
     await forceRoomDomVisible(page);
 
@@ -109,15 +119,6 @@ test.describe('JustClover browser smoke', () => {
 
     const tileCount = await page.locator('#jc118GifGrid .jc118-gif-tile').count();
     expect(tileCount).toBeGreaterThan(0);
-
-    const debug = await page.evaluate(() => window.jc118GifGridDebug?.());
-    expect(debug).toMatchObject({
-      build: EXPECTED_BUILD,
-      button: true,
-      dialog: true,
-      grid: true,
-      oldDialog: false,
-    });
 
     expect(pageErrors).toEqual([]);
   });

@@ -6,9 +6,9 @@ on:
       expected_build:
         description: Expected window.JUSTCLOVER_BUILD
         required: true
-        default: stage118-gif-gallery-no-api-stable-20260503-1
+        default: stage121-restore-appjs-and-browser-tests-20260503-1
       room_id:
-        description: Optional room id for URL
+        description: Optional room id for URL. Leave empty for smoke test.
         required: false
         default: ''
   push:
@@ -22,7 +22,7 @@ jobs:
       contents: read
     env:
       BASE_URL: https://bcxover.github.io/JustClover/
-      EXPECTED_BUILD: ${{ github.event.inputs.expected_build || 'stage118-gif-gallery-no-api-stable-20260503-1' }}
+      EXPECTED_BUILD: ${{ github.event.inputs.expected_build || 'stage121-restore-appjs-and-browser-tests-20260503-1' }}
       ROOM_ID: ${{ github.event.inputs.room_id || '' }}
       DEPLOY_WAIT_MS: '300000'
       CI: 'true'
