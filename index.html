@@ -7,10 +7,10 @@
   <meta name="theme-color" content="#080912" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icons/icon.svg" />
-  <link rel="stylesheet" href="./style.css?v=stage121-restore-appjs-and-browser-tests-20260503-1" />
+  <link rel="stylesheet" href="./style.css?v=stage122-rave-anime-ui-custom-wallpaper-20260503-1" />
 
   <script>
-    window.JUSTCLOVER_BUILD = "stage121-restore-appjs-and-browser-tests-20260503-1";
+    window.JUSTCLOVER_BUILD = "stage122-rave-anime-ui-custom-wallpaper-20260503-1";
     window.JUSTCLOVER_STAGE_NOTE = "Stage114 emergency: static files, no CDN index loader, no room wallpaper experiments.";
     (function jc114EmergencyCleanup(){
       try {
@@ -127,13 +127,13 @@
         <nav class="nav">
           <button class="nav-btn active" data-section="homeSection" type="button"><span>＋</span> Лобби</button>
           <button class="nav-btn" data-section="watchSection" type="button"><span>▶</span> Комната</button>
-          <button class="nav-btn" data-section="profileSection" type="button"><span>◇</span> Профиль</button>
-          <button class="nav-btn" data-section="aboutSection" type="button"><span>i</span> Stage114</button>
+          <button class="nav-btn" data-section="profileSection" type="button"><span>✦</span> Оформление</button>
+          <button class="nav-btn" data-section="aboutSection" type="button"><span>i</span> Stage122</button>
         </nav>
 
         <div class="rail-footer panel-soft">
-          <div class="rail-note-title">Clean Active Room</div>
-          <p class="status">Когда комната открыта, левый rail скрывается, а основным интерфейсом становится Rave-like сетка: плеер + чат.</p>
+          <div class="rail-note-title">Anime Rave Shell</div>
+          <p class="status">ПК-версия: лобби, плеер и чат в прозрачном акриловом стиле с живыми обоями.</p>
         </div>
       </aside>
 
@@ -144,7 +144,16 @@
               <span class="kicker">Лобби</span>
               <h2>Создай комнату или зайди по invite</h2>
             </div>
-            <p>После входа в комнату включается единый активный режим просмотра.</p>
+            <p>Источники и комнаты собраны в одну Rave-like ленту, но в оригинальном anime/glass стиле.</p>
+          </div>
+
+          <div class="jc122-source-hub panel" aria-label="Быстрый выбор источников">
+            <button class="jc122-source-tile active" data-jc122-source="youtube" type="button"><b>YouTube</b><span>ролики / live</span></button>
+            <button class="jc122-source-tile" data-jc122-source="vk" type="button"><b>VK Видео</b><span>video / clip</span></button>
+            <button class="jc122-source-tile" data-jc122-source="gdrive" type="button"><b>Google Drive</b><span>файл / preview</span></button>
+            <button class="jc122-source-tile" data-jc122-source="ydrive" type="button"><b>Яндекс Диск</b><span>ссылка / web</span></button>
+            <button class="jc122-source-tile" data-jc122-source="web" type="button"><b>WEB</b><span>универсально</span></button>
+            <button class="jc122-source-tile" data-jc122-source="local" type="button"><b>Local</b><span>файл с ПК</span></button>
           </div>
 
           <div class="dashboard-grid">
@@ -232,15 +241,21 @@
                 <div class="source-tabs" aria-label="Быстрый выбор источника">
                   <button class="source-pill active" data-source-choice="youtube" type="button">YouTube</button>
                   <button class="source-pill" data-source-choice="vk" type="button">VK Video</button>
+                  <button class="source-pill" data-source-choice="gdrive" type="button">Google Drive</button>
+                  <button class="source-pill" data-source-choice="ydrive" type="button">Яндекс Диск</button>
+                  <button class="source-pill" data-source-choice="web" type="button">WEB</button>
                   <button class="source-pill" data-source-choice="local" type="button">Local</button>
                 </div>
                 <div class="source-grid compact-source-grid">
                   <select id="sourceType">
                     <option value="youtube">YouTube</option>
                     <option value="vk">VK Video</option>
+                    <option value="gdrive">Google Drive</option>
+                    <option value="ydrive">Яндекс Диск</option>
+                    <option value="web">WEB / iframe</option>
                     <option value="local">Local video</option>
                   </select>
-                  <input id="sourceUrl" placeholder="Вставь ссылку YouTube или VK" />
+                  <input id="sourceUrl" placeholder="Вставь ссылку YouTube / VK / Drive / WEB" />
                   <input id="localVideoFile" class="hidden" type="file" accept="video/*,.mkv,.avi,.mov,.mp4,.webm" />
                   <input id="sourceTitle" placeholder="Название источника" />
                   <button id="setSourceBtn" class="btn primary" type="button">Применить</button>
@@ -282,10 +297,10 @@
         <section id="profileSection" class="section">
           <div class="section-head">
             <div>
-              <span class="kicker">Profile</span>
-              <h2>Профиль</h2>
+              <span class="kicker">Customize</span>
+              <h2>Оформление и профиль</h2>
             </div>
-            <p>Профиль оставлен отдельным, но не вмешивается в активный просмотр.</p>
+            <p>Здесь будут главные фишки кастомизации: живые обои, прозрачность, акцент и профиль.</p>
           </div>
           <div class="profile-grid">
             <div id="profilePreviewCard" class="profile-preview panel">
@@ -311,19 +326,19 @@
         <section id="aboutSection" class="section">
           <div class="section-head">
             <div>
-              <span class="kicker">Stage114</span>
-              <h2>Clean Active Room Layout</h2>
+              <span class="kicker">Stage122</span>
+              <h2>Rave-like Anime Shell</h2>
             </div>
-            <p>Не продолжай Stage74 как базу, начни от Stage62 или от чистого base commit и сделай Stage114 clean active layout.</p>
+            <p>ПК-дизайн: оригинальная Rave-like логика, anime/glass оформление и задел под новые источники.</p>
           </div>
           <div class="about-grid">
             <div class="card panel">
               <h3>Что изменено</h3>
-              <p>Активный просмотр стал главным режимом комнаты: большой плеер слева, живой чат справа, нижняя панель управления поверх плеера.</p>
+              <p>Добавлен Rave-like лобби-хаб, прозрачная комната, меню оформления, live-wallpaper слой и новые источники Drive/WEB.</p>
             </div>
             <div class="card panel">
-              <h3>Чего нет</h3>
-              <p>Нет auto guest login, нет appendChild переноса чата, нет MutationObserver по document и нет постоянных интервалов для подгонки геометрии.</p>
+              <h3>Дальше</h3>
+              <p>После доводки ПК-версии можно адаптировать Android web и подготовить основу под устанавливаемое приложение.</p>
             </div>
           </div>
         </section>
@@ -332,6 +347,6 @@
   </main>
 
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script type="module" src="./app.js?v=stage121-restore-appjs-and-browser-tests-20260503-1"></script>
+  <script type="module" src="./app.js?v=stage122-rave-anime-ui-custom-wallpaper-20260503-1"></script>
 </body>
 </html>

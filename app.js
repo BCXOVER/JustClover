@@ -27,8 +27,8 @@ import {
   equalTo
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
-const BUILD = "stage121-restore-appjs-and-browser-tests-20260503-1";
-console.log("JustClover loaded:", BUILD, "— emergency static build, no CDN loader, no wallpaper experiments");
+const BUILD = "stage122-rave-anime-ui-custom-wallpaper-20260503-1";
+console.log("JustClover loaded:", BUILD, "— Stage122 anime glass shell with safe local wallpaper customization");
 window.JUSTCLOVER_BUILD = BUILD;
 
 const $ = (id) => document.getElementById(id);
@@ -607,6 +607,10 @@ function normalizeStoredSource(source) {
     return embedUrl ? { ...source, url, embedUrl } : { type: "none" };
   }
   if (source.type === "local") return source;
+  if (["gdrive", "ydrive", "web"].includes(source.type)) {
+    const url = source.url || source.embedUrl || "";
+    return url ? { ...source, url, embedUrl: source.embedUrl || url } : { type: "none" };
+  }
   return source;
 }
 function toggleSourceInputs() {
@@ -618,6 +622,9 @@ function toggleSourceInputs() {
   if (type === "local") status(els.sourceNote, "Local video выбирается на устройстве. После reload файл нужно выбрать снова.");
   if (type === "youtube") status(els.sourceNote, "YouTube загружается в основной контейнер без JS-подгонки геометрии.");
   if (type === "vk") status(els.sourceNote, "VK загружается через iframe. Панель источников остаётся живой и не скрывается display:none.");
+  if (type === "gdrive") status(els.sourceNote, "Google Drive открыт как iframe/preview. Для закрытых файлов нужен публичный доступ.");
+  if (type === "ydrive") status(els.sourceNote, "Яндекс Диск добавлен как внешний WEB-источник. Если iframe заблокирован, открой ссылку рядом.");
+  if (type === "web") status(els.sourceNote, "WEB-источник: пробуем показать в iframe, при запрете откроется внешней кнопкой.");
 }
 async function setSource() {
   if (!currentRoomId) {
@@ -654,6 +661,8 @@ async function setSource() {
       source = { type: "youtube", url, videoId: id, title: titleInput || "YouTube" };
     } else if (type === "vk") {
       source = { type: "vk", url, embedUrl: vkEmbed(url), title: titleInput || "VK Video" };
+    } else if (["gdrive", "ydrive", "web"].includes(type)) {
+      source = { type, url, embedUrl: url, title: titleInput || (type === "gdrive" ? "Google Drive" : type === "ydrive" ? "Яндекс Диск" : "WEB") };
     }
   }
   writeSourceCache(currentRoomId, source);
@@ -703,6 +712,13 @@ async function loadSource(source = { type: "none" }) {
     show(els.iframePlayer);
     if (els.iframePlayer) els.iframePlayer.src = normalized.embedUrl || normalized.url;
     status(els.sourceNote, `VK Video: ${normalized.title || "источник"}`);
+    return;
+  }
+  if (["gdrive", "ydrive", "web"].includes(normalized.type)) {
+    show(els.iframePlayer);
+    if (els.iframePlayer) els.iframePlayer.src = normalized.embedUrl || normalized.url;
+    if (els.externalLink) els.externalLink.href = normalized.url || normalized.embedUrl || "";
+    status(els.sourceNote, `${String(normalized.type).toUpperCase()}: ${normalized.title || "WEB источник"}`);
     return;
   }
   if (normalized.type === "youtube") {
@@ -1294,7 +1310,7 @@ try {
    No wallpaper code, no reload loop, no CDN index loader.
    ========================================================= */
 (function(){
-  const BUILD = "stage121-restore-appjs-and-browser-tests-20260503-1";
+  const BUILD = "stage122-rave-anime-ui-custom-wallpaper-20260503-1";
   window.JUSTCLOVER_BUILD = BUILD;
   function cleanupOldWallpaper(){
     document.querySelectorAll('[id^="jc90"],[id^="jc91"],[id^="jc92"],[id^="jc93"],[id^="jc94"],[id^="jc95"],[id^="jc96"],[id^="jc97"],[id^="jc98"],[id^="jc99"],[id^="jc100"],[id^="jc101"],[id^="jc102"],[id^="jc103"],[id^="jc104"],[id^="jc105"],[id^="jc106"],[id^="jc107"],[id^="jc108"],[id^="jc109"],[id^="jc110"],[id^="jc111"],[id^="jc112"],[id^="jc113"],.jc101SurfaceBg,.jc99SurfaceBg,.jc-room-bg,.jc-chat-bg').forEach(el => {
@@ -1327,7 +1343,7 @@ try {
    GIF is chat message only. No wallpapers, no player changes.
    ========================================================= */
 (function(){
-  const BUILD = 'stage121-restore-appjs-and-browser-tests-20260503-1';
+  const BUILD = 'stage122-rave-anime-ui-custom-wallpaper-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc115GifChatDebug = function(){
     return {
@@ -1349,7 +1365,7 @@ try {
    older cached handlers or DOM re-renders are present.
    ========================================================= */
 (function(){
-  const BUILD = 'stage121-restore-appjs-and-browser-tests-20260503-1';
+  const BUILD = 'stage122-rave-anime-ui-custom-wallpaper-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   function bootGifButton(){
     try { ensureGifButton(); } catch (_) {}
@@ -1384,7 +1400,7 @@ try {
    JustClover Stage 117 — Giphy picker restore debug
    ========================================================= */
 (function(){
-  const BUILD = 'stage121-restore-appjs-and-browser-tests-20260503-1';
+  const BUILD = 'stage122-rave-anime-ui-custom-wallpaper-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc117GiphyDebug = function(){
     return {
@@ -1408,7 +1424,7 @@ try {
    Does not touch auth/player/source/fullscreen/wallpapers.
    ========================================================= */
 (function(){
-  const BUILD = 'stage121-restore-appjs-and-browser-tests-20260503-1';
+  const BUILD = 'stage122-rave-anime-ui-custom-wallpaper-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const GIFS = [
@@ -1618,14 +1634,282 @@ try {
 })();
 
 
-/* Stage121 guard: app.js restored from real app code, not workflow YAML. */
-window.JUSTCLOVER_BUILD = "stage121-restore-appjs-and-browser-tests-20260503-1";
+/* =========================================================
+   JustClover Stage 122 — Anime/Rave-like UI shell + customization
+   Original implementation inspired by watch-party UX patterns.
+   No copied assets or third-party code from Rave.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage122-rave-anime-ui-custom-wallpaper-20260503-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+
+  const DB_NAME = 'justclover-stage122-customization';
+  const STORE = 'wallpaper';
+  let wallpaperUrl = '';
+
+  function qs(sel, root=document){ return root.querySelector(sel); }
+  function qsa(sel, root=document){ return Array.from(root.querySelectorAll(sel)); }
+  function escHtml(value){
+    return String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+  }
+  function setStatus(text){ const el = document.getElementById('jc122CustomizeStatus'); if(el) el.textContent = text || ''; }
+
+  function openDb(){
+    return new Promise((resolve, reject) => {
+      if(!('indexedDB' in window)) return reject(new Error('IndexedDB not available'));
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = () => req.result.createObjectStore(STORE);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error || new Error('IndexedDB failed'));
+    });
+  }
+  async function idbPut(key, value){
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).put(value, key);
+      tx.oncomplete = () => { db.close(); resolve(true); };
+      tx.onerror = () => { db.close(); reject(tx.error); };
+    });
+  }
+  async function idbGet(key){
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readonly');
+      const req = tx.objectStore(STORE).get(key);
+      req.onsuccess = () => { db.close(); resolve(req.result); };
+      req.onerror = () => { db.close(); reject(req.error); };
+    });
+  }
+  async function idbDel(key){
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).delete(key);
+      tx.oncomplete = () => { db.close(); resolve(true); };
+      tx.onerror = () => { db.close(); reject(tx.error); };
+    });
+  }
+
+  function ensureWallpaperLayer(){
+    let layer = document.getElementById('jc122WallpaperLayer');
+    if(layer) return layer;
+    layer = document.createElement('div');
+    layer.id = 'jc122WallpaperLayer';
+    layer.setAttribute('aria-hidden', 'true');
+    layer.innerHTML = '<div class="jc122-wallpaper-preset"></div>';
+    document.body.prepend(layer);
+    return layer;
+  }
+  function revokeWallpaper(){
+    if(wallpaperUrl){ try{ URL.revokeObjectURL(wallpaperUrl); }catch(_){} }
+    wallpaperUrl = '';
+  }
+  function applyWallpaper(record){
+    const layer = ensureWallpaperLayer();
+    revokeWallpaper();
+    layer.innerHTML = '';
+    document.body.classList.add('jc122-wallpaper-active');
+    if(!record){
+      layer.innerHTML = '<div class="jc122-wallpaper-preset jc122-preset-anime"></div>';
+      document.body.dataset.jc122Wallpaper = 'anime';
+      return;
+    }
+    if(record.kind === 'preset'){
+      layer.innerHTML = `<div class="jc122-wallpaper-preset jc122-preset-${escHtml(record.name || 'anime')}"></div>`;
+      document.body.dataset.jc122Wallpaper = record.name || 'anime';
+      localStorage.setItem('jc122-wallpaper-preset', record.name || 'anime');
+      return;
+    }
+    if(record.blob){
+      wallpaperUrl = URL.createObjectURL(record.blob);
+      if(String(record.type || '').startsWith('video/')){
+        const video = document.createElement('video');
+        video.src = wallpaperUrl;
+        video.autoplay = true;
+        video.loop = true;
+        video.muted = true;
+        video.playsInline = true;
+        video.className = 'jc122-wallpaper-media';
+        layer.appendChild(video);
+        video.play?.().catch(()=>{});
+      } else {
+        const img = document.createElement('img');
+        img.src = wallpaperUrl;
+        img.alt = '';
+        img.className = 'jc122-wallpaper-media';
+        layer.appendChild(img);
+      }
+      document.body.dataset.jc122Wallpaper = 'custom';
+    }
+  }
+
+  function setGlass(value){
+    const alpha = Math.max(0.22, Math.min(0.88, Number(value) || 0.52));
+    document.documentElement.style.setProperty('--jc122-glass-alpha', String(alpha));
+    localStorage.setItem('jc122-glass-alpha', String(alpha));
+    const range = document.getElementById('jc122GlassRange');
+    if(range) range.value = String(alpha);
+  }
+  function setScale(value){
+    const scale = Math.max(0.9, Math.min(1.14, Number(value) || 1));
+    document.documentElement.style.setProperty('--jc122-ui-scale', String(scale));
+    localStorage.setItem('jc122-ui-scale', String(scale));
+    const range = document.getElementById('jc122ScaleRange');
+    if(range) range.value = String(scale);
+  }
+  function setVibe(name){
+    const vibe = ['anime','crimson','midnight','emerald'].includes(name) ? name : 'anime';
+    document.body.dataset.jc122Vibe = vibe;
+    localStorage.setItem('jc122-vibe', vibe);
+    qsa('[data-jc122-vibe]').forEach(btn => btn.classList.toggle('active', btn.dataset.jc122Vibe === vibe));
+  }
+
+  function ensureCustomizer(){
+    if(document.getElementById('jc122Customizer')) return;
+    const profileGrid = qs('#profileSection .profile-grid');
+    if(!profileGrid) return;
+    const card = document.createElement('div');
+    card.id = 'jc122Customizer';
+    card.className = 'card panel jc122-customizer';
+    card.innerHTML = `
+      <div class="dashboard-card-head compact-head">
+        <div><h3>Оформление сайта</h3><p class="status">Живые обои, прозрачность, настроение UI. Всё хранится на этом устройстве.</p></div>
+        <span class="soft-badge">Stage122</span>
+      </div>
+      <label class="jc122-file-label">Загрузить живые обои с ПК
+        <input id="jc122WallpaperFile" type="file" accept="image/*,video/mp4,video/webm,video/ogg,.gif,.webp,.png,.jpg,.jpeg,.mp4,.webm" />
+      </label>
+      <div class="jc122-custom-row">
+        <button type="button" class="btn soft" data-jc122-preset="anime">Anime dusk</button>
+        <button type="button" class="btn soft" data-jc122-preset="crimson">Crimson</button>
+        <button type="button" class="btn soft" data-jc122-preset="midnight">Midnight</button>
+        <button type="button" class="btn soft" data-jc122-preset="emerald">Emerald</button>
+      </div>
+      <label>Прозрачность меню
+        <input id="jc122GlassRange" type="range" min="0.22" max="0.88" step="0.02" />
+      </label>
+      <label>Масштаб интерфейса ПК
+        <input id="jc122ScaleRange" type="range" min="0.9" max="1.14" step="0.01" />
+      </label>
+      <div class="jc122-custom-row">
+        <button type="button" class="btn soft" data-jc122-vibe="anime">Anime</button>
+        <button type="button" class="btn soft" data-jc122-vibe="crimson">Rose</button>
+        <button type="button" class="btn soft" data-jc122-vibe="midnight">Dark</button>
+        <button type="button" class="btn soft" data-jc122-vibe="emerald">Clover</button>
+      </div>
+      <div class="jc122-custom-row jc122-danger-row">
+        <button type="button" class="btn soft" id="jc122ClearWallpaper">Сбросить обои</button>
+        <button type="button" class="btn primary" id="jc122PreviewRoom">К комнате</button>
+      </div>
+      <p class="status" id="jc122CustomizeStatus"></p>`;
+    profileGrid.appendChild(card);
+
+    qs('#jc122WallpaperFile')?.addEventListener('change', async (event) => {
+      const file = event.target.files?.[0];
+      if(!file) return;
+      if(file.size > 80 * 1024 * 1024){ setStatus('Файл слишком большой. Для web-версии лучше до 80 MB.'); return; }
+      setStatus('Сохраняю обои на этом устройстве...');
+      try{
+        const record = { kind:'custom', type:file.type || 'application/octet-stream', name:file.name, blob:file, updatedAt:Date.now() };
+        await idbPut('current', record);
+        applyWallpaper(record);
+        setStatus(`Готово: ${file.name}`);
+      }catch(err){
+        console.error('Stage122 wallpaper save failed', err);
+        setStatus('Не удалось сохранить в браузере, применяю только до перезагрузки.');
+        applyWallpaper({ kind:'custom', type:file.type, blob:file });
+      }
+    });
+    qsa('[data-jc122-preset]', card).forEach(btn => btn.addEventListener('click', async () => {
+      const name = btn.dataset.jc122Preset || 'anime';
+      await idbDel('current').catch(()=>{});
+      applyWallpaper({ kind:'preset', name });
+      setStatus(`Пресет применён: ${name}`);
+    }));
+    qs('#jc122ClearWallpaper')?.addEventListener('click', async () => {
+      await idbDel('current').catch(()=>{});
+      localStorage.removeItem('jc122-wallpaper-preset');
+      applyWallpaper({kind:'preset', name:'anime'});
+      setStatus('Обои сброшены.');
+    });
+    qs('#jc122PreviewRoom')?.addEventListener('click', () => {
+      qs('[data-section="watchSection"]')?.click();
+    });
+    qs('#jc122GlassRange')?.addEventListener('input', (e) => setGlass(e.target.value));
+    qs('#jc122ScaleRange')?.addEventListener('input', (e) => setScale(e.target.value));
+    qsa('[data-jc122-vibe]', card).forEach(btn => btn.addEventListener('click', () => setVibe(btn.dataset.jc122Vibe)));
+  }
+
+  function wireSourceHub(){
+    qsa('[data-jc122-source]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const type = btn.dataset.jc122Source || 'youtube';
+        qsa('[data-jc122-source]').forEach(x => x.classList.toggle('active', x === btn));
+        const sourceType = document.getElementById('sourceType');
+        if(sourceType){
+          sourceType.value = type;
+          sourceType.dispatchEvent(new Event('change', { bubbles:true }));
+        }
+        qs('[data-section="watchSection"]')?.click();
+        document.body.classList.add('catalog-open');
+        setTimeout(() => document.getElementById('sourceUrl')?.focus(), 80);
+      });
+    });
+  }
+  function decorateRoom(){
+    if(document.getElementById('jc122RoomChrome')) return;
+    const controls = qs('.player-bottom-controls');
+    if(controls){
+      const badge = document.createElement('div');
+      badge.id = 'jc122RoomChrome';
+      badge.className = 'jc122-room-chrome';
+      badge.innerHTML = '<span>JUST ✤ CLOVER</span><small>watch together</small>';
+      controls.before(badge);
+    }
+  }
+  async function boot(){
+    document.body.classList.add('jc122-shell');
+    setGlass(localStorage.getItem('jc122-glass-alpha') || 0.52);
+    setScale(localStorage.getItem('jc122-ui-scale') || 1);
+    setVibe(localStorage.getItem('jc122-vibe') || 'anime');
+    ensureWallpaperLayer();
+    const preset = localStorage.getItem('jc122-wallpaper-preset') || 'anime';
+    try{
+      const record = await idbGet('current');
+      applyWallpaper(record || { kind:'preset', name:preset });
+    }catch(_){ applyWallpaper({ kind:'preset', name:preset }); }
+    ensureCustomizer();
+    wireSourceHub();
+    decorateRoom();
+    setTimeout(ensureCustomizer, 700);
+    setTimeout(decorateRoom, 700);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
+  else boot();
+
+  window.jc122UiDebug = function(){
+    return {
+      build: BUILD,
+      wallpaperLayer: !!document.getElementById('jc122WallpaperLayer'),
+      customizer: !!document.getElementById('jc122Customizer'),
+      sourceHub: document.querySelectorAll('[data-jc122-source]').length,
+      glassAlpha: getComputedStyle(document.documentElement).getPropertyValue('--jc122-glass-alpha').trim(),
+      sourceExtraOptions: Array.from(document.querySelectorAll('#sourceType option')).map(o => o.value).filter(v => ['gdrive','ydrive','web'].includes(v))
+    };
+  };
+})();
+
+
+/* Stage122 guard: app.js restored from real app code, not workflow YAML. */
+window.JUSTCLOVER_BUILD = "stage122-rave-anime-ui-custom-wallpaper-20260503-1";
 window.jc121AppFixDebug = function(){
   return {
     build: window.JUSTCLOVER_BUILD,
     appJsRestored: true,
     yamlInjected: false,
     gifDialogCode: typeof window.jc118GifGridDebug === 'function',
+    stage122Ui: typeof window.jc122UiDebug === 'function',
     authView: !!document.getElementById('authView'),
     appView: !!document.getElementById('appView'),
     playerFrame: !!document.getElementById('playerFrame'),

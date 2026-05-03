@@ -113,7 +113,7 @@ body.player-fullscreen .player-frame{border-radius:0;height:100dvh;min-height:10
    JustClover Stage 114 — emergency static rollback
    ========================================================= */
 html::after{
-  content:'121 APPFIX'!important;
+  content:'122 RAVE UI'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -141,7 +141,7 @@ html::after{
    JustClover Stage 115 — safe GIF messages in chat
    ========================================================= */
 html::after{
-  content:'121 APPFIX'!important;
+  content:'122 RAVE UI'!important;
   background:rgba(34,197,94,.96)!important;
   color:#03130a!important;
 }
@@ -180,7 +180,7 @@ html::after{
    JustClover Stage 116 — robust GIF dialog
    ========================================================= */
 html::after{
-  content:'121 APPFIX'!important;
+  content:'122 RAVE UI'!important;
   background:rgba(34,211,238,.96)!important;
   color:#041016!important;
 }
@@ -275,7 +275,7 @@ html::after{
    JustClover Stage 117 — Giphy picker restore
    ========================================================= */
 html::after{
-  content:'121 APPFIX'!important;
+  content:'122 RAVE UI'!important;
   background:rgba(168,85,247,.96)!important;
   color:#fff!important;
 }
@@ -342,7 +342,7 @@ html::after{
    Always-visible quick GIF grid, paste direct links, no player changes.
    ========================================================= */
 html::after{
-  content:'121 APPFIX'!important;
+  content:'122 RAVE UI'!important;
   background:rgba(45,212,191,.96)!important;
   color:#03130f!important;
 }
@@ -453,4 +453,416 @@ html::after{
 @media(max-width:560px){
   .jc118-gif-row{grid-template-columns:1fr!important}
   .jc118-gif-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-height:210px!important}
+}
+
+
+/* =========================================================
+   Stage122 — Anime Rave-like glass UI, desktop first
+   ========================================================= */
+:root{
+  --jc122-glass-alpha:.52;
+  --jc122-ui-scale:1;
+  --jc122-panel: rgba(10, 12, 24, var(--jc122-glass-alpha));
+  --jc122-panel-strong: rgba(12, 13, 26, calc(var(--jc122-glass-alpha) + .12));
+  --jc122-line: rgba(255,255,255,.16);
+  --jc122-text:#f8f7ff;
+  --jc122-muted:#c7c0d8;
+  --jc122-glow: rgba(255,88,142,.34);
+  --jc122-radius: 28px;
+}
+body.jc122-shell{
+  background:#06070d;
+  color:var(--jc122-text);
+  overflow-x:hidden;
+}
+body.jc122-shell[data-jc122-vibe="crimson"]{ --primary:#ff5d83; --jc122-glow:rgba(255,70,112,.42); }
+body.jc122-shell[data-jc122-vibe="midnight"]{ --primary:#8ca7ff; --jc122-glow:rgba(106,136,255,.32); }
+body.jc122-shell[data-jc122-vibe="emerald"]{ --primary:#36e0a1; --jc122-glow:rgba(40,220,160,.32); }
+#jc122WallpaperLayer{
+  position:fixed;
+  inset:0;
+  z-index:-5;
+  overflow:hidden;
+  background:#070812;
+  pointer-events:none;
+}
+.jc122-wallpaper-media,
+.jc122-wallpaper-preset{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  filter:saturate(1.16) contrast(1.08) brightness(.72);
+  transform:scale(1.025);
+}
+.jc122-wallpaper-preset{
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255,105,150,.42), transparent 30%),
+    radial-gradient(circle at 76% 24%, rgba(95,145,255,.32), transparent 32%),
+    radial-gradient(circle at 52% 82%, rgba(67,223,176,.2), transparent 36%),
+    linear-gradient(135deg, #111320 0%, #24162a 42%, #0b1122 100%);
+}
+.jc122-preset-crimson{ background:radial-gradient(circle at 24% 22%, rgba(255,78,117,.5), transparent 32%), radial-gradient(circle at 78% 72%, rgba(95,55,255,.28), transparent 34%), linear-gradient(135deg,#1b0710,#301223 48%,#090711); }
+.jc122-preset-midnight{ background:radial-gradient(circle at 18% 18%, rgba(99,122,255,.42), transparent 33%), radial-gradient(circle at 80% 52%, rgba(36,220,255,.18), transparent 36%), linear-gradient(135deg,#060916,#101c36 50%,#050713); }
+.jc122-preset-emerald{ background:radial-gradient(circle at 16% 20%, rgba(53,230,167,.38), transparent 30%), radial-gradient(circle at 84% 30%, rgba(255,105,160,.24), transparent 35%), linear-gradient(135deg,#041512,#13261f 45%,#07090e); }
+body.jc122-shell::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-4;
+  background:
+    linear-gradient(90deg, rgba(5,6,12,.72), rgba(5,6,12,.36) 40%, rgba(5,6,12,.72)),
+    radial-gradient(circle at 50% 120%, rgba(255,255,255,.08), transparent 40%);
+  pointer-events:none;
+}
+body.jc122-shell .bg{
+  background:linear-gradient(180deg, rgba(8,9,18,.64), rgba(8,9,18,.28) 48%, rgba(8,9,18,.72));
+  z-index:-3;
+}
+body.jc122-shell .panel,
+body.jc122-shell .card,
+body.jc122-shell .auth-card,
+body.jc122-shell .chat-card,
+body.jc122-shell .source-panel,
+body.jc122-shell .rail,
+body.jc122-shell .topbar,
+body.jc122-shell .player-bottom-controls,
+body.jc122-shell .panel-soft{
+  background:var(--jc122-panel) !important;
+  border:1px solid var(--jc122-line) !important;
+  box-shadow:0 22px 80px rgba(0,0,0,.42), 0 0 0 1px rgba(255,255,255,.03) inset !important;
+  backdrop-filter: blur(24px) saturate(1.35);
+  -webkit-backdrop-filter: blur(24px) saturate(1.35);
+}
+body.jc122-shell .topbar{
+  min-height:78px;
+  justify-content:center;
+  border-radius:0 0 30px 30px;
+}
+body.jc122-shell .brand{
+  position:absolute;
+  left:28px;
+}
+body.jc122-shell .brand h1{
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  text-shadow:0 0 24px rgba(255,255,255,.32);
+}
+body.jc122-shell .top-actions{
+  position:absolute;
+  right:28px;
+}
+body.jc122-shell .app{
+  transform:scale(var(--jc122-ui-scale));
+  transform-origin:top center;
+  min-height:calc(100vh / var(--jc122-ui-scale));
+}
+body.jc122-shell .rail{
+  border-radius:0 34px 34px 0;
+  margin:16px 0 16px 16px;
+  height:calc(100vh - 112px);
+  position:sticky;
+  top:96px;
+}
+body.jc122-shell .mini-card,
+body.jc122-shell .room-card,
+body.jc122-shell .user-card{
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:24px;
+}
+body.jc122-shell .nav-btn{
+  min-height:54px;
+  border-radius:18px;
+  color:#ede9ff;
+}
+body.jc122-shell .nav-btn.active,
+body.jc122-shell .btn.primary{
+  background:linear-gradient(135deg, color-mix(in srgb, var(--primary) 86%, #ffffff 4%), #ff799d) !important;
+  box-shadow:0 16px 42px var(--jc122-glow) !important;
+}
+body.jc122-shell .content{
+  padding:28px clamp(24px,4vw,64px) 40px 22px;
+}
+body.jc122-shell .section-head{
+  align-items:end;
+  margin-bottom:24px;
+}
+body.jc122-shell .section-head h2{
+  font-size:clamp(34px,4vw,64px);
+  line-height:.95;
+  max-width:820px;
+  letter-spacing:-.055em;
+}
+body.jc122-shell .kicker{
+  color:#ff8aa7;
+  letter-spacing:.26em;
+}
+.jc122-source-hub{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(120px,1fr));
+  gap:12px;
+  padding:14px;
+  margin:0 0 24px;
+  border-radius:30px;
+}
+.jc122-source-tile{
+  min-height:86px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:22px;
+  background:rgba(255,255,255,.055);
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  padding:14px 16px;
+  cursor:pointer;
+  transition:transform .18s ease, border-color .18s ease, background .18s ease;
+}
+.jc122-source-tile b{ font-size:18px; letter-spacing:-.02em; }
+.jc122-source-tile span{ color:var(--jc122-muted); font-size:12px; margin-top:5px; }
+.jc122-source-tile:hover,
+.jc122-source-tile.active{
+  transform:translateY(-2px);
+  border-color:color-mix(in srgb, var(--primary) 70%, #fff 10%);
+  background:linear-gradient(135deg, color-mix(in srgb, var(--primary) 18%, transparent), rgba(255,255,255,.08));
+}
+body.jc122-shell .dashboard-grid{
+  grid-template-columns:minmax(380px,.95fr) minmax(360px,.9fr) minmax(360px,.9fr);
+  align-items:start;
+}
+body.jc122-shell .dashboard-main-card{
+  min-height:540px;
+  border-radius:34px;
+}
+body.jc122-shell .dashboard-main-card::before{
+  content:"LIVE ROOM";
+  position:absolute;
+  right:24px;
+  top:24px;
+  padding:12px 16px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  color:#fff;
+  font-size:12px;
+  letter-spacing:.12em;
+}
+body.jc122-shell .form-stack input,
+body.jc122-shell .form-stack textarea,
+body.jc122-shell select,
+body.jc122-shell .message-form input,
+body.jc122-shell .source-grid input{
+  background:rgba(5,6,12,.52) !important;
+  border:1px solid rgba(255,255,255,.13) !important;
+  border-radius:18px !important;
+  color:#fff !important;
+}
+body.jc122-shell .active-room-shell{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 392px;
+  gap:12px;
+  min-height:calc(100vh - 106px);
+}
+body.jc122-shell.active-room .content{
+  padding:0;
+}
+body.jc122-shell.active-room .topbar{
+  position:fixed;
+  top:0; left:0; right:0;
+  height:74px;
+  z-index:40;
+  border-radius:0;
+  background:rgba(12,10,18,.44) !important;
+}
+body.jc122-shell.active-room .room-player-column{
+  padding:88px 0 0 0;
+  min-height:100vh;
+}
+body.jc122-shell.active-room .room-topline{
+  position:absolute;
+  left:22px;
+  top:96px;
+  z-index:18;
+  width:min(760px,calc(100vw - 470px));
+  padding:0;
+  pointer-events:none;
+}
+body.jc122-shell.active-room .room-status-line{
+  margin-top:8px;
+  pointer-events:auto;
+}
+body.jc122-shell.active-room .room-topline h2{
+  font-size:clamp(22px,2vw,34px);
+  color:#fff;
+  text-shadow:0 2px 24px rgba(0,0,0,.72);
+}
+body.jc122-shell .active-player-card,
+body.jc122-shell .player-card{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:0 !important;
+  border-radius:0 !important;
+}
+body.jc122-shell.active-room .player-frame{
+  min-height:calc(100vh - 88px);
+  height:calc(100vh - 88px);
+  border-radius:0 34px 34px 0;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.42);
+  overflow:hidden;
+  box-shadow:0 26px 120px rgba(0,0,0,.54);
+}
+body.jc122-shell .embed-box,
+body.jc122-shell #videoPlayer{
+  width:100%; height:100%;
+  object-fit:contain;
+  background:#000;
+}
+body.jc122-shell .empty-player{
+  color:#ded8ed;
+  background:radial-gradient(circle at 50% 45%, rgba(255,255,255,.07), transparent 34%);
+}
+.jc122-room-chrome{
+  position:absolute;
+  left:50%;
+  bottom:92px;
+  transform:translateX(-50%);
+  padding:10px 18px;
+  border-radius:999px;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.12);
+  backdrop-filter:blur(16px);
+  display:flex;
+  gap:10px;
+  align-items:center;
+  pointer-events:none;
+}
+.jc122-room-chrome span{font-weight:900;letter-spacing:.12em}
+.jc122-room-chrome small{color:#cfc8dd}
+body.jc122-shell .player-bottom-controls{
+  bottom:24px;
+  border-radius:999px;
+  padding:10px 14px;
+}
+body.jc122-shell .control-btn{
+  width:56px;
+  height:56px;
+  font-size:22px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+}
+body.jc122-shell .room-chat-column{
+  padding:88px 12px 12px 0;
+  min-height:100vh;
+}
+body.jc122-shell .chat-card{
+  min-height:calc(100vh - 100px);
+  border-radius:30px;
+  overflow:hidden;
+}
+body.jc122-shell .messages{
+  padding-right:6px;
+}
+body.jc122-shell .chat-msg{
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:22px;
+}
+body.jc122-shell .source-panel-embedded{
+  position:absolute;
+  right:416px;
+  bottom:22px;
+  width:min(560px,calc(100vw - 850px));
+  z-index:24;
+  border-radius:28px;
+}
+body.jc122-shell:not(.catalog-open) .source-panel-embedded{
+  opacity:0;
+  transform:translateY(12px);
+  pointer-events:none;
+}
+body.jc122-shell.catalog-open .source-panel-embedded{
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+body.jc122-shell .source-tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+body.jc122-shell .source-pill{
+  border-radius:999px;
+}
+.jc122-customizer{
+  grid-column:1 / -1;
+  border-radius:32px;
+}
+.jc122-file-label{
+  display:block;
+  padding:16px;
+  border:1px dashed rgba(255,255,255,.22);
+  border-radius:22px;
+  background:rgba(255,255,255,.055);
+  cursor:pointer;
+}
+.jc122-file-label input{display:block;margin-top:12px;width:100%}
+.jc122-custom-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:14px 0;
+}
+.jc122-customizer label{
+  display:block;
+  margin:14px 0;
+  color:#fff;
+}
+.jc122-customizer input[type="range"]{
+  width:100%;
+  accent-color:var(--primary);
+}
+.jc122-customizer [data-jc122-vibe].active{
+  border-color:var(--primary);
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--primary) 60%, transparent) inset;
+}
+body.jc122-shell .profile-grid{
+  grid-template-columns:minmax(280px,360px) minmax(380px,1fr);
+}
+body.jc122-shell .profile-preview,
+body.jc122-shell .profile-form{
+  border-radius:32px;
+}
+body.jc122-shell::after{
+  content:"122 RAVE UI";
+  position:fixed;
+  left:12px;
+  bottom:10px;
+  z-index:9999;
+  background:linear-gradient(135deg, var(--primary), #48e0bb);
+  color:#05100d;
+  border-radius:999px;
+  padding:7px 12px;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.03em;
+  box-shadow:0 10px 28px rgba(0,0,0,.3);
+}
+@media (max-width:1180px){
+  .jc122-source-hub{grid-template-columns:repeat(3,1fr)}
+  body.jc122-shell .dashboard-grid{grid-template-columns:1fr}
+  body.jc122-shell.active-room .active-room-shell{grid-template-columns:1fr 340px}
+}
+@media (max-width:900px){
+  body.jc122-shell .app{transform:none;display:block}
+  body.jc122-shell .rail{position:relative;width:auto;height:auto;margin:12px;border-radius:28px}
+  body.jc122-shell .content{padding:18px}
+  .jc122-source-hub{grid-template-columns:repeat(2,1fr)}
+  body.jc122-shell.active-room .active-room-shell{display:block}
+  body.jc122-shell .room-chat-column{padding:12px}
+  body.jc122-shell.active-room .player-frame{height:62vh;min-height:420px;border-radius:0 0 28px 28px}
+  body.jc122-shell.active-room .room-topline{position:relative;top:auto;left:auto;width:auto;padding:92px 16px 10px}
 }
