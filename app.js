@@ -27,7 +27,7 @@ import {
   equalTo
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
-const BUILD = "stage115-chat-gif-restore-stable-20260503-1";
+const BUILD = "stage116-gif-button-dialog-stable-20260503-1";
 console.log("JustClover loaded:", BUILD, "— emergency static build, no CDN loader, no wallpaper experiments");
 window.JUSTCLOVER_BUILD = BUILD;
 
@@ -818,13 +818,28 @@ function isChatImageUrl(value) {
   }
 }
 function normalizeChatMediaUrl(value) {
-  const raw = String(value || '').trim();
+  let raw = String(value || '').trim();
   if (!raw) return '';
   try {
     const url = new URL(raw);
     if (!['http:', 'https:', 'blob:', 'data:'].includes(url.protocol)) return '';
-    if (!isChatImageUrl(url.href)) return '';
-    return url.href;
+    if (url.protocol === 'http:' || url.protocol === 'https:') {
+      const host = url.hostname.toLowerCase();
+      const path = url.pathname;
+      // Giphy page URL -> direct GIF URL. Example: https://giphy.com/gifs/name-ABC123
+      if ((host === 'giphy.com' || host.endsWith('.giphy.com')) && path.includes('/gifs/')) {
+        const last = decodeURIComponent(path.split('/').filter(Boolean).pop() || '');
+        const id = (last.match(/-([A-Za-z0-9]+)$/) || last.match(/^([A-Za-z0-9]+)$/) || [])[1];
+        if (id) raw = `https://media.giphy.com/media/${id}/giphy.gif`;
+      }
+      // Giphy media URL without direct file -> direct GIF URL.
+      const mediaMatch = raw.match(/giphy\.com\/media\/([A-Za-z0-9]+)(?:\/|$)/i);
+      if (mediaMatch && !/\.gif(?:\?|#|$)/i.test(raw)) raw = `https://media.giphy.com/media/${mediaMatch[1]}/giphy.gif`;
+    }
+    const finalUrl = new URL(raw);
+    if (!['http:', 'https:', 'blob:', 'data:'].includes(finalUrl.protocol)) return '';
+    if (!isChatImageUrl(finalUrl.href)) return '';
+    return finalUrl.href;
   } catch (_) {
     return '';
   }
@@ -881,17 +896,96 @@ async function sendChat(text, extra = {}) {
   });
 }
 async function sendGifFromPrompt() {
+  openGifDialog();
+}
+
+function ensureGifDialog() {
+  let root = document.getElementById('jc116GifDialog');
+  if (root) return root;
+  root = document.createElement('div');
+  root.id = 'jc116GifDialog';
+  root.className = 'hidden';
+  root.innerHTML = `
+    <div class="jc116-gif-backdrop" data-jc116-gif-close></div>
+    <div class="jc116-gif-modal" role="dialog" aria-modal="true" aria-label="Отправить GIF">
+      <button type="button" class="jc116-gif-x" data-jc116-gif-close aria-label="Закрыть">×</button>
+      <h3>Отправить GIF</h3>
+      <p>Вставь прямую ссылку на GIF / WebP / PNG / JPG. Ссылки Giphy вида giphy.com/gifs/... тоже поддерживаются.</p>
+      <input id="jc116GifInput" placeholder="https://media.giphy.com/media/.../giphy.gif" autocomplete="off" />
+      <div class="jc116-gif-preview" id="jc116GifPreview">Preview</div>
+      <div class="jc116-gif-actions">
+        <button type="button" class="btn soft" data-jc116-gif-close>Отмена</button>
+        <button type="button" class="btn primary" id="jc116GifSend">Отправить GIF</button>
+      </div>
+      <p class="status" id="jc116GifStatus"></p>
+    </div>`;
+  document.body.appendChild(root);
+  const input = root.querySelector('#jc116GifInput');
+  const preview = root.querySelector('#jc116GifPreview');
+  const stat = root.querySelector('#jc116GifStatus');
+  function renderPreview() {
+    const mediaUrl = normalizeChatMediaUrl(input.value || '');
+    if (mediaUrl) {
+      preview.innerHTML = `<img src="${esc(mediaUrl)}" alt="GIF preview" />`;
+      stat.textContent = '';
+    } else {
+      preview.textContent = 'Preview';
+    }
+  }
+  input.addEventListener('input', renderPreview);
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') { event.preventDefault(); root.querySelector('#jc116GifSend')?.click(); }
+    if (event.key === 'Escape') closeGifDialog();
+  });
+  root.querySelectorAll('[data-jc116-gif-close]').forEach((button) => button.addEventListener('click', closeGifDialog));
+  root.querySelector('#jc116GifSend')?.addEventListener('click', async () => {
+    if (!currentRoomId) {
+      stat.textContent = 'Сначала войди в комнату.';
+      return;
+    }
+    const mediaUrl = normalizeChatMediaUrl(input.value || '');
+    if (!mediaUrl) {
+      stat.textContent = 'Нужна ссылка на GIF / WebP / PNG / JPG. Для Tenor лучше копируй прямую ссылку media.tenor.com.';
+      return;
+    }
+    await sendChat('', { mediaUrl });
+    input.value = '';
+    preview.textContent = 'Preview';
+    closeGifDialog();
+  });
+  return root;
+}
+function openGifDialog() {
   if (!currentRoomId) {
     status(els.roomStatus, 'Сначала войди в комнату.');
     return;
   }
-  const url = prompt('Вставь прямую ссылку на GIF / WebP / PNG / JPG');
-  const mediaUrl = normalizeChatMediaUrl(url || '');
-  if (!mediaUrl) {
-    if (url) status(els.roomStatus, 'Нужна прямая ссылка на картинку/GIF: .gif, .webp, .png, .jpg');
-    return;
+  const root = ensureGifDialog();
+  root.classList.remove('hidden');
+  document.body.classList.add('jc116-gif-dialog-open');
+  setTimeout(() => root.querySelector('#jc116GifInput')?.focus(), 30);
+}
+function closeGifDialog() {
+  const root = document.getElementById('jc116GifDialog');
+  root?.classList.add('hidden');
+  document.body.classList.remove('jc116-gif-dialog-open');
+}
+function ensureGifButton() {
+  const tools = document.querySelector('.composer-tools');
+  if (!tools) return null;
+  let button = tools.querySelector('[data-jc116-gif], [data-jc115-gif-url], .gif-tool');
+  if (!button) {
+    button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'gif-tool';
+    button.textContent = 'GIF';
+    tools.appendChild(button);
   }
-  await sendChat('', { mediaUrl });
+  button.type = 'button';
+  button.classList.add('gif-tool');
+  button.dataset.jc116Gif = '1';
+  button.textContent = 'GIF';
+  return button;
 }
 
 async function startVoice() {
@@ -1050,8 +1144,9 @@ function bindEvents() {
       els.chatInput.focus();
     });
   });
-  document.querySelectorAll(".composer-tools [data-jc115-gif-url]").forEach((button) => {
-    button.addEventListener("click", sendGifFromPrompt);
+  document.querySelectorAll(".composer-tools [data-jc115-gif-url], .composer-tools [data-jc116-gif], .composer-tools .gif-tool").forEach((button) => {
+    button.dataset.jc116Gif = "1";
+    button.addEventListener("click", (event) => { event.preventDefault(); event.stopPropagation(); openGifDialog(); });
   });
   els.videoPlayer?.addEventListener("play", () => {
     if (!applyingRemote && currentSource.type === "local") writePlayback(true, els.videoPlayer.currentTime);
@@ -1112,7 +1207,7 @@ try {
    No wallpaper code, no reload loop, no CDN index loader.
    ========================================================= */
 (function(){
-  const BUILD = "stage115-chat-gif-restore-stable-20260503-1";
+  const BUILD = "stage116-gif-button-dialog-stable-20260503-1";
   window.JUSTCLOVER_BUILD = BUILD;
   function cleanupOldWallpaper(){
     document.querySelectorAll('[id^="jc90"],[id^="jc91"],[id^="jc92"],[id^="jc93"],[id^="jc94"],[id^="jc95"],[id^="jc96"],[id^="jc97"],[id^="jc98"],[id^="jc99"],[id^="jc100"],[id^="jc101"],[id^="jc102"],[id^="jc103"],[id^="jc104"],[id^="jc105"],[id^="jc106"],[id^="jc107"],[id^="jc108"],[id^="jc109"],[id^="jc110"],[id^="jc111"],[id^="jc112"],[id^="jc113"],.jc101SurfaceBg,.jc99SurfaceBg,.jc-room-bg,.jc-chat-bg').forEach(el => {
@@ -1145,7 +1240,7 @@ try {
    GIF is chat message only. No wallpapers, no player changes.
    ========================================================= */
 (function(){
-  const BUILD = 'stage115-chat-gif-restore-stable-20260503-1';
+  const BUILD = 'stage116-gif-button-dialog-stable-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc115GifChatDebug = function(){
     return {
@@ -1154,6 +1249,44 @@ try {
       chatMessages: !!document.getElementById('chatMessages'),
       chatForm: !!document.getElementById('chatForm'),
       oldWallpaperNodes: document.querySelectorAll('.jc101SurfaceBg,.jc99SurfaceBg,.jc-room-bg,.jc-chat-bg,[id^="jc10"],[id^="jc11"],[id^="jc9"]').length,
+      playerFrameVisible: !!document.querySelector('.player-frame'),
+      iframeVisible: !!document.querySelector('#youtubePlayer, #iframePlayer, #videoPlayer')
+    };
+  };
+})();
+
+
+/* =========================================================
+   JustClover Stage 116 — robust GIF button dialog
+   The handler is delegated in capture phase so the GIF button works even if
+   older cached handlers or DOM re-renders are present.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage116-gif-button-dialog-stable-20260503-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+  function bootGifButton(){
+    try { ensureGifButton(); } catch (_) {}
+  }
+  document.addEventListener('click', (event) => {
+    const btn = event.target?.closest?.('[data-jc116-gif], [data-jc115-gif-url], .gif-tool');
+    if (!btn) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation?.();
+    try { openGifDialog(); } catch (err) { console.error('GIF dialog failed', err); }
+  }, true);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootGifButton, { once:true });
+  else bootGifButton();
+  setTimeout(bootGifButton, 500);
+  setTimeout(bootGifButton, 1500);
+  window.jc116GifButtonDebug = function(){
+    return {
+      build: BUILD,
+      gifButton: !!document.querySelector('[data-jc116-gif], [data-jc115-gif-url], .gif-tool'),
+      dialogExists: !!document.getElementById('jc116GifDialog'),
+      chatForm: !!document.getElementById('chatForm'),
+      chatInput: !!document.getElementById('chatInput'),
+      roomId: currentRoomId || '',
       playerFrameVisible: !!document.querySelector('.player-frame'),
       iframeVisible: !!document.querySelector('#youtubePlayer, #iframePlayer, #videoPlayer')
     };

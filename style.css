@@ -113,7 +113,7 @@ body.player-fullscreen .player-frame{border-radius:0;height:100dvh;min-height:10
    JustClover Stage 114 — emergency static rollback
    ========================================================= */
 html::after{
-  content:'115 GIFCHAT'!important;
+  content:'116 GIFOK'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -141,7 +141,7 @@ html::after{
    JustClover Stage 115 — safe GIF messages in chat
    ========================================================= */
 html::after{
-  content:'115 GIFCHAT'!important;
+  content:'116 GIFOK'!important;
   background:rgba(34,197,94,.96)!important;
   color:#03130a!important;
 }
@@ -174,3 +174,99 @@ html::after{
 .chat-link:hover{text-decoration:underline!important}
 .chat-text{white-space:pre-wrap!important}
 .message:has(.chat-gif-media){background:rgba(255,255,255,.055)!important}
+
+
+/* =========================================================
+   JustClover Stage 116 — robust GIF dialog
+   ========================================================= */
+html::after{
+  content:'116 GIFOK'!important;
+  background:rgba(34,211,238,.96)!important;
+  color:#041016!important;
+}
+.composer-tools .gif-tool,
+.composer-tools [data-jc116-gif],
+.composer-tools [data-jc115-gif-url]{
+  min-width:44px!important;
+  padding:0 12px!important;
+  border-radius:14px!important;
+  font-weight:900!important;
+}
+#jc116GifDialog.hidden{display:none!important}
+#jc116GifDialog{
+  position:fixed!important;
+  inset:0!important;
+  z-index:2147483300!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:18px!important;
+  color:#fff!important;
+}
+.jc116-gif-backdrop{
+  position:absolute!important;
+  inset:0!important;
+  background:rgba(0,0,0,.72)!important;
+  backdrop-filter:blur(10px)!important;
+}
+.jc116-gif-modal{
+  position:relative!important;
+  width:min(520px, calc(100vw - 32px))!important;
+  border-radius:24px!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  background:linear-gradient(180deg,rgba(20,22,34,.98),rgba(8,10,18,.98))!important;
+  box-shadow:0 28px 90px rgba(0,0,0,.55)!important;
+  padding:22px!important;
+}
+.jc116-gif-x{
+  position:absolute!important;
+  right:14px!important;
+  top:12px!important;
+  width:38px!important;
+  height:38px!important;
+  border-radius:13px!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  background:rgba(255,255,255,.08)!important;
+  color:#fff!important;
+  font:900 24px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  cursor:pointer!important;
+}
+.jc116-gif-modal h3{margin:0 42px 8px 0!important;font-size:22px!important;line-height:1.1!important}
+.jc116-gif-modal p{margin:0 0 14px!important;color:rgba(238,241,255,.72)!important;line-height:1.45!important}
+#jc116GifInput{
+  width:100%!important;
+  height:48px!important;
+  border-radius:16px!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  background:rgba(0,0,0,.34)!important;
+  color:#fff!important;
+  padding:0 14px!important;
+  outline:none!important;
+  font:700 14px/1 Inter,Segoe UI,Arial,sans-serif!important;
+}
+#jc116GifInput:focus{border-color:rgba(34,211,238,.60)!important;box-shadow:0 0 0 3px rgba(34,211,238,.16)!important}
+.jc116-gif-preview{
+  min-height:150px!important;
+  margin:14px 0!important;
+  border-radius:18px!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  background:rgba(0,0,0,.22)!important;
+  display:grid!important;
+  place-items:center!important;
+  color:rgba(255,255,255,.50)!important;
+  overflow:hidden!important;
+}
+.jc116-gif-preview img{
+  width:100%!important;
+  max-height:240px!important;
+  object-fit:contain!important;
+  display:block!important;
+}
+.jc116-gif-actions{display:flex!important;gap:10px!important;justify-content:flex-end!important}
+.chat-gif-media{
+  display:block!important;
+  width:min(100%, 260px)!important;
+  max-height:220px!important;
+  object-fit:contain!important;
+  border-radius:16px!important;
+}
+.chat-media-link{display:inline-block!important;margin-top:8px!important}
