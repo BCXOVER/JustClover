@@ -113,7 +113,7 @@ body.player-fullscreen .player-frame{border-radius:0;height:100dvh;min-height:10
    JustClover Stage 114 — emergency static rollback
    ========================================================= */
 html::after{
-  content:'117 GIPHY'!important;
+  content:'121 APPFIX'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -141,7 +141,7 @@ html::after{
    JustClover Stage 115 — safe GIF messages in chat
    ========================================================= */
 html::after{
-  content:'117 GIPHY'!important;
+  content:'121 APPFIX'!important;
   background:rgba(34,197,94,.96)!important;
   color:#03130a!important;
 }
@@ -180,7 +180,7 @@ html::after{
    JustClover Stage 116 — robust GIF dialog
    ========================================================= */
 html::after{
-  content:'117 GIPHY'!important;
+  content:'121 APPFIX'!important;
   background:rgba(34,211,238,.96)!important;
   color:#041016!important;
 }
@@ -275,7 +275,7 @@ html::after{
    JustClover Stage 117 — Giphy picker restore
    ========================================================= */
 html::after{
-  content:'117 GIPHY'!important;
+  content:'121 APPFIX'!important;
   background:rgba(168,85,247,.96)!important;
   color:#fff!important;
 }
@@ -342,7 +342,7 @@ html::after{
    Always-visible quick GIF grid, paste direct links, no player changes.
    ========================================================= */
 html::after{
-  content:'118 GIFGRID'!important;
+  content:'121 APPFIX'!important;
   background:rgba(45,212,191,.96)!important;
   color:#03130f!important;
 }
