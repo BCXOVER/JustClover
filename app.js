@@ -1,12 +1,12 @@
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage101-chat-glass-room-bg-20260503-1
+   Version: stage102-room-glass-tuning-20260503-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage101-chat-glass-room-bg-20260503-1";
+const JC40_BUILD = "stage102-room-glass-tuning-20260503-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
@@ -626,10 +626,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage101-chat-glass-room-bg-20260503-1
+   Version: stage102-room-glass-tuning-20260503-1
    ========================================================= */
 (function(){
-  const BUILD = "stage101-chat-glass-room-bg-20260503-1";
+  const BUILD = "stage102-room-glass-tuning-20260503-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1156,7 +1156,7 @@ try{
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage101-chat-glass-room-bg-20260503-1";
+  const BUILD = "stage102-room-glass-tuning-20260503-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1394,7 +1394,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage101-chat-glass-room-bg-20260503-1";
+  const BUILD = "stage102-room-glass-tuning-20260503-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1692,7 +1692,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage101-chat-glass-room-bg-20260503-1';
+  const BUILD = 'stage102-room-glass-tuning-20260503-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1873,7 +1873,7 @@ try{
    когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
    ========================================================= */
 (function(){
-  const BUILD = "stage101-chat-glass-room-bg-20260503-1";
+  const BUILD = "stage102-room-glass-tuning-20260503-1";
   const CHECK_EVERY_MS = 15000;
   const FIRST_CHECK_MS = 4500;
   const RELOAD_DELAY_MS = 1800;
@@ -1986,13 +1986,13 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Real Stable Player Dock
-   Version: stage101-chat-glass-room-bg-20260503-1
+   Version: stage102-room-glass-tuning-20260503-1
 
    No player resize loop. No fixed/cover iframe fighting.
    JS only creates bottom buttons and toggles the stable CSS class.
    ========================================================= */
 (function(){
-  const BUILD = 'stage101-chat-glass-room-bg-20260503-1';
+  const BUILD = 'stage102-room-glass-tuning-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2190,13 +2190,13 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Player Mic Overlay
-   Version: stage101-chat-glass-room-bg-20260503-1
+   Version: stage102-room-glass-tuning-20260503-1
 
    Adds a clear mic toggle inside the player and removes the chat action from
    the bottom dock. Does not change auth, chat DOM, source logic, or player fit.
    ========================================================= */
 (function(){
-  const BUILD = 'stage101-chat-glass-room-bg-20260503-1';
+  const BUILD = 'stage102-room-glass-tuning-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2361,14 +2361,14 @@ try{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage101-chat-glass-room-bg-20260503-1
+   Version: stage102-room-glass-tuning-20260503-1
 
    Adds a robust mic control mounted on .watch-main. It is not a child of the
    YouTube iframe/player element and therefore remains visible in JustClover
    site fullscreen. No player scale/fit logic is changed.
    ========================================================= */
 (function(){
-  const BUILD = 'stage101-chat-glass-room-bg-20260503-1';
+  const BUILD = 'stage102-room-glass-tuning-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2561,7 +2561,7 @@ try{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage101-chat-glass-room-bg-20260503-1
+   Version: stage102-room-glass-tuning-20260503-1
 
    Keep Stage80 layout. Put mic back into the bottom dock next to sources and
    fullscreen, keep chat hidden, and mirror voice state on the dock button.
@@ -2569,7 +2569,7 @@ try{
    inside the YouTube/VK iframe cannot show external DOM controls.
    ========================================================= */
 (function(){
-  const BUILD = 'stage101-chat-glass-room-bg-20260503-1';
+  const BUILD = 'stage102-room-glass-tuning-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2738,11 +2738,11 @@ try{
 
 /* =========================================================
    JustClover Stage 89 — Glass Chat + Dock Transparency
-   Version: stage101-chat-glass-room-bg-20260503-1
+   Version: stage102-room-glass-tuning-20260503-1
    Small runtime marker/debug only; no layout JS hacks added.
    ========================================================= */
 (()=>{
-  const BUILD = 'stage101-chat-glass-room-bg-20260503-1';
+  const BUILD = 'stage102-room-glass-tuning-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc89GlassDebug = function(){
     const dock = document.getElementById('jc80Dock');
@@ -2768,11 +2768,11 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Player Recovery Safe Glass
-   Version: stage101-chat-glass-room-bg-20260503-1
+   Version: stage102-room-glass-tuning-20260503-1
    Debug marker only. No background/player mutation.
    ========================================================= */
 (()=>{
-  const BUILD = 'stage101-chat-glass-room-bg-20260503-1';
+  const BUILD = 'stage102-room-glass-tuning-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc93RecoveryDebug = function(){
     const q = s => document.querySelector(s);
@@ -2793,14 +2793,14 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Room Appearance Wallpapers
-   Version: stage101-chat-glass-room-bg-20260503-1
+   Version: stage102-room-glass-tuning-20260503-1
 
    Adds “Оформление комнаты” settings. Safe only: no iframe/video/player-frame
    mutation, no background layers over the player. Uses CSS variables and
    localStorage to paint dock/chat/topbar/watch-main surfaces.
    ========================================================= */
 (function(){
-  const BUILD = 'stage101-chat-glass-room-bg-20260503-1';
+  const BUILD = 'stage102-room-glass-tuning-20260503-1';
   const LS = {
     enabled:'jc94-room-wallpaper-enabled',
     wallpaper:'jc94-room-wallpaper',
@@ -3068,7 +3068,7 @@ try{
 
 /* =========================================================
    JustClover Stage 95 — Local Room Wallpaper Fix
-   Version: stage101-chat-glass-room-bg-20260503-1
+   Version: stage102-room-glass-tuning-20260503-1
 
    Fixes local file upload in “Оформление в комнате”. Supports:
    - images: GIF / WebP / PNG / JPG / SVG
@@ -3078,7 +3078,7 @@ try{
    video is a separate muted fixed layer behind room UI surfaces only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage101-chat-glass-room-bg-20260503-1';
+  const BUILD = 'stage102-room-glass-tuning-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS = {
@@ -3305,14 +3305,14 @@ try{
 
 /* =========================================================
    JustClover Stage 96 — Room Wallpaper Apply Fix
-   Version: stage101-chat-glass-room-bg-20260503-1
+   Version: stage102-room-glass-tuning-20260503-1
 
    Mount selected room wallpaper inside the active watch layout. This fixes the
    case where a local file appears in the Appearance preview but not in the room.
    No player iframe/video/source/auth/chat handlers are touched.
    ========================================================= */
 (function(){
-  const BUILD = 'stage101-chat-glass-room-bg-20260503-1';
+  const BUILD = 'stage102-room-glass-tuning-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS = {
@@ -3487,12 +3487,12 @@ try{
 
 /* =========================================================
    JustClover Stage 97 — Room BG Layout Fix
-   Version: stage101-chat-glass-room-bg-20260503-1
+   Version: stage102-room-glass-tuning-20260503-1
    Runtime safeguard only: keep the room background layer attached to body so
    it can never push .watch-layout / player / chat down.
    ========================================================= */
 (()=>{
-  const BUILD='stage101-chat-glass-room-bg-20260503-1';
+  const BUILD='stage102-room-glass-tuning-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   function activeRoom(){
     const app=document.getElementById('appView');
@@ -3543,14 +3543,14 @@ try{
 
 /* =========================================================
    JustClover Stage 98 — Room Wallpaper Surface Fix
-   Version: stage101-chat-glass-room-bg-20260503-1
+   Version: stage102-room-glass-tuning-20260503-1
 
    Fix: the wallpaper/video selected in Appearance is mounted as a fixed room
    background and also pushed into safe glass surfaces. It never participates
    in .watch-layout flow and never touches player iframe/video/source logic.
    ========================================================= */
 (()=>{
-  const BUILD='stage101-chat-glass-room-bg-20260503-1';
+  const BUILD='stage102-room-glass-tuning-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS={
@@ -3724,7 +3724,7 @@ try{
 
 /* =========================================================
    JustClover Stage 99 — Room Wallpaper Surfaces
-   Version: stage101-chat-glass-room-bg-20260503-1
+   Version: stage102-room-glass-tuning-20260503-1
 
    Fix for the case where the preview shows the selected local wallpaper/video,
    but the room/chat/dock stay black. We paint the chosen background directly
@@ -3732,7 +3732,7 @@ try{
    Player iframe/video/source logic is not touched.
    ========================================================= */
 (()=>{
-  const BUILD='stage101-chat-glass-room-bg-20260503-1';
+  const BUILD='stage102-room-glass-tuning-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS={
@@ -3984,14 +3984,14 @@ try{
 
 /* =========================================================
    JustClover Stage 100 — Topbar Recovery + Safe Surfaces
-   Version: stage101-chat-glass-room-bg-20260503-1
+   Version: stage102-room-glass-tuning-20260503-1
 
    Do not touch player iframe/video. Remove only Stage99 topbar surface layer and
    force the active-room topbar back to fixed/visible. Wallpaper surfaces remain
    limited to dock + chat.
    ========================================================= */
 (function(){
-  const BUILD = 'stage101-chat-glass-room-bg-20260503-1';
+  const BUILD = 'stage102-room-glass-tuning-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   let raf = 0;
   let observer = null;
@@ -4099,13 +4099,13 @@ try{
 
 /* =========================================================
    JustClover Stage 101 — Chat Glass Room Background
-   Version: stage101-chat-glass-room-bg-20260503-1
+   Version: stage102-room-glass-tuning-20260503-1
 
    Mounts wallpaper surfaces directly in chat/dock only. It does not touch the
    active topbar, player iframe/video, source state, chat handlers or auth.
    ========================================================= */
 (function(){
-  const BUILD = 'stage101-chat-glass-room-bg-20260503-1';
+  const BUILD = 'stage102-room-glass-tuning-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let raf = 0;
@@ -4256,6 +4256,226 @@ try{
       topbarExists: !!document.getElementById('jc51RaveTopbar'),
       playerFrameVisible: vis(q('.player-frame')),
       iframeVisible: vis(iframe)
+    };
+  };
+})();
+
+
+/* =========================================================
+   JustClover Stage 102 — Room Glass Tuning
+   Version: stage102-room-glass-tuning-20260503-1
+
+   Adds fine tuning controls for chat/dock readability. Safe: no player,
+   iframe, source, auth, chat handler, or topbar geometry changes.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage102-room-glass-tuning-20260503-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+
+  const LS = {
+    chatDim: 'jc102-chat-dim',
+    chatPanel: 'jc102-chat-panel',
+    chatBlur: 'jc102-chat-blur',
+    dockDim: 'jc102-dock-dim',
+    dockPanel: 'jc102-dock-panel',
+    dockBlur: 'jc102-dock-blur'
+  };
+
+  const DEF = {
+    chatDim: .54,
+    chatPanel: .22,
+    chatBlur: 14,
+    dockDim: .36,
+    dockPanel: .14,
+    dockBlur: 12
+  };
+
+  let raf = 0;
+  let observer = null;
+
+  function get(k, d){
+    try {
+      const raw = localStorage.getItem(k);
+      if(raw === null || raw === '') return d;
+      const n = Number(raw);
+      return Number.isFinite(n) ? n : d;
+    } catch(_) { return d; }
+  }
+
+  function set(k,v){ try { localStorage.setItem(k,String(v)); } catch(_){} }
+  function del(k){ try { localStorage.removeItem(k); } catch(_){} }
+  function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+  function isAuth(){ try { return !!window.__jc62IsAuthScreen?.(); } catch(_) { return false; } }
+  function activeRoom(){
+    const app = document.getElementById('appView');
+    const watch = document.getElementById('watchSection');
+    return !isAuth() && !!app && !app.classList.contains('hidden') && !!watch && watch.classList.contains('active');
+  }
+  function wallpaperEnabled(){
+    try { return localStorage.getItem('jc94-room-wallpaper-enabled') !== '0'; }
+    catch(_) { return true; }
+  }
+
+  function vals(){
+    const chatPanel = clamp(get(LS.chatPanel, DEF.chatPanel), .02, .72);
+    const dockPanel = clamp(get(LS.dockPanel, DEF.dockPanel), .00, .62);
+    return {
+      chatDim: clamp(get(LS.chatDim, DEF.chatDim), .00, .86),
+      chatPanel,
+      chatCardPanel: clamp(chatPanel + .08, .04, .82),
+      chatComposerPanel: clamp(chatPanel + .16, .08, .86),
+      chatInputPanel: clamp(.08 + chatPanel * .28, .06, .26),
+      chatBlur: clamp(get(LS.chatBlur, DEF.chatBlur), 0, 32),
+      dockDim: clamp(get(LS.dockDim, DEF.dockDim), .00, .82),
+      dockPanel,
+      dockInnerPanel: clamp(dockPanel + .16, .10, .78),
+      dockBlur: clamp(get(LS.dockBlur, DEF.dockBlur), 0, 32)
+    };
+  }
+
+  function apply(){
+    const v = vals();
+    const root = document.documentElement;
+    root.style.setProperty('--jc102-chat-dim', String(v.chatDim));
+    root.style.setProperty('--jc102-chat-panel', String(v.chatPanel));
+    root.style.setProperty('--jc102-chat-card-panel', String(v.chatCardPanel));
+    root.style.setProperty('--jc102-chat-composer-panel', String(v.chatComposerPanel));
+    root.style.setProperty('--jc102-chat-input-panel', String(v.chatInputPanel));
+    root.style.setProperty('--jc102-chat-blur', `${v.chatBlur}px`);
+    root.style.setProperty('--jc102-dock-dim', String(v.dockDim));
+    root.style.setProperty('--jc102-dock-panel', String(v.dockPanel));
+    root.style.setProperty('--jc102-dock-inner-panel', String(v.dockInnerPanel));
+    root.style.setProperty('--jc102-dock-blur', `${v.dockBlur}px`);
+
+    const on = activeRoom() && wallpaperEnabled();
+    document.body?.classList?.toggle('jc102-glass-tuning', on);
+
+    syncInputs();
+  }
+
+  function syncInputs(){
+    const v = vals();
+    const map = {
+      jc102ChatDim: v.chatDim,
+      jc102ChatPanel: v.chatPanel,
+      jc102ChatBlur: v.chatBlur,
+      jc102DockDim: v.dockDim,
+      jc102DockPanel: v.dockPanel,
+      jc102DockBlur: v.dockBlur
+    };
+    Object.entries(map).forEach(([id,val]) => {
+      const el = document.getElementById(id);
+      if(el && document.activeElement !== el) el.value = String(val);
+    });
+  }
+
+  function renderSettings(){
+    const card = document.getElementById('jc94RoomStyleCard');
+    if(!card || document.getElementById('jc102GlassTuning')) return;
+
+    const host = card.querySelector('.jc94-room-style-form') || card;
+    const block = document.createElement('div');
+    block.id = 'jc102GlassTuning';
+    block.innerHTML = `
+      <div class="jc102-tuning-title">
+        <div>
+          <h4>Тонкая настройка комнаты</h4>
+          <small>Фон уже есть. Здесь настраивается читаемость чата и нижней панели.</small>
+        </div>
+        <button id="jc102ResetGlassTuning" type="button">Сброс</button>
+      </div>
+      <div class="jc102-tuning-grid">
+        <label>Чат — затемнение фона
+          <input id="jc102ChatDim" type="range" min="0" max="0.86" step="0.01" />
+        </label>
+        <label>Чат — плотность glass
+          <input id="jc102ChatPanel" type="range" min="0.02" max="0.72" step="0.01" />
+        </label>
+        <label>Чат — blur
+          <input id="jc102ChatBlur" type="range" min="0" max="32" step="1" />
+        </label>
+        <label>Нижняя панель — затемнение
+          <input id="jc102DockDim" type="range" min="0" max="0.82" step="0.01" />
+        </label>
+        <label>Нижняя панель — плотность glass
+          <input id="jc102DockPanel" type="range" min="0" max="0.62" step="0.01" />
+        </label>
+        <label>Нижняя панель — blur
+          <input id="jc102DockBlur" type="range" min="0" max="32" step="1" />
+        </label>
+      </div>`;
+    const status = host.querySelector('#jc94RoomStyleStatus');
+    if(status) status.insertAdjacentElement('beforebegin', block);
+    else host.appendChild(block);
+
+    block.querySelectorAll('input[type="range"]').forEach(el => {
+      el.addEventListener('input', () => {
+        if(el.id === 'jc102ChatDim') set(LS.chatDim, el.value);
+        if(el.id === 'jc102ChatPanel') set(LS.chatPanel, el.value);
+        if(el.id === 'jc102ChatBlur') set(LS.chatBlur, el.value);
+        if(el.id === 'jc102DockDim') set(LS.dockDim, el.value);
+        if(el.id === 'jc102DockPanel') set(LS.dockPanel, el.value);
+        if(el.id === 'jc102DockBlur') set(LS.dockBlur, el.value);
+        apply();
+      });
+    });
+
+    block.querySelector('#jc102ResetGlassTuning')?.addEventListener('click', () => {
+      Object.values(LS).forEach(del);
+      apply();
+      const st = document.getElementById('jc94RoomStyleStatus');
+      if(st) st.textContent = 'Тонкая настройка glass сброшена.';
+    });
+
+    syncInputs();
+  }
+
+  function sync(){
+    raf = 0;
+    renderSettings();
+    apply();
+  }
+
+  function schedule(){
+    if(!raf) raf = requestAnimationFrame(sync);
+  }
+
+  document.addEventListener('DOMContentLoaded', schedule);
+  document.addEventListener('click', () => setTimeout(schedule, 35), true);
+  document.addEventListener('input', e => {
+    if(e.target?.closest?.('#jc94RoomStyleCard,#jc102GlassTuning')) setTimeout(schedule, 20);
+  }, true);
+  window.addEventListener('storage', schedule);
+  window.addEventListener('resize', schedule, {passive:true});
+
+  if(document.body && !observer){
+    observer = new MutationObserver(schedule);
+    observer.observe(document.body, {attributes:true, attributeFilter:['class','style','hidden'], childList:true, subtree:true});
+  }
+
+  [0,100,350,900,1800].forEach(ms => setTimeout(schedule, ms));
+
+  window.jc102GlassTuningDebug = function(){
+    const q = s => document.querySelector(s);
+    const css = el => el ? getComputedStyle(el) : null;
+    const iframe = q('.player-frame iframe, #youtubePlayer iframe, #jc65DirectPlayer');
+    const visible = el => !!el && css(el).display !== 'none' && css(el).visibility !== 'hidden' && css(el).opacity !== '0';
+    return {
+      build: BUILD,
+      activeRoom: activeRoom(),
+      bodyClassOn: document.body?.classList?.contains('jc102-glass-tuning'),
+      settingsExists: !!q('#jc102GlassTuning'),
+      topbarExists: !!q('#jc51RaveTopbar'),
+      topbarLayer: !!q('#jc51RaveTopbar .jc101SurfaceBg, .topbar .jc101SurfaceBg'),
+      sidebarLayer: !!q('.jc101SurfaceBg[data-jc101="sidebar"]'),
+      chatLayer: !!q('.jc101SurfaceBg[data-jc101="chat"]'),
+      dockLayer: !!q('.jc101SurfaceBg[data-jc101="dock"]'),
+      values: vals(),
+      chatBg: css(q('.watch-sidebar'))?.backgroundColor || '',
+      chatCardBg: css(q('.watch-sidebar .chat-card'))?.backgroundColor || '',
+      dockBg: css(q('#jc80Dock'))?.backgroundColor || '',
+      playerFrameVisible: visible(q('.player-frame')),
+      iframeVisible: visible(iframe)
     };
   };
 })();
