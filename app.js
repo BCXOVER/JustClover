@@ -27,7 +27,7 @@ import {
   equalTo
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
-const BUILD = "stage117-giphy-picker-restore-stable-20260503-1";
+const BUILD = "stage118-gif-gallery-no-api-stable-20260503-1";
 console.log("JustClover loaded:", BUILD, "— emergency static build, no CDN loader, no wallpaper experiments");
 window.JUSTCLOVER_BUILD = BUILD;
 
@@ -1294,7 +1294,7 @@ try {
    No wallpaper code, no reload loop, no CDN index loader.
    ========================================================= */
 (function(){
-  const BUILD = "stage117-giphy-picker-restore-stable-20260503-1";
+  const BUILD = "stage118-gif-gallery-no-api-stable-20260503-1";
   window.JUSTCLOVER_BUILD = BUILD;
   function cleanupOldWallpaper(){
     document.querySelectorAll('[id^="jc90"],[id^="jc91"],[id^="jc92"],[id^="jc93"],[id^="jc94"],[id^="jc95"],[id^="jc96"],[id^="jc97"],[id^="jc98"],[id^="jc99"],[id^="jc100"],[id^="jc101"],[id^="jc102"],[id^="jc103"],[id^="jc104"],[id^="jc105"],[id^="jc106"],[id^="jc107"],[id^="jc108"],[id^="jc109"],[id^="jc110"],[id^="jc111"],[id^="jc112"],[id^="jc113"],.jc101SurfaceBg,.jc99SurfaceBg,.jc-room-bg,.jc-chat-bg').forEach(el => {
@@ -1327,7 +1327,7 @@ try {
    GIF is chat message only. No wallpapers, no player changes.
    ========================================================= */
 (function(){
-  const BUILD = 'stage117-giphy-picker-restore-stable-20260503-1';
+  const BUILD = 'stage118-gif-gallery-no-api-stable-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc115GifChatDebug = function(){
     return {
@@ -1349,7 +1349,7 @@ try {
    older cached handlers or DOM re-renders are present.
    ========================================================= */
 (function(){
-  const BUILD = 'stage117-giphy-picker-restore-stable-20260503-1';
+  const BUILD = 'stage118-gif-gallery-no-api-stable-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   function bootGifButton(){
     try { ensureGifButton(); } catch (_) {}
@@ -1384,7 +1384,7 @@ try {
    JustClover Stage 117 — Giphy picker restore debug
    ========================================================= */
 (function(){
-  const BUILD = 'stage117-giphy-picker-restore-stable-20260503-1';
+  const BUILD = 'stage118-gif-gallery-no-api-stable-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc117GiphyDebug = function(){
     return {
@@ -1397,6 +1397,221 @@ try {
       chatForm: !!document.getElementById('chatForm'),
       roomId: (typeof currentRoomId !== 'undefined' ? currentRoomId : ''),
       playerFrameVisible: !!document.querySelector('.player-frame'),
+      iframeVisible: !!document.querySelector('#youtubePlayer, #iframePlayer, #videoPlayer')
+    };
+  };
+})();
+
+/* =========================================================
+   JustClover Stage 118 — GIF gallery no API
+   Fix: GIF picker always shows quick GIFs; no dependency on Giphy API.
+   Does not touch auth/player/source/fullscreen/wallpapers.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage118-gif-gallery-no-api-stable-20260503-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+
+  const GIFS = [
+    {tag:'funny laugh yes', url:'https://media.giphy.com/media/111ebonMs90YLu/giphy.gif'},
+    {tag:'happy excited yay', url:'https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif'},
+    {tag:'cat cute smile', url:'https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif'},
+    {tag:'dance party', url:'https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif'},
+    {tag:'mind blown wow', url:'https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif'},
+    {tag:'go run excited', url:'https://media.giphy.com/media/5GoVLqeAOo6PK/giphy.gif'},
+    {tag:'anime cute', url:'https://media.giphy.com/media/13CoXDiaCcCoyk/giphy.gif'},
+    {tag:'ok good', url:'https://media.giphy.com/media/xT0xeJpnrWC4XWblEk/giphy.gif'},
+    {tag:'clap applause', url:'https://media.giphy.com/media/fxI1G5PNC5esyNlIUs/giphy.gif'},
+    {tag:'no nope', url:'https://media.giphy.com/media/3o7TKwmnDgQb5jemjK/giphy.gif'},
+    {tag:'cry sad', url:'https://media.giphy.com/media/OPU6wzx8JrHna/giphy.gif'},
+    {tag:'love heart', url:'https://media.giphy.com/media/26FLdmIp6wJr91JAI/giphy.gif'}
+  ];
+
+  function esc2(value){
+    return String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+  }
+  function giphyId(value){
+    const raw = String(value || '').trim();
+    if(!raw) return '';
+    try{
+      const url = new URL(raw);
+      const parts = url.pathname.split('/').filter(Boolean).map(part => decodeURIComponent(part));
+      const media = parts.indexOf('media');
+      if(media >= 0 && parts[media + 1]) return parts[media + 1].replace(/[^A-Za-z0-9_-]/g,'');
+      const embed = parts.indexOf('embed');
+      if(embed >= 0 && parts[embed + 1]) return parts[embed + 1].replace(/[^A-Za-z0-9_-]/g,'');
+      const last = parts[parts.length - 1] || '';
+      const dash = last.match(/-([A-Za-z0-9_-]{6,})$/);
+      if(dash) return dash[1];
+      const plain = last.match(/^([A-Za-z0-9_-]{6,})$/);
+      if(plain) return plain[1];
+    }catch(_){ }
+    const m = raw.match(/(?:giphy\.com\/(?:gifs|clips|embed|media)\/|media\d*\.giphy\.com\/media\/)([A-Za-z0-9_-]{6,})/i);
+    return m ? m[1] : '';
+  }
+  function normalizeGif(value){
+    let raw = String(value || '').trim();
+    if(!raw) return '';
+    const id = giphyId(raw);
+    if(id) raw = `https://media.giphy.com/media/${id}/giphy.gif`;
+    try{
+      const url = new URL(raw);
+      if(!['http:','https:','blob:','data:'].includes(url.protocol)) return '';
+      if(url.protocol === 'data:') return /^data:image\/(gif|webp|png|jpe?g);base64,/i.test(url.href) ? url.href : '';
+      const host = url.hostname.toLowerCase();
+      const okHost = /(^|\.)giphy\.com$/i.test(host) || /media\d*\.giphy\.com$/i.test(host) || /media\.tenor\.com$/i.test(host) || /c\.tenor\.com$/i.test(host) || /i\.imgur\.com$/i.test(host);
+      const okExt = /\.(gif|webp|png|jpe?g|bmp|svg)(\?|#|$)/i.test(url.pathname);
+      return (okExt || okHost) ? url.href : '';
+    }catch(_){ return ''; }
+  }
+
+  function ensureButton(){
+    const tools = document.querySelector('.composer-tools');
+    if(!tools) return null;
+    let btn = tools.querySelector('[data-jc118-gif], [data-jc116-gif], [data-jc115-gif-url], .gif-tool');
+    if(!btn){
+      btn = document.createElement('button');
+      btn.type = 'button';
+      tools.appendChild(btn);
+    }
+    btn.type = 'button';
+    btn.textContent = 'GIF';
+    btn.classList.add('gif-tool');
+    btn.dataset.jc118Gif = '1';
+    btn.dataset.jc116Gif = '1';
+    return btn;
+  }
+
+  function ensureDialog(){
+    let root = document.getElementById('jc118GifDialog');
+    if(root) return root;
+    // Hide old picker if it exists; Stage118 owns GIF UI.
+    document.getElementById('jc116GifDialog')?.remove();
+    root = document.createElement('div');
+    root.id = 'jc118GifDialog';
+    root.className = 'hidden';
+    root.innerHTML = `
+      <div class="jc118-gif-backdrop" data-jc118-close></div>
+      <div class="jc118-gif-modal" role="dialog" aria-modal="true" aria-label="Отправить GIF">
+        <button type="button" class="jc118-gif-x" data-jc118-close aria-label="Закрыть">×</button>
+        <h3>Отправить GIF</h3>
+        <p>Выбери быстрый GIF ниже или вставь прямую ссылку на GIF / WebP / PNG / JPG. Giphy-ссылки тоже конвертируются.</p>
+        <input class="jc118-gif-paste" id="jc118GifInput" placeholder="https://media.giphy.com/media/.../giphy.gif" autocomplete="off" />
+        <div class="jc118-gif-row">
+          <input class="jc118-gif-search" id="jc118GifSearch" placeholder="Фильтр: funny, cat, anime, love..." autocomplete="off" />
+          <button type="button" class="btn soft" id="jc118GifClear">Все GIF</button>
+        </div>
+        <div class="jc118-gif-grid" id="jc118GifGrid" aria-label="Быстрые GIF"></div>
+        <div class="jc118-gif-preview" id="jc118GifPreview">Preview</div>
+        <div class="jc118-gif-actions">
+          <button type="button" class="btn soft" data-jc118-close>Отмена</button>
+          <button type="button" class="btn primary" id="jc118GifSend">Отправить GIF</button>
+        </div>
+        <p class="jc118-gif-status" id="jc118GifStatus">Быстрые GIF загружены локальным списком — без внешнего API.</p>
+      </div>`;
+    document.body.appendChild(root);
+
+    const input = root.querySelector('#jc118GifInput');
+    const search = root.querySelector('#jc118GifSearch');
+    const grid = root.querySelector('#jc118GifGrid');
+    const preview = root.querySelector('#jc118GifPreview');
+    const statusLine = root.querySelector('#jc118GifStatus');
+    let selected = '';
+
+    function renderPreview(url){
+      const clean = normalizeGif(url || input.value || selected);
+      if(clean){
+        preview.innerHTML = `<img src="${esc2(clean)}" alt="GIF preview" referrerpolicy="no-referrer" />`;
+        statusLine.textContent = '';
+      }else{
+        preview.textContent = 'Preview';
+      }
+    }
+    function pick(url){
+      selected = normalizeGif(url);
+      input.value = selected;
+      grid.querySelectorAll('.jc118-gif-tile').forEach(tile => tile.classList.toggle('selected', tile.dataset.gifUrl === selected));
+      renderPreview(selected);
+    }
+    function renderGrid(query=''){
+      const q = String(query || '').trim().toLowerCase();
+      const list = q ? GIFS.filter(item => item.tag.includes(q)) : GIFS;
+      const finalList = list.length ? list : GIFS;
+      grid.innerHTML = finalList.map(item => `<button type="button" class="jc118-gif-tile" data-gif-url="${esc2(item.url)}" title="${esc2(item.tag)}"><img src="${esc2(item.url)}" alt="GIF" loading="lazy" decoding="async" referrerpolicy="no-referrer"></button>`).join('');
+      statusLine.textContent = list.length ? 'Выбери GIF ниже.' : 'По фильтру ничего нет, показал все быстрые GIF.';
+    }
+    grid.addEventListener('click', event => {
+      const tile = event.target?.closest?.('.jc118-gif-tile');
+      if(!tile) return;
+      pick(tile.dataset.gifUrl || '');
+    });
+    input.addEventListener('input', () => { selected = normalizeGif(input.value); renderPreview(selected); });
+    input.addEventListener('keydown', event => {
+      if(event.key === 'Enter'){ event.preventDefault(); root.querySelector('#jc118GifSend')?.click(); }
+      if(event.key === 'Escape') closeDialog();
+    });
+    search.addEventListener('input', () => renderGrid(search.value));
+    root.querySelector('#jc118GifClear')?.addEventListener('click', () => { search.value=''; renderGrid(''); });
+    root.querySelectorAll('[data-jc118-close]').forEach(el => el.addEventListener('click', closeDialog));
+    root.querySelector('#jc118GifSend')?.addEventListener('click', async () => {
+      const clean = normalizeGif(input.value || selected);
+      if(!clean){ statusLine.textContent = 'Выбери GIF или вставь рабочую ссылку.'; return; }
+      try{
+        if(typeof sendChat === 'function') await sendChat('', { mediaUrl: clean });
+        else{
+          const chatInput = document.getElementById('chatInput');
+          const chatForm = document.getElementById('chatForm');
+          if(chatInput && chatForm){ chatInput.value = clean; chatForm.requestSubmit?.(); }
+        }
+        input.value = '';
+        selected = '';
+        preview.textContent = 'Preview';
+        closeDialog();
+      }catch(err){
+        console.error('Stage118 GIF send failed', err);
+        statusLine.textContent = 'Не удалось отправить GIF. Проверь, что ты в комнате.';
+      }
+    });
+    renderGrid('');
+    return root;
+  }
+
+  function openDialog(){
+    const root = ensureDialog();
+    root.classList.remove('hidden');
+    document.body.classList.add('jc116-gif-dialog-open');
+    setTimeout(() => root.querySelector('#jc118GifInput')?.focus(), 30);
+  }
+  function closeDialog(){
+    document.getElementById('jc118GifDialog')?.classList.add('hidden');
+    document.body.classList.remove('jc116-gif-dialog-open');
+  }
+
+  document.addEventListener('click', event => {
+    const btn = event.target?.closest?.('[data-jc118-gif], [data-jc116-gif], [data-jc115-gif-url], .gif-tool');
+    if(!btn) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation?.();
+    openDialog();
+  }, true);
+
+  const start = () => {
+    ensureButton();
+    setTimeout(ensureButton, 500);
+    setTimeout(ensureButton, 1500);
+  };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true});
+  else start();
+
+  window.jc118GifGridDebug = function(){
+    return {
+      build: window.JUSTCLOVER_BUILD,
+      button: !!document.querySelector('[data-jc118-gif], [data-jc116-gif], .gif-tool'),
+      dialog: !!document.getElementById('jc118GifDialog'),
+      grid: !!document.getElementById('jc118GifGrid'),
+      oldDialog: !!document.getElementById('jc116GifDialog'),
+      normalizeGiphy: normalizeGif('https://giphy.com/gifs/cat-kitten-ICOgUNjpvO0PC'),
+      playerFrameVisible: !!document.querySelector('.player-frame, #playerFrame'),
       iframeVisible: !!document.querySelector('#youtubePlayer, #iframePlayer, #videoPlayer')
     };
   };
