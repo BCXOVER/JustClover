@@ -27,7 +27,7 @@ import {
   equalTo
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
-const BUILD = "stage114-static-emergency-loads-20260503-1";
+const BUILD = "stage115-chat-gif-restore-stable-20260503-1";
 console.log("JustClover loaded:", BUILD, "— emergency static build, no CDN loader, no wallpaper experiments");
 window.JUSTCLOVER_BUILD = BUILD;
 
@@ -807,6 +807,48 @@ async function applyPlayback(playback) {
   }
 }
 
+function isChatImageUrl(value) {
+  try {
+    const url = new URL(String(value || '').trim());
+    if (!['http:', 'https:', 'blob:', 'data:'].includes(url.protocol)) return false;
+    if (url.protocol === 'data:') return /^data:image\/(gif|webp|png|jpe?g);base64,/i.test(url.href);
+    return /\.(gif|webp|png|jpe?g|bmp|svg)(\?|#|$)/i.test(url.pathname) || /media\.tenor\.com|c.tenor\.com|giphy\.com|media\.giphy\.com|i\.imgur\.com/i.test(url.hostname);
+  } catch (_) {
+    return false;
+  }
+}
+function normalizeChatMediaUrl(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  try {
+    const url = new URL(raw);
+    if (!['http:', 'https:', 'blob:', 'data:'].includes(url.protocol)) return '';
+    if (!isChatImageUrl(url.href)) return '';
+    return url.href;
+  } catch (_) {
+    return '';
+  }
+}
+function linkifyChatText(text) {
+  const source = String(text || '');
+  const parts = source.split(/(https?:\/\/[^\s]+)/g);
+  return parts.map(part => {
+    if (/^https?:\/\//i.test(part)) {
+      const safe = esc(part);
+      return `<a class="chat-link" href="${safe}" target="_blank" rel="noopener noreferrer">${safe}</a>`;
+    }
+    return esc(part);
+  }).join('');
+}
+function chatMediaHtml(message) {
+  const media = normalizeChatMediaUrl(message?.mediaUrl || '');
+  const textAsMedia = normalizeChatMediaUrl(message?.text || '');
+  const url = media || textAsMedia;
+  if (!url) return '';
+  const safe = esc(url);
+  return `<a class="chat-media-link" href="${safe}" target="_blank" rel="noopener noreferrer"><img class="chat-gif-media" src="${safe}" alt="GIF" loading="lazy" decoding="async" referrerpolicy="no-referrer" /></a>`;
+}
+
 function clearChat() {
   if (els.chatMessages) els.chatMessages.innerHTML = "";
 }
@@ -814,20 +856,42 @@ function addChat(message) {
   if (!els.chatMessages || !message) return;
   const item = document.createElement("div");
   item.className = "message";
-  item.innerHTML = `<strong>${esc(message.nickname || "User")}#${esc(message.tag || "0000")}</strong><div>${esc(message.text || "")}</div><time>${new Date(message.createdAt || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</time>`;
+  const mediaHtml = chatMediaHtml(message);
+  const text = String(message.text || '').trim();
+  const textIsOnlyMedia = normalizeChatMediaUrl(text) && !message.caption;
+  const textHtml = text && !textIsOnlyMedia ? `<div class="chat-text">${linkifyChatText(message.caption || text)}</div>` : '';
+  item.innerHTML = `<strong>${esc(message.nickname || "User")}#${esc(message.tag || "0000")}</strong>${textHtml}${mediaHtml}<time>${new Date(message.createdAt || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</time>`;
   els.chatMessages.appendChild(item);
   els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
 }
-async function sendChat(text) {
+async function sendChat(text, extra = {}) {
   const value = String(text || "").trim();
-  if (!value || !currentRoomId || !currentUser || !profile) return;
+  const mediaUrl = normalizeChatMediaUrl(extra.mediaUrl || value);
+  const caption = String(extra.caption || '').trim().slice(0, 180);
+  if ((!value && !mediaUrl) || !currentRoomId || !currentUser || !profile) return;
   await push(ref(db, `roomChats/${currentRoomId}`), {
     uid: currentUser.uid,
     nickname: profile.nickname,
     tag: profile.tag,
-    text: value,
+    text: mediaUrl && value === mediaUrl ? '' : value,
+    caption,
+    mediaUrl,
+    type: mediaUrl ? 'gif' : 'text',
     createdAt: Date.now()
   });
+}
+async function sendGifFromPrompt() {
+  if (!currentRoomId) {
+    status(els.roomStatus, 'Сначала войди в комнату.');
+    return;
+  }
+  const url = prompt('Вставь прямую ссылку на GIF / WebP / PNG / JPG');
+  const mediaUrl = normalizeChatMediaUrl(url || '');
+  if (!mediaUrl) {
+    if (url) status(els.roomStatus, 'Нужна прямая ссылка на картинку/GIF: .gif, .webp, .png, .jpg');
+    return;
+  }
+  await sendChat('', { mediaUrl });
 }
 
 async function startVoice() {
@@ -986,6 +1050,9 @@ function bindEvents() {
       els.chatInput.focus();
     });
   });
+  document.querySelectorAll(".composer-tools [data-jc115-gif-url]").forEach((button) => {
+    button.addEventListener("click", sendGifFromPrompt);
+  });
   els.videoPlayer?.addEventListener("play", () => {
     if (!applyingRemote && currentSource.type === "local") writePlayback(true, els.videoPlayer.currentTime);
   });
@@ -1045,7 +1112,7 @@ try {
    No wallpaper code, no reload loop, no CDN index loader.
    ========================================================= */
 (function(){
-  const BUILD = "stage114-static-emergency-loads-20260503-1";
+  const BUILD = "stage115-chat-gif-restore-stable-20260503-1";
   window.JUSTCLOVER_BUILD = BUILD;
   function cleanupOldWallpaper(){
     document.querySelectorAll('[id^="jc90"],[id^="jc91"],[id^="jc92"],[id^="jc93"],[id^="jc94"],[id^="jc95"],[id^="jc96"],[id^="jc97"],[id^="jc98"],[id^="jc99"],[id^="jc100"],[id^="jc101"],[id^="jc102"],[id^="jc103"],[id^="jc104"],[id^="jc105"],[id^="jc106"],[id^="jc107"],[id^="jc108"],[id^="jc109"],[id^="jc110"],[id^="jc111"],[id^="jc112"],[id^="jc113"],.jc101SurfaceBg,.jc99SurfaceBg,.jc-room-bg,.jc-chat-bg').forEach(el => {
@@ -1066,6 +1133,27 @@ try {
       oldWallpaperNodes: document.querySelectorAll('.jc101SurfaceBg,.jc99SurfaceBg,[id^="jc10"],[id^="jc11"],[id^="jc9"]').length,
       authView: !!document.getElementById('authView'),
       appView: !!document.getElementById('appView'),
+      playerFrameVisible: !!document.querySelector('.player-frame'),
+      iframeVisible: !!document.querySelector('#youtubePlayer, #iframePlayer, #videoPlayer')
+    };
+  };
+})();
+
+
+/* =========================================================
+   JustClover Stage 115 — restore GIF chat messages safely
+   GIF is chat message only. No wallpapers, no player changes.
+   ========================================================= */
+(function(){
+  const BUILD = 'stage115-chat-gif-restore-stable-20260503-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+  window.jc115GifChatDebug = function(){
+    return {
+      build: window.JUSTCLOVER_BUILD,
+      gifButton: !!document.querySelector('[data-jc115-gif-url]'),
+      chatMessages: !!document.getElementById('chatMessages'),
+      chatForm: !!document.getElementById('chatForm'),
+      oldWallpaperNodes: document.querySelectorAll('.jc101SurfaceBg,.jc99SurfaceBg,.jc-room-bg,.jc-chat-bg,[id^="jc10"],[id^="jc11"],[id^="jc9"]').length,
       playerFrameVisible: !!document.querySelector('.player-frame'),
       iframeVisible: !!document.querySelector('#youtubePlayer, #iframePlayer, #videoPlayer')
     };

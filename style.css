@@ -113,7 +113,7 @@ body.player-fullscreen .player-frame{border-radius:0;height:100dvh;min-height:10
    JustClover Stage 114 — emergency static rollback
    ========================================================= */
 html::after{
-  content:'114 LOADS'!important;
+  content:'115 GIFCHAT'!important;
   position:fixed!important;
   left:8px!important;
   bottom:8px!important;
@@ -135,3 +135,42 @@ html::after{
   opacity:0!important;
   pointer-events:none!important;
 }
+
+
+/* =========================================================
+   JustClover Stage 115 — safe GIF messages in chat
+   ========================================================= */
+html::after{
+  content:'115 GIFCHAT'!important;
+  background:rgba(34,197,94,.96)!important;
+  color:#03130a!important;
+}
+.composer-tools .gif-tool,
+.composer-tools [data-jc115-gif-url]{
+  width:auto!important;
+  min-width:48px!important;
+  padding:0 12px!important;
+  border-radius:999px!important;
+  font:900 12px/1 Inter,Segoe UI,Arial,sans-serif!important;
+  letter-spacing:.04em!important;
+  color:#fff!important;
+  background:linear-gradient(135deg,rgba(236,72,153,.56),rgba(34,211,238,.44))!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+}
+.chat-gif-media{
+  display:block!important;
+  width:min(100%, 260px)!important;
+  max-height:220px!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  border-radius:16px!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  background:rgba(0,0,0,.24)!important;
+  box-shadow:0 12px 28px rgba(0,0,0,.22)!important;
+  margin-top:8px!important;
+}
+.chat-media-link{display:block!important;width:max-content!important;max-width:100%!important;text-decoration:none!important}
+.chat-link{color:#7dd3fc!important;text-decoration:none!important;word-break:break-all!important}
+.chat-link:hover{text-decoration:underline!important}
+.chat-text{white-space:pre-wrap!important}
+.message:has(.chat-gif-media){background:rgba(255,255,255,.055)!important}
