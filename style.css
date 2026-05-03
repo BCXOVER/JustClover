@@ -12,6 +12,7 @@
   --radius:26px;
   --topbar-h:78px;
 }
+
 body {
     background-color: var(--bg);
     color: var(--text);
@@ -19,10 +20,12 @@ body {
     margin: 0;
     padding: 0;
 }
+
 #app {
     text-align: center;
     padding: 20px;
 }
+
 button {
     background-color: var(--primary);
     border: none;
@@ -33,6 +36,8 @@ button {
     cursor: pointer;
     margin: 10px;
 }
+
 button:hover {
     background-color: #1f6f8c;
 }
+    

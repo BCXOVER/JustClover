@@ -5,3 +5,4 @@ document.getElementById('createRoomButton').addEventListener('click', function()
 document.getElementById('joinRoomButton').addEventListener('click', function() {
     alert('Join room button clicked!');
 });
+    
