@@ -1,0 +1,24 @@
+
+name: Run tests after deploy
+
+on:
+  push:
+    branches:
+      - gh-pages
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the deployed site
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Run Playwright tests
+        run: |
+          npx playwright install
+          npx playwright test

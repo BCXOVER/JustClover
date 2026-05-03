@@ -1,0 +1,33 @@
+
+name: Deploy ZIP to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '*.zip'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Upload ZIP file
+        uses: actions/upload-artifact@v2
+        with:
+          name: justclover-archive
+          path: ./path-to-your-zip/*.zip
+
+      - name: Unzip the archive
+        run: |
+          unzip ./path-to-your-zip/*.zip -d ./build
+
+      - name: Deploy files to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: ./build
