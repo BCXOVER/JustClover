@@ -1,10 +1,10 @@
 /* =========================================================
    JustClover Stage 107 — EARLY Build Lock / No Reload Guard
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
    Must run before older stage patches.
    ========================================================= */
 (function(){
-  const BUILD="stage108-chat-only-wallpaper-optimized-20260503-1";
+  const BUILD="stage109-chat-gif-safe-no-player-lag-20260503-1";
   window.JUSTCLOVER_BUILD=BUILD;
   window.JC_STAGE_EXPECTED_BUILD=BUILD;
   window.JC_DISABLE_AUTO_RELOAD=true;
@@ -26,13 +26,13 @@
 
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage108-chat-only-wallpaper-optimized-20260503-1";
+const JC40_BUILD = "stage109-chat-gif-safe-no-player-lag-20260503-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
@@ -652,10 +652,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
    ========================================================= */
 (function(){
-  const BUILD = "stage108-chat-only-wallpaper-optimized-20260503-1";
+  const BUILD = "stage109-chat-gif-safe-no-player-lag-20260503-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1182,7 +1182,7 @@ try{
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage108-chat-only-wallpaper-optimized-20260503-1";
+  const BUILD = "stage109-chat-gif-safe-no-player-lag-20260503-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1420,7 +1420,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage108-chat-only-wallpaper-optimized-20260503-1";
+  const BUILD = "stage109-chat-gif-safe-no-player-lag-20260503-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1718,7 +1718,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD = 'stage109-chat-gif-safe-no-player-lag-20260503-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1895,14 +1895,14 @@ try{
 
 /* =========================================================
    Stage 106 — Auto Update Disabled / No Reload Loop
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Emergency fix: Stage72 auto-updater caused reload loops when URL ?v,
    service worker, app.js and jsDelivr cache were out of sync. Do not reload
    automatically. Only expose manual debug/check helpers.
    ========================================================= */
 (function(){
-  const BUILD = "stage108-chat-only-wallpaper-optimized-20260503-1";
+  const BUILD = "stage109-chat-gif-safe-no-player-lag-20260503-1";
   window.JUSTCLOVER_BUILD = BUILD;
 
   function normalizeUrlOnce(){
@@ -1946,13 +1946,13 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Real Stable Player Dock
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    No player resize loop. No fixed/cover iframe fighting.
    JS only creates bottom buttons and toggles the stable CSS class.
    ========================================================= */
 (function(){
-  const BUILD = 'stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD = 'stage109-chat-gif-safe-no-player-lag-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2150,13 +2150,13 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Player Mic Overlay
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Adds a clear mic toggle inside the player and removes the chat action from
    the bottom dock. Does not change auth, chat DOM, source logic, or player fit.
    ========================================================= */
 (function(){
-  const BUILD = 'stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD = 'stage109-chat-gif-safe-no-player-lag-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2321,14 +2321,14 @@ try{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Adds a robust mic control mounted on .watch-main. It is not a child of the
    YouTube iframe/player element and therefore remains visible in JustClover
    site fullscreen. No player scale/fit logic is changed.
    ========================================================= */
 (function(){
-  const BUILD = 'stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD = 'stage109-chat-gif-safe-no-player-lag-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2521,7 +2521,7 @@ try{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Keep Stage80 layout. Put mic back into the bottom dock next to sources and
    fullscreen, keep chat hidden, and mirror voice state on the dock button.
@@ -2529,7 +2529,7 @@ try{
    inside the YouTube/VK iframe cannot show external DOM controls.
    ========================================================= */
 (function(){
-  const BUILD = 'stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD = 'stage109-chat-gif-safe-no-player-lag-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2698,11 +2698,11 @@ try{
 
 /* =========================================================
    JustClover Stage 89 — Glass Chat + Dock Transparency
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
    Small runtime marker/debug only; no layout JS hacks added.
    ========================================================= */
 (()=>{
-  const BUILD = 'stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD = 'stage109-chat-gif-safe-no-player-lag-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc89GlassDebug = function(){
     const dock = document.getElementById('jc80Dock');
@@ -2728,11 +2728,11 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Player Recovery Safe Glass
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
    Debug marker only. No background/player mutation.
    ========================================================= */
 (()=>{
-  const BUILD = 'stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD = 'stage109-chat-gif-safe-no-player-lag-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc93RecoveryDebug = function(){
     const q = s => document.querySelector(s);
@@ -2753,14 +2753,14 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Room Appearance Wallpapers
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Adds “Оформление комнаты” settings. Safe only: no iframe/video/player-frame
    mutation, no background layers over the player. Uses CSS variables and
    localStorage to paint dock/chat/topbar/watch-main surfaces.
    ========================================================= */
 (function(){
-  const BUILD = 'stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD = 'stage109-chat-gif-safe-no-player-lag-20260503-1';
   const LS = {
     enabled:'jc94-room-wallpaper-enabled',
     wallpaper:'jc94-room-wallpaper',
@@ -3028,7 +3028,7 @@ try{
 
 /* =========================================================
    JustClover Stage 95 — Local Room Wallpaper Fix
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Fixes local file upload in “Оформление в комнате”. Supports:
    - images: GIF / WebP / PNG / JPG / SVG
@@ -3038,7 +3038,7 @@ try{
    video is a separate muted fixed layer behind room UI surfaces only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD = 'stage109-chat-gif-safe-no-player-lag-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS = {
@@ -3265,14 +3265,14 @@ try{
 
 /* =========================================================
    JustClover Stage 96 — Room Wallpaper Apply Fix
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Mount selected room wallpaper inside the active watch layout. This fixes the
    case where a local file appears in the Appearance preview but not in the room.
    No player iframe/video/source/auth/chat handlers are touched.
    ========================================================= */
 (function(){
-  const BUILD = 'stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD = 'stage109-chat-gif-safe-no-player-lag-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS = {
@@ -3447,12 +3447,12 @@ try{
 
 /* =========================================================
    JustClover Stage 97 — Room BG Layout Fix
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
    Runtime safeguard only: keep the room background layer attached to body so
    it can never push .watch-layout / player / chat down.
    ========================================================= */
 (()=>{
-  const BUILD='stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD='stage109-chat-gif-safe-no-player-lag-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   function activeRoom(){
     const app=document.getElementById('appView');
@@ -3503,14 +3503,14 @@ try{
 
 /* =========================================================
    JustClover Stage 98 — Room Wallpaper Surface Fix
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Fix: the wallpaper/video selected in Appearance is mounted as a fixed room
    background and also pushed into safe glass surfaces. It never participates
    in .watch-layout flow and never touches player iframe/video/source logic.
    ========================================================= */
 (()=>{
-  const BUILD='stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD='stage109-chat-gif-safe-no-player-lag-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS={
@@ -3684,7 +3684,7 @@ try{
 
 /* =========================================================
    JustClover Stage 99 — Room Wallpaper Surfaces
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Fix for the case where the preview shows the selected local wallpaper/video,
    but the room/chat/dock stay black. We paint the chosen background directly
@@ -3692,7 +3692,7 @@ try{
    Player iframe/video/source logic is not touched.
    ========================================================= */
 (()=>{
-  const BUILD='stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD='stage109-chat-gif-safe-no-player-lag-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS={
@@ -3924,14 +3924,14 @@ try{
 
 /* =========================================================
    JustClover Stage 100 — Topbar Recovery + Safe Surfaces
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Do not touch player iframe/video. Remove only Stage99 topbar surface layer and
    force the active-room topbar back to fixed/visible. Wallpaper surfaces remain
    limited to dock + chat.
    ========================================================= */
 (function(){
-  const BUILD = 'stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD = 'stage109-chat-gif-safe-no-player-lag-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   let raf = 0;
   let observer = null;
@@ -4039,13 +4039,13 @@ try{
 
 /* =========================================================
    JustClover Stage 101 — Chat Glass Room Background
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Mounts wallpaper surfaces directly in chat/dock only. It does not touch the
    active topbar, player iframe/video, source state, chat handlers or auth.
    ========================================================= */
 (function(){
-  const BUILD = 'stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD = 'stage109-chat-gif-safe-no-player-lag-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let raf = 0;
@@ -4205,13 +4205,13 @@ try{
 
 /* =========================================================
    JustClover Stage 102 — Room Glass Tuning
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Adds fine tuning controls for chat/dock readability. Safe: no player,
    iframe, source, auth, chat handler, or topbar geometry changes.
    ========================================================= */
 (function(){
-  const BUILD = 'stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD = 'stage109-chat-gif-safe-no-player-lag-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS = {
@@ -4425,7 +4425,7 @@ try{
 
 /* =========================================================
    JustClover Stage 104 — Safe Local Wallpaper No-Freeze
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Emergency safety patch: local MP4/WebM backgrounds are session-only and are
    never stored in IndexedDB. This prevents browser hangs with large video files.
@@ -4433,7 +4433,7 @@ try{
    not touched.
    ========================================================= */
 (()=>{
-  const BUILD='stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD='stage109-chat-gif-safe-no-player-lag-20260503-1';
   window.JUSTCLOVER_BUILD=BUILD;
   const DB_NAME='justclover-room-wallpaper-db-v1';
   const MAX_IMAGE_PERSIST=1.5*1024*1024;
@@ -4532,12 +4532,12 @@ try{
 
 /* =========================================================
    JustClover Stage 105 — Room Wallpaper Performance + Clean Glass
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
    One fixed wallpaper layer for the room. Transparent chat/sidebar/dock like
    the lobby, no fragmented surface backgrounds, better performance.
    ========================================================= */
 (function(){
-  const BUILD='stage108-chat-only-wallpaper-optimized-20260503-1';
+  const BUILD='stage109-chat-gif-safe-no-player-lag-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   const LS={
     enabled:'jc94-room-wallpaper-enabled',
@@ -4714,10 +4714,10 @@ try{
 
 /* =========================================================
    JustClover Stage 107 — FINAL Build Lock / Debug
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
    ========================================================= */
 (function(){
-  const BUILD="stage108-chat-only-wallpaper-optimized-20260503-1";
+  const BUILD="stage109-chat-gif-safe-no-player-lag-20260503-1";
   window.JUSTCLOVER_BUILD=BUILD;
   window.JC_STAGE_EXPECTED_BUILD=BUILD;
   window.JC_DISABLE_AUTO_RELOAD=true;
@@ -4775,4 +4775,265 @@ try{
       badge:'107 NOLOOP'
     };
   };
+})();
+
+
+/* =========================================================
+   JustClover Stage 109 — Chat GIF Safe / No Player Lag
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
+
+   Clean wallpaper controller:
+   - one CSS background layer only in the right chat column
+   - GIF/WebP/PNG/JPG only
+   - MP4/WebM/OGG disabled for room wallpaper to protect video playback
+   - removes/pauses all old wallpaper video/layers from earlier stages
+   ========================================================= */
+(function(){
+  const BUILD = 'stage109-chat-gif-safe-no-player-lag-20260503-1';
+  window.JUSTCLOVER_BUILD = BUILD;
+  window.JC_STAGE_EXPECTED_BUILD = BUILD;
+
+  const OLD_LAYER_SELECTORS = [
+    '#jc90LiveBg','#jc91RoomBg','#jc92RoomBg','#jc95RoomVideoBg',
+    '#jc96RoomBg','#jc98RoomBg','#jc105RoomBg',
+    '.jc99SurfaceBg','.jc101SurfaceBg'
+  ].join(',');
+
+  const IMAGE_EXT = /\.(gif|webp|png|jpe?g|avif|svg)(\?|#|$)/i;
+  const VIDEO_EXT = /\.(mp4|webm|ogg|ogv|mov|m4v)(\?|#|$)/i;
+  const LS = {
+    enabled:'jc94-room-wallpaper-enabled',
+    url:'jc94-room-wallpaper',
+    kind:'jc95-room-local-kind',
+    dim:'jc94-room-wallpaper-dim',
+    blur:'jc94-room-wallpaper-blur',
+    gifSafe:'jc109-chat-wallpaper-url',
+    gifSafeName:'jc109-chat-wallpaper-name'
+  };
+
+  let localObjectUrl = '';
+  let raf = 0;
+  let lastCleanup = 0;
+  let observer = null;
+
+  function q(s,r=document){ return r.querySelector(s); }
+  function qa(s,r=document){ return Array.from(r.querySelectorAll(s)); }
+  function get(k,d=''){ try { return localStorage.getItem(k) ?? d; } catch(_) { return d; } }
+  function set(k,v){ try { localStorage.setItem(k,v); } catch(_){} }
+  function del(k){ try { localStorage.removeItem(k); } catch(_){} }
+  function isAuth(){ try { return !!window.__jc62IsAuthScreen?.(); } catch(_) { return false; } }
+  function appOpen(){ const app=q('#appView'); return !!(app && !app.classList.contains('hidden')); }
+  function watchActive(){ const w=q('#watchSection'); return !!(w && w.classList.contains('active')); }
+  function activeRoom(){ return !isAuth() && appOpen() && watchActive(); }
+  function enabled(){ return get(LS.enabled,'1') !== '0'; }
+
+  function isVideoUrl(u){ return VIDEO_EXT.test(String(u||'')); }
+  function isImageUrl(u){ return IMAGE_EXT.test(String(u||'')) || String(u||'').startsWith('blob:') || String(u||'').startsWith('data:image/'); }
+
+  function cssUrl(u){
+    if(!u) return 'none';
+    if(/^url\(/i.test(u) || /^linear-gradient|^radial-gradient/i.test(u)) return u;
+    return 'url("' + String(u).replace(/\\/g,'\\\\').replace(/"/g,'\\"') + '")';
+  }
+
+  function fallbackCss(){
+    const root=getComputedStyle(document.documentElement);
+    const vars=['--jc94-room-wallpaper','--jc95-room-image','--jc98-room-image','--jc101-room-image'];
+    for(const v of vars){
+      const val=(root.getPropertyValue(v)||'').trim();
+      if(val && val !== 'none' && !/mp4|webm|ogg/i.test(val)) return val;
+    }
+    return 'linear-gradient(135deg, rgba(11,16,32,.78), rgba(26,14,34,.76))';
+  }
+
+  function currentWallpaper(){
+    const direct = localObjectUrl || get(LS.gifSafe,'') || window.__jc109ChatWallpaperUrl || '';
+    if(direct && !isVideoUrl(direct)) return {url:direct, blocked:false, source:'jc109'};
+
+    const old = window.__jc95RoomWallpaperUrl || get(LS.url,'') || '';
+    if(old && isVideoUrl(old)) return {url:'', blocked:true, source:'video-blocked'};
+    if(old && !isVideoUrl(old)) return {url:old, blocked:false, source:'old-url'};
+
+    return {url:'', blocked:false, source:'fallback'};
+  }
+
+  function cleanupOldLayers(force=false){
+    const now=performance.now();
+    if(!force && now-lastCleanup<220) return;
+    lastCleanup=now;
+    qa(OLD_LAYER_SELECTORS).forEach(el=>{
+      try{
+        qa('video',el).forEach(v=>{
+          try{ v.pause(); }catch(_){}
+          try{ v.removeAttribute('src'); v.load(); }catch(_){}
+        });
+        el.remove();
+      }catch(_){}
+    });
+    ['jc95-room-video-wallpaper','jc95-room-local-wallpaper','jc105-room-bg-active',
+     'jc99-surface-bg','jc101-chat-video','jc108-chat-wallpaper'].forEach(c=>document.body?.classList?.remove(c));
+    // Keep old systems from persisting heavy local videos.
+    if(isVideoUrl(window.__jc95RoomWallpaperUrl || '')){
+      try{ window.__jc95RoomWallpaperUrl=''; }catch(_){}
+      del(LS.url);
+      set(LS.kind,'image');
+    }
+  }
+
+  function ensureChatLayer(){
+    const sidebar=q('.watch-sidebar');
+    if(!sidebar) return null;
+    let layer=q(':scope > #jc109ChatWallpaper', sidebar);
+    if(!layer){
+      layer=document.createElement('div');
+      layer.id='jc109ChatWallpaper';
+      layer.setAttribute('aria-hidden','true');
+      sidebar.prepend(layer);
+    }
+    return layer;
+  }
+
+  function readTuning(){
+    const dim = parseFloat(get(LS.dim,'0.30'));
+    const blur = parseFloat(get(LS.blur,'12'));
+    document.documentElement.style.setProperty('--jc109-chat-dim', String(Math.max(.18, Math.min(.72, Number.isFinite(dim)?dim:.36))));
+    document.documentElement.style.setProperty('--jc109-chat-blur', `${Math.max(0, Math.min(20, Number.isFinite(blur)?blur:12))}px`);
+  }
+
+  function sync(){
+    raf=0;
+    cleanupOldLayers(false);
+    readTuning();
+
+    const on=enabled() && activeRoom();
+    document.body?.classList?.toggle('jc109-chat-wallpaper', on);
+
+    const layer=ensureChatLayer();
+    if(!layer) return;
+
+    const spec=currentWallpaper();
+    document.body?.classList?.toggle('jc109-video-wallpaper-blocked', !!(on && spec.blocked));
+
+    if(!on){
+      layer.hidden=true;
+      layer.style.display='none';
+      document.documentElement.style.setProperty('--jc109-chat-wallpaper','none');
+      return;
+    }
+
+    layer.hidden=false;
+    layer.style.display='';
+    const bg = spec.blocked ? 'linear-gradient(135deg, rgba(11,16,32,.78), rgba(26,14,34,.76))' : (spec.url ? cssUrl(spec.url) : fallbackCss());
+    document.documentElement.style.setProperty('--jc109-chat-wallpaper', bg);
+
+    // Hard-disable wallpaper on dock/player each sync in case earlier stages reapply inline vars/classes.
+    qa('#jc80Dock .jc101SurfaceBg, #jc80Dock .jc99SurfaceBg, .chat-card .jc101SurfaceBg, .chat-card .jc99SurfaceBg, #chatForm .jc101SurfaceBg, #chatForm .jc99SurfaceBg').forEach(el=>el.remove());
+  }
+
+  function schedule(){ if(!raf) raf=requestAnimationFrame(sync); }
+
+  function handleFile(file){
+    if(!file) return;
+    const type=(file.type||'').toLowerCase();
+    const name=(file.name||'').toLowerCase();
+    const video = type.startsWith('video/') || VIDEO_EXT.test(name);
+    const image = type.startsWith('image/') || IMAGE_EXT.test(name);
+    if(video){
+      if(localObjectUrl){ try{ URL.revokeObjectURL(localObjectUrl); }catch(_){} localObjectUrl=''; }
+      try{ window.__jc95RoomWallpaperUrl=''; window.__jc95RoomWallpaperKind='image'; }catch(_){}
+      del(LS.url);
+      set(LS.kind,'image');
+      set(LS.gifSafeName, file.name || 'video blocked');
+      document.body?.classList?.add('jc109-video-wallpaper-blocked');
+      const status=q('#jc94RoomStatus');
+      if(status) status.textContent='Видео-обои в комнате отключены ради плавного плеера. Используй GIF/WebP/PNG/JPG.';
+      schedule();
+      return;
+    }
+    if(image){
+      if(localObjectUrl){ try{ URL.revokeObjectURL(localObjectUrl); }catch(_){} }
+      localObjectUrl=URL.createObjectURL(file);
+      window.__jc109ChatWallpaperUrl=localObjectUrl;
+      window.__jc95RoomWallpaperUrl=localObjectUrl;
+      window.__jc95RoomWallpaperKind='image';
+      set(LS.kind,'image');
+      set(LS.gifSafeName, file.name || 'local image');
+      // Do NOT store huge GIF/image in localStorage. Object URL is safe for current session.
+      const status=q('#jc94RoomStatus');
+      if(status) status.textContent='GIF/картинка применена только к чату. Плеер не трогаем.';
+      schedule();
+      return;
+    }
+    const status=q('#jc94RoomStatus');
+    if(status) status.textContent='Поддерживаются GIF/WebP/PNG/JPG. Видео отключены ради плавного плеера.';
+  }
+
+  document.addEventListener('change', e=>{
+    const input=e.target;
+    if(input && input.id==='jc94RoomFile'){
+      handleFile(input.files && input.files[0]);
+    }
+  }, true);
+
+  document.addEventListener('input', e=>{
+    const t=e.target;
+    if(!t) return;
+    if(t.id==='jc94RoomUrl'){
+      const v=(t.value||'').trim();
+      if(v && !isVideoUrl(v)){
+        set(LS.gifSafe,v);
+        window.__jc109ChatWallpaperUrl=v;
+      }
+      schedule();
+    }
+    if(t.id==='jc94RoomDim' || t.id==='jc94RoomBlur' || t.id==='jc94RoomGlass'){
+      schedule();
+    }
+  }, true);
+
+  document.addEventListener('click', e=>{
+    const btn=e.target?.closest?.('button');
+    if(btn && /применить/i.test(btn.textContent||'')){
+      setTimeout(()=>{
+        const url=(q('#jc94RoomUrl')?.value||'').trim();
+        if(url && !isVideoUrl(url)){
+          set(LS.gifSafe,url);
+          window.__jc109ChatWallpaperUrl=url;
+        }
+        schedule();
+      },40);
+    }
+    setTimeout(schedule,80);
+  }, true);
+
+  function boot(){
+    cleanupOldLayers(true);
+    schedule();
+    if(!observer){
+      observer=new MutationObserver(()=>{ cleanupOldLayers(false); schedule(); });
+      observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','hidden']});
+    }
+    [80,250,700,1500,3000].forEach(ms=>setTimeout(()=>{cleanupOldLayers(true); schedule();},ms));
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
+  else boot();
+  window.addEventListener('resize', schedule, {passive:true});
+  window.addEventListener('storage', schedule);
+  document.addEventListener('visibilitychange', ()=>{ cleanupOldLayers(true); schedule(); }, true);
+
+  window.jc109ChatGifSafeDebug=()=>({
+    build:BUILD,
+    roomActive:activeRoom(),
+    bodyClass:document.body?.classList?.contains('jc109-chat-wallpaper'),
+    layerExists:!!q('#jc109ChatWallpaper'),
+    wallpaper:getComputedStyle(document.documentElement).getPropertyValue('--jc109-chat-wallpaper'),
+    localObjectUrl:!!localObjectUrl,
+    savedUrl:get(LS.url,''),
+    gifSafeUrl:get(LS.gifSafe,''),
+    oldLayers:qa(OLD_LAYER_SELECTORS).length,
+    videoWallpaperBlocked:document.body?.classList?.contains('jc109-video-wallpaper-blocked'),
+    playerFrameVisible:!!(q('.player-frame') && getComputedStyle(q('.player-frame')).display !== 'none'),
+    iframeVisible:!!(q('#youtubePlayer, #iframePlayer, .player-frame iframe') && getComputedStyle(q('#youtubePlayer, #iframePlayer, .player-frame iframe')).display !== 'none')
+  });
 })();

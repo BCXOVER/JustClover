@@ -3337,7 +3337,7 @@ html::after{
 
 /* =========================================================
    JustClover Stage 94 — Real Stable Player Dock
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    One stable active-room layout:
    topbar / player / real bottom controls / chat.
@@ -3746,7 +3746,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
 
 /* =========================================================
    JustClover Stage 94 — Player Mic Overlay
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Keep Stage80 stable layout. Remove chat button from the lower dock and move
    mic control inside the player so it remains available in fullscreen.
@@ -3895,7 +3895,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc81PlayerMic{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Keep Stage80 layout. Mic is mounted on .watch-main, not inside the iframe
    and not hidden by old jc67 player-child rules, so it remains visible in
@@ -4068,7 +4068,7 @@ body.jc80-real-dock .watch-main #jc82PlayerMic[hidden]{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
    Put mic back into bottom dock; hide overlay mic; hide chat.
    ========================================================= */
 html::after{ content:'88 ICONMIC'!important; }
@@ -4231,7 +4231,7 @@ body.jc88-icon-mic-dock #jc86FullscreenProxy{
 
 /* =========================================================
    JustClover Stage 89 — Glass Chat + Dock Transparency
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Keep Stage88 active layout and mic dock behavior.
    Make the strip under the player translucent so the live background can show
@@ -4352,7 +4352,7 @@ body.jc80-real-dock .watch-main:-webkit-full-screen #jc80Dock{
 
 /* =========================================================
    JustClover Stage 94 — Player Recovery Safe Glass
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Recovery from Stage92: do not add background JS, do not touch iframe/video,
    do not create extra live background layers over/under the player. Only safe
@@ -4429,7 +4429,7 @@ body.jc80-real-dock .chat-card [contenteditable="true"]{
 
 /* =========================================================
    JustClover Stage 94 — Room Appearance Wallpapers
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Safe path: no iframe/video/player-frame mutations. Adds a dedicated
    “Оформление комнаты” block and applies wallpaper only to safe UI surfaces:
@@ -4696,7 +4696,7 @@ body.jc94-room-wallpaper #videoPlayer{
 
 /* =========================================================
    JustClover Stage 95 — Local Room Wallpaper Fix
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
    Local file support for room wallpaper. No player selectors except read-only
    recovery rules inherited from previous safe stage.
    ========================================================= */
@@ -4797,7 +4797,7 @@ body.jc95-room-local-wallpaper:not(.jc95-room-video-wallpaper) #jc51RaveTopbar{
 
 /* =========================================================
    JustClover Stage 96 — Room Wallpaper Apply Fix
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Fix: local room wallpaper/video selected in Appearance now actually renders
    inside the active watch room. It is mounted behind the room UI, not inside
@@ -4934,7 +4934,7 @@ body.jc96-room-bg-on #videoPlayer{
 
 /* =========================================================
    JustClover Stage 97 — Room BG Layout Fix
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Fix Stage96: the room wallpaper layer must never participate in
    .watch-layout flow. It is a fixed background layer under the room UI.
@@ -5160,7 +5160,7 @@ body.jc80-real-dock.jc96-room-bg-on #videoPlayer{
 
 /* =========================================================
    JustClover Stage 98 — Room Wallpaper Surface Fix
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Real fix for room wallpaper visibility:
    - background is a fixed non-layout layer under the room UI;
@@ -5367,7 +5367,7 @@ body.jc98-room-bg-on #jc51RaveTopbar{
 
 /* =========================================================
    JustClover Stage 99 — Room Wallpaper Surfaces
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Real surface fix: do not rely on a background behind black containers.
    The selected room wallpaper/video is painted directly inside safe UI surfaces:
@@ -5537,7 +5537,7 @@ body.jc99-room-surfaces #videoPlayer{
 
 /* =========================================================
    JustClover Stage 100 — Topbar Recovery + Safe Surfaces
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Recovery from Stage99: do not paint/mutate the topbar surface. Keep room
    wallpaper only in safe surfaces: bottom dock + right chat column. Restore the
@@ -5673,7 +5673,7 @@ body.jc100-topbar-recovery.jc100-no-topbar #jc100FallbackExit{
 
 /* =========================================================
    JustClover Stage 101 — Chat Glass Room Background
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Recovery-safe: do NOT touch the room topbar, player-frame, iframe or source
    video. Only paint the selected room wallpaper inside the right chat column,
@@ -5842,7 +5842,7 @@ body.jc101-chat-glass #videoPlayer{
 
 /* =========================================================
    JustClover Stage 102 — Room Glass Tuning
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Fine-tunes readability only. Does not touch topbar geometry, player-frame,
    YouTube/VK iframe, source video, auth, or chat handlers.
@@ -6002,7 +6002,7 @@ body.jc101-chat-glass .jc101SurfaceBg[data-jc101="topbar"]{
 
 /* =========================================================
    JustClover Stage 105 — Room Wallpaper Performance + Clean Glass
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
    Single fixed room background layer + transparent glass surfaces.
    No tiled surface wallpapers, no repeated background-attachment painting.
    ========================================================= */
@@ -6194,7 +6194,7 @@ html::after{content:'106 NOLOOP'!important;background:rgba(34,211,238,.96)!impor
 
 /* =========================================================
    JustClover Stage 107 — Build Lock / No Reload / Clear Marker
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
    Final override marker so the active deployed stage is visible immediately.
    ========================================================= */
 #jc72UpdateNotice,
@@ -6222,7 +6222,7 @@ html::after{
 
 /* =========================================================
    JustClover Stage 108 — Chat-only wallpaper optimized
-   Version: stage108-chat-only-wallpaper-optimized-20260503-1
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
 
    Keep live wallpaper only in the right chat column. Remove wallpaper from the
    bottom dock / composer nested surfaces to avoid extra repeated images and
@@ -6323,4 +6323,159 @@ body.jc101-chat-glass #youtubePlayer,
 body.jc101-chat-glass #iframePlayer,
 body.jc101-chat-glass #videoPlayer{
   background:#000!important;
+}
+
+
+/* =========================================================
+   JustClover Stage 109 — Chat GIF Safe / No Player Lag
+   Version: stage109-chat-gif-safe-no-player-lag-20260503-1
+
+   Final clean override for room wallpapers:
+   - wallpaper ONLY in the right chat column
+   - GIF/WebP/PNG/JPG supported
+   - MP4/WebM room wallpapers disabled to protect the player
+   - no wallpaper in dock/bottom strip/player/topbar
+   ========================================================= */
+html::after{
+  content:'109 GIFSAFE'!important;
+  background:rgba(34,197,94,.96)!important;
+  color:#03130a!important;
+}
+
+/* Kill every old wallpaper surface/layer from stages 90-108. */
+#jc90LiveBg,
+#jc91RoomBg,
+#jc92RoomBg,
+#jc95RoomVideoBg,
+#jc96RoomBg,
+#jc98RoomBg,
+#jc105RoomBg,
+.jc99SurfaceBg,
+.jc101SurfaceBg{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  background-image:none!important;
+}
+
+/* One and only one wallpaper layer: right chat column. */
+#jc109ChatWallpaper{
+  position:absolute!important;
+  inset:0!important;
+  z-index:0!important;
+  pointer-events:none!important;
+  overflow:hidden!important;
+  border-radius:inherit!important;
+  background-image:var(--jc109-chat-wallpaper, none)!important;
+  background-size:cover!important;
+  background-position:center center!important;
+  background-repeat:no-repeat!important;
+  background-attachment:scroll!important;
+  transform:translateZ(0)!important;
+  will-change:auto!important;
+}
+
+#jc109ChatWallpaper::after{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  pointer-events:none!important;
+  background:
+    linear-gradient(180deg, rgba(3,5,12,.24), rgba(3,5,12,.42)),
+    rgba(0,0,0,var(--jc109-chat-dim,.36))!important;
+}
+
+/* The right chat surface is glass like the main menu. */
+body.jc109-chat-wallpaper .watch-sidebar{
+  position:relative!important;
+  overflow:hidden!important;
+  isolation:isolate!important;
+  background:rgba(7,10,20,.12)!important;
+  border-left:1px solid rgba(255,255,255,.12)!important;
+  backdrop-filter:blur(var(--jc109-chat-blur,12px)) saturate(145%)!important;
+  -webkit-backdrop-filter:blur(var(--jc109-chat-blur,12px)) saturate(145%)!important;
+}
+
+body.jc109-chat-wallpaper .watch-sidebar > :not(#jc109ChatWallpaper){
+  position:relative!important;
+  z-index:2!important;
+}
+
+/* Chat card/composer transparent, no second wallpaper copy. */
+body.jc109-chat-wallpaper .watch-sidebar .chat-card,
+body.jc109-chat-wallpaper .watch-sidebar .side-card{
+  background:rgba(7,10,20,.18)!important;
+  border-color:rgba(255,255,255,.14)!important;
+  box-shadow:0 14px 34px rgba(0,0,0,.16)!important;
+  backdrop-filter:blur(10px) saturate(135%)!important;
+  -webkit-backdrop-filter:blur(10px) saturate(135%)!important;
+}
+
+body.jc109-chat-wallpaper .chat-card .side-card-head,
+body.jc109-chat-wallpaper .chat-card .messages,
+body.jc109-chat-wallpaper .chat-card #chatMessages,
+body.jc109-chat-wallpaper .chat-card .empty-state,
+body.jc109-chat-wallpaper .chat-card .message-list{
+  background:transparent!important;
+}
+
+body.jc109-chat-wallpaper .chat-card #chatForm,
+body.jc109-chat-wallpaper .chat-card .message-form{
+  background:rgba(7,10,20,.22)!important;
+  border-color:rgba(255,255,255,.14)!important;
+  box-shadow:0 -10px 24px rgba(0,0,0,.12)!important;
+  backdrop-filter:blur(10px) saturate(130%)!important;
+  -webkit-backdrop-filter:blur(10px) saturate(130%)!important;
+}
+
+body.jc109-chat-wallpaper .chat-card input,
+body.jc109-chat-wallpaper .chat-card textarea,
+body.jc109-chat-wallpaper .chat-card [contenteditable="true"],
+body.jc109-chat-wallpaper .chat-card .message-input{
+  background:rgba(255,255,255,.085)!important;
+  border-color:rgba(255,255,255,.16)!important;
+  box-shadow:none!important;
+}
+
+/* Absolutely no wallpaper near player or bottom dock. */
+body.jc109-chat-wallpaper #jc80Dock,
+body.jc109-chat-wallpaper #jc80Dock .jc80-dock-inner,
+body.jc109-chat-wallpaper .watch-main,
+body.jc109-chat-wallpaper .watch-stage,
+body.jc109-chat-wallpaper .player-card-redesign,
+body.jc109-chat-wallpaper .player-card,
+body.jc109-chat-wallpaper .player-shell{
+  background-image:none!important;
+}
+
+body.jc109-chat-wallpaper #jc80Dock{
+  background:rgba(7,10,20,.86)!important;
+  border-top:1px solid rgba(255,255,255,.10)!important;
+  backdrop-filter:blur(8px) saturate(115%)!important;
+  -webkit-backdrop-filter:blur(8px) saturate(115%)!important;
+}
+
+body.jc109-chat-wallpaper #jc80Dock .jc80-dock-inner{
+  background:rgba(10,12,22,.42)!important;
+  border-color:rgba(255,255,255,.14)!important;
+}
+
+body.jc109-chat-wallpaper .player-frame,
+body.jc109-chat-wallpaper .player-frame iframe,
+body.jc109-chat-wallpaper .player-frame video,
+body.jc109-chat-wallpaper #youtubePlayer,
+body.jc109-chat-wallpaper #iframePlayer,
+body.jc109-chat-wallpaper #videoPlayer{
+  background:#000!important;
+  background-image:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+
+/* Emergency class for unsupported heavy local video wallpapers. */
+body.jc109-video-wallpaper-blocked #jc109ChatWallpaper{
+  background-image:linear-gradient(135deg, rgba(11,16,32,.78), rgba(26,14,34,.76))!important;
 }

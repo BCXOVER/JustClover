@@ -1,5 +1,5 @@
-/* JustClover cache killer stage108-chat-only-wallpaper-optimized-20260503-1 */
-const JC_SW_BUILD = "stage108-chat-only-wallpaper-optimized-20260503-1";
+/* JustClover cache killer stage109-chat-gif-safe-no-player-lag-20260503-1 */
+const JC_SW_BUILD = "stage109-chat-gif-safe-no-player-lag-20260503-1";
 self.addEventListener('install', event => {
   self.skipWaiting();
 });
