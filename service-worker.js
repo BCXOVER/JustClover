@@ -1,4 +1,4 @@
-/* JustClover cache killer stage105-room-performance-glass-20260503-1 */
+/* JustClover cache killer stage106-no-autoreload-room-perf-20260503-1 */
 self.addEventListener('install', event => { self.skipWaiting(); });
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
