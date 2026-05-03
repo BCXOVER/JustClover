@@ -1,4 +1,4 @@
-/* JustClover cache killer stage103-persistent-room-wallpaper-20260503-1 */
+/* JustClover cache killer stage104-safe-local-wallpaper-no-freeze-20260503-1 */
 self.addEventListener('install', event => { self.skipWaiting(); });
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {

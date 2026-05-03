@@ -1,12 +1,12 @@
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
 
    Цель: не чинить старый каталог патчами поверх патчей, а заменить
    его новым изолированным modal, который не зависит от Stage35/36/37.
    ========================================================= */
 
-const JC40_BUILD = "stage103-persistent-room-wallpaper-20260503-1";
+const JC40_BUILD = "stage104-safe-local-wallpaper-no-freeze-20260503-1";
 const JC40_BASE_COMMIT = "f658b5bfad3fade4eb7f9c4d82865452cdc19f00";
 const JC40_BASE_APP = `https://cdn.jsdelivr.net/gh/BCXOVER/JustClover@${JC40_BASE_COMMIT}/app.js`;
 
@@ -626,10 +626,10 @@ window.JUSTCLOVER_BUILD = JC40_BUILD;
 
 /* =========================================================
    JustClover Stage 74 — Fixed Viewport Player
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
    ========================================================= */
 (function(){
-  const BUILD = "stage103-persistent-room-wallpaper-20260503-1";
+  const BUILD = "stage104-safe-local-wallpaper-no-freeze-20260503-1";
   const STORE_KEY = "jc62ActiveViewMode";
   let desired = false;
 
@@ -1156,7 +1156,7 @@ try{
    Auth/guest/login не трогаем. Чат не переносим в DOM.
    ========================================================= */
 (function(){
-  const BUILD = "stage103-persistent-room-wallpaper-20260503-1";
+  const BUILD = "stage104-safe-local-wallpaper-no-freeze-20260503-1";
   const ACTIVE_KEYS = [
     'jc64ActiveFirst','jc62ActiveViewMode','jc58ActiveViewMode','jc57ActiveViewMode','jc56ActiveViewMode',
     'jc55ActiveViewMode','jc54ActiveViewMode','jc53ActiveViewMode','jc52ActiveViewMode','jc51ActiveViewMode',
@@ -1394,7 +1394,7 @@ try{
    into the player slot immediately after setting a source.
    ========================================================= */
 (function(){
-  const BUILD = "stage103-persistent-room-wallpaper-20260503-1";
+  const BUILD = "stage104-safe-local-wallpaper-no-freeze-20260503-1";
   let lastRenderedKey = "";
   let lastUrl = "";
   let lastType = "";
@@ -1692,7 +1692,7 @@ try{
    Adds source persistence and one-time stable sizing only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage103-persistent-room-wallpaper-20260503-1';
+  const BUILD = 'stage104-safe-local-wallpaper-no-freeze-20260503-1';
   const PREFIX = 'jc71:lastSource:';
   let restoreAttempts = 0;
   let lastStableKey = '';
@@ -1873,7 +1873,7 @@ try{
    когда в репозиторий загружен новый stage. Авторизацию/плеер/чат не трогает.
    ========================================================= */
 (function(){
-  const BUILD = "stage103-persistent-room-wallpaper-20260503-1";
+  const BUILD = "stage104-safe-local-wallpaper-no-freeze-20260503-1";
   const CHECK_EVERY_MS = 15000;
   const FIRST_CHECK_MS = 4500;
   const RELOAD_DELAY_MS = 1800;
@@ -1986,13 +1986,13 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Real Stable Player Dock
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
 
    No player resize loop. No fixed/cover iframe fighting.
    JS only creates bottom buttons and toggles the stable CSS class.
    ========================================================= */
 (function(){
-  const BUILD = 'stage103-persistent-room-wallpaper-20260503-1';
+  const BUILD = 'stage104-safe-local-wallpaper-no-freeze-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2190,13 +2190,13 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Player Mic Overlay
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
 
    Adds a clear mic toggle inside the player and removes the chat action from
    the bottom dock. Does not change auth, chat DOM, source logic, or player fit.
    ========================================================= */
 (function(){
-  const BUILD = 'stage103-persistent-room-wallpaper-20260503-1';
+  const BUILD = 'stage104-safe-local-wallpaper-no-freeze-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2361,14 +2361,14 @@ try{
 
 /* =========================================================
    JustClover Stage 82 — Fullscreen Mic Fix
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
 
    Adds a robust mic control mounted on .watch-main. It is not a child of the
    YouTube iframe/player element and therefore remains visible in JustClover
    site fullscreen. No player scale/fit logic is changed.
    ========================================================= */
 (function(){
-  const BUILD = 'stage103-persistent-room-wallpaper-20260503-1';
+  const BUILD = 'stage104-safe-local-wallpaper-no-freeze-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2561,7 +2561,7 @@ try{
 
 /* =========================================================
    JustClover Stage 83 — Dock Mic Fullscreen
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
 
    Keep Stage80 layout. Put mic back into the bottom dock next to sources and
    fullscreen, keep chat hidden, and mirror voice state on the dock button.
@@ -2569,7 +2569,7 @@ try{
    inside the YouTube/VK iframe cannot show external DOM controls.
    ========================================================= */
 (function(){
-  const BUILD = 'stage103-persistent-room-wallpaper-20260503-1';
+  const BUILD = 'stage104-safe-local-wallpaper-no-freeze-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let scheduled = false;
@@ -2738,11 +2738,11 @@ try{
 
 /* =========================================================
    JustClover Stage 89 — Glass Chat + Dock Transparency
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
    Small runtime marker/debug only; no layout JS hacks added.
    ========================================================= */
 (()=>{
-  const BUILD = 'stage103-persistent-room-wallpaper-20260503-1';
+  const BUILD = 'stage104-safe-local-wallpaper-no-freeze-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc89GlassDebug = function(){
     const dock = document.getElementById('jc80Dock');
@@ -2768,11 +2768,11 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Player Recovery Safe Glass
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
    Debug marker only. No background/player mutation.
    ========================================================= */
 (()=>{
-  const BUILD = 'stage103-persistent-room-wallpaper-20260503-1';
+  const BUILD = 'stage104-safe-local-wallpaper-no-freeze-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   window.jc93RecoveryDebug = function(){
     const q = s => document.querySelector(s);
@@ -2793,14 +2793,14 @@ try{
 
 /* =========================================================
    JustClover Stage 94 — Room Appearance Wallpapers
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
 
    Adds “Оформление комнаты” settings. Safe only: no iframe/video/player-frame
    mutation, no background layers over the player. Uses CSS variables and
    localStorage to paint dock/chat/topbar/watch-main surfaces.
    ========================================================= */
 (function(){
-  const BUILD = 'stage103-persistent-room-wallpaper-20260503-1';
+  const BUILD = 'stage104-safe-local-wallpaper-no-freeze-20260503-1';
   const LS = {
     enabled:'jc94-room-wallpaper-enabled',
     wallpaper:'jc94-room-wallpaper',
@@ -3068,7 +3068,7 @@ try{
 
 /* =========================================================
    JustClover Stage 95 — Local Room Wallpaper Fix
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
 
    Fixes local file upload in “Оформление в комнате”. Supports:
    - images: GIF / WebP / PNG / JPG / SVG
@@ -3078,7 +3078,7 @@ try{
    video is a separate muted fixed layer behind room UI surfaces only.
    ========================================================= */
 (function(){
-  const BUILD = 'stage103-persistent-room-wallpaper-20260503-1';
+  const BUILD = 'stage104-safe-local-wallpaper-no-freeze-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS = {
@@ -3262,7 +3262,7 @@ try{
     if(!file) return;
     e.preventDefault();
     e.stopPropagation();
-    // Stage103: do not stop later persistence listeners; Stage94 is already stopped.
+    e.stopImmediatePropagation();
     handleFile(file);
   }, true);
 
@@ -3305,14 +3305,14 @@ try{
 
 /* =========================================================
    JustClover Stage 96 — Room Wallpaper Apply Fix
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
 
    Mount selected room wallpaper inside the active watch layout. This fixes the
    case where a local file appears in the Appearance preview but not in the room.
    No player iframe/video/source/auth/chat handlers are touched.
    ========================================================= */
 (function(){
-  const BUILD = 'stage103-persistent-room-wallpaper-20260503-1';
+  const BUILD = 'stage104-safe-local-wallpaper-no-freeze-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS = {
@@ -3487,12 +3487,12 @@ try{
 
 /* =========================================================
    JustClover Stage 97 — Room BG Layout Fix
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
    Runtime safeguard only: keep the room background layer attached to body so
    it can never push .watch-layout / player / chat down.
    ========================================================= */
 (()=>{
-  const BUILD='stage103-persistent-room-wallpaper-20260503-1';
+  const BUILD='stage104-safe-local-wallpaper-no-freeze-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   function activeRoom(){
     const app=document.getElementById('appView');
@@ -3543,14 +3543,14 @@ try{
 
 /* =========================================================
    JustClover Stage 98 — Room Wallpaper Surface Fix
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
 
    Fix: the wallpaper/video selected in Appearance is mounted as a fixed room
    background and also pushed into safe glass surfaces. It never participates
    in .watch-layout flow and never touches player iframe/video/source logic.
    ========================================================= */
 (()=>{
-  const BUILD='stage103-persistent-room-wallpaper-20260503-1';
+  const BUILD='stage104-safe-local-wallpaper-no-freeze-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS={
@@ -3724,7 +3724,7 @@ try{
 
 /* =========================================================
    JustClover Stage 99 — Room Wallpaper Surfaces
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
 
    Fix for the case where the preview shows the selected local wallpaper/video,
    but the room/chat/dock stay black. We paint the chosen background directly
@@ -3732,7 +3732,7 @@ try{
    Player iframe/video/source logic is not touched.
    ========================================================= */
 (()=>{
-  const BUILD='stage103-persistent-room-wallpaper-20260503-1';
+  const BUILD='stage104-safe-local-wallpaper-no-freeze-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS={
@@ -3807,41 +3807,21 @@ try{
     });
   }
   async function saveBlob(file,kind){
-    try{
-      const db=await openDb();
-      await new Promise((resolve,reject)=>{
-        const tx=db.transaction(STORE,'readwrite');
-        tx.objectStore(STORE).put({blob:file,kind,name:file.name || 'local file',type:file.type || '',ts:Date.now()},KEY);
-        tx.oncomplete=resolve; tx.onerror=()=>reject(tx.error);
-      });
-      try{db.close();}catch(_){}
-    }catch(_){ }
+    // Stage104 emergency: do NOT persist local files to IndexedDB.
+    // Large MP4/WebM blobs caused browser freezes when written/read back.
+    try { localStorage.setItem('jc104-room-wallpaper-persist-disabled','1'); } catch(_) {}
+    return false;
   }
+
   async function loadBlob(){
-    if(dbLoaded || localUrl || window.__jc95RoomWallpaperUrl) return;
+    // Stage104 emergency: skip old IndexedDB restore and remove the heavy DB in idle time.
+    if(dbLoaded) return;
     dbLoaded=true;
-    try{
-      const db=await openDb();
-      const rec=await new Promise((resolve,reject)=>{
-        const tx=db.transaction(STORE,'readonly');
-        const req=tx.objectStore(STORE).get(KEY);
-        req.onsuccess=()=>resolve(req.result || null);
-        req.onerror=()=>reject(req.error);
-      });
-      try{db.close();}catch(_){}
-      if(rec?.blob){
-        localUrl=URL.createObjectURL(rec.blob);
-        localKind=rec.kind || (isVideo(rec.blob) ? 'video' : 'image');
-        localName=rec.name || 'local file';
-        window.__jc95RoomWallpaperUrl=localUrl;
-        window.__jc95RoomWallpaperKind=localKind;
-        window.__jc95RoomWallpaperName=localName;
-        set(LS.localKind,localKind);
-        set(LS.localName,localName);
-        set(LS.preset,'custom-file');
-        schedule();
-      }
-    }catch(_){ }
+    try {
+      const run = () => { try { indexedDB.deleteDatabase(DB_NAME); } catch(_) {} };
+      if('requestIdleCallback' in window) requestIdleCallback(run, {timeout: 1200});
+      else setTimeout(run, 1200);
+    } catch(_) {}
   }
 
   function ensureSurface(host,name){
@@ -3906,8 +3886,8 @@ try{
 
     const sidebar=ensureSurface(document.querySelector('.watch-sidebar'),'sidebar');
     const dock=ensureSurface(document.getElementById('jc80Dock'),'dock');
-    const top=ensureSurface(document.querySelector('.topbar') || document.getElementById('jc51RaveTopbar'),'topbar');
-    [sidebar,dock,top].forEach(layer=>{
+    const top=null; // Stage104: never mount wallpaper layer into topbar
+    [sidebar,dock].forEach(layer=>{
       if(layer){ layer.hidden=!on; setSurfaceVideo(layer,src,videoOn); }
     });
   }
@@ -3967,7 +3947,7 @@ try{
       dbLoaded,
       sidebarLayer:!!layer('sidebar'),
       dockLayer:!!layer('dock'),
-      topbarLayer:!!layer('topbar'),
+      topbarLayer:false,
       sidebarVideoSrc:video('sidebar')?.src || '',
       sidebarVideoPaused:video('sidebar')?.paused ?? null,
       sidebarBg:css(q('.watch-sidebar'))?.backgroundColor || '',
@@ -3984,14 +3964,14 @@ try{
 
 /* =========================================================
    JustClover Stage 100 — Topbar Recovery + Safe Surfaces
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
 
    Do not touch player iframe/video. Remove only Stage99 topbar surface layer and
    force the active-room topbar back to fixed/visible. Wallpaper surfaces remain
    limited to dock + chat.
    ========================================================= */
 (function(){
-  const BUILD = 'stage103-persistent-room-wallpaper-20260503-1';
+  const BUILD = 'stage104-safe-local-wallpaper-no-freeze-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
   let raf = 0;
   let observer = null;
@@ -4099,13 +4079,13 @@ try{
 
 /* =========================================================
    JustClover Stage 101 — Chat Glass Room Background
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
 
    Mounts wallpaper surfaces directly in chat/dock only. It does not touch the
    active topbar, player iframe/video, source state, chat handlers or auth.
    ========================================================= */
 (function(){
-  const BUILD = 'stage103-persistent-room-wallpaper-20260503-1';
+  const BUILD = 'stage104-safe-local-wallpaper-no-freeze-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   let raf = 0;
@@ -4263,13 +4243,13 @@ try{
 
 /* =========================================================
    JustClover Stage 102 — Room Glass Tuning
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
 
    Adds fine tuning controls for chat/dock readability. Safe: no player,
    iframe, source, auth, chat handler, or topbar geometry changes.
    ========================================================= */
 (function(){
-  const BUILD = 'stage103-persistent-room-wallpaper-20260503-1';
+  const BUILD = 'stage104-safe-local-wallpaper-no-freeze-20260503-1';
   window.JUSTCLOVER_BUILD = BUILD;
 
   const LS = {
@@ -4482,240 +4462,108 @@ try{
 
 
 /* =========================================================
-   JustClover Stage 103 — Persistent Room Wallpaper
-   Version: stage103-persistent-room-wallpaper-20260503-1
+   JustClover Stage 104 — Safe Local Wallpaper No-Freeze
+   Version: stage104-safe-local-wallpaper-no-freeze-20260503-1
 
-   Fixes reload persistence for local room wallpapers. Stage95 used session-only
-   blob URLs; Stage99 IndexedDB persistence could not run because Stage95 stopped
-   later listeners. This stage stores selected files in IndexedDB and restores
-   them on page load, then wakes Stage101/102 surface renderers.
-
-   Safe: no player iframe/video/source/auth/chat handler/topbar geometry changes.
+   Emergency safety patch: local MP4/WebM backgrounds are session-only and are
+   never stored in IndexedDB. This prevents browser hangs with large video files.
+   URL wallpapers remain persistent through localStorage. Player/topbar/layout are
+   not touched.
    ========================================================= */
-(function(){
-  const BUILD='stage103-persistent-room-wallpaper-20260503-1';
-  window.JUSTCLOVER_BUILD = BUILD;
+(()=>{
+  const BUILD='stage104-safe-local-wallpaper-no-freeze-20260503-1';
+  window.JUSTCLOVER_BUILD=BUILD;
+  const DB_NAME='justclover-room-wallpaper-db-v1';
+  const MAX_IMAGE_PERSIST=1.5*1024*1024;
+  const MAX_LOCAL_VIDEO=180*1024*1024;
 
-  const DB_NAME='justclover-room-wallpaper-db-v2';
-  const STORE='wallpaper';
-  const KEY='current';
-  const LS={
-    enabled:'jc94-room-wallpaper-enabled',
-    wallpaper:'jc94-room-wallpaper',
-    preset:'jc94-room-wallpaper-preset',
-    localKind:'jc95-room-local-kind',
-    localName:'jc95-room-local-name',
-    persisted:'jc103-room-wallpaper-persisted',
-    persistedTs:'jc103-room-wallpaper-persisted-ts'
-  };
-
-  let objectUrl='';
-  let restored=false;
-  let restorePromise=null;
-  let raf=0;
-
-  const get=(k,f='')=>{ try{return localStorage.getItem(k) ?? f;}catch(_){return f;} };
-  const set=(k,v)=>{ try{localStorage.setItem(k,String(v));}catch(_){} };
-  const del=k=>{ try{localStorage.removeItem(k);}catch(_){} };
-
-  function isVideoFile(file){ return /^video\//i.test(file?.type || '') || /\.(mp4|webm|ogg|ogv|mov|m4v)$/i.test(file?.name || ''); }
-  function isImageFile(file){ return /^image\//i.test(file?.type || '') || /\.(gif|webp|png|jpe?g|svg)$/i.test(file?.name || ''); }
-  function kindFor(file){ return isVideoFile(file) ? 'video' : 'image'; }
-
-  function openDb(){
-    return new Promise((resolve,reject)=>{
-      if(!('indexedDB' in window)) return reject(new Error('IndexedDB unavailable'));
-      const req=indexedDB.open(DB_NAME,1);
-      req.onupgradeneeded=()=>{
-        const db=req.result;
-        if(!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
-      };
-      req.onsuccess=()=>resolve(req.result);
-      req.onerror=()=>reject(req.error || new Error('IndexedDB open failed'));
-    });
+  function note(text){
+    const el=document.getElementById('jc94RoomStyleStatus');
+    if(el) el.textContent=text;
   }
-
-  async function dbPut(file,kind){
-    const db=await openDb();
+  function isFileInput(t){ return t?.closest?.('#jc94RoomFile'); }
+  function killOldDb(){
     try{
-      await new Promise((resolve,reject)=>{
-        const tx=db.transaction(STORE,'readwrite');
-        tx.objectStore(STORE).put({
-          blob:file,
-          kind,
-          name:file.name || 'local wallpaper',
-          type:file.type || '',
-          size:file.size || 0,
-          ts:Date.now()
-        },KEY);
-        tx.oncomplete=resolve;
-        tx.onerror=()=>reject(tx.error || new Error('IndexedDB write failed'));
-      });
-    } finally { try{db.close();}catch(_){} }
-  }
-
-  async function dbGet(){
-    const db=await openDb();
-    try{
-      return await new Promise((resolve,reject)=>{
-        const tx=db.transaction(STORE,'readonly');
-        const req=tx.objectStore(STORE).get(KEY);
-        req.onsuccess=()=>resolve(req.result || null);
-        req.onerror=()=>reject(req.error || new Error('IndexedDB read failed'));
-      });
-    } finally { try{db.close();}catch(_){} }
-  }
-
-  async function dbClear(){
-    try{
-      const db=await openDb();
-      await new Promise((resolve,reject)=>{
-        const tx=db.transaction(STORE,'readwrite');
-        tx.objectStore(STORE).delete(KEY);
-        tx.oncomplete=resolve;
-        tx.onerror=()=>reject(tx.error || new Error('IndexedDB delete failed'));
-      });
-      try{db.close();}catch(_){}
+      const run=()=>{ try{ indexedDB.deleteDatabase(DB_NAME); }catch(_){} };
+      if('requestIdleCallback' in window) requestIdleCallback(run,{timeout:1800}); else setTimeout(run,1600);
     }catch(_){}
   }
-
-  function wakeRenderers(){
-    try{ window.dispatchEvent(new Event('resize')); }catch(_){}
-    try{ document.dispatchEvent(new Event('visibilitychange')); }catch(_){}
-    try{ window.dispatchEvent(new StorageEvent('storage',{key:LS.persisted,newValue:get(LS.persisted,'')})); }catch(_){}
-    try{ document.body?.classList?.toggle('jc103-persistent-room-wallpaper', !!window.__jc95RoomWallpaperUrl); }catch(_){}
+  function currentKind(){
+    return window.__jc95RoomWallpaperKind || localStorage.getItem('jc95-room-local-kind') || '';
   }
-
-  function setGlobal(url,kind,name){
-    window.__jc95RoomWallpaperUrl=url || '';
-    window.__jc95RoomWallpaperKind=kind || '';
-    window.__jc95RoomWallpaperName=name || '';
-    if(url){
-      set(LS.enabled,'1');
-      set(LS.preset,'custom-file');
-      set(LS.localKind,kind || 'image');
-      set(LS.localName,name || 'local wallpaper');
-      set(LS.persisted,'1');
-      set(LS.persistedTs,String(Date.now()));
-      // Never keep blob: URLs in localStorage. They are dead after reload.
-      const saved=get(LS.wallpaper,'');
-      if(/^blob:/i.test(saved)) del(LS.wallpaper);
-      document.documentElement.style.setProperty('--jc103-wallpaper-url', url);
+  function currentUrl(){
+    return window.__jc95RoomWallpaperUrl || localStorage.getItem('jc94-room-wallpaper') || '';
+  }
+  function activeRoom(){
+    const app=document.getElementById('appView');
+    const watch=document.getElementById('watchSection');
+    let auth=false; try{auth=!!window.__jc62IsAuthScreen?.();}catch(_){}
+    return !auth && !!app && !app.classList.contains('hidden') && !!watch && watch.classList.contains('active');
+  }
+  function decorateSettings(){
+    const input=document.getElementById('jc94RoomFile');
+    if(input){
+      input.setAttribute('accept','image/gif,image/webp,image/png,image/jpeg,image/*,video/mp4,video/webm,video/ogg,.mp4,.webm,.ogg,.ogv');
     }
-    wakeRenderers();
-    [40,160,420,900,1600].forEach(ms=>setTimeout(wakeRenderers,ms));
-  }
-
-  async function persistFile(file){
-    if(!file || (!isImageFile(file) && !isVideoFile(file))) return;
-    const kind=kindFor(file);
-    try{
-      await dbPut(file,kind);
-      if(objectUrl){ try{URL.revokeObjectURL(objectUrl);}catch(_){} }
-      objectUrl=URL.createObjectURL(file);
-      setGlobal(objectUrl,kind,file.name || 'local wallpaper');
-      const st=document.getElementById('jc94RoomStyleStatus');
-      if(st) st.textContent = kind==='video'
-        ? `Видео-фон сохранён в браузере: ${file.name || 'local wallpaper'}. После перезагрузки восстановится автоматически.`
-        : `Фон сохранён в браузере: ${file.name || 'local wallpaper'}. После перезагрузки восстановится автоматически.`;
-    }catch(err){
-      const st=document.getElementById('jc94RoomStyleStatus');
-      if(st) st.textContent = 'Фон применён, но браузер не дал сохранить файл для перезагрузки. Используй прямую ссылку или файл поменьше.';
+    const card=document.getElementById('jc94RoomStyleCard');
+    if(card && !document.getElementById('jc104SafeNote')){
+      const p=document.createElement('p');
+      p.id='jc104SafeNote';
+      p.className='status';
+      p.textContent='Stage104 safe: локальные видео не сохраняются после перезагрузки, чтобы не подвешивать браузер. Для постоянного живого фона используй прямую ссылку на .mp4/.webm/.gif/.webp.';
+      const file=input?.closest?.('label');
+      (file || card).insertAdjacentElement('afterend', p);
     }
   }
 
-  function restore(){
-    if(restored) return restorePromise || Promise.resolve(false);
-    restored=true;
-    restorePromise=(async()=>{
-      const saved=get(LS.wallpaper,'');
-      // If a persistent URL is configured, URL mode does not need IndexedDB.
-      if(saved && !/^blob:/i.test(saved)){
-        wakeRenderers();
-        return true;
-      }
-      if(/^blob:/i.test(saved)) del(LS.wallpaper);
-      try{
-        const rec=await dbGet();
-        if(!rec?.blob) return false;
-        if(objectUrl){ try{URL.revokeObjectURL(objectUrl);}catch(_){} }
-        objectUrl=URL.createObjectURL(rec.blob);
-        const kind=rec.kind || (isVideoFile(rec.blob) ? 'video' : 'image');
-        const name=rec.name || 'local wallpaper';
-        setGlobal(objectUrl,kind,name);
-        return true;
-      }catch(_){ return false; }
-    })();
-    return restorePromise;
-  }
-
-  function sync(){
-    raf=0;
-    restore().then(()=>wakeRenderers()).catch(()=>{});
-  }
-  function schedule(){ if(!raf) raf=requestAnimationFrame(sync); }
-
-  // This listener must be after Stage95, so Stage95 was patched above not to call
-  // stopImmediatePropagation. It saves the selected file for future reloads.
-  document.addEventListener('change',function(e){
-    const input=e.target?.closest?.('#jc94RoomFile');
+  document.addEventListener('change', function(e){
+    const input=isFileInput(e.target);
     if(!input) return;
     const file=input.files?.[0];
-    if(file) persistFile(file);
-  },true);
-
-  document.addEventListener('click',function(e){
-    if(e.target?.closest?.('#jc94ApplyRoomStyle,#jc94OpenWatch,.jc94-preset,[data-section="watchSection"],[data-section="appearanceSection"]')){
-      if(e.target?.closest?.('.jc94-preset')){
-        dbClear();
-        objectUrl='';
-        window.__jc95RoomWallpaperUrl='';
-        window.__jc95RoomWallpaperKind='';
-        window.__jc95RoomWallpaperName='';
-        del(LS.persisted);
-      }
-      setTimeout(schedule,30);
-      setTimeout(wakeRenderers,180);
-      setTimeout(wakeRenderers,700);
+    if(!file) return;
+    const isVideo=/^video\//i.test(file.type||'') || /\.(mp4|webm|ogg|ogv)$/i.test(file.name||'');
+    if(isVideo && file.size>MAX_LOCAL_VIDEO){
+      input.value='';
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      note('Видео слишком большое для локального фона. Чтобы браузер не зависал, используй файл до ~180 MB или прямую ссылку на .mp4/.webm.');
+      return;
     }
-  },true);
-
-  document.addEventListener('input',function(e){
-    if(e.target?.closest?.('#jc94RoomUrl')){
-      dbClear();
-      objectUrl='';
-      del(LS.persisted);
-      setTimeout(wakeRenderers,50);
+    if(isVideo){
+      try{ localStorage.removeItem('jc94-room-wallpaper'); }catch(_){}
+      setTimeout(()=>note(`Видео-фон применён только на текущую сессию: ${file.name}. После перезагрузки выбери файл заново или используй прямую ссылку.`), 120);
+    }else if(file.size>MAX_IMAGE_PERSIST){
+      setTimeout(()=>note(`Картинка применена на текущую сессию: ${file.name}. Для сохранения после перезагрузки используй файл до 1.5 MB или прямую ссылку.`), 120);
+    }else{
+      setTimeout(()=>note(`Фон применён: ${file.name}. Небольшие картинки могут сохраняться, видео больше не пишем в IndexedDB.`), 120);
     }
-  },true);
+  }, true);
 
-  document.addEventListener('DOMContentLoaded',schedule);
-  window.addEventListener('load',schedule,{once:true});
-  window.addEventListener('resize',wakeRenderers,{passive:true});
-  document.addEventListener('visibilitychange',schedule,true);
-  [0,80,240,700,1400,2600].forEach(ms=>setTimeout(schedule,ms));
+  document.addEventListener('click', function(e){
+    if(e.target?.closest?.('[data-section="appearanceSection"],#jc94ApplyRoomStyle,#jc94OpenWatch')) setTimeout(decorateSettings,80);
+  }, true);
 
-  window.jc103PersistentWallpaperDebug=function(){
+  killOldDb();
+  [0,150,600,1600].forEach(ms=>setTimeout(decorateSettings,ms));
+
+  window.jc104SafeWallpaperDebug=function(){
     const q=s=>document.querySelector(s);
     const css=el=>el?getComputedStyle(el):null;
-    const visible=el=>!!el && css(el).display!=='none' && css(el).visibility!=='hidden' && css(el).opacity!=='0';
-    const iframe=q('.player-frame iframe, #youtubePlayer iframe, #jc65DirectPlayer');
     return {
       build:BUILD,
-      restored,
-      hasGlobalUrl:!!window.__jc95RoomWallpaperUrl,
-      globalKind:window.__jc95RoomWallpaperKind || '',
-      globalName:window.__jc95RoomWallpaperName || '',
-      localKind:get(LS.localKind,''),
-      localName:get(LS.localName,''),
-      persisted:get(LS.persisted,''),
-      savedWallpaper:get(LS.wallpaper,'').slice(0,64),
-      bodyClass:document.body?.className || '',
-      sidebarLayer:!!q('.jc101SurfaceBg[data-jc101="sidebar"]'),
-      chatLayer:!!q('.jc101SurfaceBg[data-jc101="chat"]'),
-      dockLayer:!!q('.jc101SurfaceBg[data-jc101="dock"]'),
-      playerFrameVisible:visible(q('.player-frame')),
-      iframeVisible:visible(iframe)
+      oldDbDisabled:true,
+      indexedDbCleanupScheduled:true,
+      activeRoom:activeRoom(),
+      kind:currentKind(),
+      hasUrl:!!currentUrl(),
+      globalUrlIsBlob:String(window.__jc95RoomWallpaperUrl||'').startsWith('blob:'),
+      sidebarLayer:!!q('.jc99SurfaceBg[data-jc99="sidebar"], .jc101SurfaceBg[data-jc101="sidebar"]'),
+      chatLayer:!!q('.jc101SurfaceBg[data-jc101="chat"], .jc99SurfaceBg[data-jc99="chat"]'),
+      dockLayer:!!q('.jc99SurfaceBg[data-jc99="dock"], .jc101SurfaceBg[data-jc101="dock"]'),
+      topbarLayer:false,
+      playerFrameVisible:(()=>{const el=q('.player-frame');const st=css(el);return !!el&&st.display!=='none'&&st.visibility!=='hidden';})(),
+      iframeVisible:(()=>{const el=q('.player-frame iframe,#jc65DirectPlayer,iframe');const st=css(el);return !!el&&st.display!=='none'&&st.visibility!=='hidden';})(),
+      persistDisabled:localStorage.getItem('jc104-room-wallpaper-persist-disabled')||''
     };
   };
 })();
