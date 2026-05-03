@@ -1,0 +1,19 @@
+JustClover Stage122 upload-ready archive
+
+Files included:
+- index.html
+- style.css
+- app.js
+- service-worker.js
+- package.json
+- playwright.config.js
+- tests/smoke.spec.js
+- .github/workflows/browser-tests.yml
+- README_STAGE122_UPLOAD.txt
+
+Build expected:
+stage122-rave-anime-ui-custom-wallpaper-20260503-1
+
+Upload rule:
+Do NOT upload the ZIP itself to GitHub Pages.
+Unzip it first, then upload/replace these files in the repository root.
