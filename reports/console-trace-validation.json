@@ -1,0 +1,98 @@
+[
+  {
+    "runtime": "lupa.luajit20",
+    "case": "good",
+    "passed": true,
+    "automatic_dump_lines": 39
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "case": "no_writefile",
+    "passed": true,
+    "automatic_dump_lines": 39
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "case": "false",
+    "passed": true,
+    "automatic_dump_lines": 39
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "case": "exception",
+    "passed": true,
+    "automatic_dump_lines": 39
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "case": "mismatch",
+    "passed": true,
+    "automatic_dump_lines": 39
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "case": "no_readfile",
+    "passed": true,
+    "automatic_dump_lines": 39
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "case": "lua_only",
+    "passed": true,
+    "automatic_dump_lines": 39
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "case": "no_console_event",
+    "passed": true,
+    "automatic_dump_lines": 39
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "case": "good",
+    "passed": true,
+    "automatic_dump_lines": 39
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "case": "no_writefile",
+    "passed": true,
+    "automatic_dump_lines": 39
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "case": "false",
+    "passed": true,
+    "automatic_dump_lines": 39
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "case": "exception",
+    "passed": true,
+    "automatic_dump_lines": 39
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "case": "mismatch",
+    "passed": true,
+    "automatic_dump_lines": 39
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "case": "no_readfile",
+    "passed": true,
+    "automatic_dump_lines": 39
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "case": "lua_only",
+    "passed": true,
+    "automatic_dump_lines": 39
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "case": "no_console_event",
+    "passed": true,
+    "automatic_dump_lines": 39
+  }
+]

@@ -10,7 +10,7 @@
       "runtime": "lupa.luajit20",
       "file": "Andromeda_capture.lua",
       "passed": true,
-      "sha256": "cf199b91b9bc3960d45db32ebaf02b037b1976f6858a4305db22af8a6ab94c93"
+      "sha256": "fcadb0cd02f7fbeff785de30a62f6a320219a6f5409fc0833b583674f5cb6d25"
     },
     {
       "runtime": "lupa.luajit21",
@@ -22,7 +22,7 @@
       "runtime": "lupa.luajit21",
       "file": "Andromeda_capture.lua",
       "passed": true,
-      "sha256": "cf199b91b9bc3960d45db32ebaf02b037b1976f6858a4305db22af8a6ab94c93"
+      "sha256": "fcadb0cd02f7fbeff785de30a62f6a320219a6f5409fc0833b583674f5cb6d25"
     }
   ],
   "initialization": [
