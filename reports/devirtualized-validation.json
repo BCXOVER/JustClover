@@ -1,0 +1,89 @@
+{
+  "sha256": "8df384c45e5e2e0ecc1cea2c29e56b3db80aa3d66c185e13473674c8dd1145f5",
+  "bytes": 6462015,
+  "definitions": 564,
+  "residual_template_vm_functions": 0,
+  "gamesense_executed": false,
+  "compilation": [
+    {
+      "runtime": "lupa.luajit20",
+      "compiled": true,
+      "initialized": 564
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "compiled": true,
+      "initialized": 564
+    }
+  ],
+  "xor": [
+    {
+      "function": "f3",
+      "byte_pairs": 65536,
+      "uint32_pairs": 708,
+      "matched_original_vm": true
+    },
+    {
+      "function": "f48",
+      "byte_pairs": 65536,
+      "uint32_pairs": 708,
+      "matched_original_vm": true
+    },
+    {
+      "function": "f112",
+      "byte_pairs": 65536,
+      "uint32_pairs": 708,
+      "matched_original_vm": true
+    },
+    {
+      "function": "f117",
+      "byte_pairs": 65536,
+      "uint32_pairs": 708,
+      "matched_original_vm": true
+    },
+    {
+      "function": "f419",
+      "byte_pairs": 65536,
+      "uint32_pairs": 708,
+      "matched_original_vm": true
+    }
+  ],
+  "control_flow": [
+    {
+      "function": "f1",
+      "fixture": "initial_dependencies",
+      "status_and_dependency_events_match": true,
+      "outcome": "MISSING_ENGINE_MODULE:ffi"
+    },
+    {
+      "function": "f45",
+      "fixture": "tail",
+      "status_and_dependency_events_match": true,
+      "outcome": "error"
+    },
+    {
+      "function": "f108",
+      "fixture": "tail",
+      "status_and_dependency_events_match": true,
+      "outcome": "error"
+    },
+    {
+      "function": "f115",
+      "fixture": "match",
+      "status_and_dependency_events_match": true,
+      "outcome": "error"
+    },
+    {
+      "function": "f115",
+      "fixture": "mismatch",
+      "status_and_dependency_events_match": true,
+      "outcome": "return:nil"
+    },
+    {
+      "function": "f416",
+      "fixture": "invalid_input",
+      "status_and_dependency_events_match": true,
+      "outcome": "error"
+    }
+  ]
+}

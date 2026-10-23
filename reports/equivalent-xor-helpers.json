@@ -1,0 +1,9 @@
+{
+  "reference": "f48",
+  "identical_control_flow_graphs": [
+    "f3",
+    "f48",
+    "f112",
+    "f419"
+  ]
+}
