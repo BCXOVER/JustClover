@@ -4,26 +4,38 @@
 -- Andromeda Exclusive: reconstructed Lua; original local names/comments are unavailable.
 -- Virtual instructions are expanded into per-function Lua statements and native goto labels.
 -- Original names/comments cannot be reconstructed. GameSense is required.
--- Startup yields between VM batches; frame waits do not consume the time budget.
+-- Startup has active-time, wall-time, shared instruction and frame limits.
 -- The deliberate f2 failure loop reports its caller instead of exhausting memory.
 local bit = bit or require("bit")
 local D, F = {}, {}
 local startup_active = true
-local startup_instruction_limit = 1000000
-local startup_poll_interval = 64
+local startup_blocked = false
+local startup_diagnostic_mode = false
+local startup_instruction_limit = 100000
+local startup_poll_interval = 16
 local startup_poll_remaining = startup_poll_interval
-local startup_timeout_ms = 30000
-local startup_slice_ms = 4
-local startup_clock, startup_last_poll, startup_slice_started
-local startup_elapsed_ms = 0
+local startup_timeout_ms = 2000
+local startup_wall_timeout_ms = 15000
+local startup_slice_ms = 1
+local startup_slice_poll_limit = 128
+local startup_max_polls = 20000
+local startup_max_slices = 1800
+local startup_clock, startup_last_poll, startup_slice_started, startup_started
+local startup_elapsed_ms, startup_polls, startup_slices, startup_slice_polls = 0, 0, 0, 0
 local startup_thread
 local current_function, current_pc
+local startup_label = "Andromeda"
+local startup_yield_token = {}
+local startup_on_checkpoint = function() end
+local startup_on_finish = function() end
+local function startup_notice(message)
+    local logger = type(client)=="table" and client.log or print
+    if type(logger)=="function" then pcall(logger,"["..startup_label.."] "..message) end
+end
 do
     if type(client)=="table" and type(client.timestamp)=="function" then
-        local ok, now=pcall(client.timestamp)
-        if ok and type(now)=="number" then
-            startup_clock=client.timestamp
-        end
+        local ok, now = pcall(client.timestamp)
+        if ok and type(now)=="number" and now==now then startup_clock=client.timestamp end
     end
 end
 local function read_startup_clock()
@@ -35,32 +47,47 @@ local function read_startup_clock()
     end
     return now
 end
+local function startup_location()
+    return tostring(current_function or "initialization").." pc="..tostring(current_pc or 0)
+end
+local function startup_limit_reason()
+    local now=read_startup_clock()
+    if now and startup_started and now-startup_started>=startup_wall_timeout_ms then
+        return "ANDROMEDA_WALL_TIMEOUT: "..startup_location()
+    end
+    if startup_elapsed_ms>=startup_timeout_ms then
+        return "ANDROMEDA_ACTIVE_TIMEOUT: "..startup_location()
+    end
+    if startup_polls>=startup_max_polls or startup_slices>=startup_max_slices then
+        return "ANDROMEDA_TOTAL_BUDGET: "..startup_location()
+    end
+end
 local function begin_startup_slice()
     local now=read_startup_clock()
-    startup_last_poll, startup_slice_started=now, now
+    startup_started=startup_started or now
+    startup_last_poll, startup_slice_started=now,now
+    startup_slice_polls=0
+    startup_slices=startup_slices+1
 end
 local function check_startup_clock(no_yield)
-    -- Event callbacks can run while startup is suspended. Only charge startup's
-    -- own coroutine; time spent waiting for the next frame is excluded.
     if startup_thread and coroutine.running()~=startup_thread then return end
+    startup_polls=startup_polls+1
+    startup_slice_polls=startup_slice_polls+1
     local now=read_startup_clock()
-    if not now then return end
-    if startup_last_poll then
-        startup_elapsed_ms=startup_elapsed_ms+math.max(0, now-startup_last_poll)
+    if now and startup_last_poll then
+        startup_elapsed_ms=startup_elapsed_ms+math.max(0,now-startup_last_poll)
     end
     startup_last_poll=now
-    if startup_elapsed_ms>=startup_timeout_ms then
-        error("ANDROMEDA_STARTUP_TIMEOUT: "..tostring(current_function)..
-            " pc="..tostring(current_pc).." elapsed_ms="..
-            tostring(math.floor(startup_elapsed_ms)),0)
-    end
-    if not no_yield and startup_thread and startup_slice_started and
-        now-startup_slice_started>=startup_slice_ms then
-        -- LuaJIT permits yielding across pcall. A native API callback may still
-        -- create a non-yieldable boundary; retry at a later interpreter poll.
-        pcall(coroutine.yield)
+    local reason=startup_limit_reason()
+    if reason then error(reason,0) end
+    local time_slice=now and startup_slice_started and now-startup_slice_started>=startup_slice_ms
+    if not no_yield and startup_thread and
+        (time_slice or startup_slice_polls>=startup_slice_poll_limit) then
+        local ok,err=pcall(coroutine.yield,startup_yield_token)
+        if not ok then error("ANDROMEDA_CANNOT_YIELD: "..tostring(err),0) end
     end
 end
+
 local function new_frame() return {} end
 local function pack_returns(...) return select("#", ...), {...} end
 local function unpack_range(last, values, first) return unpack(values, first, last) end
@@ -5173,6 +5200,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local T=function_metadata[7]
 if function_metadata[9]==1 then
 return function(...)
+if startup_blocked then return end
 local registers, top, environment, W, n, m, x, N, H, v, R, Q, q = new_frame(T), 1, (getfenv()), (1)
 local T, instruction_pointer, U, _, S, z, a = 0, 1
 local instructions_left=startup_instruction_limit
@@ -5181,12 +5209,10 @@ current_function,current_pc=function_metadata.id,instruction_pointer
 if startup_active then
 instructions_left=instructions_left-1
 if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: "..function_metadata.id.." pc="..instruction_pointer,0) end
-if startup_clock then
 startup_poll_remaining=startup_poll_remaining-1
 if startup_poll_remaining<=0 then
 startup_poll_remaining=startup_poll_interval
 check_startup_clock()
-end
 end
 end
 local j=code_metadata[instruction_pointer]
@@ -6665,6 +6691,7 @@ end
 end
 else
 return function(...)
+if startup_blocked then return end
 local registers, top, environment, W, n, m, x, N, H, v = new_frame(T), 1, (getfenv()), 1
 local R
 local instructions_left=startup_instruction_limit
@@ -6673,12 +6700,10 @@ current_function,current_pc=function_metadata.id,W
 if startup_active then
 instructions_left=instructions_left-1
 if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: "..function_metadata.id.." pc="..W,0) end
-if startup_clock then
 startup_poll_remaining=startup_poll_remaining-1
 if startup_poll_remaining<=0 then
 startup_poll_remaining=startup_poll_interval
 check_startup_clock()
-end
 end
 end
 local Q=code_metadata[W]
@@ -6840,6 +6865,7 @@ F.f3=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -6849,10 +6875,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f3 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -7103,6 +7130,7 @@ F.f4=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -7112,10 +7140,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f4 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -7351,6 +7380,7 @@ F.f5=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -7360,10 +7390,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f5 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -7632,6 +7663,7 @@ F.f6=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -7641,10 +7673,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f6 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -8063,6 +8096,7 @@ F.f7=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -8072,10 +8106,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f7 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -9230,6 +9265,7 @@ F.f8=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -9239,10 +9275,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f8 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -13891,6 +13928,7 @@ F.f9=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -13900,10 +13938,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f9 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -14099,6 +14138,7 @@ F.f10=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -14108,10 +14148,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f10 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -14193,6 +14234,7 @@ F.f11=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -14202,10 +14244,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f11 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -14247,6 +14290,7 @@ F.f12=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -14256,10 +14300,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f12 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -14315,6 +14360,7 @@ F.f13=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -14324,10 +14370,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f13 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -14383,6 +14430,7 @@ F.f14=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -14392,10 +14440,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f14 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -14427,6 +14476,7 @@ F.f15=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -14436,10 +14486,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f15 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -14472,6 +14523,7 @@ F.f16=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -14481,10 +14533,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f16 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -14574,6 +14627,7 @@ F.f17=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -14583,10 +14637,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f17 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -14677,6 +14732,7 @@ F.f18=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -14686,10 +14742,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f18 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -14760,6 +14817,7 @@ F.f19=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -14769,10 +14827,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f19 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -14821,6 +14880,7 @@ F.f20=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -14830,10 +14890,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f20 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -14924,6 +14985,7 @@ F.f21=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -14933,10 +14995,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f21 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -15026,6 +15089,7 @@ F.f22=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -15035,10 +15099,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f22 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -15129,6 +15194,7 @@ F.f23=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -15138,10 +15204,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f23 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -15231,6 +15298,7 @@ F.f24=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -15240,10 +15308,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f24 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -15333,6 +15402,7 @@ F.f25=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -15342,10 +15412,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f25 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -15435,6 +15506,7 @@ F.f26=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -15444,10 +15516,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f26 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -15551,6 +15624,7 @@ F.f27=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -15560,10 +15634,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f27 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -15637,6 +15712,7 @@ F.f28=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -15646,10 +15722,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f28 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -15681,6 +15758,7 @@ F.f29=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -15690,10 +15768,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f29 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -17143,6 +17222,7 @@ F.f30=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -17152,10 +17232,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f30 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -17425,6 +17506,7 @@ F.f31=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -17434,10 +17516,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f31 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -17549,6 +17632,7 @@ F.f32=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -17558,10 +17642,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f32 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -17676,6 +17761,7 @@ F.f33=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -17685,10 +17771,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f33 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -17766,6 +17853,7 @@ F.f34=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -17775,10 +17863,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f34 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -18038,6 +18127,7 @@ F.f35=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -18047,10 +18137,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f35 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -18227,6 +18318,7 @@ F.f36=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -18236,10 +18328,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f36 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -18834,6 +18927,7 @@ F.f37=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -18843,10 +18937,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f37 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -18948,6 +19043,7 @@ F.f38=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -18957,10 +19053,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f38 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -19324,6 +19421,7 @@ F.f39=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -19333,10 +19431,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f39 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -19649,6 +19748,7 @@ F.f40=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -19658,10 +19758,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f40 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -20125,6 +20226,7 @@ F.f41=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -20134,10 +20236,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f41 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -22350,6 +22453,7 @@ F.f42=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -22359,10 +22463,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f42 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -22480,6 +22585,7 @@ F.f43=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -22489,10 +22595,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f43 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -22594,6 +22701,7 @@ F.f44=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -22603,10 +22711,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f44 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -22795,6 +22904,7 @@ F.f46=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -22804,10 +22914,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f46 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -23099,6 +23210,7 @@ F.f47=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -23108,10 +23220,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f47 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -23466,6 +23579,7 @@ F.f48=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -23475,10 +23589,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f48 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -23727,6 +23842,7 @@ F.f49=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -23736,10 +23852,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f49 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -23997,6 +24114,7 @@ F.f50=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -24006,10 +24124,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f50 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -24295,6 +24414,7 @@ F.f51=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -24304,10 +24424,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f51 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -24752,6 +24873,7 @@ F.f52=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -24761,10 +24883,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f52 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -26117,6 +26240,7 @@ F.f53=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -26126,10 +26250,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f53 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -30663,6 +30788,7 @@ F.f54=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -30672,10 +30798,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f54 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -30898,6 +31025,7 @@ F.f55=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -30907,10 +31035,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f55 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -30967,6 +31096,7 @@ F.f56=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -30976,10 +31106,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f56 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -31061,6 +31192,7 @@ F.f57=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -31070,10 +31202,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f57 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -31114,6 +31247,7 @@ F.f58=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -31123,10 +31257,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f58 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -31182,6 +31317,7 @@ F.f59=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -31191,10 +31327,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f59 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -31259,6 +31396,7 @@ F.f60=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -31268,10 +31406,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f60 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -31362,6 +31501,7 @@ F.f61=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -31371,10 +31511,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f61 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -31465,6 +31606,7 @@ F.f62=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -31474,10 +31616,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f62 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -31664,6 +31807,7 @@ F.f63=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -31673,10 +31817,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f63 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -31838,6 +31983,7 @@ F.f64=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -31847,10 +31993,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f64 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -32143,6 +32290,7 @@ F.f65=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -32152,10 +32300,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f65 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -33597,6 +33746,7 @@ F.f66=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -33606,10 +33756,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f66 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -37949,6 +38100,7 @@ F.f67=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -37958,10 +38110,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f67 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -38017,6 +38170,7 @@ F.f68=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -38026,10 +38180,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f68 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -38086,6 +38241,7 @@ F.f69=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -38095,10 +38251,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f69 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -38295,6 +38452,7 @@ F.f70=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -38304,10 +38462,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f70 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -38389,6 +38548,7 @@ F.f71=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -38398,10 +38558,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f71 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -38443,6 +38604,7 @@ F.f72=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -38452,10 +38614,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f72 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -38488,6 +38651,7 @@ F.f73=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -38497,10 +38661,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f73 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -38571,6 +38736,7 @@ F.f74=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -38580,10 +38746,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f74 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -38843,6 +39010,7 @@ F.f75=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -38852,10 +39020,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f75 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -38933,6 +39102,7 @@ F.f76=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -38942,10 +39112,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f76 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -39140,6 +39311,7 @@ F.f77=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -39149,10 +39321,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f77 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -39261,6 +39434,7 @@ F.f78=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -39270,10 +39444,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f78 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -40213,6 +40388,7 @@ F.f79=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -40222,10 +40398,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f79 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -40407,6 +40584,7 @@ F.f80=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -40416,10 +40594,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f80 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -40759,6 +40938,7 @@ F.f81=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -40768,10 +40948,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f81 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -40853,6 +41034,7 @@ F.f82=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -40862,10 +41044,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f82 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -41002,6 +41185,7 @@ F.f83=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -41011,10 +41195,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f83 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -41753,6 +41938,7 @@ F.f84=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -41762,10 +41948,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f84 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -41866,6 +42053,7 @@ F.f85=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -41875,10 +42063,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f85 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -41910,6 +42099,7 @@ F.f86=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -41919,10 +42109,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f86 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -42324,6 +42515,7 @@ F.f87=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -42333,10 +42525,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f87 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -42593,6 +42786,7 @@ F.f88=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -42602,10 +42796,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f88 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -42667,6 +42862,7 @@ F.f89=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -42676,10 +42872,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f89 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -42801,6 +42998,7 @@ F.f90=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -42810,10 +43008,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f90 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -42890,6 +43089,7 @@ F.f91=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -42899,10 +43099,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f91 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -43006,6 +43207,7 @@ F.f92=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -43015,10 +43217,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f92 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -43057,6 +43260,7 @@ F.f93=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -43066,10 +43270,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f93 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -43200,6 +43405,7 @@ F.f94=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -43209,10 +43415,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f94 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -43307,6 +43514,7 @@ F.f95=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -43316,10 +43524,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f95 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -43367,6 +43576,7 @@ F.f96=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -43376,10 +43586,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f96 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -143364,6 +143575,7 @@ F.f97=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -143373,10 +143585,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f97 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -143408,6 +143621,7 @@ F.f98=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -143417,10 +143631,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f98 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -144016,6 +144231,7 @@ F.f99=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -144025,10 +144241,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f99 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -144625,6 +144842,7 @@ F.f100=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -144634,10 +144852,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f100 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -144777,6 +144996,7 @@ F.f101=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -144786,10 +145006,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f101 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -145786,6 +146007,7 @@ F.f102=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -145795,10 +146017,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f102 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -146636,6 +146859,7 @@ F.f103=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -146645,10 +146869,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f103 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -147324,6 +147549,7 @@ F.f104=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -147333,10 +147559,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f104 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -147639,6 +147866,7 @@ F.f105=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -147648,10 +147876,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f105 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -147892,6 +148121,7 @@ F.f106=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -147901,10 +148131,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f106 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -148464,6 +148695,7 @@ F.f107=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -148473,10 +148705,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f107 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -148648,6 +148881,7 @@ F.f109=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -148657,10 +148891,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f109 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -149019,6 +149254,7 @@ F.f110=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -149028,10 +149264,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f110 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -149482,6 +149719,7 @@ F.f111=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -149491,10 +149729,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f111 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -150657,6 +150896,7 @@ F.f112=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -150666,10 +150906,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f112 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -150920,6 +151161,7 @@ F.f113=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -150929,10 +151171,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f113 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -151195,6 +151438,7 @@ F.f114=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -151204,10 +151448,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f114 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -151515,6 +151760,7 @@ F.f116=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -151524,10 +151770,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f116 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -151901,6 +152148,7 @@ F.f117=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -151910,10 +152158,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f117 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -152179,6 +152428,7 @@ F.f118=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -152188,10 +152438,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f118 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -152431,6 +152682,7 @@ F.f119=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -152440,10 +152692,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f119 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -152740,6 +152993,7 @@ F.f120=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -152749,10 +153003,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f120 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -153218,6 +153473,7 @@ F.f121=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -153227,10 +153483,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f121 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -154445,6 +154702,7 @@ F.f122=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -154454,10 +154712,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f122 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -155606,6 +155865,7 @@ F.f123=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -155615,10 +155875,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f123 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -156483,6 +156744,7 @@ F.f124=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -156492,10 +156754,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f124 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -156816,6 +157079,7 @@ F.f125=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -156825,10 +157089,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f125 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -157967,6 +158232,7 @@ F.f126=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -157976,10 +158242,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f126 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -158039,6 +158306,7 @@ F.f127=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -158048,10 +158316,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f127 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -158227,6 +158496,7 @@ F.f128=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -158236,10 +158506,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f128 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -158923,6 +159194,7 @@ F.f129=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -158932,10 +159204,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f129 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -161889,6 +162162,7 @@ F.f130=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -161898,10 +162172,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f130 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -162155,6 +162430,7 @@ F.f131=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -162164,10 +162440,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f131 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -162242,6 +162519,7 @@ F.f132=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -162251,10 +162529,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f132 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -162668,6 +162947,7 @@ F.f133=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -162677,10 +162957,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f133 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -163340,6 +163621,7 @@ F.f134=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -163349,10 +163631,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f134 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -163468,6 +163751,7 @@ F.f135=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -163477,10 +163761,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f135 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -163959,6 +164244,7 @@ F.f136=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -163968,10 +164254,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f136 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -164168,6 +164455,7 @@ F.f137=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -164177,10 +164465,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f137 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -167138,6 +167427,7 @@ F.f138=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -167147,10 +167437,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f138 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -167337,6 +167628,7 @@ F.f139=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -167346,10 +167638,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f139 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -167935,6 +168228,7 @@ F.f140=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -167944,10 +168238,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f140 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -168208,6 +168503,7 @@ F.f141=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -168217,10 +168513,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f141 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -168379,6 +168676,7 @@ F.f142=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -168388,10 +168686,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f142 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -168733,6 +169032,7 @@ F.f143=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -168742,10 +169042,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f143 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -169356,6 +169657,7 @@ F.f144=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -169365,10 +169667,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f144 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -169458,6 +169761,7 @@ F.f145=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -169467,10 +169771,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f145 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -169992,6 +170297,7 @@ F.f146=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -170001,10 +170307,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f146 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -170626,6 +170933,7 @@ F.f147=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -170635,10 +170943,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f147 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -170893,6 +171202,7 @@ F.f148=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -170902,10 +171212,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f148 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -172299,6 +172610,7 @@ F.f149=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -172308,10 +172620,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f149 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -172878,6 +173191,7 @@ F.f150=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -172887,10 +173201,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f150 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -173710,6 +174025,7 @@ F.f151=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -173719,10 +174035,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f151 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -174019,6 +174336,7 @@ F.f152=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -174028,10 +174346,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f152 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -174126,6 +174445,7 @@ F.f153=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -174135,10 +174455,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f153 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -174855,6 +175176,7 @@ F.f154=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -174864,10 +175186,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f154 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -175142,6 +175465,7 @@ F.f155=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -175151,10 +175475,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f155 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -178293,6 +178618,7 @@ F.f156=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -178302,10 +178628,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f156 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -178588,6 +178915,7 @@ F.f157=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -178597,10 +178925,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f157 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -178727,6 +179056,7 @@ F.f158=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -178736,10 +179066,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f158 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -178892,6 +179223,7 @@ F.f159=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -178901,10 +179233,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f159 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -179010,6 +179343,7 @@ F.f160=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -179019,10 +179353,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f160 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -179533,6 +179868,7 @@ F.f161=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -179542,10 +179878,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f161 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -179708,6 +180045,7 @@ F.f162=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -179717,10 +180055,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f162 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -179949,6 +180288,7 @@ F.f163=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -179958,10 +180298,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f163 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -180145,6 +180486,7 @@ F.f164=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -180154,10 +180496,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f164 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -180344,6 +180687,7 @@ F.f165=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -180353,10 +180697,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f165 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -180568,6 +180913,7 @@ F.f166=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -180577,10 +180923,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f166 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -180989,6 +181336,7 @@ F.f167=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -180998,10 +181346,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f167 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -181281,6 +181630,7 @@ F.f168=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -181290,10 +181640,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f168 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -181531,6 +181882,7 @@ F.f169=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -181540,10 +181892,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f169 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -181592,6 +181945,7 @@ F.f170=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -181601,10 +181955,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f170 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -182115,6 +182470,7 @@ F.f171=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -182124,10 +182480,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f171 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -182495,6 +182852,7 @@ F.f172=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -182504,10 +182862,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f172 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -183209,6 +183568,7 @@ F.f173=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -183218,10 +183578,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f173 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -183276,6 +183637,7 @@ F.f174=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -183285,10 +183647,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f174 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -183387,6 +183750,7 @@ F.f175=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -183396,10 +183760,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f175 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -183432,6 +183797,7 @@ F.f176=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -183441,10 +183807,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f176 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -183476,6 +183843,7 @@ F.f177=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -183485,10 +183853,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f177 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -185197,6 +185566,7 @@ F.f178=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -185206,10 +185576,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f178 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -185325,6 +185696,7 @@ F.f179=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -185334,10 +185706,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f179 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -185462,6 +185835,7 @@ F.f180=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -185471,10 +185845,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f180 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -185630,6 +186005,7 @@ F.f181=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -185639,10 +186015,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f181 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -186383,6 +186760,7 @@ F.f182=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -186392,10 +186770,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f182 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -186582,6 +186961,7 @@ F.f183=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -186591,10 +186971,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f183 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -187338,6 +187719,7 @@ F.f184=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -187347,10 +187729,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f184 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -188953,6 +189336,7 @@ F.f185=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -188962,10 +189346,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f185 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -189381,6 +189766,7 @@ F.f186=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -189390,10 +189776,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f186 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -189469,6 +189856,7 @@ F.f187=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -189478,10 +189866,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f187 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -190382,6 +190771,7 @@ F.f188=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -190391,10 +190781,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f188 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -191208,6 +191599,7 @@ F.f189=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -191217,10 +191609,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f189 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -191623,6 +192016,7 @@ F.f190=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -191632,10 +192026,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f190 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -192218,6 +192613,7 @@ F.f191=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -192227,10 +192623,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f191 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -192359,6 +192756,7 @@ F.f192=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -192368,10 +192766,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f192 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -192498,6 +192897,7 @@ F.f193=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -192507,10 +192907,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f193 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -192568,6 +192969,7 @@ F.f194=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -192577,10 +192979,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f194 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -192639,6 +193042,7 @@ F.f195=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -192648,10 +193052,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f195 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -192904,6 +193309,7 @@ F.f196=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -192913,10 +193319,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f196 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -193601,6 +194008,7 @@ F.f197=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -193610,10 +194018,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f197 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -194280,6 +194689,7 @@ F.f198=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -194289,10 +194699,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f198 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -194368,6 +194779,7 @@ F.f199=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -194377,10 +194789,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f199 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -194542,6 +194955,7 @@ F.f200=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -194551,10 +194965,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f200 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -195025,6 +195440,7 @@ F.f201=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -195034,10 +195450,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f201 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -199936,6 +200353,7 @@ F.f202=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -199945,10 +200363,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f202 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -200081,6 +200500,7 @@ F.f203=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -200090,10 +200510,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f203 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -200163,6 +200584,7 @@ F.f204=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -200172,10 +200594,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f204 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -200245,6 +200668,7 @@ F.f205=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -200254,10 +200678,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f205 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -200327,6 +200752,7 @@ F.f206=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -200336,10 +200762,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f206 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -200410,6 +200837,7 @@ F.f207=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -200419,10 +200847,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f207 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -200492,6 +200921,7 @@ F.f208=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -200501,10 +200931,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f208 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -200574,6 +201005,7 @@ F.f209=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -200583,10 +201015,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f209 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -200935,6 +201368,7 @@ F.f210=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -200944,10 +201378,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f210 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -201153,6 +201588,7 @@ F.f211=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -201162,10 +201598,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f211 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -201340,6 +201777,7 @@ F.f212=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -201349,10 +201787,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f212 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -201533,6 +201972,7 @@ F.f213=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -201542,10 +201982,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f213 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -201644,6 +202085,7 @@ F.f214=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -201653,10 +202095,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f214 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -201733,6 +202176,7 @@ F.f215=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -201742,10 +202186,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f215 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -202043,6 +202488,7 @@ F.f216=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -202052,10 +202498,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f216 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -202251,6 +202698,7 @@ F.f217=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -202260,10 +202708,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f217 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -202624,6 +203073,7 @@ F.f218=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -202633,10 +203083,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f218 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -202761,6 +203212,7 @@ F.f219=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -202770,10 +203222,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f219 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -202937,6 +203390,7 @@ F.f220=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -202946,10 +203400,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f220 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -203348,6 +203803,7 @@ F.f221=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -203357,10 +203813,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f221 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -204182,6 +204639,7 @@ F.f222=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -204191,10 +204649,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f222 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -204249,6 +204708,7 @@ F.f223=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -204258,10 +204718,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f223 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -204867,6 +205328,7 @@ F.f224=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -204876,10 +205338,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f224 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -206357,6 +206820,7 @@ F.f225=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -206366,10 +206830,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f225 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -206737,6 +207202,7 @@ F.f226=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -206746,10 +207212,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f226 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -207005,6 +207472,7 @@ F.f227=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -207014,10 +207482,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f227 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -207509,6 +207978,7 @@ F.f228=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -207518,10 +207988,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f228 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -208209,6 +208680,7 @@ F.f229=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -208218,10 +208690,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f229 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -208608,6 +209081,7 @@ F.f230=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -208617,10 +209091,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f230 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -208681,6 +209156,7 @@ F.f231=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -208690,10 +209166,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f231 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -210054,6 +210531,7 @@ F.f232=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -210063,10 +210541,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f232 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -210098,6 +210577,7 @@ F.f233=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -210107,10 +210587,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f233 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -210490,6 +210971,7 @@ F.f234=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -210499,10 +210981,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f234 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -210655,6 +211138,7 @@ F.f235=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -210664,10 +211148,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f235 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -210995,6 +211480,7 @@ F.f236=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -211004,10 +211490,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f236 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -211195,6 +211682,7 @@ F.f237=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -211204,10 +211692,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f237 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -211503,6 +211992,7 @@ F.f238=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -211512,10 +212002,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f238 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -211938,6 +212429,7 @@ F.f239=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -211947,10 +212439,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f239 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -212085,6 +212578,7 @@ F.f240=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -212094,10 +212588,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f240 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -212526,6 +213021,7 @@ F.f241=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -212535,10 +213031,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f241 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -213079,6 +213576,7 @@ F.f242=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -213088,10 +213586,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f242 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -213563,6 +214062,7 @@ F.f243=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -213572,10 +214072,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f243 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -213918,6 +214419,7 @@ F.f244=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -213927,10 +214429,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f244 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -214101,6 +214604,7 @@ F.f245=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -214110,10 +214614,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f245 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -214572,6 +215077,7 @@ F.f246=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -214581,10 +215087,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f246 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -214656,6 +215163,7 @@ F.f247=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -214665,10 +215173,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f247 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -214860,6 +215369,7 @@ F.f248=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -214869,10 +215379,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f248 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -215299,6 +215810,7 @@ F.f249=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -215308,10 +215820,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f249 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -216050,6 +216563,7 @@ F.f250=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -216059,10 +216573,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f250 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -216370,6 +216885,7 @@ F.f251=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -216379,10 +216895,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f251 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -216581,6 +217098,7 @@ F.f252=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -216590,10 +217108,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f252 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -217070,6 +217589,7 @@ F.f253=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -217079,10 +217599,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f253 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -217180,6 +217701,7 @@ F.f254=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -217189,10 +217711,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f254 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -217376,6 +217899,7 @@ F.f255=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -217385,10 +217909,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f255 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -217985,6 +218510,7 @@ F.f256=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -217994,10 +218520,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f256 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -219219,6 +219746,7 @@ F.f257=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -219228,10 +219756,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f257 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -219568,6 +220097,7 @@ F.f258=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -219577,10 +220107,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f258 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -220274,6 +220805,7 @@ F.f259=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -220283,10 +220815,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f259 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -220460,6 +220993,7 @@ F.f260=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -220469,10 +221003,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f260 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -220604,6 +221139,7 @@ F.f261=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -220613,10 +221149,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f261 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -220746,6 +221283,7 @@ F.f262=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -220755,10 +221293,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f262 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -221407,6 +221946,7 @@ F.f263=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -221416,10 +221956,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f263 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -222213,6 +222754,7 @@ F.f264=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -222222,10 +222764,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f264 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -223655,6 +224198,7 @@ F.f265=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -223664,10 +224208,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f265 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -224010,6 +224555,7 @@ F.f266=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -224019,10 +224565,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f266 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -224165,6 +224712,7 @@ F.f267=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -224174,10 +224722,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f267 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -224826,6 +225375,7 @@ F.f268=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -224835,10 +225385,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f268 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -225017,6 +225568,7 @@ F.f269=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -225026,10 +225578,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f269 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -225496,6 +226049,7 @@ F.f270=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -225505,10 +226059,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f270 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -225557,6 +226112,7 @@ F.f271=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -225566,10 +226122,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f271 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -225601,6 +226158,7 @@ F.f272=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -225610,10 +226168,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f272 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -225740,6 +226299,7 @@ F.f273=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -225749,10 +226309,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f273 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -225830,6 +226391,7 @@ F.f274=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -225839,10 +226401,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f274 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -226753,6 +227316,7 @@ F.f275=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -226762,10 +227326,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f275 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -226877,6 +227442,7 @@ F.f276=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -226886,10 +227452,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f276 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -231376,6 +231943,7 @@ F.f277=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -231385,10 +231953,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f277 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -231444,6 +232013,7 @@ F.f278=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -231453,10 +232023,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f278 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -231653,6 +232224,7 @@ F.f279=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -231662,10 +232234,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f279 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -231748,6 +232321,7 @@ F.f280=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -231757,10 +232331,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f280 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -231801,6 +232376,7 @@ F.f281=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -231810,10 +232386,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f281 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -231869,6 +232446,7 @@ F.f282=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -231878,10 +232456,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f282 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -232190,6 +232769,7 @@ F.f283=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -232199,10 +232779,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f283 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -233382,6 +233963,7 @@ F.f284=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -233391,10 +233973,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f284 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -233523,6 +234106,7 @@ F.f285=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -233532,10 +234116,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f285 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -233638,6 +234223,7 @@ F.f286=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -233647,10 +234233,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f286 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -234504,6 +235091,7 @@ F.f287=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -234513,10 +235101,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f287 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -234704,6 +235293,7 @@ F.f288=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -234713,10 +235303,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f288 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -234973,6 +235564,7 @@ F.f289=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -234982,10 +235574,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f289 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -235205,6 +235798,7 @@ F.f290=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -235214,10 +235808,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f290 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -235559,6 +236154,7 @@ F.f291=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -235568,10 +236164,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f291 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -235956,6 +236553,7 @@ F.f292=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -235965,10 +236563,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f292 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -237272,6 +237871,7 @@ F.f293=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -237281,10 +237881,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f293 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -237531,6 +238132,7 @@ F.f294=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -237540,10 +238142,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f294 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -238027,6 +238630,7 @@ F.f295=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -238036,10 +238640,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f295 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -238393,6 +238998,7 @@ F.f296=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -238402,10 +239008,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f296 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -238961,6 +239568,7 @@ F.f297=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -238970,10 +239578,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f297 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -240490,6 +241099,7 @@ F.f298=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -240499,10 +241109,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f298 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -240752,6 +241363,7 @@ F.f299=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -240761,10 +241373,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f299 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -240949,6 +241562,7 @@ F.f300=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -240958,10 +241572,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f300 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -241383,6 +241998,7 @@ F.f301=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -241392,10 +242008,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f301 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -242428,6 +243045,7 @@ F.f302=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -242437,10 +243055,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f302 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -244399,6 +245018,7 @@ F.f303=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -244408,10 +245028,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f303 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -244971,6 +245592,7 @@ F.f304=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -244980,10 +245602,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f304 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -245306,6 +245929,7 @@ F.f305=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -245315,10 +245939,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f305 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -245530,6 +246155,7 @@ F.f306=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -245539,10 +246165,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f306 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -245644,6 +246271,7 @@ F.f307=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -245653,10 +246281,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f307 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -245854,6 +246483,7 @@ F.f308=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -245863,10 +246493,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f308 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -246864,6 +247495,7 @@ F.f309=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -246873,10 +247505,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f309 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -247381,6 +248014,7 @@ F.f310=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -247390,10 +248024,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f310 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -247684,6 +248319,7 @@ F.f311=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -247693,10 +248329,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f311 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -248271,6 +248908,7 @@ F.f312=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -248280,10 +248918,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f312 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -248486,6 +249125,7 @@ F.f313=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -248495,10 +249135,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f313 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -248660,6 +249301,7 @@ F.f314=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -248669,10 +249311,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f314 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -248869,6 +249512,7 @@ F.f315=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -248878,10 +249522,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f315 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -248929,6 +249574,7 @@ F.f316=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -248938,10 +249584,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f316 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -248996,6 +249643,7 @@ F.f317=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -249005,10 +249653,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f317 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -249254,6 +249903,7 @@ F.f318=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -249263,10 +249913,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f318 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -249907,6 +250558,7 @@ F.f319=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -249916,10 +250568,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f319 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -250281,6 +250934,7 @@ F.f320=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -250290,10 +250944,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f320 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -250880,6 +251535,7 @@ F.f321=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -250889,10 +251545,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f321 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -251162,6 +251819,7 @@ F.f322=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -251171,10 +251829,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f322 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -251932,6 +252591,7 @@ F.f323=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -251941,10 +252601,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f323 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -252224,6 +252885,7 @@ F.f324=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -252233,10 +252895,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f324 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -252778,6 +253441,7 @@ F.f325=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -252787,10 +253451,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f325 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -252863,6 +253528,7 @@ F.f326=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -252872,10 +253538,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f326 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -253154,6 +253821,7 @@ F.f327=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -253163,10 +253831,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f327 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -253324,6 +253993,7 @@ F.f328=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -253333,10 +254003,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f328 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -253625,6 +254296,7 @@ F.f329=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -253634,10 +254306,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f329 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -253768,6 +254441,7 @@ F.f330=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -253777,10 +254451,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f330 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -254170,6 +254845,7 @@ F.f331=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -254179,10 +254855,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f331 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -254317,6 +254994,7 @@ F.f332=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -254326,10 +255004,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f332 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -254578,6 +255257,7 @@ F.f333=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -254587,10 +255267,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f333 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -254924,6 +255605,7 @@ F.f334=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -254933,10 +255615,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f334 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -255689,6 +256372,7 @@ F.f335=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -255698,10 +256382,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f335 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -257280,6 +257965,7 @@ F.f336=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -257289,10 +257975,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f336 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -258293,6 +258980,7 @@ F.f337=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -258302,10 +258990,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f337 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -258762,6 +259451,7 @@ F.f338=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -258771,10 +259461,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f338 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -258837,6 +259528,7 @@ F.f339=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -258846,10 +259538,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f339 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -258905,6 +259598,7 @@ F.f340=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -258914,10 +259608,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f340 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -259062,6 +259757,7 @@ F.f341=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -259071,10 +259767,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f341 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -259524,6 +260221,7 @@ F.f342=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -259533,10 +260231,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f342 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -259704,6 +260403,7 @@ F.f343=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -259713,10 +260413,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f343 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -260631,6 +261332,7 @@ F.f344=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -260640,10 +261342,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f344 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -261516,6 +262219,7 @@ F.f345=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -261525,10 +262229,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f345 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -264973,6 +265678,7 @@ F.f346=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -264982,10 +265688,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f346 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -265701,6 +266408,7 @@ F.f347=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -265710,10 +266418,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f347 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -265761,6 +266470,7 @@ F.f348=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -265770,10 +266480,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f348 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -265904,6 +266615,7 @@ F.f349=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -265913,10 +266625,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f349 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -265974,6 +266687,7 @@ F.f350=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -265983,10 +266697,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f350 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -266061,6 +266776,7 @@ F.f351=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -266070,10 +266786,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f351 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -266186,6 +266903,7 @@ F.f352=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -266195,10 +266913,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f352 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -266894,6 +267613,7 @@ F.f353=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -266903,10 +267623,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f353 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -267578,6 +268299,7 @@ F.f354=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -267587,10 +268309,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f354 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -269586,6 +270309,7 @@ F.f355=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -269595,10 +270319,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f355 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -269721,6 +270446,7 @@ F.f356=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -269730,10 +270456,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f356 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -269913,6 +270640,7 @@ F.f357=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -269922,10 +270650,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f357 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -270263,6 +270992,7 @@ F.f358=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -270272,10 +271002,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f358 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -270811,6 +271542,7 @@ F.f359=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -270820,10 +271552,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f359 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -271124,6 +271857,7 @@ F.f360=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -271133,10 +271867,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f360 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -272180,6 +272915,7 @@ F.f361=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -272189,10 +272925,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f361 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -273033,6 +273770,7 @@ F.f362=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -273042,10 +273780,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f362 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -273146,6 +273885,7 @@ F.f363=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -273155,10 +273895,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f363 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -273950,6 +274691,7 @@ F.f364=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -273959,10 +274701,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f364 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -275577,6 +276320,7 @@ F.f365=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -275586,10 +276330,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f365 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -276873,6 +277618,7 @@ F.f366=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -276882,10 +277628,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f366 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -277190,6 +277937,7 @@ F.f367=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -277199,10 +277947,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f367 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -277693,6 +278442,7 @@ F.f368=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -277702,10 +278452,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f368 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -278034,6 +278785,7 @@ F.f369=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -278043,10 +278795,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f369 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -278171,6 +278924,7 @@ F.f370=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -278180,10 +278934,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f370 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -278798,6 +279553,7 @@ F.f371=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -278807,10 +279563,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f371 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -278911,6 +279668,7 @@ F.f372=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -278920,10 +279678,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f372 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -279015,6 +279774,7 @@ F.f373=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -279024,10 +279784,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f373 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -279158,6 +279919,7 @@ F.f374=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -279167,10 +279929,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f374 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -279377,6 +280140,7 @@ F.f375=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -279386,10 +280150,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f375 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -279444,6 +280209,7 @@ F.f376=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -279453,10 +280219,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f376 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -279595,6 +280362,7 @@ F.f377=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -279604,10 +280372,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f377 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -279746,6 +280515,7 @@ F.f378=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -279755,10 +280525,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f378 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -280280,6 +281051,7 @@ F.f379=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -280289,10 +281061,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f379 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -281075,6 +281848,7 @@ F.f380=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -281084,10 +281858,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f380 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -281175,6 +281950,7 @@ F.f381=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -281184,10 +281960,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f381 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -281289,6 +282066,7 @@ F.f382=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -281298,10 +282076,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f382 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -281439,6 +282218,7 @@ F.f383=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -281448,10 +282228,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f383 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -281698,6 +282479,7 @@ F.f384=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -281707,10 +282489,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f384 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -281805,6 +282588,7 @@ F.f385=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -281814,10 +282598,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f385 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -282151,6 +282936,7 @@ F.f386=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -282160,10 +282946,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f386 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -282511,6 +283298,7 @@ F.f387=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -282520,10 +283308,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f387 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -283077,6 +283866,7 @@ F.f388=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -283086,10 +283876,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f388 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -283144,6 +283935,7 @@ F.f389=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -283153,10 +283945,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f389 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -283521,6 +284314,7 @@ F.f390=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -283530,10 +284324,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f390 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -284389,6 +285184,7 @@ F.f391=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -284398,10 +285194,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f391 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -284756,6 +285553,7 @@ F.f392=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -284765,10 +285563,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f392 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -285366,6 +286165,7 @@ F.f393=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -285375,10 +286175,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f393 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -285820,6 +286621,7 @@ F.f394=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -285829,10 +286631,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f394 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -286928,6 +287731,7 @@ F.f395=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -286937,10 +287741,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f395 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -287166,6 +287971,7 @@ F.f396=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -287175,10 +287981,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f396 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -287615,6 +288422,7 @@ F.f397=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -287624,10 +288432,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f397 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -289131,6 +289940,7 @@ F.f398=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -289140,10 +289950,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f398 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -289306,6 +290117,7 @@ F.f399=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -289315,10 +290127,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f399 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -289725,6 +290538,7 @@ F.f400=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -289734,10 +290548,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f400 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -289930,6 +290745,7 @@ F.f401=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -289939,10 +290755,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f401 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -290149,6 +290966,7 @@ F.f402=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -290158,10 +290976,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f402 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -292041,6 +292860,7 @@ F.f404=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -292050,10 +292870,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f404 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -292227,6 +293048,7 @@ F.f405=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -292236,10 +293058,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f405 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -292517,6 +293340,7 @@ F.f406=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -292526,10 +293350,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f406 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -292856,6 +293681,7 @@ F.f407=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -292865,10 +293691,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f407 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -294149,6 +294976,7 @@ F.f408=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -294158,10 +294986,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f408 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -297661,6 +298490,7 @@ F.f409=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -297670,10 +298500,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f409 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -297843,6 +298674,7 @@ F.f410=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -297852,10 +298684,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f410 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -298047,6 +298880,7 @@ F.f411=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -298056,10 +298890,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f411 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -299011,6 +299846,7 @@ F.f412=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -299020,10 +299856,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f412 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -299904,6 +300741,7 @@ F.f413=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -299913,10 +300751,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f413 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -300124,6 +300963,7 @@ F.f414=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -300133,10 +300973,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f414 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -300272,6 +301113,7 @@ F.f415=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -300281,10 +301123,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f415 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -300785,6 +301628,7 @@ F.f417=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -300794,10 +301638,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f417 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -300868,6 +301713,7 @@ F.f418=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -300877,10 +301723,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f418 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -301236,6 +302083,7 @@ F.f419=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -301245,10 +302093,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f419 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -301499,6 +302348,7 @@ F.f420=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -301508,10 +302358,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f420 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -301805,6 +302656,7 @@ F.f421=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -301814,10 +302666,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f421 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -302122,6 +302975,7 @@ F.f422=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -302131,10 +302985,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f422 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -302571,6 +303426,7 @@ F.f423=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -302580,10 +303436,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f423 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -303786,6 +304643,7 @@ F.f424=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -303795,10 +304653,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f424 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -303856,6 +304715,7 @@ F.f425=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -303865,10 +304725,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f425 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -304014,6 +304875,7 @@ F.f426=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -304023,10 +304885,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f426 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -304165,6 +305028,7 @@ F.f427=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -304174,10 +305038,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f427 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -304253,6 +305118,7 @@ F.f428=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -304262,10 +305128,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f428 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -304450,6 +305317,7 @@ F.f429=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -304459,10 +305327,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f429 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -304580,6 +305449,7 @@ F.f430=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -304589,10 +305459,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f430 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -304940,6 +305811,7 @@ F.f431=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -304949,10 +305821,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f431 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -305559,6 +306432,7 @@ F.f432=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -305568,10 +306442,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f432 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -305756,6 +306631,7 @@ F.f433=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -305765,10 +306641,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f433 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -305837,6 +306714,7 @@ F.f434=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -305846,10 +306724,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f434 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -306058,6 +306937,7 @@ F.f435=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -306067,10 +306947,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f435 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -306286,6 +307167,7 @@ F.f436=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -306295,10 +307177,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f436 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -306464,6 +307347,7 @@ F.f437=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -306473,10 +307357,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f437 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -306635,6 +307520,7 @@ F.f438=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -306644,10 +307530,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f438 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -306976,6 +307863,7 @@ F.f439=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -306985,10 +307873,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f439 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -307391,6 +308280,7 @@ F.f440=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -307400,10 +308290,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f440 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -307554,6 +308445,7 @@ F.f441=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -307563,10 +308455,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f441 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -307813,6 +308706,7 @@ F.f442=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -307822,10 +308716,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f442 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -308309,6 +309204,7 @@ F.f443=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -308318,10 +309214,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f443 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -308806,6 +309703,7 @@ F.f444=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -308815,10 +309713,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f444 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -310600,6 +311499,7 @@ F.f445=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -310609,10 +311509,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f445 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -310722,6 +311623,7 @@ F.f446=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -310731,10 +311633,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f446 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -310855,6 +311758,7 @@ F.f447=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -310864,10 +311768,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f447 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -311035,6 +311940,7 @@ F.f448=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -311044,10 +311950,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f448 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -311120,6 +312027,7 @@ F.f449=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -311129,10 +312037,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f449 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -311315,6 +312224,7 @@ F.f450=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -311324,10 +312234,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f450 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -311539,6 +312450,7 @@ F.f451=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -311548,10 +312460,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f451 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -311955,6 +312868,7 @@ F.f452=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -311964,10 +312878,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f452 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -312051,6 +312966,7 @@ F.f453=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -312060,10 +312976,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f453 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -312500,6 +313417,7 @@ F.f454=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -312509,10 +313427,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f454 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -313198,6 +314117,7 @@ F.f455=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -313207,10 +314127,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f455 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -313412,6 +314333,7 @@ F.f456=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -313421,10 +314343,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f456 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -313735,6 +314658,7 @@ F.f457=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -313744,10 +314668,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f457 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -313910,6 +314835,7 @@ F.f458=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -313919,10 +314845,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f458 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -314098,6 +315025,7 @@ F.f459=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -314107,10 +315035,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f459 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -314211,6 +315140,7 @@ F.f460=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -314220,10 +315150,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f460 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -314321,6 +315252,7 @@ F.f461=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -314330,10 +315262,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f461 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -314469,6 +315402,7 @@ F.f462=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -314478,10 +315412,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f462 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -314625,6 +315560,7 @@ F.f463=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -314634,10 +315570,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f463 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -314790,6 +315727,7 @@ F.f464=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -314799,10 +315737,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f464 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -314902,6 +315841,7 @@ F.f465=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -314911,10 +315851,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f465 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -315006,6 +315947,7 @@ F.f466=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -315015,10 +315957,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f466 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -315249,6 +316192,7 @@ F.f467=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -315258,10 +316202,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f467 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -315602,6 +316547,7 @@ F.f468=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -315611,10 +316557,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f468 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -315898,6 +316845,7 @@ F.f469=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -315907,10 +316855,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f469 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -316005,6 +316954,7 @@ F.f470=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -316014,10 +316964,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f470 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -316727,6 +317678,7 @@ F.f471=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -316736,10 +317688,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f471 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -317742,6 +318695,7 @@ F.f472=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -317751,10 +318705,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f472 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -317896,6 +318851,7 @@ F.f473=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -317905,10 +318861,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f473 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -318001,6 +318958,7 @@ F.f474=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -318010,10 +318968,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f474 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -318151,6 +319110,7 @@ F.f475=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -318160,10 +319120,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f475 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -318270,6 +319231,7 @@ F.f476=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -318279,10 +319241,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f476 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -318376,6 +319339,7 @@ F.f477=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -318385,10 +319349,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f477 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -318526,6 +319491,7 @@ F.f478=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -318535,10 +319501,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f478 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -318729,6 +319696,7 @@ F.f479=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -318738,10 +319706,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f479 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -318984,6 +319953,7 @@ F.f480=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -318993,10 +319963,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f480 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -319052,6 +320023,7 @@ F.f481=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -319061,10 +320033,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f481 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -319322,6 +320295,7 @@ F.f482=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -319331,10 +320305,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f482 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -319490,6 +320465,7 @@ F.f483=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -319499,10 +320475,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f483 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -320010,6 +320987,7 @@ F.f484=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -320019,10 +320997,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f484 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -321719,6 +322698,7 @@ F.f485=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -321728,10 +322708,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f485 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -323181,6 +324162,7 @@ F.f486=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -323190,10 +324172,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f486 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -323821,6 +324804,7 @@ F.f487=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -323830,10 +324814,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f487 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -323937,6 +324922,7 @@ F.f488=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -323946,10 +324932,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f488 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -324051,6 +325038,7 @@ F.f489=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -324060,10 +325048,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f489 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -324169,6 +325158,7 @@ F.f490=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -324178,10 +325168,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f490 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -324285,6 +325276,7 @@ F.f491=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -324294,10 +325286,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f491 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -324418,6 +325411,7 @@ F.f492=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -324427,10 +325421,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f492 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -324595,6 +325590,7 @@ F.f493=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -324604,10 +325600,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f493 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -326014,6 +327011,7 @@ F.f494=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -326023,10 +327021,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f494 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -326089,6 +327088,7 @@ F.f495=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -326098,10 +327098,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f495 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -326924,6 +327925,7 @@ F.f496=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -326933,10 +327935,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f496 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -327494,6 +328497,7 @@ F.f497=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -327503,10 +328507,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f497 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -327893,6 +328898,7 @@ F.f498=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -327902,10 +328908,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f498 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -328058,6 +329065,7 @@ F.f499=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -328067,10 +329075,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f499 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -328312,6 +329321,7 @@ F.f500=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -328321,10 +329331,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f500 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -328589,6 +329600,7 @@ F.f501=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -328598,10 +329610,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f501 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -329230,6 +330243,7 @@ F.f502=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -329239,10 +330253,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f502 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -329405,6 +330420,7 @@ F.f503=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -329414,10 +330430,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f503 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -329695,6 +330712,7 @@ F.f504=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -329704,10 +330722,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f504 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -330004,6 +331023,7 @@ F.f505=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -330013,10 +331033,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f505 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -330167,6 +331188,7 @@ F.f506=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -330176,10 +331198,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f506 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -330374,6 +331397,7 @@ F.f507=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -330383,10 +331407,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f507 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -330588,6 +331613,7 @@ F.f508=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -330597,10 +331623,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f508 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -330890,6 +331917,7 @@ F.f509=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -330899,10 +331927,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f509 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -331049,6 +332078,7 @@ F.f510=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -331058,10 +332088,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f510 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -331311,6 +332342,7 @@ F.f511=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -331320,10 +332352,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f511 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -331414,6 +332447,7 @@ F.f512=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -331423,10 +332457,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f512 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -331629,6 +332664,7 @@ F.f513=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -331638,10 +332674,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f513 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -333379,6 +334416,7 @@ F.f514=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -333388,10 +334426,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f514 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -333508,6 +334547,7 @@ F.f515=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -333517,10 +334557,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f515 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -333616,6 +334657,7 @@ F.f516=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -333625,10 +334667,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f516 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -333819,6 +334862,7 @@ F.f517=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -333828,10 +334872,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f517 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -334544,6 +335589,7 @@ F.f518=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -334553,10 +335599,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f518 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -334874,6 +335921,7 @@ F.f519=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -334883,10 +335931,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f519 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -335644,6 +336693,7 @@ F.f520=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -335653,10 +336703,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f520 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -335904,6 +336955,7 @@ F.f521=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -335913,10 +336965,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f521 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -336198,6 +337251,7 @@ F.f522=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -336207,10 +337261,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f522 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -336462,6 +337517,7 @@ F.f523=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -336471,10 +337527,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f523 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -336954,6 +338011,7 @@ F.f524=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -336963,10 +338021,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f524 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -337088,6 +338147,7 @@ F.f525=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -337097,10 +338157,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f525 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -337408,6 +338469,7 @@ F.f526=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -337417,10 +338479,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f526 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -337560,6 +338623,7 @@ F.f527=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -337569,10 +338633,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f527 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -337664,6 +338729,7 @@ F.f528=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -337673,10 +338739,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f528 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -337771,6 +338838,7 @@ F.f529=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -337780,10 +338848,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f529 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -337836,6 +338905,7 @@ F.f530=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -337845,10 +338915,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f530 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -337966,6 +339037,7 @@ F.f531=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -337975,10 +339047,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f531 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -338440,6 +339513,7 @@ F.f532=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -338449,10 +339523,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f532 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -338870,6 +339945,7 @@ F.f533=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -338879,10 +339955,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f533 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -339186,6 +340263,7 @@ F.f534=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -339195,10 +340273,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f534 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -339769,6 +340848,7 @@ F.f535=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -339778,10 +340858,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f535 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -339875,6 +340956,7 @@ F.f536=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -339884,10 +340966,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f536 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -340247,6 +341330,7 @@ F.f537=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -340256,10 +341340,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f537 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -340795,6 +341880,7 @@ F.f538=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -340804,10 +341890,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f538 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -341994,6 +343081,7 @@ F.f539=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -342003,10 +343091,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f539 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -342235,6 +343324,7 @@ F.f540=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -342244,10 +343334,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f540 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -343063,6 +344154,7 @@ F.f541=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -343072,10 +344164,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f541 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -343777,6 +344870,7 @@ F.f542=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -343786,10 +344880,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f542 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -344359,6 +345454,7 @@ F.f543=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -344368,10 +345464,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f543 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -344404,6 +345501,7 @@ F.f544=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -344413,10 +345511,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f544 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -344996,6 +346095,7 @@ F.f545=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -345005,10 +346105,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f545 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -345205,6 +346306,7 @@ F.f546=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -345214,10 +346316,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f546 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -345309,6 +346412,7 @@ F.f547=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -345318,10 +346422,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f547 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -345353,6 +346458,7 @@ F.f548=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -345362,10 +346468,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f548 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -345710,6 +346817,7 @@ F.f549=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -345719,10 +346827,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f549 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -346395,6 +347504,7 @@ F.f550=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -346404,10 +347514,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f550 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -346449,6 +347560,7 @@ F.f551=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -346458,10 +347570,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f551 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -346503,6 +347616,7 @@ F.f552=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -346512,10 +347626,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f552 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -347159,6 +348274,7 @@ F.f553=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -347168,10 +348284,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f553 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -347214,6 +348331,7 @@ F.f554=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -347223,10 +348341,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f554 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -347269,6 +348388,7 @@ F.f555=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -347278,10 +348398,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f555 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -347385,6 +348506,7 @@ F.f556=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -347394,10 +348516,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f556 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -347488,6 +348611,7 @@ F.f557=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -347497,10 +348621,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f557 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -347592,6 +348717,7 @@ F.f558=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -347601,10 +348727,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f558 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -347694,6 +348821,7 @@ F.f559=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -347703,10 +348831,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f559 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -347796,6 +348925,7 @@ F.f560=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -347805,10 +348935,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f560 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -347898,6 +349029,7 @@ F.f561=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -347907,10 +349039,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f561 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -348000,6 +349133,7 @@ F.f562=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -348009,10 +349143,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f562 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -348103,6 +349238,7 @@ F.f563=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -348112,10 +349248,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f563 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -348205,6 +349342,7 @@ F.f564=function(function_metadata,upvalues)
 local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
 local frame_size=function_metadata[7]
 return function(...)
+if startup_blocked then return end
 local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
@@ -348214,10 +349352,11 @@ local function tick(pc)
  if startup_active then
   instructions_left=instructions_left-1
   if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f564 pc="..pc,0) end
-  if startup_clock then
-   startup_poll_remaining=startup_poll_remaining-1
-   if startup_poll_remaining<=0 then startup_poll_remaining=startup_poll_interval;check_startup_clock() end
-  end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
  end
 end
  tick(1)
@@ -348304,60 +349443,70 @@ end
 end
 local arguments, argument_count = {...}, select("#", ...)
 local function start()
-    local count, result=pack_returns(make_function(D.f1,nil)(unpack(arguments,1,argument_count)))
-    if startup_clock then check_startup_clock(true) end
+    local count,result=pack_returns(make_function(D.f1,nil)(unpack(arguments,1,argument_count)))
+    check_startup_clock(true)
     return unpack(result,1,count)
 end
 local can_schedule=type(client)=="table" and type(client.delay_call)=="function" and
     type(coroutine)=="table" and type(coroutine.create)=="function" and
     type(coroutine.resume)=="function" and type(coroutine.running)=="function" and
-    type(coroutine.status)=="function" and type(coroutine.yield)=="function" and
-    startup_clock~=nil
+    type(coroutine.status)=="function" and type(coroutine.yield)=="function"
 if not can_schedule then
-    begin_startup_slice()
-    local count, result=pack_returns(pcall(start))
-    startup_active=false
-    if not result[1] then error("Andromeda startup stopped: "..tostring(result[2]),0) end
-    return unpack(result,2,count)
+    startup_active,startup_blocked=false,true
+    pcall(startup_on_finish,"unavailable")
+    error("ANDROMEDA_RUNTIME_UNAVAILABLE: client.delay_call and coroutine support are required",0)
 end
-
--- A GameSense Lua chunk may return while delay_call continues its startup.
--- Keep the VM stack in one coroutine and resume it in small frame-sized slices.
-local delay_call=client.delay_call
-local cancelled, shutdown_registered=false, false
-local function cancel_startup()
-    cancelled=true
+local cancelled,shutdown_registered=false,false
+local cancel_startup
+local function finish_startup(state)
     startup_active=false
-end
-local function finish_startup()
-    startup_active=false
+    startup_blocked=state~="complete" or startup_diagnostic_mode
     if shutdown_registered and type(client.unset_event_callback)=="function" then
         pcall(client.unset_event_callback,"shutdown",cancel_startup)
     end
     shutdown_registered=false
+    pcall(startup_on_finish,state)
+end
+cancel_startup=function()
+    cancelled=true
+    finish_startup("cancelled")
 end
 if type(client.set_event_callback)=="function" then
     shutdown_registered=pcall(client.set_event_callback,"shutdown",cancel_startup)
 end
+local function failed(reason)
+    finish_startup("stopped")
+    startup_notice("STOPPED: "..tostring(reason))
+    error("Andromeda startup stopped: "..tostring(reason),0)
+end
 startup_thread=coroutine.create(start)
+local last_progress
 local function resume_startup()
     if cancelled or not startup_active then return end
     begin_startup_slice()
-    local count, result=pack_returns(coroutine.resume(startup_thread))
-    if not result[1] then
-        finish_startup()
-        error("Andromeda startup stopped: "..tostring(result[2]),0)
-    end
+    local expired=startup_limit_reason()
+    if expired then return failed(expired) end
+    local count,result=pack_returns(coroutine.resume(startup_thread))
+    if not result[1] then return failed(result[2]) end
     if cancelled then return end
+    pcall(startup_on_checkpoint)
     if coroutine.status(startup_thread)=="suspended" then
-        local ok, err=pcall(delay_call,0.001,resume_startup)
-        if not ok then
-            finish_startup()
-            error("Andromeda startup stopped: could not schedule startup: "..tostring(err),0)
+        if result[2]~=startup_yield_token then
+            return failed("ANDROMEDA_UNEXPECTED_YIELD: "..startup_location())
         end
+        local now=read_startup_clock()
+        if (now and (not last_progress or now-last_progress>=1000)) or
+            (not now and startup_slices%60==1) then
+            startup_notice("RUNNING: "..startup_location())
+            last_progress=now
+        end
+        local ok,err=pcall(client.delay_call,0.001,resume_startup)
+        if not ok then return failed("ANDROMEDA_SCHEDULING_FAILED: "..tostring(err)) end
         return
     end
-    finish_startup()
+    finish_startup("complete")
+    startup_notice("Startup function returned; menu visibility is not verified")
     return unpack(result,2,count)
 end
+startup_notice("STARTING")
 return resume_startup()

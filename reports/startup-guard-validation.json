@@ -1,0 +1,442 @@
+[
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "complete",
+    "passed": true,
+    "resumes": 0,
+    "polls": 1,
+    "error": "",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "infinite",
+    "passed": true,
+    "resumes": 602,
+    "polls": 6249,
+    "error": "Andromeda startup stopped: ANDROMEDA_STARTUP_LIMIT: f1 pc=1",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "variant_zero",
+    "passed": true,
+    "resumes": 602,
+    "polls": 6249,
+    "error": "Andromeda startup stopped: ANDROMEDA_STARTUP_LIMIT: f1 pc=1",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "no_clock",
+    "passed": true,
+    "resumes": 48,
+    "polls": 6249,
+    "error": "Andromeda startup stopped: ANDROMEDA_STARTUP_LIMIT: f1 pc=1",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "clock_failure",
+    "passed": true,
+    "resumes": 48,
+    "polls": 6249,
+    "error": "Andromeda startup stopped: ANDROMEDA_STARTUP_LIMIT: f1 pc=1",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "cancel",
+    "passed": true,
+    "resumes": 1,
+    "polls": 10,
+    "error": "",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "wall_timeout",
+    "passed": true,
+    "resumes": 1,
+    "polls": 10,
+    "error": "Andromeda startup stopped: ANDROMEDA_WALL_TIMEOUT: f1 pc=1",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "schedule_failure",
+    "passed": true,
+    "resumes": 0,
+    "polls": 10,
+    "error": "Andromeda startup stopped: ANDROMEDA_SCHEDULING_FAILED: [string \"<python>\"]:10: TEST_SCHEDULER_ERROR",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "non_yieldable",
+    "passed": true,
+    "resumes": 0,
+    "polls": 10,
+    "error": "Andromeda startup stopped: ANDROMEDA_CANNOT_YIELD: attempt to yield across C-call boundary",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "shared_budget",
+    "passed": true,
+    "resumes": 1,
+    "polls": 256,
+    "error": "Andromeda startup stopped: ANDROMEDA_TOTAL_BUDGET: host_callback pc=2",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "dependency_failure",
+    "passed": true,
+    "resumes": 0,
+    "polls": 0,
+    "error": "Andromeda startup stopped: MISSING_MODULE ffi",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_capture.lua",
+    "case": "complete",
+    "passed": true,
+    "resumes": 0,
+    "polls": 1,
+    "error": "",
+    "trace_bytes": 158
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_capture.lua",
+    "case": "infinite",
+    "passed": true,
+    "resumes": 291,
+    "polls": 3005,
+    "error": "Andromeda startup stopped: ANDROMEDA_WALL_TIMEOUT: f1 pc=1",
+    "trace_bytes": 2824
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_capture.lua",
+    "case": "variant_zero",
+    "passed": true,
+    "resumes": 291,
+    "polls": 3005,
+    "error": "Andromeda startup stopped: ANDROMEDA_WALL_TIMEOUT: f1 pc=1",
+    "trace_bytes": 2566
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_capture.lua",
+    "case": "no_clock",
+    "passed": true,
+    "resumes": 48,
+    "polls": 6249,
+    "error": "Andromeda startup stopped: ANDROMEDA_STARTUP_LIMIT: f1 pc=1",
+    "trace_bytes": 2824
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_capture.lua",
+    "case": "clock_failure",
+    "passed": true,
+    "resumes": 48,
+    "polls": 6249,
+    "error": "Andromeda startup stopped: ANDROMEDA_STARTUP_LIMIT: f1 pc=1",
+    "trace_bytes": 2824
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_capture.lua",
+    "case": "cancel",
+    "passed": true,
+    "resumes": 1,
+    "polls": 10,
+    "error": "",
+    "trace_bytes": 2826
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_capture.lua",
+    "case": "wall_timeout",
+    "passed": true,
+    "resumes": 1,
+    "polls": 10,
+    "error": "Andromeda startup stopped: ANDROMEDA_WALL_TIMEOUT: f1 pc=1",
+    "trace_bytes": 2824
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_capture.lua",
+    "case": "schedule_failure",
+    "passed": true,
+    "resumes": 0,
+    "polls": 10,
+    "error": "Andromeda startup stopped: ANDROMEDA_SCHEDULING_FAILED: [string \"<python>\"]:10: TEST_SCHEDULER_ERROR",
+    "trace_bytes": 2824
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_capture.lua",
+    "case": "non_yieldable",
+    "passed": true,
+    "resumes": 0,
+    "polls": 10,
+    "error": "Andromeda startup stopped: ANDROMEDA_CANNOT_YIELD: attempt to yield across C-call boundary",
+    "trace_bytes": 128
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_capture.lua",
+    "case": "shared_budget",
+    "passed": true,
+    "resumes": 1,
+    "polls": 256,
+    "error": "Andromeda startup stopped: ANDROMEDA_TOTAL_BUDGET: host_callback pc=2",
+    "trace_bytes": 3506
+  },
+  {
+    "runtime": "lupa.luajit20",
+    "file": "Andromeda_capture.lua",
+    "case": "dependency_failure",
+    "passed": true,
+    "resumes": 0,
+    "polls": 0,
+    "error": "Andromeda startup stopped: MISSING_MODULE ffi",
+    "trace_bytes": 618
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "complete",
+    "passed": true,
+    "resumes": 0,
+    "polls": 1,
+    "error": "",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "infinite",
+    "passed": true,
+    "resumes": 602,
+    "polls": 6249,
+    "error": "Andromeda startup stopped: ANDROMEDA_STARTUP_LIMIT: f1 pc=1",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "variant_zero",
+    "passed": true,
+    "resumes": 602,
+    "polls": 6249,
+    "error": "Andromeda startup stopped: ANDROMEDA_STARTUP_LIMIT: f1 pc=1",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "no_clock",
+    "passed": true,
+    "resumes": 48,
+    "polls": 6249,
+    "error": "Andromeda startup stopped: ANDROMEDA_STARTUP_LIMIT: f1 pc=1",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "clock_failure",
+    "passed": true,
+    "resumes": 48,
+    "polls": 6249,
+    "error": "Andromeda startup stopped: ANDROMEDA_STARTUP_LIMIT: f1 pc=1",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "cancel",
+    "passed": true,
+    "resumes": 1,
+    "polls": 10,
+    "error": "",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "wall_timeout",
+    "passed": true,
+    "resumes": 1,
+    "polls": 10,
+    "error": "Andromeda startup stopped: ANDROMEDA_WALL_TIMEOUT: f1 pc=1",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "schedule_failure",
+    "passed": true,
+    "resumes": 0,
+    "polls": 10,
+    "error": "Andromeda startup stopped: ANDROMEDA_SCHEDULING_FAILED: [string \"<python>\"]:10: TEST_SCHEDULER_ERROR",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "non_yieldable",
+    "passed": true,
+    "resumes": 0,
+    "polls": 10,
+    "error": "Andromeda startup stopped: ANDROMEDA_CANNOT_YIELD: attempt to yield across C-call boundary",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "shared_budget",
+    "passed": true,
+    "resumes": 1,
+    "polls": 256,
+    "error": "Andromeda startup stopped: ANDROMEDA_TOTAL_BUDGET: host_callback pc=2",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_reconstructed.lua",
+    "case": "dependency_failure",
+    "passed": true,
+    "resumes": 0,
+    "polls": 0,
+    "error": "Andromeda startup stopped: MISSING_MODULE ffi",
+    "trace_bytes": 0
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_capture.lua",
+    "case": "complete",
+    "passed": true,
+    "resumes": 0,
+    "polls": 1,
+    "error": "",
+    "trace_bytes": 158
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_capture.lua",
+    "case": "infinite",
+    "passed": true,
+    "resumes": 291,
+    "polls": 3005,
+    "error": "Andromeda startup stopped: ANDROMEDA_WALL_TIMEOUT: f1 pc=1",
+    "trace_bytes": 2824
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_capture.lua",
+    "case": "variant_zero",
+    "passed": true,
+    "resumes": 291,
+    "polls": 3005,
+    "error": "Andromeda startup stopped: ANDROMEDA_WALL_TIMEOUT: f1 pc=1",
+    "trace_bytes": 2566
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_capture.lua",
+    "case": "no_clock",
+    "passed": true,
+    "resumes": 48,
+    "polls": 6249,
+    "error": "Andromeda startup stopped: ANDROMEDA_STARTUP_LIMIT: f1 pc=1",
+    "trace_bytes": 2824
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_capture.lua",
+    "case": "clock_failure",
+    "passed": true,
+    "resumes": 48,
+    "polls": 6249,
+    "error": "Andromeda startup stopped: ANDROMEDA_STARTUP_LIMIT: f1 pc=1",
+    "trace_bytes": 2824
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_capture.lua",
+    "case": "cancel",
+    "passed": true,
+    "resumes": 1,
+    "polls": 10,
+    "error": "",
+    "trace_bytes": 2826
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_capture.lua",
+    "case": "wall_timeout",
+    "passed": true,
+    "resumes": 1,
+    "polls": 10,
+    "error": "Andromeda startup stopped: ANDROMEDA_WALL_TIMEOUT: f1 pc=1",
+    "trace_bytes": 2824
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_capture.lua",
+    "case": "schedule_failure",
+    "passed": true,
+    "resumes": 0,
+    "polls": 10,
+    "error": "Andromeda startup stopped: ANDROMEDA_SCHEDULING_FAILED: [string \"<python>\"]:10: TEST_SCHEDULER_ERROR",
+    "trace_bytes": 2824
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_capture.lua",
+    "case": "non_yieldable",
+    "passed": true,
+    "resumes": 0,
+    "polls": 10,
+    "error": "Andromeda startup stopped: ANDROMEDA_CANNOT_YIELD: attempt to yield across C-call boundary",
+    "trace_bytes": 128
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_capture.lua",
+    "case": "shared_budget",
+    "passed": true,
+    "resumes": 1,
+    "polls": 256,
+    "error": "Andromeda startup stopped: ANDROMEDA_TOTAL_BUDGET: host_callback pc=2",
+    "trace_bytes": 3506
+  },
+  {
+    "runtime": "lupa.luajit21",
+    "file": "Andromeda_capture.lua",
+    "case": "dependency_failure",
+    "passed": true,
+    "resumes": 0,
+    "polls": 0,
+    "error": "Andromeda startup stopped: MISSING_MODULE ffi",
+    "trace_bytes": 618
+  }
+]

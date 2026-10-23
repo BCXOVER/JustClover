@@ -1,0 +1,63 @@
+{
+  "compilation": [
+    {
+      "runtime": "lupa.luajit20",
+      "file": "Andromeda_reconstructed.lua",
+      "passed": true,
+      "sha256": "4a63a8607ccd70a28a3a351c948f1ebfb894e33497fc440895098c3fad00471f"
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "file": "Andromeda_capture.lua",
+      "passed": true,
+      "sha256": "cf199b91b9bc3960d45db32ebaf02b037b1976f6858a4305db22af8a6ab94c93"
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "file": "Andromeda_reconstructed.lua",
+      "passed": true,
+      "sha256": "4a63a8607ccd70a28a3a351c948f1ebfb894e33497fc440895098c3fad00471f"
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "file": "Andromeda_capture.lua",
+      "passed": true,
+      "sha256": "cf199b91b9bc3960d45db32ebaf02b037b1976f6858a4305db22af8a6ab94c93"
+    }
+  ],
+  "initialization": [
+    {
+      "runtime": "lupa.luajit20",
+      "file": "Andromeda_reconstructed.lua",
+      "passed": true,
+      "metadata_count": 564,
+      "factory_count": 564,
+      "application_executed": false
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "file": "Andromeda_capture.lua",
+      "passed": true,
+      "metadata_count": 564,
+      "factory_count": 564,
+      "application_executed": false
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "file": "Andromeda_reconstructed.lua",
+      "passed": true,
+      "metadata_count": 564,
+      "factory_count": 564,
+      "application_executed": false
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "file": "Andromeda_capture.lua",
+      "passed": true,
+      "metadata_count": 564,
+      "factory_count": 564,
+      "application_executed": false
+    }
+  ],
+  "gamesense_executed": false
+}
