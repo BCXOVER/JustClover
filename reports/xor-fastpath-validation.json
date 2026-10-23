@@ -1,0 +1,67 @@
+{
+  "gamesense_executed": false,
+  "runtimes": [
+    {
+      "runtime": "lupa.luajit20",
+      "passed": true,
+      "byte_pairs": 65536,
+      "uint32_pairs": 2196,
+      "fallback_pairs": 19
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "passed": true,
+      "byte_pairs": 65536,
+      "uint32_pairs": 2196,
+      "fallback_pairs": 19
+    }
+  ],
+  "original_vm_reference": {
+    "passed": true,
+    "byte_pairs": 65536,
+    "uint32_pairs": 2196,
+    "application_executed": false
+  },
+  "workloads": [
+    {
+      "runtime": "lupa.luajit20",
+      "fast_path": false,
+      "calls_completed": 3894,
+      "polls": 20000,
+      "resumes": 156,
+      "passed": true,
+      "unchanged_budgets": true,
+      "simulated_clock": "constant"
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "fast_path": true,
+      "calls_completed": 25000,
+      "polls": 1563,
+      "resumes": 12,
+      "passed": true,
+      "unchanged_budgets": true,
+      "simulated_clock": "constant"
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "fast_path": false,
+      "calls_completed": 3894,
+      "polls": 20000,
+      "resumes": 156,
+      "passed": true,
+      "unchanged_budgets": true,
+      "simulated_clock": "constant"
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "fast_path": true,
+      "calls_completed": 25000,
+      "polls": 1563,
+      "resumes": 12,
+      "passed": true,
+      "unchanged_budgets": true,
+      "simulated_clock": "constant"
+    }
+  ]
+}

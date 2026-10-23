@@ -22,6 +22,7 @@ local startup_max_polls = 20000
 local startup_max_slices = 1800
 local startup_clock, startup_last_poll, startup_slice_started, startup_started
 local startup_elapsed_ms, startup_polls, startup_slices, startup_slice_polls = 0, 0, 0, 0
+local startup_fast_xor_calls, startup_slow_xor_calls = 0, 0
 local startup_thread
 local current_function, current_pc
 local startup_label = "Andromeda"
@@ -349441,6 +349442,33 @@ end
 end
 end
 end
+-- f48 is arithmetic XOR. Preserve its unusual/non-uint32 cases in the old body.
+local arithmetic_xor_factory=F.f48
+F.f48=function(function_metadata,upvalues)
+    local arithmetic_xor=arithmetic_xor_factory(function_metadata,upvalues)
+    return function(left,right)
+        if startup_blocked then return end
+        if type(left)=="number" and type(right)=="number" and
+            left>=0 and left<=4294967295 and right>=0 and right<=4294967295 and
+            left%1==0 and right%1==0 then
+            current_function,current_pc="f48",1
+            if startup_active then
+                startup_fast_xor_calls=startup_fast_xor_calls+1
+                startup_poll_remaining=startup_poll_remaining-1
+                if startup_poll_remaining<=0 then
+                    startup_poll_remaining=startup_poll_interval
+                    check_startup_clock()
+                end
+            end
+            local result=bit.bxor(left,right)
+            if result<0 then result=result+4294967296 end
+            return result
+        end
+        if startup_active then startup_slow_xor_calls=startup_slow_xor_calls+1 end
+        return arithmetic_xor(left,right)
+    end
+end
+
 local arguments, argument_count = {...}, select("#", ...)
 local function start()
     local count,result=pack_returns(make_function(D.f1,nil)(unpack(arguments,1,argument_count)))
@@ -349456,18 +349484,22 @@ if not can_schedule then
     pcall(startup_on_finish,"unavailable")
     error("ANDROMEDA_RUNTIME_UNAVAILABLE: client.delay_call and coroutine support are required",0)
 end
-local cancelled,shutdown_registered=false,false
+local cancelled,shutdown_registered,finished=false,false,false
 local cancel_startup
 local function finish_startup(state)
+    if finished then return end
+    finished=true
     startup_active=false
     startup_blocked=state~="complete" or startup_diagnostic_mode
     if shutdown_registered and type(client.unset_event_callback)=="function" then
         pcall(client.unset_event_callback,"shutdown",cancel_startup)
     end
     shutdown_registered=false
-    pcall(startup_on_finish,state)
+    local ok,err=pcall(startup_on_finish,state)
+    if not ok then startup_notice("FINISH CALLBACK FAILED: "..tostring(err)) end
 end
 cancel_startup=function()
+    if finished then return end
     cancelled=true
     finish_startup("cancelled")
 end
@@ -349489,7 +349521,8 @@ local function resume_startup()
     local count,result=pack_returns(coroutine.resume(startup_thread))
     if not result[1] then return failed(result[2]) end
     if cancelled then return end
-    pcall(startup_on_checkpoint)
+    local checkpoint_ok,checkpoint_error=pcall(startup_on_checkpoint)
+    if not checkpoint_ok then startup_notice("CHECKPOINT CALLBACK FAILED: "..tostring(checkpoint_error)) end
     if coroutine.status(startup_thread)=="suspended" then
         if result[2]~=startup_yield_token then
             return failed("ANDROMEDA_UNEXPECTED_YIELD: "..startup_location())

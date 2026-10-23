@@ -1,4 +1,4 @@
--- Console diagnostic V3: instrumented reconstruction; resolved helpers run as native Lua.
+-- Console diagnostic V4: instrumented reconstruction with uint32 XOR fast path.
 -- Limits: 1 ms slice target, 750 ms active execution, 5 s wall time, finite shared budget.
 -- PARTIAL DEOBFUSCATION: contains all 564 function definitions.
 -- Five functions retain VM fallback: f1, f45, f108, f115, f416.
@@ -24,6 +24,7 @@ local startup_max_polls = 20000
 local startup_max_slices = 600
 local startup_clock, startup_last_poll, startup_slice_started, startup_started
 local startup_elapsed_ms, startup_polls, startup_slices, startup_slice_polls = 0, 0, 0, 0
+local startup_fast_xor_calls, startup_slow_xor_calls = 0, 0
 local startup_thread
 local current_function, current_pc
 local startup_label = "Andromeda capture"
@@ -5184,7 +5185,7 @@ local fallback_make_function
 local __andromeda_paths={"andromeda_vm_trace.txt","lua/andromeda_vm_trace.txt"}
 local __andromeda_path
 local __andromeda_file_status="not_attempted"
-local __andromeda_records={"ANDROMEDA_VM_TRACE_V3","BUILD bounded-reconstruction-console-v3",
+local __andromeda_records={"ANDROMEDA_VM_TRACE_V4","BUILD uint32-xor-console-v4",
     "FUNCTIONS 564","PROJECT_INFO_PRESENT "..(type(get_project_info)=="function" and "1" or "0")}
 local __andromeda_watched={f1=true,f45=true,f108=true,f115=true,f416=true}
 local __andromeda_seen={}
@@ -5234,6 +5235,7 @@ local function __andromeda_contents()
     local parts={table.concat(__andromeda_records,"\n"),
         "STATE "..__andromeda_state,
         "LAST "..tostring(current_function or "initialization").." "..tostring(current_pc or 0),
+        "XOR_FAST "..startup_fast_xor_calls.." XOR_SLOW "..startup_slow_xor_calls,
         "RECENT"}
     for _,row in ipairs(__andromeda_recent_lines(128)) do parts[#parts+1]=row end
     return table.concat(parts,"\n").."\n"
@@ -5280,6 +5282,7 @@ local function __andromeda_dump(page)
     startup_notice(__andromeda_records[1])
     startup_notice(__andromeda_records[4])
     startup_notice("STATE "..__andromeda_state.." LAST "..startup_location())
+    startup_notice("XOR_FAST "..startup_fast_xor_calls.." XOR_SLOW "..startup_slow_xor_calls)
     startup_notice("FILE_STATUS "..__andromeda_file_status..
         (__andromeda_path and " API_PATH "..__andromeda_path or ""))
     if page then
@@ -349595,6 +349598,33 @@ end
 end
 end
 end
+-- f48 is arithmetic XOR. Preserve its unusual/non-uint32 cases in the old body.
+local arithmetic_xor_factory=F.f48
+F.f48=function(function_metadata,upvalues)
+    local arithmetic_xor=arithmetic_xor_factory(function_metadata,upvalues)
+    return function(left,right)
+        if startup_blocked then return end
+        if type(left)=="number" and type(right)=="number" and
+            left>=0 and left<=4294967295 and right>=0 and right<=4294967295 and
+            left%1==0 and right%1==0 then
+            current_function,current_pc="f48",1
+            if startup_active then
+                startup_fast_xor_calls=startup_fast_xor_calls+1
+                startup_poll_remaining=startup_poll_remaining-1
+                if startup_poll_remaining<=0 then
+                    startup_poll_remaining=startup_poll_interval
+                    check_startup_clock()
+                end
+            end
+            local result=bit.bxor(left,right)
+            if result<0 then result=result+4294967296 end
+            return result
+        end
+        if startup_active then startup_slow_xor_calls=startup_slow_xor_calls+1 end
+        return arithmetic_xor(left,right)
+    end
+end
+
 local arguments, argument_count = {...}, select("#", ...)
 local function start()
     local count,result=pack_returns(make_function(D.f1,nil)(unpack(arguments,1,argument_count)))
@@ -349610,9 +349640,11 @@ if not can_schedule then
     pcall(startup_on_finish,"unavailable")
     error("ANDROMEDA_RUNTIME_UNAVAILABLE: client.delay_call and coroutine support are required",0)
 end
-local cancelled,shutdown_registered=false,false
+local cancelled,shutdown_registered,finished=false,false,false
 local cancel_startup
 local function finish_startup(state)
+    if finished then return end
+    finished=true
     startup_active=false
     startup_blocked=state~="complete" or startup_diagnostic_mode
     if shutdown_registered and type(client.unset_event_callback)=="function" then
@@ -349623,6 +349655,7 @@ local function finish_startup(state)
     if not ok then startup_notice("FINISH CALLBACK FAILED: "..tostring(err)) end
 end
 cancel_startup=function()
+    if finished then return end
     cancelled=true
     finish_startup("cancelled")
 end
