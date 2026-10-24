@@ -1,0 +1,126 @@
+{
+  "artifact": {
+    "file": "andromeda.lua",
+    "sha256": "4ab390d27bc2037091eb073e656f161f2f463e69e868ba7586255ad2f631ca33",
+    "bytes": 1188485,
+    "lines": 27288,
+    "functions": 411,
+    "gamesense_executed": false,
+    "scope": "Actual single-file artifact, including cooperative startup; GameSense UI, modules and engine are mocked. Gameplay callbacks are not exercised.",
+    "checks": [
+      {
+        "runtime": "lupa.luajit20",
+        "compiled": true,
+        "actual_artifact_initialization_completed": true,
+        "ui_calls": 1791,
+        "scheduled_resumptions": 10
+      },
+      {
+        "runtime": "lupa.luajit21",
+        "compiled": true,
+        "actual_artifact_initialization_completed": true,
+        "ui_calls": 1791,
+        "scheduled_resumptions": 10
+      }
+    ]
+  },
+  "status": "Reconstructed standalone Lua. Generated identifiers, capture cells and some compiler scaffolding remain. This is not the original author project or a claim of complete high-level recovery.",
+  "previous_source_bytes": 2535676,
+  "source_bytes_removed": 1347191,
+  "transformations": {
+    "inlined": 11022,
+    "dead": 1591,
+    "tables": 701,
+    "methods": 587
+  },
+  "archive": {
+    "file": "Andromeda_recovered_source.zip",
+    "members": [
+      "andromeda.lua"
+    ],
+    "bytes": 114923,
+    "sha256": "6df56008e7647cdba7d52c90799dfa47d8068fb1d64b6103a91356336c5e5409"
+  },
+  "ui_initialization_comparison": [
+    {
+      "runtime": "lupa.luajit20",
+      "baseline_completed": true,
+      "clean_completed": true,
+      "baseline_ui_calls": 1791,
+      "clean_ui_calls": 1791,
+      "equal_prefix": 1791,
+      "baseline_result": "None",
+      "clean_result": "None",
+      "all_ui_calls_equal": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "baseline_completed": true,
+      "clean_completed": true,
+      "baseline_ui_calls": 1791,
+      "clean_ui_calls": 1791,
+      "equal_prefix": 1791,
+      "baseline_result": "None",
+      "clean_result": "None",
+      "all_ui_calls_equal": true
+    }
+  ],
+  "autonomous_fixtures": {
+    "matched_outputs": 338,
+    "both_reject_invalid_inputs": 284,
+    "budget_skips": 2,
+    "differences": []
+  },
+  "features": [
+    {
+      "runtime": "lupa.luajit20",
+      "hitchance_cases": 4096,
+      "config_import_cases": 154,
+      "successful_config_imports": 154,
+      "results_and_effects_match": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "hitchance_cases": 4096,
+      "config_import_cases": 154,
+      "successful_config_imports": 154,
+      "results_and_effects_match": true
+    }
+  ],
+  "structured_control_flow": [
+    {
+      "runtime": "lupa.luajit20",
+      "graphs": 1000,
+      "trace_and_exit_matches": 8000
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "graphs": 1000,
+      "trace_and_exit_matches": 8000
+    }
+  ],
+  "expression_semantics": [
+    {
+      "runtime": "lupa.luajit20",
+      "cases": 160,
+      "return_values_call_order_and_global_writes_match": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "cases": 160,
+      "return_values_call_order_and_global_writes_match": true
+    }
+  ],
+  "capture_lifetimes": [
+    {
+      "runtime": "lupa.luajit20",
+      "cases": 12,
+      "captured_values_and_metamethod_effects_match": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "cases": 12,
+      "captured_values_and_metamethod_effects_match": true
+    }
+  ]
+}

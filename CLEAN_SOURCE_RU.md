@@ -1,3 +1,5 @@
+> Новая версия и уточнённый статус восстановления: [RECOVERED_SOURCE_RU.md](RECOVERED_SOURCE_RU.md).
+
 # Andromeda: один восстановленный Lua-файл
 
 [Скачать архив](Andromeda_clean_source.zip). Внутри только `andromeda.lua`.
