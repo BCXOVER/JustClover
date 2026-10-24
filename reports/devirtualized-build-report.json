@@ -410,12 +410,7 @@
   },
   {
     "name": "f47",
-    "states": 30,
-    "iterations": 32,
-    "patches": 18,
-    "conflicts": 0,
-    "native_blocks": 20,
-    "non_scalar_writes": 0
+    "special": "fixed-input crash trap replaced by immediate error"
   },
   {
     "name": "f48",
@@ -968,12 +963,7 @@
   },
   {
     "name": "f109",
-    "states": 29,
-    "iterations": 31,
-    "patches": 0,
-    "conflicts": 0,
-    "native_blocks": 20,
-    "non_scalar_writes": 0
+    "special": "fixed-input crash trap replaced by immediate error"
   },
   {
     "name": "f110",
@@ -1031,12 +1021,7 @@
   },
   {
     "name": "f116",
-    "states": 36,
-    "iterations": 39,
-    "patches": 12,
-    "conflicts": 0,
-    "native_blocks": 22,
-    "non_scalar_writes": 0
+    "special": "fixed-input crash trap replaced by immediate error"
   },
   {
     "name": "f117",
@@ -3744,12 +3729,7 @@
   },
   {
     "name": "f418",
-    "states": 28,
-    "iterations": 30,
-    "patches": 0,
-    "conflicts": 0,
-    "native_blocks": 20,
-    "non_scalar_writes": 0
+    "special": "fixed-input crash trap replaced by immediate error"
   },
   {
     "name": "f419",

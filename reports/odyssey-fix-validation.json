@@ -1,0 +1,118 @@
+{
+  "sha256": "d44f530e9adf4854bc5b80dc41957276ffae5f88e3352419fe7c92d92012529c",
+  "gamesense_executed": false,
+  "reproduction": "f1 entry at pc759 through the unmodified real helper-selection branches; stop before pc1292",
+  "cause": "missing env_functions or math.clamp selects f45 -> f47 -> fixed eight-space parser",
+  "checks": [
+    {
+      "runtime": "lupa.luajit20",
+      "case": "previous_missing_helper_reproduces_spin",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "fixed_helper_absent",
+      "passed": true,
+      "crash_calls": 0
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "fixed_helper_empty",
+      "passed": true,
+      "crash_calls": 0
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "fixed_helper_partial",
+      "passed": true,
+      "crash_calls": 0
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "fixed_helper_invalid",
+      "passed": true,
+      "crash_calls": 0
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "fixed_helper_provided",
+      "passed": true,
+      "crash_calls": 0
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "trap_f47_immediate_error",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "trap_f109_immediate_error",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "trap_f116_immediate_error",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "trap_f418_immediate_error",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "previous_missing_helper_reproduces_spin",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "fixed_helper_absent",
+      "passed": true,
+      "crash_calls": 0
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "fixed_helper_empty",
+      "passed": true,
+      "crash_calls": 0
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "fixed_helper_partial",
+      "passed": true,
+      "crash_calls": 0
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "fixed_helper_invalid",
+      "passed": true,
+      "crash_calls": 0
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "fixed_helper_provided",
+      "passed": true,
+      "crash_calls": 0
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "trap_f47_immediate_error",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "trap_f109_immediate_error",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "trap_f116_immediate_error",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "trap_f418_immediate_error",
+      "passed": true
+    }
+  ]
+}

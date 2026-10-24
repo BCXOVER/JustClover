@@ -1,5 +1,5 @@
 {
-  "sha256": "8df384c45e5e2e0ecc1cea2c29e56b3db80aa3d66c185e13473674c8dd1145f5",
+  "sha256": "d44f530e9adf4854bc5b80dc41957276ffae5f88e3352419fe7c92d92012529c",
   "gamesense_executed": false,
   "clock": "absent; shared finite counters and cooperative yields",
   "checks": [
@@ -12,10 +12,10 @@
     },
     {
       "runtime": "lupa.luajit20",
-      "case": "bounded_nested_decoder",
+      "case": "crash_trap_fails_immediately",
       "passed": true,
       "xor_calls": 0,
-      "resumes": 157
+      "resumes": 1
     },
     {
       "runtime": "lupa.luajit21",
@@ -26,10 +26,10 @@
     },
     {
       "runtime": "lupa.luajit21",
-      "case": "bounded_nested_decoder",
+      "case": "crash_trap_fails_immediately",
       "passed": true,
       "xor_calls": 0,
-      "resumes": 157
+      "resumes": 1
     }
   ]
 }

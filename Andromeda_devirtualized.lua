@@ -1,7 +1,7 @@
 -- Andromeda Exclusive: reconstructed Lua; original local names/comments are unavailable.
 -- Virtual instructions are expanded into per-function Lua statements and native goto labels.
 -- Original names/comments cannot be reconstructed. GameSense is required.
--- Startup yields between VM batches; frame waits do not consume the time budget.
+-- Startup yields between native batches and keeps its original finite budgets.
 -- The deliberate f2 failure loop reports its caller instead of exhausting memory.
 local bit = bit or require("bit")
 local D, F = {}, {}
@@ -97,6 +97,27 @@ local constant_cache = {
     [1]=without_upvalues, [5]=math.modf, [6]=math.pi, [7]=string.len,
     [8]=math.floor, [9]=math.ceil, [10]=string.byte
 }
+-- The loader supplied math.clamp through env_functions. A missing helper used
+-- to select a deliberate fixed-input crash routine during startup.
+local andromeda_environment = getfenv()
+do
+    local supplied = andromeda_environment.env_functions
+    if type(supplied) ~= "table" or type(supplied["math.clamp"]) ~= "function" then
+        local functions = {}
+        if type(supplied) == "table" then
+            for name, fn in pairs(supplied) do functions[name] = fn end
+        end
+        functions["math.clamp"] = function(value, minimum, maximum)
+            return math.min(math.max(value, minimum), maximum)
+        end
+        local standalone = {}
+        for name, value in pairs(andromeda_environment) do standalone[name] = value end
+        standalone.env_functions = functions
+        standalone._G = standalone
+        andromeda_environment = setmetatable(standalone, {__index = andromeda_environment})
+    end
+end
+
 local make_function
 D.f1={id="f1",[4]={},[7]=130,[9]=1}
 D.f2={id="f2",[4]={},[7]=29,[9]=1}
@@ -5189,7 +5210,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -20992,7 +21013,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -21257,7 +21278,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -21507,7 +21528,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -21790,7 +21811,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -22223,7 +22244,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -23392,7 +23413,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -28055,7 +28076,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -28265,7 +28286,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -28361,7 +28382,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -28417,7 +28438,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -28487,7 +28508,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -28557,7 +28578,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -28603,7 +28624,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -28650,7 +28671,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -28754,7 +28775,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -28859,7 +28880,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -28944,7 +28965,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -29007,7 +29028,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -29112,7 +29133,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -29216,7 +29237,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -29321,7 +29342,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -29425,7 +29446,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -29529,7 +29550,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -29633,7 +29654,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -29751,7 +29772,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -29839,7 +29860,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -29885,7 +29906,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -31349,7 +31370,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -31633,7 +31654,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -31759,7 +31780,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -31888,7 +31909,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -31980,7 +32001,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -32254,7 +32275,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -32445,7 +32466,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -33054,7 +33075,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -33170,7 +33191,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -33548,7 +33569,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -33875,7 +33896,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -34353,7 +34374,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -36580,7 +36601,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -36712,7 +36733,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -36828,7 +36849,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -37028,7 +37049,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -37509,7 +37530,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -37808,374 +37829,13 @@ end
 goto p42
 end
 end
-
--- Function f47; 20 recovered instruction blocks.
+-- Fixed-input crash routine; the original repeatedly parsed eight spaces.
 F.f47=function(function_metadata,upvalues)
-local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
-local frame_size=function_metadata[7]
-return function(...)
-if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
-local T,U,_,S,z,a=0
-local instructions_left=startup_instruction_limit
-local branch_taken
-local function tick(pc)
- current_function,current_pc="f47",pc
- if startup_active then
-  instructions_left=instructions_left-1
-  if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f47 pc="..pc,0) end
-  startup_poll_remaining=startup_poll_remaining-1
-if startup_poll_remaining<=0 then
-startup_poll_remaining=startup_poll_interval
-check_startup_clock()
-end
- end
-end
- tick(1)
-goto p19
-::p16::
-tick(16)
-do
-do
-(registers)[10] = registers[9]
-end
-
-end
-::p17::
-do
-do
-top = (10)
-registers[top]()
-top = top - 1
-end
-
-end
-goto p97
-::p19::
-tick(19)
-do
-do
-_, Q = pack_returns(...)
-end
-
-end
-::p20::
-do
-do
-(registers)[1] = environment["string"]
-end
-
-end
-::p21::
-do
-do
-registers[1] = (registers[1]["byte"])
-end
-
-end
-::p22::
-do
-do
-(registers)[2] = environment["string"]
-end
-
-end
-::p23::
-do
-do
-registers[2] = (registers[2]["rep"])
-end
-
-end
-::p24::
-do
-do
-(registers)[4] = registers[2]
-end
-
-end
-::p25::
-do
-do
-registers[5] = (" ")
-end
-
-end
-::p26::
-do
-do
-registers[6] = (8)
-end
-
-end
-goto p57
-::p44::
-tick(44)
-do
-do
-if N then
-    for f, F, u in next, N do
-        if not (f >= 1) then
-
-        else
-            F[2] = F
-            F[3] = registers[f];
-            (F)[1] = 3
-            N[f] = nil
-        end
+    return function()
+        if startup_blocked then return end
+        current_function,current_pc="f47",0
+        error("ANDROMEDA_PROTECTION_FAILURE: disabled fixed-input crash routine f47",0)
     end
-end
-return
-end
-
-end
-::p57::
-do
-do
-a = 4
-registers[a] = registers[a](registers[a + 1], registers[a + 2])
-top = (a)
-end
-
-end
-::p58::
-do
-do
-a = (D.f48)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[5] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-::p59::
-do
-do
-a = (D.f49)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[6] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-::p60::
-do
-do
-a = (D.f50)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[7] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-::p61::
-do
-do
-a = (D.f51)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[8] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-::p62::
-do
-do
-a = (D.f52)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[9] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-::p97::
-do
-do
-(registers)[10] = registers[9]
-end
-
-end
-::p98::
-do
-do
-top = 10;
-(registers)[top] = registers[top]()
-end
-
-end
-::p99::
-branch_taken=false
-do
-do
-if not registers[10] then
-    branch_taken=true
-end
-end
-
-end
-if branch_taken then goto p44 end
-goto p16
-end
 end
 
 -- Function f48; 25 recovered instruction blocks.
@@ -38184,7 +37844,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -38447,7 +38107,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -38719,7 +38379,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -39019,7 +38679,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -39478,7 +39138,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -40845,7 +40505,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -45393,7 +45053,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -45630,7 +45290,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -45701,7 +45361,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -45797,7 +45457,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -45852,7 +45512,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -45922,7 +45582,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -46001,7 +45661,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -46106,7 +45766,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -46211,7 +45871,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -46412,7 +46072,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -46588,7 +46248,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -46895,7 +46555,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -48351,7 +48011,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -52705,7 +52365,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -52775,7 +52435,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -52846,7 +52506,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -53057,7 +52717,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -53153,7 +52813,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -53209,7 +52869,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -53256,7 +52916,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -53341,7 +53001,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -53615,7 +53275,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -53707,7 +53367,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -53916,7 +53576,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -54039,7 +53699,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -54993,7 +54653,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -55189,7 +54849,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -55543,7 +55203,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -55639,7 +55299,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -55790,7 +55450,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -56543,7 +56203,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -56658,7 +56318,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -56704,7 +56364,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -57120,7 +56780,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -57391,7 +57051,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -57467,7 +57127,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -57603,7 +57263,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -57694,7 +57354,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -57812,7 +57472,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -57865,7 +57525,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -58010,7 +57670,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -58119,7 +57779,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -58181,7 +57841,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -158180,7 +157840,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -158226,7 +157886,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -158836,7 +158496,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -159447,7 +159107,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -159601,7 +159261,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -160612,7 +160272,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -161464,7 +161124,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -162154,7 +161814,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -162471,7 +162131,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -162726,7 +162386,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -163300,7 +162960,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -163483,7 +163143,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -163981,378 +163641,13 @@ if branch_taken then goto p67 end
 error("ANDROMEDA_INVALID_FALLTHROUGH: f108 pc=83",0)
 end
 end
-
--- Function f109; 20 recovered instruction blocks.
+-- Fixed-input crash routine; the original repeatedly parsed eight spaces.
 F.f109=function(function_metadata,upvalues)
-local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
-local frame_size=function_metadata[7]
-return function(...)
-if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
-local T,U,_,S,z,a=0
-local instructions_left=startup_instruction_limit
-local branch_taken
-local function tick(pc)
- current_function,current_pc="f109",pc
- if startup_active then
-  instructions_left=instructions_left-1
-  if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f109 pc="..pc,0) end
-  startup_poll_remaining=startup_poll_remaining-1
-if startup_poll_remaining<=0 then
-startup_poll_remaining=startup_poll_interval
-check_startup_clock()
-end
- end
-end
- tick(1)
-goto p26
-::p2::
-tick(2)
-do
-do
-a = (D.f110)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[8] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
+    return function()
+        if startup_blocked then return end
+        current_function,current_pc="f109",0
+        error("ANDROMEDA_PROTECTION_FAILURE: disabled fixed-input crash routine f109",0)
     end
-end
-end
-
-end
-::p3::
-do
-do
-a = (D.f111)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[9] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-goto p22
-::p6::
-tick(6)
-do
-do
-a = 4
-registers[a] = registers[a](registers[a + 1], registers[a + 2])
-top = (a)
-end
-
-end
-::p7::
-do
-do
-a = (D.f112)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[5] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-::p8::
-do
-do
-a = (D.f113)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[6] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-::p9::
-do
-do
-a = (D.f114)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[7] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-goto p2
-::p11::
-tick(11)
-do
-do
-(registers)[10] = registers[9]
-end
-
-end
-::p12::
-do
-do
-top = (10)
-registers[top]()
-top = top - 1
-end
-
-end
-goto p22
-::p16::
-tick(16)
-do
-do
-(registers)[2] = environment["string"]
-end
-
-end
-::p17::
-do
-do
-registers[2] = (registers[2]["rep"])
-end
-
-end
-::p18::
-do
-do
-(registers)[4] = registers[2]
-end
-
-end
-::p19::
-do
-do
-registers[5] = (" ")
-end
-
-end
-::p20::
-do
-do
-registers[6] = (8)
-end
-
-end
-goto p6
-::p22::
-do
-do
-(registers)[10] = registers[9]
-end
-
-end
-::p23::
-do
-do
-top = 10;
-(registers)[top] = registers[top]()
-end
-
-end
-::p24::
-branch_taken=false
-do
-do
-if not registers[10] then
-    branch_taken=true
-end
-end
-
-end
-if branch_taken then goto p30 end
-goto p11
-::p26::
-do
-do
-_, Q = pack_returns(...)
-end
-
-end
-::p27::
-do
-do
-(registers)[1] = environment["string"]
-end
-
-end
-::p28::
-do
-do
-registers[1] = (registers[1]["byte"])
-end
-
-end
-goto p16
-::p30::
-do
-do
-if N then
-    for f, F, u in next, N do
-        if not (f >= 1) then
-
-        else
-            F[2] = F
-            F[3] = registers[f];
-            (F)[1] = 3
-            N[f] = nil
-        end
-    end
-end
-return
-end
-
-end
-end
 end
 
 -- Function f110; 48 recovered instruction blocks.
@@ -164361,7 +163656,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -164826,7 +164121,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -166003,7 +165298,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -166268,7 +165563,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -166545,7 +165840,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -166864,7 +166159,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -167247,393 +166542,13 @@ if branch_taken then goto p69 end
 error("ANDROMEDA_INVALID_FALLTHROUGH: f115 pc=84",0)
 end
 end
-
--- Function f116; 22 recovered instruction blocks.
+-- Fixed-input crash routine; the original repeatedly parsed eight spaces.
 F.f116=function(function_metadata,upvalues)
-local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
-local frame_size=function_metadata[7]
-return function(...)
-if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
-local T,U,_,S,z,a=0
-local instructions_left=startup_instruction_limit
-local branch_taken
-local function tick(pc)
- current_function,current_pc="f116",pc
- if startup_active then
-  instructions_left=instructions_left-1
-  if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f116 pc="..pc,0) end
-  startup_poll_remaining=startup_poll_remaining-1
-if startup_poll_remaining<=0 then
-startup_poll_remaining=startup_poll_interval
-check_startup_clock()
-end
- end
-end
- tick(1)
-goto p16
-::p2::
-tick(2)
-do
-do
-registers[6] = (8)
-end
-
-end
-::p3::
-do
-do
-a = 4
-registers[a] = registers[a](registers[a + 1], registers[a + 2])
-top = (a)
-end
-
-end
-::p4::
-do
-do
-a = (D.f117)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[5] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
+    return function()
+        if startup_blocked then return end
+        current_function,current_pc="f116",0
+        error("ANDROMEDA_PROTECTION_FAILURE: disabled fixed-input crash routine f116",0)
     end
-end
-end
-
-end
-::p5::
-do
-do
-a = (D.f118)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[6] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-goto p30
-::p16::
-do
-do
-_, Q = pack_returns(...)
-end
-
-end
-::p17::
-do
-do
-(registers)[1] = environment["string"]
-end
-
-end
-::p18::
-do
-do
-registers[1] = (registers[1]["byte"])
-end
-
-end
-::p19::
-do
-do
-(registers)[2] = environment["string"]
-end
-
-end
-goto p56
-::p30::
-do
-do
-a = (D.f119)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[7] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-::p31::
-do
-do
-a = (D.f120)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[8] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-::p32::
-do
-do
-a = (D.f121)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[9] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-goto p37
-::p36::
-tick(36)
-do
-do
-if N then
-    for f, F, u in next, N do
-        if not (f >= 1) then
-
-        else
-            F[2] = F
-            F[3] = registers[f];
-            (F)[1] = 3
-            N[f] = nil
-        end
-    end
-end
-return
-end
-
-end
-::p37::
-tick(37)
-do
-do
-(registers)[10] = registers[9]
-end
-
-end
-::p38::
-do
-do
-top = 10;
-(registers)[top] = registers[top]()
-end
-
-end
-::p39::
-branch_taken=false
-do
-do
-if not registers[10] then
-    branch_taken=true
-end
-end
-
-end
-if branch_taken then goto p36 end
-::p41::
-do
-do
-(registers)[10] = registers[9]
-end
-
-end
-::p42::
-do
-do
-top = (10)
-registers[top]()
-top = top - 1
-end
-
-end
-goto p37
-::p56::
-do
-do
-registers[2] = (registers[2]["rep"])
-end
-
-end
-::p57::
-do
-do
-a = (registers)
-z = 4
-end
-
-end
-::p58::
-do
-do
-q = registers
-m = 2
-q = (q[m])
-end
-
-end
-::p59::
-do
-do
-(a)[z] = q
-end
-
-end
-::p60::
-do
-do
-registers[5] = (" ")
-end
-
-end
-goto p2
-end
 end
 
 -- Function f117; 27 recovered instruction blocks.
@@ -167642,7 +166557,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -167922,7 +166837,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -168176,7 +167091,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -168487,7 +167402,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -168967,7 +167882,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -170196,7 +169111,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -171359,7 +170274,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -172238,7 +171153,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -172573,7 +171488,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -173726,7 +172641,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -173800,7 +172715,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -173990,7 +172905,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -174688,7 +173603,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -177656,7 +176571,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -177924,7 +176839,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -178013,7 +176928,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -178441,7 +177356,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -179115,7 +178030,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -179245,7 +178160,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -179738,7 +178653,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -179949,7 +178864,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -182921,7 +181836,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -183122,7 +182037,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -183722,7 +182637,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -183997,7 +182912,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -184170,7 +183085,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -184526,7 +183441,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -185151,7 +184066,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -185255,7 +184170,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -185791,7 +184706,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -186427,7 +185342,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -186696,7 +185611,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -188104,7 +187019,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -188685,7 +187600,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -189519,7 +188434,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -189830,7 +188745,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -189939,7 +188854,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -190670,7 +189585,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -190959,7 +189874,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -194112,7 +193027,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -194409,7 +193324,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -194550,7 +193465,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -194717,7 +193632,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -194837,7 +193752,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -195362,7 +194277,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -195539,7 +194454,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -195782,7 +194697,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -195980,7 +194895,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -196181,7 +195096,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -196407,7 +195322,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -196830,7 +195745,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -197124,7 +196039,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -197376,7 +196291,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -197439,7 +196354,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -197964,7 +196879,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -198346,7 +197261,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -199062,7 +197977,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -199131,7 +198046,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -199244,7 +198159,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -199291,7 +198206,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -199337,7 +198252,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -201060,7 +199975,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -201190,7 +200105,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -201329,7 +200244,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -201499,7 +200414,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -202254,7 +201169,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -202455,7 +201370,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -203213,7 +202128,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -204830,7 +203745,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -205260,7 +204175,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -205350,7 +204265,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -206265,7 +205180,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -207093,7 +206008,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -207510,7 +206425,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -208107,7 +207022,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -208250,7 +207165,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -208391,7 +207306,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -208463,7 +207378,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -208536,7 +207451,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -208803,7 +207718,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -209502,7 +208417,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -210183,7 +209098,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -210273,7 +209188,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -210449,7 +209364,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -210934,7 +209849,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -215847,7 +214762,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -215994,7 +214909,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -216078,7 +214993,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -216162,7 +215077,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -216246,7 +215161,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -216331,7 +215246,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -216415,7 +215330,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -216499,7 +215414,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -216862,7 +215777,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -217082,7 +215997,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -217271,7 +216186,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -217466,7 +216381,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -217579,7 +216494,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -217670,7 +216585,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -217982,7 +216897,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -218192,7 +217107,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -218567,7 +217482,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -218706,7 +217621,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -218884,7 +217799,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -219297,7 +218212,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -220133,7 +219048,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -220202,7 +219117,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -220822,7 +219737,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -222314,7 +221229,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -222696,7 +221611,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -222966,7 +221881,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -223472,7 +222387,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -224174,7 +223089,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -224575,7 +223490,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -224650,7 +223565,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -226025,7 +224940,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -226071,7 +224986,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -226465,7 +225380,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -226632,7 +225547,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -226974,7 +225889,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -227176,7 +226091,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -227486,7 +226401,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -227923,7 +226838,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -228072,7 +226987,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -228515,7 +227430,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -229070,7 +227985,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -229556,7 +228471,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -229913,7 +228828,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -230098,7 +229013,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -230571,7 +229486,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -230657,7 +229572,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -230863,7 +229778,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -231304,7 +230219,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -232057,7 +230972,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -232379,7 +231294,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -232592,7 +231507,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -233083,7 +231998,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -233195,7 +232110,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -233393,7 +232308,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -234004,7 +232919,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -235240,7 +234155,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -235591,7 +234506,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -236299,7 +235214,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -236487,7 +235402,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -236633,7 +235548,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -236777,7 +235692,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -237440,7 +236355,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -238248,7 +237163,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -239692,7 +238607,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -240049,7 +238964,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -240206,7 +239121,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -240869,7 +239784,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -241062,7 +239977,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -241543,7 +240458,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -241606,7 +240521,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -241652,7 +240567,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -241793,7 +240708,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -241885,7 +240800,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -242810,7 +241725,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -242936,7 +241851,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -247437,7 +246352,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -247507,7 +246422,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -247718,7 +246633,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -247815,7 +246730,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -247870,7 +246785,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -247940,7 +246855,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -248263,7 +247178,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -249457,7 +248372,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -249600,7 +248515,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -249717,7 +248632,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -250585,7 +249500,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -250787,7 +249702,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -251058,7 +249973,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -251292,7 +250207,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -251648,7 +250563,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -252047,7 +250962,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -253365,7 +252280,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -253626,7 +252541,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -254124,7 +253039,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -254492,7 +253407,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -255062,7 +253977,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -256593,7 +255508,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -256857,7 +255772,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -257056,7 +255971,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -257492,7 +256407,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -258539,7 +257454,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -260512,7 +259427,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -261086,7 +260001,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -261423,7 +260338,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -261649,7 +260564,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -261765,7 +260680,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -261977,7 +260892,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -262989,7 +261904,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -263508,7 +262423,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -263813,7 +262728,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -264402,7 +263317,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -264619,7 +263534,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -264795,7 +263710,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -265006,7 +263921,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -265068,7 +263983,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -265137,7 +264052,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -265397,7 +264312,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -266052,7 +264967,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -266428,7 +265343,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -267029,7 +265944,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -267313,7 +266228,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -268085,7 +267000,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -268379,7 +267294,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -268935,7 +267850,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -269022,7 +267937,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -269315,7 +268230,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -269487,7 +268402,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -269790,7 +268705,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -269935,7 +268850,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -270339,7 +269254,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -270488,7 +269403,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -270751,7 +269666,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -271099,7 +270014,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -271866,7 +270781,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -273459,7 +272374,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -274474,7 +273389,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -274945,7 +273860,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -275022,7 +273937,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -275092,7 +274007,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -275251,7 +274166,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -275715,7 +274630,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -275897,7 +274812,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -276826,7 +275741,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -277713,7 +276628,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -281172,7 +280087,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -281902,7 +280817,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -281964,7 +280879,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -282109,7 +281024,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -282181,7 +281096,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -282270,7 +281185,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -282397,7 +281312,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -283107,7 +282022,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -283793,7 +282708,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -285803,7 +284718,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -285940,7 +284855,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -286134,7 +285049,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -286486,7 +285401,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -287036,7 +285951,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -287351,7 +286266,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -288409,7 +287324,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -289264,7 +288179,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -289379,7 +288294,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -290185,7 +289100,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -291814,7 +290729,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -293112,7 +292027,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -293431,7 +292346,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -293936,7 +292851,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -294279,7 +293194,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -294418,7 +293333,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -295047,7 +293962,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -295162,7 +294077,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -295268,7 +294183,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -295413,7 +294328,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -295634,7 +294549,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -295703,7 +294618,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -295856,7 +294771,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -296009,7 +294924,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -296545,7 +295460,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -297342,7 +296257,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -297444,7 +296359,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -297560,7 +296475,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -297712,7 +296627,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -297973,7 +296888,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -298082,7 +296997,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -298430,7 +297345,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -298792,7 +297707,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -299360,7 +298275,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -299429,7 +298344,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -299808,7 +298723,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -300678,7 +299593,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -301047,7 +299962,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -301659,7 +300574,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -302115,7 +301030,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -303225,7 +302140,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -303465,7 +302380,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -303916,7 +302831,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -305434,7 +304349,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -305611,7 +304526,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -306032,7 +304947,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -306239,7 +305154,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -306460,7 +305375,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -308354,7 +307269,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -308542,7 +307457,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -308834,7 +307749,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -309175,7 +308090,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -310470,7 +309385,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -313984,7 +312899,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -314168,7 +313083,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -314374,7 +313289,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -315340,7 +314255,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -316235,7 +315150,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -316457,7 +315372,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -316607,7 +315522,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -317119,7 +316034,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -317979,7 +316894,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -318057,375 +316972,13 @@ end
 goto p3
 end
 end
-
--- Function f418; 20 recovered instruction blocks.
+-- Fixed-input crash routine; the original repeatedly parsed eight spaces.
 F.f418=function(function_metadata,upvalues)
-local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
-local frame_size=function_metadata[7]
-return function(...)
-if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
-local T,U,_,S,z,a=0
-local instructions_left=startup_instruction_limit
-local branch_taken
-local function tick(pc)
- current_function,current_pc="f418",pc
- if startup_active then
-  instructions_left=instructions_left-1
-  if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f418 pc="..pc,0) end
-  startup_poll_remaining=startup_poll_remaining-1
-if startup_poll_remaining<=0 then
-startup_poll_remaining=startup_poll_interval
-check_startup_clock()
-end
- end
-end
- tick(1)
-goto p2
-::p2::
-do
-do
-_, Q = pack_returns(...)
-end
-
-end
-::p3::
-do
-do
-(registers)[1] = environment["string"]
-end
-
-end
-::p4::
-do
-do
-registers[1] = (registers[1]["byte"])
-end
-
-end
-goto p25
-::p7::
-tick(7)
-do
-do
-(registers)[10] = registers[9]
-end
-
-end
-::p8::
-do
-do
-top = (10)
-registers[top]()
-top = top - 1
-end
-
-end
-::p10::
-tick(10)
-do
-do
-(registers)[10] = registers[9]
-end
-
-end
-::p11::
-do
-do
-top = 10;
-(registers)[top] = registers[top]()
-end
-
-end
-::p12::
-branch_taken=false
-do
-do
-if not registers[10] then
-    branch_taken=true
-end
-end
-
-end
-if branch_taken then goto p24 end
-goto p7
-::p14::
-tick(14)
-do
-do
-registers[5] = (" ")
-end
-
-end
-::p15::
-do
-do
-registers[6] = (8)
-end
-
-end
-::p16::
-do
-do
-a = 4
-registers[a] = registers[a](registers[a + 1], registers[a + 2])
-top = (a)
-end
-
-end
-::p17::
-do
-do
-a = (D.f419)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[5] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
+    return function()
+        if startup_blocked then return end
+        current_function,current_pc="f418",0
+        error("ANDROMEDA_PROTECTION_FAILURE: disabled fixed-input crash routine f418",0)
     end
-end
-end
-
-end
-::p18::
-do
-do
-a = (D.f420)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[6] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-::p19::
-do
-do
-a = (D.f421)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[7] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-::p20::
-do
-do
-a = (D.f422)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[8] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-::p22::
-do
-do
-a = (D.f423)
-z = (a[4])
-q = (#z)
-m = q > 0 and {
-}
-x = make_function(a, m);
-(setfenv)(x, environment);
-(registers)[9] = x
-if m then
-    for f = 1, q do
-        a = (z[f])
-        x = (a[2])
-        S = (a[1])
-        if x == 0 then
-            if not N then
-                N = {
-                }
-            end
-            H = N[S]
-            if not H then
-                H = ({
-                    [2] = registers,
-                    [1] = S,
-                });
-                (N)[S] = H
-            end
-            (m)[f - 1] = H
-        else
-            if x ~= 1 then
-                (m)[f - 1] = upvalues[S]
-            else
-                m[f - 1] = (registers[S])
-            end
-        end
-    end
-end
-end
-
-end
-goto p10
-::p24::
-do
-do
-if N then
-    for f, F, u in next, N do
-        if not (f >= 1) then
-
-        else
-            F[2] = F
-            F[3] = registers[f];
-            (F)[1] = 3
-            N[f] = nil
-        end
-    end
-end
-return
-end
-
-end
-::p25::
-do
-do
-(registers)[2] = environment["string"]
-end
-
-end
-::p26::
-do
-do
-registers[2] = (registers[2]["rep"])
-end
-
-end
-::p27::
-do
-do
-(registers)[4] = registers[2]
-end
-
-end
-goto p14
-end
 end
 
 -- Function f419; 25 recovered instruction blocks.
@@ -318434,7 +316987,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -318699,7 +317252,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -319007,7 +317560,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -319326,7 +317879,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -319777,7 +318330,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -320994,7 +319547,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -321066,7 +319619,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -321226,7 +319779,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -321379,7 +319932,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -321469,7 +320022,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -321668,7 +320221,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -321800,7 +320353,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -322162,7 +320715,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -322783,7 +321336,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -322982,7 +321535,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -323065,7 +321618,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -323288,7 +321841,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -323518,7 +322071,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -323698,7 +322251,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -323871,7 +322424,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -324214,7 +322767,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -324631,7 +323184,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -324796,7 +323349,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -325057,7 +323610,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -325555,7 +324108,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -326054,7 +324607,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -327850,7 +326403,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -327974,7 +326527,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -328109,7 +326662,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -328291,7 +326844,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -328378,7 +326931,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -328575,7 +327128,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -328801,7 +327354,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -329219,7 +327772,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -329317,7 +327870,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -329768,7 +328321,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -330468,7 +329021,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -330684,7 +329237,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -331009,7 +329562,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -331186,7 +329739,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -331376,7 +329929,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -331491,7 +330044,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -331603,7 +330156,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -331753,7 +330306,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -331911,7 +330464,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -332078,7 +330631,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -332192,7 +330745,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -332298,7 +330851,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -332543,7 +331096,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -332898,7 +331451,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -333196,7 +331749,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -333305,7 +331858,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -334029,7 +332582,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -335046,7 +333599,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -335202,7 +333755,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -335309,7 +333862,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -335461,7 +334014,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -335582,7 +334135,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -335690,7 +334243,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -335842,7 +334395,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -336047,7 +334600,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -336304,7 +334857,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -336374,7 +334927,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -336646,7 +335199,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -336816,7 +335369,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -337338,7 +335891,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -339049,7 +337602,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -340513,7 +339066,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -341155,7 +339708,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -341273,7 +339826,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -341389,7 +339942,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -341509,7 +340062,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -341627,7 +340180,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -341762,7 +340315,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -341941,7 +340494,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -343362,7 +341915,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -343439,7 +341992,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -344276,7 +342829,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -344848,7 +343401,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -345249,7 +343802,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -345416,7 +343969,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -345672,7 +344225,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -345951,7 +344504,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -346594,7 +345147,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -346771,7 +345324,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -347063,7 +345616,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -347374,7 +345927,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -347539,7 +346092,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -347748,7 +346301,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -347964,7 +346517,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -348268,7 +346821,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -348429,7 +346982,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -348693,7 +347246,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -348798,7 +347351,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -349015,7 +347568,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -350767,7 +349320,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -350898,7 +349451,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -351008,7 +349561,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -351213,7 +349766,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -351940,7 +350493,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -352272,7 +350825,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -353044,7 +351597,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -353306,7 +351859,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -353602,7 +352155,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -353868,7 +352421,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -354362,7 +352915,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -354498,7 +353051,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -354820,7 +353373,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -354974,7 +353527,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -355080,7 +353633,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -355189,7 +353742,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -355256,7 +353809,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -355388,7 +353941,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -355864,7 +354417,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -356296,7 +354849,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -356614,7 +355167,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -357199,7 +355752,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -357307,7 +355860,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -357681,7 +356234,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -358231,7 +356784,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -359432,7 +357985,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -359675,7 +358228,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -360505,7 +359058,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -361221,7 +359774,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -361805,7 +360358,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -361852,7 +360405,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -362446,7 +360999,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -362657,7 +361210,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -362763,7 +361316,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -362809,7 +361362,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -363168,7 +361721,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -363855,7 +362408,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -363911,7 +362464,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -363967,7 +362520,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -364625,7 +363178,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -364682,7 +363235,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -364739,7 +363292,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -364857,7 +363410,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -364962,7 +363515,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -365068,7 +363621,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -365172,7 +363725,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -365276,7 +363829,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -365380,7 +363933,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -365484,7 +364037,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -365589,7 +364142,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
@@ -365693,7 +364246,7 @@ local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=
 local frame_size=function_metadata[7]
 return function(...)
 if startup_blocked then return end
-local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,getfenv(),1
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
 local T,U,_,S,z,a=0
 local instructions_left=startup_instruction_limit
 local branch_taken
