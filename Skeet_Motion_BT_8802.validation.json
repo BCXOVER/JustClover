@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "archive": "Skeet_Motion_BT_8802.zip",
+  "bytes": 10007058,
+  "sha256": "c11ac1d07175fb7abe6a046805b3831cb99cf7d34d89ec2f6d2fa8671547c1d2",
+  "dll_sha256": "1ea8ea4f27b7d6b00c0e9a045ac6e1c4a3e7b75dbafc39503c25f992b80802b0",
+  "manifest_files": 95,
+  "zip_crc_verified": true,
+  "game_tested": false
+}
