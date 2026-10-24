@@ -1,12 +1,7 @@
 [
   {
     "name": "f1",
-    "states": 1335,
-    "iterations": 1432,
-    "patches": 99,
-    "conflicts": 0,
-    "native_blocks": 1335,
-    "non_scalar_writes": 64
+    "special": "direct standalone application entry with recovered 103 API bindings"
   },
   {
     "name": "f2",
@@ -954,12 +949,7 @@
   },
   {
     "name": "f108",
-    "states": 24,
-    "iterations": 29,
-    "patches": 13,
-    "conflicts": 0,
-    "native_blocks": 44,
-    "non_scalar_writes": 4
+    "special": "loader-only crash event handler removed"
   },
   {
     "name": "f109",
@@ -1012,12 +1002,7 @@
   },
   {
     "name": "f115",
-    "states": 30,
-    "iterations": 36,
-    "patches": 13,
-    "conflicts": 0,
-    "native_blocks": 30,
-    "non_scalar_writes": 4
+    "special": "loader-only crash event handler removed"
   },
   {
     "name": "f116",
@@ -3711,12 +3696,7 @@
   },
   {
     "name": "f416",
-    "states": 73,
-    "iterations": 96,
-    "patches": 22,
-    "conflicts": 0,
-    "native_blocks": 73,
-    "non_scalar_writes": 4
+    "special": "loader-only crash event handler removed"
   },
   {
     "name": "f417",

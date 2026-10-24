@@ -1,6 +1,6 @@
 {
-  "sha256": "d44f530e9adf4854bc5b80dc41957276ffae5f88e3352419fe7c92d92012529c",
-  "bytes": 6447216,
+  "sha256": "782761bb83f90a561731d5a8ef28d9b7cb1dd392d7176511068f4568de238a35",
+  "bytes": 6108459,
   "definitions": 564,
   "residual_template_vm_functions": 0,
   "gamesense_executed": false,
@@ -58,30 +58,6 @@
     {
       "function": "f45",
       "fixture": "tail",
-      "status_and_dependency_events_match": true,
-      "outcome": "error"
-    },
-    {
-      "function": "f108",
-      "fixture": "tail",
-      "status_and_dependency_events_match": true,
-      "outcome": "error"
-    },
-    {
-      "function": "f115",
-      "fixture": "match",
-      "status_and_dependency_events_match": true,
-      "outcome": "error"
-    },
-    {
-      "function": "f115",
-      "fixture": "mismatch",
-      "status_and_dependency_events_match": true,
-      "outcome": "return:nil"
-    },
-    {
-      "function": "f416",
-      "fixture": "invalid_input",
       "status_and_dependency_events_match": true,
       "outcome": "error"
     }

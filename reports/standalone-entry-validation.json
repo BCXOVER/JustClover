@@ -1,0 +1,133 @@
+{
+  "sha256": "782761bb83f90a561731d5a8ef28d9b7cb1dd392d7176511068f4568de238a35",
+  "gamesense_executed": false,
+  "scope": "real f96 executes until requesting gamesense/pui; module contents and engine native APIs are unavailable",
+  "checks": [
+    {
+      "runtime": "lupa.luajit20",
+      "case": "previous_table_max_failure_reproduced",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "all_103_api_names_and_function_identities_match_previous_initializer",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "real_application_to_pui_absent",
+      "passed": true,
+      "dependency": "gamesense/pui"
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "real_application_to_pui_registry",
+      "passed": true,
+      "dependency": "gamesense/pui"
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "real_application_to_pui_named",
+      "passed": true,
+      "dependency": "gamesense/pui"
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "removed_loader_event_f108",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "removed_loader_event_f115",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "removed_loader_event_f416",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "remaining_trap_f47_fails_immediately",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "remaining_trap_f109_fails_immediately",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "remaining_trap_f116_fails_immediately",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "remaining_trap_f418_fails_immediately",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "previous_table_max_failure_reproduced",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "all_103_api_names_and_function_identities_match_previous_initializer",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "real_application_to_pui_absent",
+      "passed": true,
+      "dependency": "gamesense/pui"
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "real_application_to_pui_registry",
+      "passed": true,
+      "dependency": "gamesense/pui"
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "real_application_to_pui_named",
+      "passed": true,
+      "dependency": "gamesense/pui"
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "removed_loader_event_f108",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "removed_loader_event_f115",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "removed_loader_event_f416",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "remaining_trap_f47_fails_immediately",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "remaining_trap_f109_fails_immediately",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "remaining_trap_f116_fails_immediately",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "remaining_trap_f418_fails_immediately",
+      "passed": true
+    }
+  ]
+}
