@@ -28,10 +28,10 @@
   "previous_source_bytes": 2535676,
   "source_bytes_removed": 1347191,
   "transformations": {
-    "inlined": 11022,
-    "dead": 1591,
-    "tables": 701,
-    "methods": 587
+    "inlined": 10296,
+    "dead": 1441,
+    "tables": 412,
+    "methods": 584
   },
   "archive": {
     "file": "Andromeda_recovered_source.zip",
