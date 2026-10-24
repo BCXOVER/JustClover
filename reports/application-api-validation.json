@@ -1,0 +1,48 @@
+{
+  "sha256": "ab3f9e313ba4e66cfdca66f6733ab19748151851042892a73162a6d741bd6419",
+  "gamesense_executed": false,
+  "scope": "real f96 through imports and screen-size vector call, stopping at the first pui.reference; GUI modules are mocked",
+  "used_slots": 71,
+  "highest_slot": 171,
+  "static_use_functions": 172,
+  "checks": [
+    {
+      "runtime": "lupa.luajit20",
+      "case": "reported_zero_argument_numeric_failure_reproduced",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "real_f96_passes_reported_failure_and_reaches_pui_reference",
+      "passed": true,
+      "screen_size": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "runtime": "lupa.luajit20",
+      "case": "real_anchor_layout_and_signed_rounding",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "reported_zero_argument_numeric_failure_reproduced",
+      "passed": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "real_f96_passes_reported_failure_and_reaches_pui_reference",
+      "passed": true,
+      "screen_size": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "case": "real_anchor_layout_and_signed_rounding",
+      "passed": true
+    }
+  ]
+}

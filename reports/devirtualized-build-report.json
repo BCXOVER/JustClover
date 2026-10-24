@@ -1,7 +1,7 @@
 [
   {
     "name": "f1",
-    "special": "direct standalone application entry with recovered 103 API bindings"
+    "special": "direct standalone application entry with 71 application API slots, highest index 171"
   },
   {
     "name": "f2",

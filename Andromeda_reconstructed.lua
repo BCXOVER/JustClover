@@ -5192,7 +5192,7 @@ make_function=function(function_metadata,upvalues)
     return factory(function_metadata,upvalues)
 end
 
--- Start the recovered application directly with its original API slot order.
+-- Start the recovered application with the API slots used by its own code.
 -- f96 clears the former loader seed cells at entry; it retains ffi and SHA256.
 F.f1=function(function_metadata,upvalues)
     return function()
@@ -5200,7 +5200,8 @@ F.f1=function(function_metadata,upvalues)
         current_function,current_pc="f1",1
         local ffi_module=andromeda_environment.require("ffi")
         local apis={}
-        for index,path in ipairs({"client.exec","string.find","string.rep","string.format","string.gsub","string.gmatch","string.match","string.reverse","string.byte","string.char","string.upper","string.lower","string.sub","table.maxn","table.clear","table.pack","table.sort","table.unpack","table.concat","table.insert","json.encode_invalid_numbers","json.encode_sparse_array","json.stringify","json.encode_number_precision","json.encode_max_depth","json.decode_invalid_numbers","json.parse","json.decode_max_depth","jit.flush","jit.status","jit.attach","database.read","database.write","database.flush","coroutine.wrap","coroutine.yield","coroutine.resume","coroutine.status","coroutine.isyieldable","coroutine.running","coroutine.create","client.random_int","client.create_interface","client.find_signature","client.set_event_callback","client.unset_event_callback","bit.rol","bit.rshift","bit.ror","bit.bswap","bit.bxor","bit.bor","bit.arshift","bit.bnot","bit.tobit","bit.lshift","bit.tohex","bit.band","assert","tostring","tonumber","rawget","xpcall","ipairs","pcall","gcinfo","module","writefile","readfile","setfenv","require","setmetatable","loadstring","pairs","error","rawequal","load","newproxy","collectgarbage","next","rawset","unpack","select","rawlen","type","getmetatable","getfenv","ffi.new","ffi.cast","ffi.typeof","ffi.sizeof","ffi.alignof","ffi.istype","ffi.fill","ffi.cdef","ffi.abi","ffi.metatype","ffi.copy","ffi.typeinfo","ffi.string","ffi.gc","ffi.errno","ffi.offsetof"}) do
+        local binding_paths={[19]="globals.frametime",[23]="globals.tickcount",[26]="globals.curtime",[27]="globals.mapname",[28]="globals.tickinterval",[29]="globals.framecount",[30]="globals.realtime",[31]="globals.maxplayers",[32]="entity.get_local_player",[33]="entity.is_alive",[36]="entity.set_prop",[37]="entity.get_player_weapon",[39]="entity.hitbox_position",[40]="entity.get_player_resource",[41]="entity.get_esp_data",[42]="entity.is_dormant",[43]="entity.get_player_name",[44]="entity.get_game_rules",[45]="entity.get_classname",[46]="entity.get_origin",[47]="entity.get_prop",[49]="entity.get_players",[50]="entity.is_enemy",[52]="client.current_threat",[54]="client.userid_to_entindex",[56]="client.set_event_callback",[57]="client.screen_size",[58]="client.trace_bullet",[60]="client.color_log",[66]="client.random_int",[67]="client.latency",[70]="client.log",[78]="client.trace_line",[81]="client.register_esp_flag",[86]="client.exec",[87]="client.random_float",[91]="client.eye_position",[93]="client.camera_angles",[95]="client.unset_event_callback",[96]="client.system_time",[99]="ui.reference",[108]="ui.is_menu_open",[110]="ui.set",[117]="ui.type",[120]="ui.get",[121]="database.read",[122]="database.write",[125]="renderer.load_svg",[127]="renderer.circle_outline",[128]="renderer.rectangle",[129]="renderer.gradient",[130]="renderer.circle",[131]="renderer.text",[135]="renderer.triangle",[136]="renderer.measure_text",[138]="renderer.indicator",[139]="renderer.texture",[141]="plist.set",[144]="math.ceil",[148]="math.cos",[150]="math.random",[151]="math.max",[152]="math.atan2",[154]="math.floor",[155]="math.sqrt",[157]="math.atan",[160]="math.pow",[161]="math.abs",[162]="math.min",[163]="math.sin",[171]="math.rad"}
+        for index,path in pairs(binding_paths) do
             local value=andromeda_environment
             for part in path:gmatch("[^.]+") do
                 if part=="ffi" and value==andromeda_environment then
@@ -5211,6 +5212,11 @@ F.f1=function(function_metadata,upvalues)
             end
             apis[index]=value
         end
+        setmetatable(apis,{__index=function(_,index)
+            local path=binding_paths[index]
+            if path then error("ANDROMEDA_MISSING_API: "..path,0) end
+            error("ANDROMEDA_UNRESOLVED_API_SLOT: "..tostring(index),0)
+        end})
         local crypto=make_function(D.f29,nil)()
         local cells={[17]=function()end}
         local application_upvalues={

@@ -1,5 +1,5 @@
 {
-  "sha256": "782761bb83f90a561731d5a8ef28d9b7cb1dd392d7176511068f4568de238a35",
+  "sha256": "ab3f9e313ba4e66cfdca66f6733ab19748151851042892a73162a6d741bd6419",
   "gamesense_executed": false,
   "scope": "real f96 executes until requesting gamesense/pui; module contents and engine native APIs are unavailable",
   "checks": [
@@ -10,7 +10,7 @@
     },
     {
       "runtime": "lupa.luajit20",
-      "case": "all_103_api_names_and_function_identities_match_previous_initializer",
+      "case": "all_71_application_api_bindings",
       "passed": true
     },
     {
@@ -73,7 +73,7 @@
     },
     {
       "runtime": "lupa.luajit21",
-      "case": "all_103_api_names_and_function_identities_match_previous_initializer",
+      "case": "all_71_application_api_bindings",
       "passed": true
     },
     {
