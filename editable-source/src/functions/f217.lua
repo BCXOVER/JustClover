@@ -1,0 +1,375 @@
+
+-- Function f217; 30 recovered instruction blocks.
+F.f217=function(function_metadata,upvalues)
+local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
+local frame_size=function_metadata[7]
+return function(...)
+if startup_blocked then return end
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
+local T,U,_,S,z,a=0
+local instructions_left=startup_instruction_limit
+local branch_taken
+local function tick(pc)
+ current_function,current_pc="f217",pc
+ if startup_active then
+  instructions_left=instructions_left-1
+  if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f217 pc="..pc,0) end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
+ end
+end
+ tick(1)
+goto p67
+::p17::
+tick(17)
+do
+do
+registers[5] = (upvalues[3])
+end
+
+end
+::p18::
+do
+do
+(registers)[6] = upvalues[4]["normalize"]
+end
+
+end
+::p19::
+do
+do
+registers[7] = (registers[3]["eye_angles_y"])
+end
+
+end
+::p20::
+do
+do
+registers[7] = (registers[7] - registers[4])
+end
+
+end
+::p21::
+do
+do
+registers[8] = (-180)
+end
+
+end
+goto p80
+::p23::
+tick(23)
+do
+do
+(registers)[3] = nil
+end
+
+end
+::p24::
+do
+do
+if not (N) then
+
+else
+    for T, environment, W in next, N do
+        if not (T >= 1) then
+
+        else
+            environment[2] = environment;
+            (environment)[3] = (registers[T]);
+            (environment)[1] = (3)
+            N[T] = nil
+        end
+    end
+end
+return registers[3]
+end
+
+end
+::p30::
+tick(30)
+do
+do
+(registers)[5] = nil
+end
+
+end
+::p31::
+do
+do
+if not (N) then
+
+else
+    for T, environment, W in next, N do
+        if not (T >= 1) then
+
+        else
+            environment[2] = environment;
+            (environment)[3] = (registers[T]);
+            (environment)[1] = (3)
+            N[T] = nil
+        end
+    end
+end
+return registers[5]
+end
+
+end
+::p50::
+tick(50)
+do
+do
+(registers)[4] = nil
+end
+
+end
+::p51::
+do
+do
+if not (N) then
+
+else
+    for T, environment, W in next, N do
+        if not (T >= 1) then
+
+        else
+            environment[2] = environment;
+            (environment)[3] = (registers[T]);
+            (environment)[1] = (3)
+            N[T] = nil
+        end
+    end
+end
+return registers[4]
+end
+
+end
+::p53::
+tick(53)
+do
+do
+(registers)[2] = nil
+end
+
+end
+::p54::
+do
+do
+if not (N) then
+
+else
+    for T, environment, W in next, N do
+        if not (T >= 1) then
+
+        else
+            environment[2] = environment;
+            (environment)[3] = (registers[T]);
+            (environment)[1] = (3)
+            N[T] = nil
+        end
+    end
+end
+return registers[2]
+end
+
+end
+::p55::
+tick(55)
+branch_taken=false
+do
+do
+if registers[4] ~= registers[0] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p17 end
+goto p30
+::p63::
+tick(63)
+do
+do
+registers[4] = (upvalues[2])
+end
+
+end
+::p64::
+do
+do
+(registers)[5] = registers[1]
+end
+
+end
+::p65::
+do
+do
+a = (4);
+(registers)[a] = registers[a](registers[a + 1])
+top = (a)
+end
+
+end
+goto p55
+::p67::
+do
+do
+(registers)[1] = upvalues[0][32]
+end
+
+end
+::p68::
+do
+do
+top = 1;
+(registers)[top] = registers[top]()
+end
+
+end
+::p69::
+branch_taken=false
+do
+do
+if registers[1] ~= registers[0] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p120 end
+goto p53
+::p80::
+do
+do
+registers[9] = (180)
+end
+
+end
+::p81::
+do
+do
+a = 6
+z = (4)
+q = 0
+if z == 0 then
+
+else
+    top = (a + z - 1)
+end
+m, x = nil
+if z ~= 1 then
+    m, x = pack_returns(registers[a](unpack_range(top, registers, a + 1)))
+else
+    m, x = pack_returns(registers[a]())
+end
+if q ~= 1 then
+    if q ~= 0 then
+        m = a + q - 2
+        top = (m + 1)
+    else
+        m = m + a - 1
+        top = m
+    end
+    z = 0
+    for f = a, m do
+        z = (z + 1);
+        (registers)[f] = x[z]
+    end
+else
+    top = a - 1
+end
+end
+
+end
+::p82::
+do
+do
+if not (N) then
+
+else
+    for f, F, u in next, N do
+        if f >= 1 then
+            (F)[2] = F;
+            (F)[3] = (registers[f])
+            F[1] = (3)
+            N[f] = (nil)
+        end
+    end
+end
+a = 5
+return registers[a](unpack_range(top, registers, a + 1))
+end
+
+end
+::p109::
+tick(109)
+do
+do
+a = (3)
+z = registers[2]
+registers[a + 1] = (z);
+(registers)[a] = z["get_anim_state"]
+end
+
+end
+::p110::
+do
+do
+a = (3);
+(registers)[a] = registers[a](registers[a + 1])
+top = (a)
+end
+
+end
+::p111::
+branch_taken=false
+do
+do
+if registers[3] ~= registers[0] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p63 end
+goto p50
+::p120::
+do
+do
+registers[2] = (upvalues[1])
+end
+
+end
+::p121::
+do
+do
+(registers)[3] = registers[1]
+end
+
+end
+::p122::
+do
+do
+a = (2);
+(registers)[a] = registers[a](registers[a + 1])
+top = (a)
+end
+
+end
+::p123::
+branch_taken=false
+do
+do
+if registers[2] ~= registers[0] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p109 end
+goto p23
+end
+end

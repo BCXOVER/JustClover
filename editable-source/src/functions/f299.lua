@@ -1,0 +1,199 @@
+
+-- Function f299; 18 recovered instruction blocks.
+F.f299=function(function_metadata,upvalues)
+local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
+local frame_size=function_metadata[7]
+return function(...)
+if startup_blocked then return end
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
+local T,U,_,S,z,a=0
+local instructions_left=startup_instruction_limit
+local branch_taken
+local function tick(pc)
+ current_function,current_pc="f299",pc
+ if startup_active then
+  instructions_left=instructions_left-1
+  if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f299 pc="..pc,0) end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
+ end
+end
+ tick(1)
+goto p2
+::p2::
+do
+do
+a = {
+    ...,
+}
+for f = 1, 1, 1 do
+    registers[f] = (a[f])
+end
+end
+
+end
+::p3::
+do
+do
+(registers)[2] = upvalues[0][154]
+end
+
+end
+::p4::
+do
+do
+(registers)[3] = registers[1]
+end
+
+end
+goto p30
+::p9::
+tick(9)
+do
+do
+if not (N) then
+
+else
+    for T, environment, W in next, N do
+        if not (T >= 1) then
+
+        else
+            environment[2] = environment;
+            (environment)[3] = (registers[T]);
+            (environment)[1] = (3)
+            N[T] = nil
+        end
+    end
+end
+return registers[3]
+end
+
+end
+::p28::
+tick(28)
+do
+do
+(registers)[3] = registers[2]
+end
+
+end
+goto p69
+::p30::
+do
+do
+a = (2);
+(registers)[a] = registers[a](registers[a + 1])
+top = (a)
+end
+
+end
+::p31::
+do
+do
+(registers)[1] = registers[2]
+end
+
+end
+::p32::
+do
+do
+registers[2] = registers[1] + 1
+end
+
+end
+::p33::
+do
+do
+(registers)[2] = upvalues[1][registers[2]]
+end
+
+end
+::p34::
+branch_taken=false
+do
+do
+if registers[2] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p88 end
+goto p83
+::p69::
+tick(69)
+branch_taken=false
+do
+do
+if registers[3] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p9 end
+::p72::
+do
+do
+(registers)[3] = nil
+end
+
+end
+goto p9
+::p83::
+do
+do
+(registers)[2] = upvalues[1][registers[1]]
+end
+
+end
+goto p88
+::p85::
+tick(85)
+do
+do
+registers[3] = (registers[3] == "string")
+end
+
+end
+::p86::
+branch_taken=false
+do
+do
+if not registers[3] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p69 end
+goto p28
+::p88::
+do
+do
+(registers)[3] = environment["type"]
+end
+
+end
+::p89::
+do
+do
+(registers)[4] = registers[2]
+end
+
+end
+::p90::
+do
+do
+a = (3);
+(registers)[a] = registers[a](registers[a + 1])
+top = (a)
+end
+
+end
+goto p85
+end
+end

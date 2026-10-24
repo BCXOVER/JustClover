@@ -1,0 +1,6811 @@
+{
+  "format": 1,
+  "kind": "reconstructed Lua source fragments; concatenated into one lexical scope",
+  "baseline_commit": "c0ddd84d6b9c0fccd4fb80f315fe6b43bc1c42cb",
+  "baseline_sha256": "ab3f9e313ba4e66cfdca66f6733ab19748151851042892a73162a6d741bd6419",
+  "baseline_bytes": 6109002,
+  "function_count": 564,
+  "user_confirmation": {
+    "startup_completed": true,
+    "menu_visible": true,
+    "basis": "console output and screenshots supplied by the user",
+    "all_gameplay_features_verified": false
+  },
+  "parts": [
+    {
+      "path": "src/runtime.lua",
+      "bytes": 4718,
+      "sha256": "abf80b4286f3031878df2fd24627dd73b19df53ab8207bc79bcdcaec4ab0da59"
+    },
+    {
+      "path": "src/program_data.lua",
+      "bytes": 2085754,
+      "sha256": "9275720af971cd8acaaeb95c13a3ed71f1bbc2c71a2cbdea2be03dbd1cb30bbf"
+    },
+    {
+      "path": "src/function_factory.lua",
+      "bytes": 246,
+      "sha256": "f8e89953d9730671e373c37c5bd4cdd90ab53be92a76581d61ee1620213df6ee"
+    },
+    {
+      "path": "src/functions/f001_standalone_entry.lua",
+      "bytes": 3252,
+      "sha256": "47362d69b9f0932494c44c455f4ed91566643e2de6756d0d8247787cb3929573"
+    },
+    {
+      "path": "src/functions/f002_environment_failure.lua",
+      "bytes": 190,
+      "sha256": "6a958eb3df9448d7f0565dc55fdc8d7f819230708bd61b59f0912fde1a681026"
+    },
+    {
+      "path": "src/functions/f003_arithmetic_xor.lua",
+      "bytes": 3369,
+      "sha256": "93da602e19f88189d925e41bd01e42398380b6b6979b761ba92c834f785c3733"
+    },
+    {
+      "path": "src/functions/f004.lua",
+      "bytes": 3263,
+      "sha256": "5efe8ef02df75e5e8f077e47f20cc403644eb50e111ec9a0c9a9cda3073b2014"
+    },
+    {
+      "path": "src/functions/f005.lua",
+      "bytes": 3467,
+      "sha256": "77349f2f2abbb506f3446db7519c25a0b5b5b4916e49b4dab8f890a7a21970fa"
+    },
+    {
+      "path": "src/functions/f006.lua",
+      "bytes": 4994,
+      "sha256": "420685b2230767445ec430fe7e3815611f205560db948cf5772a2f3c0080732c"
+    },
+    {
+      "path": "src/functions/f007.lua",
+      "bytes": 12694,
+      "sha256": "3b6dad2aa38503877e8bccf13f39aeebad40e0cf744ef6b7af0e2b8a15db8245"
+    },
+    {
+      "path": "src/functions/f008.lua",
+      "bytes": 40744,
+      "sha256": "80b2c3d5b244dcfb5f44a3fe34d61d621490d783023e2138fbe970952d55bece"
+    },
+    {
+      "path": "src/functions/f009.lua",
+      "bytes": 2799,
+      "sha256": "165e884e7e6e589687a0eb5914bd787c09e671710004dfb31600fef40d9d71cf"
+    },
+    {
+      "path": "src/functions/f010.lua",
+      "bytes": 2016,
+      "sha256": "873eb76295527a6497f1bd89bad42ee9221ae7e3ee0bc7c4c66408e276cf50e1"
+    },
+    {
+      "path": "src/functions/f011.lua",
+      "bytes": 1370,
+      "sha256": "760d0efc272c8844789a1f976f14732ef7604cbe2b39de8f144a6a9536817f5b"
+    },
+    {
+      "path": "src/functions/f012.lua",
+      "bytes": 1494,
+      "sha256": "eabfb7d2eaac538e9da1dc336ad5dec4986e8479b50f304dcd547042d295217a"
+    },
+    {
+      "path": "src/functions/f013.lua",
+      "bytes": 1494,
+      "sha256": "7e730a146797ae4f18b49e696e9b20e22a1e4468bd726854eb9eaee105156220"
+    },
+    {
+      "path": "src/functions/f014.lua",
+      "bytes": 1239,
+      "sha256": "96870781ad386ba3c5f6a30bde7d227e2413491d3961486ac4753e9651f2dd54"
+    },
+    {
+      "path": "src/functions/f015.lua",
+      "bytes": 1247,
+      "sha256": "c25a8a2049adb5a476a13322600732bafc4506621ec8c1bd231b6a5477379258"
+    },
+    {
+      "path": "src/functions/f016.lua",
+      "bytes": 1954,
+      "sha256": "956668be6ad733cde1e1f334ff9bd22814a16f48acd54d08e02b026baa367762"
+    },
+    {
+      "path": "src/functions/f017.lua",
+      "bytes": 1968,
+      "sha256": "9bf172a12828e4744c6e392ee83abb620118630eac5874b9a5acba1a201f4b2e"
+    },
+    {
+      "path": "src/functions/f018.lua",
+      "bytes": 1589,
+      "sha256": "1590dd6497a16745d44f0eb1f910be764c7fe535277ad2d88ad9b953c2865442"
+    },
+    {
+      "path": "src/functions/f019.lua",
+      "bytes": 1461,
+      "sha256": "26b134dd09e85630fced41efd223db2fcdfc1f4617876dd2c48c9f04a592e61c"
+    },
+    {
+      "path": "src/functions/f020.lua",
+      "bytes": 1968,
+      "sha256": "e91013165539a70c878f8e133d7bfc3f786084a102abc6cfee9512cb73218e8e"
+    },
+    {
+      "path": "src/functions/f021.lua",
+      "bytes": 1975,
+      "sha256": "614caa11c08a07c1d4fe213a95edfe410f8e4a5d7dcf38cb0617a6b1dcc9273a"
+    },
+    {
+      "path": "src/functions/f022.lua",
+      "bytes": 1978,
+      "sha256": "151a71b7696c45d0bb9dac9798e926470c3f8e876674f5dd7c4878b5108c7f50"
+    },
+    {
+      "path": "src/functions/f023.lua",
+      "bytes": 1970,
+      "sha256": "af3883108635f4d98eae79a0ec704ee4ff3daa91b3e49a46021122fd58d8ac62"
+    },
+    {
+      "path": "src/functions/f024.lua",
+      "bytes": 1965,
+      "sha256": "ab2e76818e6eaf3591c9433b0b1c9040740cf0a2c5d61d670b1db9ae277dea70"
+    },
+    {
+      "path": "src/functions/f025.lua",
+      "bytes": 1958,
+      "sha256": "dda71198a746f25ced7ccc4911cb2221baec2dd9e01d28ba25408ff3a56ef4fc"
+    },
+    {
+      "path": "src/functions/f026.lua",
+      "bytes": 2293,
+      "sha256": "6beab9847236b0407b52c40d172ca1f28fd7c6b74d97cb6fe5a61282dcf70d48"
+    },
+    {
+      "path": "src/functions/f027.lua",
+      "bytes": 1575,
+      "sha256": "cfa16859ef1b99dc3766aa5033c19cebe7aaff3c90dc314c2a420404d6cfccc2"
+    },
+    {
+      "path": "src/functions/f028.lua",
+      "bytes": 1239,
+      "sha256": "ba5a911364579ca14e216bb2184449d26d0a11d9f9873a494dc637116df435ea"
+    },
+    {
+      "path": "src/functions/f029_sha256_hmac_module.lua",
+      "bytes": 17954,
+      "sha256": "968329c9da9fd7b858340f015e5f10befcce12f181b48a76975f9a178c375600"
+    },
+    {
+      "path": "src/functions/f030.lua",
+      "bytes": 3084,
+      "sha256": "fdb85896bd9edc182b3e2faee6b738b56abd66ce98663515e7443d57378e0475"
+    },
+    {
+      "path": "src/functions/f031.lua",
+      "bytes": 1908,
+      "sha256": "02fe5edd21144966e86ecccf27aa8a48e1f646fc1dfe3c767ff1f18d29287363"
+    },
+    {
+      "path": "src/functions/f032.lua",
+      "bytes": 2418,
+      "sha256": "3d5a10e8e32095a1ef7150a374579dd3b8343e1ebc2ecf95cb0a6422e6e92b0b"
+    },
+    {
+      "path": "src/functions/f033.lua",
+      "bytes": 1670,
+      "sha256": "7d1f66674ab312ff75163771be631e24316a70802313a85b6cf24672e2f98e2c"
+    },
+    {
+      "path": "src/functions/f034.lua",
+      "bytes": 3305,
+      "sha256": "5f049e2ec4220db9f7bda9e490f9c1148d2365373b77b8a82d3d07f22c5862a3"
+    },
+    {
+      "path": "src/functions/f035.lua",
+      "bytes": 2583,
+      "sha256": "4ca17e1f6384063136b3da9066badbbdb845cf2fa96c01967212754ade34eb8d"
+    },
+    {
+      "path": "src/functions/f036.lua",
+      "bytes": 5990,
+      "sha256": "60f94890d4dd839d963218c8c23e7e6b273febdd512b1e061bed43fcaa4f67ce"
+    },
+    {
+      "path": "src/functions/f037.lua",
+      "bytes": 2033,
+      "sha256": "a22caa88396871eb27ef65af4a8e4a4f3f09883fd276e765fc5615d2ee5ed771"
+    },
+    {
+      "path": "src/functions/f038.lua",
+      "bytes": 4205,
+      "sha256": "21468093cd563de6a89ef7387d2ff968dfec3c9d4f425888b8976dcc66419512"
+    },
+    {
+      "path": "src/functions/f039.lua",
+      "bytes": 3625,
+      "sha256": "b34e7c322749d9ee5b5c3814de2daa828468132244fef9c9981f2ba42cf5d723"
+    },
+    {
+      "path": "src/functions/f040.lua",
+      "bytes": 5077,
+      "sha256": "5b9a274b0a546ddaf689c10d88ed86a9d1d4870f931e13af80173bf72e1b6947"
+    },
+    {
+      "path": "src/functions/f041.lua",
+      "bytes": 21407,
+      "sha256": "a015d2dfd86f1e21a83b613e6b1b770c099c4248b2edc328c02b535ab21a99bb"
+    },
+    {
+      "path": "src/functions/f042.lua",
+      "bytes": 2364,
+      "sha256": "03cf3282452e09c6a27ecc70f2f78f22954cbeccaf9fc6b1794f6bdb0becadd1"
+    },
+    {
+      "path": "src/functions/f043.lua",
+      "bytes": 1845,
+      "sha256": "60982c1be03d5477bd881a5b1aebb1a2fe6dbd8e822e04f8ec1c193ee3343299"
+    },
+    {
+      "path": "src/functions/f044.lua",
+      "bytes": 2673,
+      "sha256": "cb6885e9fa2ed954fb4fbd09195a98d014355541143ffd6eff491a6991a1ba55"
+    },
+    {
+      "path": "src/functions/f045.lua",
+      "bytes": 9534,
+      "sha256": "71fc94f98117cc567741a1ab4c7876455459054d98ce4226e1cc936f970b7b35"
+    },
+    {
+      "path": "src/functions/f046.lua",
+      "bytes": 3404,
+      "sha256": "29d99a6f128b306d63d91e93a8c8255cb4e02b80ff36d8d3c9a6b0b28fe397ca"
+    },
+    {
+      "path": "src/functions/f047_disabled_crash_trap.lua",
+      "bytes": 327,
+      "sha256": "b0191b868cc2861d9aed0913c6a66980f082e7fdb4cc1d70198138484b568d9f"
+    },
+    {
+      "path": "src/functions/f048_arithmetic_xor.lua",
+      "bytes": 3360,
+      "sha256": "11183ec35d0526de79b88c3ff26db869af3fcd85eaecf991f1e4509867e26694"
+    },
+    {
+      "path": "src/functions/f049_extract_bits.lua",
+      "bytes": 3380,
+      "sha256": "bea49729bed89ea83e0e961ba0ee1934dbaccbad1fa694f2b3435d36abacd2db"
+    },
+    {
+      "path": "src/functions/f050_read_uint32.lua",
+      "bytes": 3557,
+      "sha256": "7c0637b7f8f8ff8cfbab4458314464b7eb1008c14bca6e46b1b5f6f9bf20787e"
+    },
+    {
+      "path": "src/functions/f051_numeric_decoder.lua",
+      "bytes": 5135,
+      "sha256": "bef9f2aa7b29e8058068a2b1656df6e9c0111565964d959d24a29c140c71832b"
+    },
+    {
+      "path": "src/functions/f052.lua",
+      "bytes": 14244,
+      "sha256": "8536f840ec9315f8dced1c1209bf849d475907472d59f74accf464c25c86e6cb"
+    },
+    {
+      "path": "src/functions/f053.lua",
+      "bytes": 39222,
+      "sha256": "64248fe5975713bfc5c30c168f989ba2b27875c608de054d98158629bdc35717"
+    },
+    {
+      "path": "src/functions/f054.lua",
+      "bytes": 2937,
+      "sha256": "2efa699734981c64c25ffda8f92341e80bccd67f480091d46a0fbbf915d175fb"
+    },
+    {
+      "path": "src/functions/f055.lua",
+      "bytes": 1502,
+      "sha256": "93c9a73a7874072eb971671b5d72f1ca80c150e040cf4000ebba5006665e2364"
+    },
+    {
+      "path": "src/functions/f056.lua",
+      "bytes": 2016,
+      "sha256": "92e08f23100119da833bc545a627c3712f060c8a805b8107187997ffff7e9677"
+    },
+    {
+      "path": "src/functions/f057.lua",
+      "bytes": 1362,
+      "sha256": "0c6f4386f1318864cd126b60db0f3f99254a3a8bf6388904c1b35150d7f7f27c"
+    },
+    {
+      "path": "src/functions/f058.lua",
+      "bytes": 1498,
+      "sha256": "7a93e1dfb1812c91abd10f1e814428210834944c5c82fef4e9503cadec4884bb"
+    },
+    {
+      "path": "src/functions/f059.lua",
+      "bytes": 1520,
+      "sha256": "fc4e36fbd33565f18b185591ac250ec2c466aa5b4c27c00d45777c1b96618a31"
+    },
+    {
+      "path": "src/functions/f060.lua",
+      "bytes": 1968,
+      "sha256": "9778bea607ef6a6af649b6ea97b693e7691bcc87edee6cd67c0dd98912271fd6"
+    },
+    {
+      "path": "src/functions/f061.lua",
+      "bytes": 1964,
+      "sha256": "8714b79ff8c842d5b00aaa90f3f4a82d617286787899b2e04ebc086ac29e019c"
+    },
+    {
+      "path": "src/functions/f062.lua",
+      "bytes": 3098,
+      "sha256": "11f5d81bdfaf2de59fd67255e6f176fdd5abd5d4610a0338118cfffb7d0b5b25"
+    },
+    {
+      "path": "src/functions/f063.lua",
+      "bytes": 2406,
+      "sha256": "0ba480eef6c109b73cd22141a45678d989cdbc66add2849f7530ca23db48e483"
+    },
+    {
+      "path": "src/functions/f064.lua",
+      "bytes": 3662,
+      "sha256": "4e08668f0b19ad65f9b07c85fc90e979abd175921a3a8e2265ee799d8fc1e6db"
+    },
+    {
+      "path": "src/functions/f065.lua",
+      "bytes": 17040,
+      "sha256": "b06fe95f5eda4e617c139e5abf8a525f3d12785b833e54ad19814663cfa30fea"
+    },
+    {
+      "path": "src/functions/f066.lua",
+      "bytes": 37909,
+      "sha256": "4f5b3d6ce3f2999fc384d33212a0897ecc8270d503f6e32bd619fc6f2170489b"
+    },
+    {
+      "path": "src/functions/f067.lua",
+      "bytes": 1494,
+      "sha256": "31ed8d77071ecdbaa270060f65ed8f38e1fe524b691d4435608f88244ee32b9a"
+    },
+    {
+      "path": "src/functions/f068.lua",
+      "bytes": 1502,
+      "sha256": "1581f1fb2cab9b774dce779d7690fc4d6a1e50cbbce32f002b6591f2ed1fddef"
+    },
+    {
+      "path": "src/functions/f069.lua",
+      "bytes": 2809,
+      "sha256": "5d712558d980be8335e0fd88b71ff751d187ff7001fe69b88311bcddf6419f30"
+    },
+    {
+      "path": "src/functions/f070.lua",
+      "bytes": 2016,
+      "sha256": "70515259e35a4d328e0e3f63d8087646d526ba5ea74ac97f700f2c6143b16d57"
+    },
+    {
+      "path": "src/functions/f071.lua",
+      "bytes": 1374,
+      "sha256": "ec091d3e23b02cef51089eb83e73d82563344fa45f6291143556a11355bb14f1"
+    },
+    {
+      "path": "src/functions/f072.lua",
+      "bytes": 1247,
+      "sha256": "0184fe62af0475ed0456f1e25226c80ece4ca4fa5d7d958aca4d42815d5319d2"
+    },
+    {
+      "path": "src/functions/f073.lua",
+      "bytes": 1565,
+      "sha256": "f487203cb1abc5ac44c5c9285c5c8c6e543ebd7c406984b52f8d8f4ba845125d"
+    },
+    {
+      "path": "src/functions/f074.lua",
+      "bytes": 3767,
+      "sha256": "a003c5a668f08dfa44c9116b1c155524c290592bb5f486e86b0e36dce42b2c89"
+    },
+    {
+      "path": "src/functions/f075.lua",
+      "bytes": 1615,
+      "sha256": "8d13354dd56ad1ae566b4b32207a815cc3407aebe609a5df2f7ed83543db9356"
+    },
+    {
+      "path": "src/functions/f076.lua",
+      "bytes": 3152,
+      "sha256": "e0d0086dd2760dbe19233d4e950005713cfb2874d9b3ff0cd369aeb556d12cab"
+    },
+    {
+      "path": "src/functions/f077.lua",
+      "bytes": 1888,
+      "sha256": "805e8ea50060328665d85f054372a9d3e1a869433521404cef2c20d6e2c6e321"
+    },
+    {
+      "path": "src/functions/f078.lua",
+      "bytes": 9931,
+      "sha256": "138badf22d4ce37d30efb196eab9c74663e9727caaf598f5ee2a76dc5c9b8b92"
+    },
+    {
+      "path": "src/functions/f079.lua",
+      "bytes": 2790,
+      "sha256": "b3a1fd5eff65b8ee127c46b133ac8ea7170bb63ea4f6e037bbf6d035fb341ad1"
+    },
+    {
+      "path": "src/functions/f080.lua",
+      "bytes": 4649,
+      "sha256": "2bf453bc0ab8378c85b5e05381b29ab96a09b058c70743642e4a0fa394739c7f"
+    },
+    {
+      "path": "src/functions/f081.lua",
+      "bytes": 1711,
+      "sha256": "5c5d4965ed8ca9e281d04557c642795f736ceed278aff31acc8ece86e3ef4883"
+    },
+    {
+      "path": "src/functions/f082.lua",
+      "bytes": 2196,
+      "sha256": "81613d8ccb07722e962ed2ca5a14098c17ea0c230209363a58458d39110ef83a"
+    },
+    {
+      "path": "src/functions/f083.lua",
+      "bytes": 8554,
+      "sha256": "9d8ba4054287826a97e8266bab46e07344bb439f62911ce9bfdb719b6fc588d2"
+    },
+    {
+      "path": "src/functions/f084.lua",
+      "bytes": 1895,
+      "sha256": "3d19c0f58ceb50c5100877b16e5a38c633dcab1f3a4e2336f7ba99d32d4d5fce"
+    },
+    {
+      "path": "src/functions/f085.lua",
+      "bytes": 1241,
+      "sha256": "2f87ae3fea01051afa9f179d30b00128b56d45dc2cef59a31ef21bada6f8d79a"
+    },
+    {
+      "path": "src/functions/f086.lua",
+      "bytes": 4550,
+      "sha256": "2730c93120b05cec39c86b9b756d41cb1599585674a4e149d40dc95c0b7fa0a7"
+    },
+    {
+      "path": "src/functions/f087.lua",
+      "bytes": 3062,
+      "sha256": "c3a409166656760a44a00a5a2f923edf9e8f3e61bce9404fd9104d9b5b0ed58c"
+    },
+    {
+      "path": "src/functions/f088.lua",
+      "bytes": 1553,
+      "sha256": "cfdf5fe3b1b755c8a3c5d178b80ec58680f0ded3d53a0ec1faf3e0ca962493c0"
+    },
+    {
+      "path": "src/functions/f089.lua",
+      "bytes": 2103,
+      "sha256": "c7add0ebc2765bb0b75c0d63cf31e5802f4376940a7cded55feeac07595490c8"
+    },
+    {
+      "path": "src/functions/f090.lua",
+      "bytes": 1633,
+      "sha256": "911725e6ced8e459d604664f23df3632c9687862760c8f291ac11d28330f679a"
+    },
+    {
+      "path": "src/functions/f091.lua",
+      "bytes": 2051,
+      "sha256": "0a80bec8dd2e781a9923af948107be427fab79807bcbfcf4492ddce4b364d52d"
+    },
+    {
+      "path": "src/functions/f092.lua",
+      "bytes": 1305,
+      "sha256": "5adbd087d23c45750356a0227f0d324571d085ab1f974d1267a6ec597bf5b4f1"
+    },
+    {
+      "path": "src/functions/f093.lua",
+      "bytes": 2098,
+      "sha256": "25c50d1684f8884e8999a1c9eba47e0d8d12e1e351d988c57df5d16cdd72a876"
+    },
+    {
+      "path": "src/functions/f094.lua",
+      "bytes": 1820,
+      "sha256": "387dd0f181035225010c3dc23b1a0cb7236f285d88906f68cf13fee76a84b994"
+    },
+    {
+      "path": "src/functions/f095.lua",
+      "bytes": 1353,
+      "sha256": "af317980edb4b77b4224acaa54bcad01fe31c4674d51a62c1b190a18c3b916c5"
+    },
+    {
+      "path": "src/functions/f096_application.lua",
+      "bytes": 1182083,
+      "sha256": "8a89ae1c1d889394d7ea584e2f0bfc47477833f9236d8dca8781bf75dc946805"
+    },
+    {
+      "path": "src/functions/f097.lua",
+      "bytes": 1239,
+      "sha256": "0ea1abd4ba9719b315575b2aca2a4b7c5b7e87e5c1d8cb97b41ef801987f7714"
+    },
+    {
+      "path": "src/functions/f098.lua",
+      "bytes": 6865,
+      "sha256": "b2962b076d254220ec9e5515cf5b28bc920f4668ca383e1c75ac339427605dde"
+    },
+    {
+      "path": "src/functions/f099.lua",
+      "bytes": 6942,
+      "sha256": "a61aea54342bd39c4fb65e41216caabb6c17c7d5ea75f284c056015d1bd92ed5"
+    },
+    {
+      "path": "src/functions/f100.lua",
+      "bytes": 2329,
+      "sha256": "a928c823d85efb026d4e4ebac5211007051dd3db43eb5850c2e98507154be4f4"
+    },
+    {
+      "path": "src/functions/f101.lua",
+      "bytes": 10569,
+      "sha256": "d87a1c52ef9d16ebef6ff0931d30e30d43c2e8f1f291c7bbb581da0adb67c698"
+    },
+    {
+      "path": "src/functions/f102.lua",
+      "bytes": 9584,
+      "sha256": "b0740aa3659c65381108dfecd1ce7854e401b8c49b09c9acec8c7b60cd2aa3e5"
+    },
+    {
+      "path": "src/functions/f103.lua",
+      "bytes": 7625,
+      "sha256": "ad2a80568d2f6ad3036ba5e3eb1e1ffa22bdd7639a49357fbe400ef7c5a5c9ef"
+    },
+    {
+      "path": "src/functions/f104.lua",
+      "bytes": 3992,
+      "sha256": "e61b5bc8f11c5ed68bbe4fd79ef499637bcabc05febde6b8c29c6144b4823461"
+    },
+    {
+      "path": "src/functions/f105.lua",
+      "bytes": 3315,
+      "sha256": "6b92ade97711ba29e34d0c02466422b0e3cebe60bb4d1aa39c627024e45f930d"
+    },
+    {
+      "path": "src/functions/f106.lua",
+      "bytes": 6791,
+      "sha256": "1692a5d79825d66857512e65066a8a5825d0514fe28297edd41473cd5a428136"
+    },
+    {
+      "path": "src/functions/f107.lua",
+      "bytes": 2417,
+      "sha256": "d31b22ef15efb38f92dbe0712b582439948a91d1581fd6051d6a65bf0e91c7e2"
+    },
+    {
+      "path": "src/functions/f108_removed_loader_handler.lua",
+      "bytes": 128,
+      "sha256": "fe289a78def2c5998ef7a1fa272f285cb71df9e8f786661b5d1a25d5050f7200"
+    },
+    {
+      "path": "src/functions/f109_disabled_crash_trap.lua",
+      "bytes": 330,
+      "sha256": "cb90107fdf3c7e5bc196018e5299c9b76b5e62c3ff210f4cf9713c0e12deef0d"
+    },
+    {
+      "path": "src/functions/f110.lua",
+      "bytes": 5178,
+      "sha256": "9d4c611bc6a800fd25eff0e126d105ec41cc71dc307c5fddee5e8ae6859e4423"
+    },
+    {
+      "path": "src/functions/f111.lua",
+      "bytes": 12783,
+      "sha256": "e8fc6a55d78aa7eabcc9b2f99bae6f1fb1cda206b1a4061c4407de710831309d"
+    },
+    {
+      "path": "src/functions/f112_arithmetic_xor.lua",
+      "bytes": 3380,
+      "sha256": "4074b11256ea09eeabe31c9825aa104590b06ac5e9ee57ab2b513d8c16bda5cb"
+    },
+    {
+      "path": "src/functions/f113.lua",
+      "bytes": 3394,
+      "sha256": "8bf2d1f57bc5219304c80c835b186cfda4822244af78b44175197d2ba9ad94e1"
+    },
+    {
+      "path": "src/functions/f114.lua",
+      "bytes": 3638,
+      "sha256": "a715c715d792506b63ee7374b4860315d353e3b8ab7153a29fd6ef9cec86731d"
+    },
+    {
+      "path": "src/functions/f115_removed_loader_handler.lua",
+      "bytes": 128,
+      "sha256": "c41d1efefbc12c70bd66fe46162b1854b61dc692ddd687c3c885611586f6f283"
+    },
+    {
+      "path": "src/functions/f116_disabled_crash_trap.lua",
+      "bytes": 330,
+      "sha256": "26d25bc4200b93670e0d1bf9794bd6a2dfc49ceb2b65799d3b4314e222ba893f"
+    },
+    {
+      "path": "src/functions/f117_arithmetic_xor.lua",
+      "bytes": 3452,
+      "sha256": "4ea0a0185c93a2cf75a8fa1d7f72f7f7a84027dc87597e72a08297a3158a6419"
+    },
+    {
+      "path": "src/functions/f118.lua",
+      "bytes": 3316,
+      "sha256": "df03a01c66dc284f0194bd99b84acaae41568c0cd3ec62711a98903b525e1f6d"
+    },
+    {
+      "path": "src/functions/f119.lua",
+      "bytes": 3614,
+      "sha256": "c24c2a11da41f2ce6d79443ebad03708db8fd235ac0c0fb07326d85547d3dfc4"
+    },
+    {
+      "path": "src/functions/f120.lua",
+      "bytes": 5199,
+      "sha256": "c6a9c731078e3aa4c97cb4d8b85b9ed3cbdaf77812133a29cfb0bc4da5aa409b"
+    },
+    {
+      "path": "src/functions/f121.lua",
+      "bytes": 12968,
+      "sha256": "5d108040d367b0facd4ac25811e5817fd77986ca2e8cb04d701f003d23d9acfe"
+    },
+    {
+      "path": "src/functions/f122.lua",
+      "bytes": 12007,
+      "sha256": "cd6477d603cde245fe133b41c3770ea148ee46a76cc9afef19e4dc8804214ccd"
+    },
+    {
+      "path": "src/functions/f123.lua",
+      "bytes": 9107,
+      "sha256": "ac820b1fa40e0bda4fbff138abc026c41f3c3222e71fcc95ab33bedd011ae46c"
+    },
+    {
+      "path": "src/functions/f124.lua",
+      "bytes": 3971,
+      "sha256": "adf5c7e4c1734735b06811ea6b87d9be53e1a9e21f71d8441ef98854c6402679"
+    },
+    {
+      "path": "src/functions/f125.lua",
+      "bytes": 10073,
+      "sha256": "8dfb2132eb93e650e57d94992fc11bd2d4e728cc4c0f2f1f0fb27fe5ec024edd"
+    },
+    {
+      "path": "src/functions/f126.lua",
+      "bytes": 1517,
+      "sha256": "1318f44ff06b370941e4b57c4ac60de5d5732156036814804a8d1f13d0f2735f"
+    },
+    {
+      "path": "src/functions/f127.lua",
+      "bytes": 2717,
+      "sha256": "aa5e62b9d8f455917bcdad063db77996c273419bb2527cea0f74f740c5af184c"
+    },
+    {
+      "path": "src/functions/f128.lua",
+      "bytes": 8670,
+      "sha256": "8aecb59bf8c72844f39948bee0467a9d93f8b7f1218d1c91acb753e8398c74d1"
+    },
+    {
+      "path": "src/functions/f129.lua",
+      "bytes": 29866,
+      "sha256": "fc587b7e9ae6a1a70a9cebf7df33bdb8b93e400d5b6aad6dbc5b1083e78229bf"
+    },
+    {
+      "path": "src/functions/f130.lua",
+      "bytes": 3033,
+      "sha256": "6d6949bd7e3b7b7b6c725c7de98711e6125de19233757e1d2acca56d183de493"
+    },
+    {
+      "path": "src/functions/f131.lua",
+      "bytes": 1620,
+      "sha256": "76e81894a90b765202ccea800eab009421b6d981b5b384489d94d74c90fed389"
+    },
+    {
+      "path": "src/functions/f132.lua",
+      "bytes": 4200,
+      "sha256": "71e5c25d6ca8ebb271df1b973b8987dfd9a9010bf98aa0d96b10a86453100e5d"
+    },
+    {
+      "path": "src/functions/f133.lua",
+      "bytes": 7641,
+      "sha256": "9f4f2e736e3d717539bacf633aadf0ec4e528783ce03022fffb36607840dd8ff"
+    },
+    {
+      "path": "src/functions/f134.lua",
+      "bytes": 2058,
+      "sha256": "d118793ee07a7c17ee35d38264b48aa11e1f1bbc7442a94a203c725cb7310f25"
+    },
+    {
+      "path": "src/functions/f135.lua",
+      "bytes": 5606,
+      "sha256": "27b57676c1a7aaefae283e3d7197ae3c05e7d20666d9615a7b6a1c4156bf1d7a"
+    },
+    {
+      "path": "src/functions/f136.lua",
+      "bytes": 2939,
+      "sha256": "409ee5dfd28fc959e526e9c6adb883ec30f4c0e509ff86cdea8032bdb693fd2e"
+    },
+    {
+      "path": "src/functions/f137.lua",
+      "bytes": 31538,
+      "sha256": "1f3554e5ed4f8a21ee4fe9633e57c9a2fad39e1c9414e2be824af946bfbb1a4e"
+    },
+    {
+      "path": "src/functions/f138.lua",
+      "bytes": 2818,
+      "sha256": "71022bff225b0d10e0f61255f05b28a8a030c0ce9413171a052830c6909d955b"
+    },
+    {
+      "path": "src/functions/f139.lua",
+      "bytes": 7030,
+      "sha256": "028587d61057ff11a676ecaf12112f68ebe09ded745efe5ce26e494c108ac07f"
+    },
+    {
+      "path": "src/functions/f140.lua",
+      "bytes": 3825,
+      "sha256": "232b23414b75b3b538b1443fe7cf5558b4dcbd814fecd160881853cd28f1c3b6"
+    },
+    {
+      "path": "src/functions/f141.lua",
+      "bytes": 2413,
+      "sha256": "c8b5020e1b9d4d9e956dbcd2e4ecba5f25fa7c47543c059cd76c8fa8711d55ab"
+    },
+    {
+      "path": "src/functions/f142.lua",
+      "bytes": 4425,
+      "sha256": "07828b0ef5d24e722ec23754ccc97f801fe75b81f65bb9f6ddd7c4ab56b11a6f"
+    },
+    {
+      "path": "src/functions/f143.lua",
+      "bytes": 6997,
+      "sha256": "f2ac4cc9d0a193059b4d2617c3b8575faaf7ef25b31c23821065e39ed744d7f9"
+    },
+    {
+      "path": "src/functions/f144.lua",
+      "bytes": 1786,
+      "sha256": "8c08aa78f5e1ba5508a272f1bc768bc5ad0f20f0a6106e899b7b685e3c0a9097"
+    },
+    {
+      "path": "src/functions/f145.lua",
+      "bytes": 6247,
+      "sha256": "f915037cdcbb2b52ac01a9e56a4a5131ffd566e0ed237dbf1b422b9898292c25"
+    },
+    {
+      "path": "src/functions/f146.lua",
+      "bytes": 7416,
+      "sha256": "3685aad684e7967fe280f9afdea57bd91c627308e8871ed873193c8c2b1515f6"
+    },
+    {
+      "path": "src/functions/f147.lua",
+      "bytes": 3593,
+      "sha256": "2661eae0d18fb8be2ae044d2185721a03c323bee8858ab1a2cefbb3cc31c424b"
+    },
+    {
+      "path": "src/functions/f148.lua",
+      "bytes": 14487,
+      "sha256": "83ff74a8f2ab8c7a8da178207089ee4be4b4cac48f0d4c4de5ffa572cd6db447"
+    },
+    {
+      "path": "src/functions/f149.lua",
+      "bytes": 5903,
+      "sha256": "ad8b906a4a292eae966b005be7af08634216bde45817295033454c8a633cbb73"
+    },
+    {
+      "path": "src/functions/f150.lua",
+      "bytes": 9672,
+      "sha256": "d0064ca3d6ef5c734a4ba9f528260bd9fb50619416c01545782558e7cbc7558b"
+    },
+    {
+      "path": "src/functions/f151.lua",
+      "bytes": 3503,
+      "sha256": "fc08bc643a36ca8b39138756de86672a0594003bbe668938306933f826edbcfb"
+    },
+    {
+      "path": "src/functions/f152.lua",
+      "bytes": 1867,
+      "sha256": "f0a0f305e0e8f4e59194043062863f42feec67a5d3c7e314c64d4484cb12aa9f"
+    },
+    {
+      "path": "src/functions/f153.lua",
+      "bytes": 6870,
+      "sha256": "4092d97d3750200a8cf259997c82a44ec019461295775947dd0d4193d56d0594"
+    },
+    {
+      "path": "src/functions/f154.lua",
+      "bytes": 3660,
+      "sha256": "15476736260f16a2bc181dd0c49acfefdfef636f8ce29bbadb2d24d98d72588e"
+    },
+    {
+      "path": "src/functions/f155.lua",
+      "bytes": 31196,
+      "sha256": "0ab59e4e7474592ade994005f94a319b108cbb585c92cce7f8be192c7c00dd61"
+    },
+    {
+      "path": "src/functions/f156.lua",
+      "bytes": 3641,
+      "sha256": "25a7cca5748e004a37511bdfc6f7cef87ca51ba2618c647ee4cce1ea7c9a69df"
+    },
+    {
+      "path": "src/functions/f157.lua",
+      "bytes": 2228,
+      "sha256": "c6e0e5e6f3784c2f0f5f11942515e8f82bdc7006c54698ed56d84037e2bc8462"
+    },
+    {
+      "path": "src/functions/f158.lua",
+      "bytes": 2521,
+      "sha256": "62aaa0cc8d591f56eb864b1e4a0b6aeaaac8b79ee155a2e7644c2cdca4db0b0f"
+    },
+    {
+      "path": "src/functions/f159.lua",
+      "bytes": 1928,
+      "sha256": "02d1df66f9fb1b55436d6c994453f95b6b655a07cf8e3873efb5649f17618ab0"
+    },
+    {
+      "path": "src/functions/f160.lua",
+      "bytes": 5963,
+      "sha256": "b45e21dc105025e615575277ea4d1b4cfd457bb80ac3440bc45260123668d500"
+    },
+    {
+      "path": "src/functions/f161.lua",
+      "bytes": 2431,
+      "sha256": "f64ab06e77bf32fab91fbad2d75ce0950a1a67aa217fc5a9b432170868047478"
+    },
+    {
+      "path": "src/functions/f162.lua",
+      "bytes": 4153,
+      "sha256": "ce409c4d1b2e0548f8ae5c982b90e0126d9ff1027f61a2c479f5e899d0d75e48"
+    },
+    {
+      "path": "src/functions/f163.lua",
+      "bytes": 2790,
+      "sha256": "8447936297180dce0e5484011b0185a3057150055377942af1dbaa494e3d1d82"
+    },
+    {
+      "path": "src/functions/f164.lua",
+      "bytes": 2817,
+      "sha256": "db6e1e1a11eaf0bd982b21a11626e3412390a3abb6aa9df4c17ef1d13ddaeb83"
+    },
+    {
+      "path": "src/functions/f165.lua",
+      "bytes": 2923,
+      "sha256": "a87a2b9fc2f3195e1ef3ee553e03b678b3b049255362dc4ce32c8082e50e5464"
+    },
+    {
+      "path": "src/functions/f166.lua",
+      "bytes": 5279,
+      "sha256": "962e2b82a379223e6f37b9c924161f1e844906f739913942c77431d32f4e7ddc"
+    },
+    {
+      "path": "src/functions/f167.lua",
+      "bytes": 3995,
+      "sha256": "ca49cd23b8bb98a260a4f256ecfebdbb9954f2b9d159d19f57deb44e8ed2d294"
+    },
+    {
+      "path": "src/functions/f168.lua",
+      "bytes": 3359,
+      "sha256": "528c8b6371e86959e02caf4eae3be6c3cdf674c0df097e3999aaeb074e6091c6"
+    },
+    {
+      "path": "src/functions/f169.lua",
+      "bytes": 1385,
+      "sha256": "106343ac2e347617e27dc884eb043c94099408ec618a2cb26a38f8e8051f9b23"
+    },
+    {
+      "path": "src/functions/f170.lua",
+      "bytes": 6319,
+      "sha256": "f88e8a96b9da1c69e82850f2ef40c8933296d0f75f3c97db718a933ea532873f"
+    },
+    {
+      "path": "src/functions/f171.lua",
+      "bytes": 4616,
+      "sha256": "f71b68246c71af2290499c7fd9c7f3cad84082316af3da302c05f74f8449a7e3"
+    },
+    {
+      "path": "src/functions/f172.lua",
+      "bytes": 7902,
+      "sha256": "77df1979b5379306bef828e04972eb3cd61700bb7d3bb3dd0831ac89e668eaa7"
+    },
+    {
+      "path": "src/functions/f173.lua",
+      "bytes": 1429,
+      "sha256": "21c53abe74f4f489c0bf7649d534bb66b666b51194c305e4599744c7190be5f9"
+    },
+    {
+      "path": "src/functions/f174.lua",
+      "bytes": 1832,
+      "sha256": "3fcf386494fe4bdd1ee6822ff0e460d14b7cfcae0fd24ead255ebca500d6a020"
+    },
+    {
+      "path": "src/functions/f175.lua",
+      "bytes": 1251,
+      "sha256": "7aa5d8478b8521acb0dd39720586b576c001062fa1d01633316bc8421bd133e6"
+    },
+    {
+      "path": "src/functions/f176.lua",
+      "bytes": 1243,
+      "sha256": "b8ba3501c3dfa5066e66690ca55c618f5b8dd9a49d6b162e8efc70359f708fb0"
+    },
+    {
+      "path": "src/functions/f177.lua",
+      "bytes": 16515,
+      "sha256": "729576fb78c1eadcf3fbb496cb4bb057e4b44510f91ffed04c8fa56e0980b9ee"
+    },
+    {
+      "path": "src/functions/f178.lua",
+      "bytes": 2143,
+      "sha256": "8b25816996161939442fedcab8847f392eb6368ef2787c23dbb5797b001c30f3"
+    },
+    {
+      "path": "src/functions/f179_signed_round.lua",
+      "bytes": 2165,
+      "sha256": "99adfc9d804a918418e7742c1c262fb59cc92e33fd5c65e30297e5230f8c6ae6"
+    },
+    {
+      "path": "src/functions/f180.lua",
+      "bytes": 2307,
+      "sha256": "2a1d8e837155ec0c4dc2e61a522b664c6071a35dfa6dc46bd1b430d9454cb810"
+    },
+    {
+      "path": "src/functions/f181.lua",
+      "bytes": 8662,
+      "sha256": "feb3674c4559a30534447ab2d4853bc15821711aa6bf4bafd12aabe92f98c8c4"
+    },
+    {
+      "path": "src/functions/f182.lua",
+      "bytes": 3169,
+      "sha256": "6f4802616f1720d2df49c87cd722b32e57812a32f087a22050fcee40e9c783d2"
+    },
+    {
+      "path": "src/functions/f183.lua",
+      "bytes": 9917,
+      "sha256": "24a00ea156a2d50a65c6ad6ad189274945e3005e6e77be97a160e12e25041ae5"
+    },
+    {
+      "path": "src/functions/f184.lua",
+      "bytes": 17432,
+      "sha256": "9fa6688851c0ebb5afec12dfdbb3d473f7da534b0f388e8c5182f6983df25807"
+    },
+    {
+      "path": "src/functions/f185.lua",
+      "bytes": 5274,
+      "sha256": "dd8f028d6a2dbf4c6d5145a7dac96ec5c36bcbafbe3742b86834b2c7c76800a4"
+    },
+    {
+      "path": "src/functions/f186.lua",
+      "bytes": 1620,
+      "sha256": "8d965962360d0b0d91696f9abb36fe2735185d4193132de07a54f8327132a527"
+    },
+    {
+      "path": "src/functions/f187.lua",
+      "bytes": 9501,
+      "sha256": "e9f486566591c2296a28dbf2d8dc3b0953fbdc63f48a23db9dd86bc78ff83820"
+    },
+    {
+      "path": "src/functions/f188.lua",
+      "bytes": 9009,
+      "sha256": "7854fb12cf01b4b315624cf9fa84acf8888296b51a4d21061e5725655c2484e0"
+    },
+    {
+      "path": "src/functions/f189.lua",
+      "bytes": 6337,
+      "sha256": "a04dbd452fd8746ab51a2f954c9294c94509104d64715da3af1961629c498f8c"
+    },
+    {
+      "path": "src/functions/f190.lua",
+      "bytes": 6745,
+      "sha256": "2f43b38297abe4bc9386424b54f2fcaccda0f58e338c5b585686062a9384bb09"
+    },
+    {
+      "path": "src/functions/f191.lua",
+      "bytes": 2288,
+      "sha256": "5bcba16c7584c511f783992aa1b69a28bca929951d4af0104a04bd4cb561edb4"
+    },
+    {
+      "path": "src/functions/f192.lua",
+      "bytes": 2272,
+      "sha256": "d7b6d053a399f6034cd4872dce25c70b3bedc917ba9a97ca0e27e12bf3ce651e"
+    },
+    {
+      "path": "src/functions/f193.lua",
+      "bytes": 1476,
+      "sha256": "d68724c9bbb9770c11cc9db4e635cd94902cbd18754e430a6ef3cf9d679e6e90"
+    },
+    {
+      "path": "src/functions/f194.lua",
+      "bytes": 1484,
+      "sha256": "ad953d5bcbdcd26bd0a6f61ea048485bdbc1fc3a5292fa8c9e79bb0015aa8339"
+    },
+    {
+      "path": "src/functions/f195.lua",
+      "bytes": 3761,
+      "sha256": "b8b1b94b8f341171460d781897e230056423e79478fa282139ac763e140825f5"
+    },
+    {
+      "path": "src/functions/f196.lua",
+      "bytes": 7989,
+      "sha256": "2a8e6d4ee44812baffdf16a367603e361dfcb564d81236fe985c2e76c59571a2"
+    },
+    {
+      "path": "src/functions/f197.lua",
+      "bytes": 7344,
+      "sha256": "459e2365e6421dd801c01b826f3776ea440fb2136b4e80dc43c4802567967292"
+    },
+    {
+      "path": "src/functions/f198.lua",
+      "bytes": 1724,
+      "sha256": "e0addb2a5b2c0192ad4d94eee18efc037df91bfda823b87623f4262ae9d3e577"
+    },
+    {
+      "path": "src/functions/f199.lua",
+      "bytes": 2416,
+      "sha256": "83e95b778484599ee214fd599e7873dc1950f4e833018f040fd00b7ad86469c4"
+    },
+    {
+      "path": "src/functions/f200.lua",
+      "bytes": 5987,
+      "sha256": "6b241458504fea162dfe1ca94c5ccd777c2770af9a2749e5ffa07f8fed3e5f2b"
+    },
+    {
+      "path": "src/functions/f201.lua",
+      "bytes": 53331,
+      "sha256": "6ac85743654c645e502114e1a4d4e90f2c0c2e961c7835729d3caaadb65d8158"
+    },
+    {
+      "path": "src/functions/f202.lua",
+      "bytes": 2361,
+      "sha256": "c861d55aa0cf641e3e5d54c46c9b71bfc5bc2967d002a61d1b08304e0de03cc3"
+    },
+    {
+      "path": "src/functions/f203.lua",
+      "bytes": 1579,
+      "sha256": "cc6d168506e60bd3bfdbc98f6ec155969d25b715124f3b8efef4a390114deabb"
+    },
+    {
+      "path": "src/functions/f204.lua",
+      "bytes": 1578,
+      "sha256": "64586643be175cde7ff84cbeb1bfccb2d70697a3992f3466091316fba0b8dd57"
+    },
+    {
+      "path": "src/functions/f205.lua",
+      "bytes": 1585,
+      "sha256": "045677439e0aa809180203b2c05eaa4be74bfc710ecc660d4a04931f04ac68fd"
+    },
+    {
+      "path": "src/functions/f206.lua",
+      "bytes": 1580,
+      "sha256": "26d7be34979c7c7c04a8ea759b24e0168efde67c7ae76f20c8b2add4c43482ee"
+    },
+    {
+      "path": "src/functions/f207.lua",
+      "bytes": 1572,
+      "sha256": "9422cadbde3c77001fb5eac8fd201bbd6767f6751bd1250ef856686073ac12fd"
+    },
+    {
+      "path": "src/functions/f208.lua",
+      "bytes": 1573,
+      "sha256": "eee58d09ee5ea9d1e65f6b9bf710e1634ca138e6aa345e2c5a570726bc805cd3"
+    },
+    {
+      "path": "src/functions/f209.lua",
+      "bytes": 4351,
+      "sha256": "2fd5718e2435cce61f703c6c7309f3c76ebb3306ef97f31d697d3e8e5669d4c1"
+    },
+    {
+      "path": "src/functions/f210.lua",
+      "bytes": 3128,
+      "sha256": "6c7e71789016a01298d292979aff385df86238ac822a401550e724f50b462953"
+    },
+    {
+      "path": "src/functions/f211.lua",
+      "bytes": 2669,
+      "sha256": "e143ce1fba441ce4c7d44cd91dd865e846ee691feb0311c0ea2b22958c208bb6"
+    },
+    {
+      "path": "src/functions/f212.lua",
+      "bytes": 2517,
+      "sha256": "b594c547883bb89375c09387b26ebef27e9a625769dc25c36fec3d7366212ebb"
+    },
+    {
+      "path": "src/functions/f213.lua",
+      "bytes": 1841,
+      "sha256": "0dbaf887396f48eaf9b952f87706f9ce5c0c9ce2092ca4c785fc7e3e2ffa1526"
+    },
+    {
+      "path": "src/functions/f214.lua",
+      "bytes": 1690,
+      "sha256": "cbf5038a4426dcc0ccea3a2594b659284c518723bedd5c5fcdaaa8fa3d97b157"
+    },
+    {
+      "path": "src/functions/f215.lua",
+      "bytes": 4314,
+      "sha256": "8da8d8d503185d8a0f6b1ecb6c04e8cbb35214c9d23760023323a982701af5c6"
+    },
+    {
+      "path": "src/functions/f216.lua",
+      "bytes": 2976,
+      "sha256": "a95cca15258efc313a7d8e3ad127b5f925e76128113f8ffb6c5a9fd5b08f34cc"
+    },
+    {
+      "path": "src/functions/f217.lua",
+      "bytes": 4989,
+      "sha256": "5402f7d450aa17996489f74153e56e3ccfafc4a8aafe4e727b242216105951bf"
+    },
+    {
+      "path": "src/functions/f218.lua",
+      "bytes": 2111,
+      "sha256": "3357a73fc21c4ffc7abafd1a4ceb4d0b7514e4e2c040c649b42f20ad6011270b"
+    },
+    {
+      "path": "src/functions/f219.lua",
+      "bytes": 2719,
+      "sha256": "36be2e1433ff441c90d2b8ce0d5e6f42b6046363c32d1ddb74bc5a57e7395a7f"
+    },
+    {
+      "path": "src/functions/f220.lua",
+      "bytes": 4757,
+      "sha256": "c77c6bf3a073db6adebae42860dd2d6dbcafc519b49fb5bccc7a6a78f673e4cc"
+    },
+    {
+      "path": "src/functions/f221.lua",
+      "bytes": 9147,
+      "sha256": "e620719c5e70d366990cdc4b019e28234fd30de0bdca35c63042a3fbfc41a565"
+    },
+    {
+      "path": "src/functions/f222.lua",
+      "bytes": 1431,
+      "sha256": "3c5ac37358eb79491f8d4c5ae07757d486024ce63f91ebf5b455adc17ddf297d"
+    },
+    {
+      "path": "src/functions/f223.lua",
+      "bytes": 6670,
+      "sha256": "31a786f2b92e40fc8ee6820c6915f18dd001e19472da5e7bfb860ea79f0bae99"
+    },
+    {
+      "path": "src/functions/f224.lua",
+      "bytes": 15404,
+      "sha256": "8474894acf55fb1097599e1f6ec2de72c17e6127e14f5415155dd3357dc45d68"
+    },
+    {
+      "path": "src/functions/f225.lua",
+      "bytes": 4515,
+      "sha256": "5c71993a630823c74a20ca99bd3081548820c55acb16568d18dc4023fb73e482"
+    },
+    {
+      "path": "src/functions/f226.lua",
+      "bytes": 3221,
+      "sha256": "7a1af17aeb6ad35d49b43a131a65ca5a9bff1967a55bae6eb1d99ee400de3aa1"
+    },
+    {
+      "path": "src/functions/f227.lua",
+      "bytes": 5524,
+      "sha256": "3952ce6bedbe6f7d30745ac23028f80290145d0343272e83b2eb4625f9fe7d2c"
+    },
+    {
+      "path": "src/functions/f228.lua",
+      "bytes": 7406,
+      "sha256": "4d52f0bc9d5adb9e4a62009586ab661f256310c9c4a6b073b8d5c903886434fd"
+    },
+    {
+      "path": "src/functions/f229.lua",
+      "bytes": 4589,
+      "sha256": "84f7d62e12f6733a54aeca95aa735befb4d750d0a7005d4d124a61c3df5ba61d"
+    },
+    {
+      "path": "src/functions/f230.lua",
+      "bytes": 1539,
+      "sha256": "78bd0848e26b7f14e091df68a99da90f37baf9b37f19aa42f3ccafac1bd5217a"
+    },
+    {
+      "path": "src/functions/f231.lua",
+      "bytes": 14594,
+      "sha256": "8e23230ba8ffd19f0ab395a007bf3ede2be3582949d8e4b97870ec2ec0dd552e"
+    },
+    {
+      "path": "src/functions/f232.lua",
+      "bytes": 1243,
+      "sha256": "77e327eec19877d9f2a2bf4eb1c1bce93d9f0fa8bb08bd9f24e024a0604a13e6"
+    },
+    {
+      "path": "src/functions/f233.lua",
+      "bytes": 5429,
+      "sha256": "98c6672be339d6b80abb582e98a009a4b9b0a665863ca5983437c78ba5142b69"
+    },
+    {
+      "path": "src/functions/f234.lua",
+      "bytes": 2452,
+      "sha256": "588809639c40bd5cb8407a63c428e3a62574f6bdbe57a3596045307a3a0c6f3a"
+    },
+    {
+      "path": "src/functions/f235.lua",
+      "bytes": 4132,
+      "sha256": "6ce0c7022a2392daf814a707de9f2d38ba4d43aed092521fffa57a4b3da49d97"
+    },
+    {
+      "path": "src/functions/f236.lua",
+      "bytes": 2842,
+      "sha256": "1b754718bb4baedb8b046ed6af6d601fb7d9b3e30f3b5efcc09650e7116c96c8"
+    },
+    {
+      "path": "src/functions/f237.lua",
+      "bytes": 3709,
+      "sha256": "7dc43d37070c6b1db366bc5b9d35f4ec3073da5343be1b2206adf7ee0655e8b8"
+    },
+    {
+      "path": "src/functions/f238.lua",
+      "bytes": 5167,
+      "sha256": "08561754dcf63ebf01a17b20a3e393175d7422af558b661fd507fc39ce21bd22"
+    },
+    {
+      "path": "src/functions/f239.lua",
+      "bytes": 2311,
+      "sha256": "a1a2415940f19a0d1c4533fc8c37341f7d89f50fea75e7069ce180cb6bc5f219"
+    },
+    {
+      "path": "src/functions/f240.lua",
+      "bytes": 5035,
+      "sha256": "42aa9a0390351bea527c68992791111b49efb5a4e37c5364599817d13a379de3"
+    },
+    {
+      "path": "src/functions/f241.lua",
+      "bytes": 6368,
+      "sha256": "3993ad564fe5c26b81753c6a7a935ec3ef0ea142c2862ce5c9bf71af14447d3d"
+    },
+    {
+      "path": "src/functions/f242.lua",
+      "bytes": 5831,
+      "sha256": "37b097d5858a98ae2827f0a7f0d0a31d8bd99d47e5fa416f7398bf7a8db84538"
+    },
+    {
+      "path": "src/functions/f243.lua",
+      "bytes": 4433,
+      "sha256": "e068251c59a84afae42ecd08c909af28f5e9afc9aaf57d025a46a5042d0dd9be"
+    },
+    {
+      "path": "src/functions/f244.lua",
+      "bytes": 2655,
+      "sha256": "20d0a816ee6fc62013e65f76f2dc9abdc7a35d3abf39b4c98abbcb0f83fc1fbb"
+    },
+    {
+      "path": "src/functions/f245.lua",
+      "bytes": 5545,
+      "sha256": "1c9a76524803df29a16f276bfb5d8ad23510078ee6949ab210d5efc42220f6c3"
+    },
+    {
+      "path": "src/functions/f246.lua",
+      "bytes": 1567,
+      "sha256": "1940c4c5a6ba02e77eff70ad1ca021414effa5dda23300f1341c6cc98a0b57fe"
+    },
+    {
+      "path": "src/functions/f247.lua",
+      "bytes": 2909,
+      "sha256": "69c7383449dd8c95ed4df14913f075cf6168d55e2e9ca01e6337261d958a907b"
+    },
+    {
+      "path": "src/functions/f248.lua",
+      "bytes": 5670,
+      "sha256": "2cd3e1645ff1d8b0dbbe4a2722160ba287c8c8d23e075dfa9bc36756d0385051"
+    },
+    {
+      "path": "src/functions/f249.lua",
+      "bytes": 8631,
+      "sha256": "f5217544fbf1bd1ad98703c5b87a8002b162b162ee1fc38b3c979a2b4be21edf"
+    },
+    {
+      "path": "src/functions/f250.lua",
+      "bytes": 4211,
+      "sha256": "01be35e2718dbcf1ba08845ffe7d20403db5fee2e27898700aa4086f1203420c"
+    },
+    {
+      "path": "src/functions/f251.lua",
+      "bytes": 3090,
+      "sha256": "69fc797c0af183f2e1688317bd0b3800c9a4796f73b9c362be1c9862f2272e8d"
+    },
+    {
+      "path": "src/functions/f252.lua",
+      "bytes": 6060,
+      "sha256": "ffb073d51fc487e491d4b3350a94431974c271c5c65627acc07532905f97e0d0"
+    },
+    {
+      "path": "src/functions/f253.lua",
+      "bytes": 1808,
+      "sha256": "af164b9c25bcf0225bad389b9a90ecd5bcd8be5709808b370c84800ed0e74e97"
+    },
+    {
+      "path": "src/functions/f254.lua",
+      "bytes": 2602,
+      "sha256": "8b88ecfc1fcd09da70032a547ebbc503705ba9c1a0f4e87b049452677a9dfea4"
+    },
+    {
+      "path": "src/functions/f255_screen_anchor.lua",
+      "bytes": 7545,
+      "sha256": "2512c86ed06199fa81b5bb8944d0663bfd735b5396083e3c4f0a6c86d7a7dfe1"
+    },
+    {
+      "path": "src/functions/f256.lua",
+      "bytes": 13053,
+      "sha256": "007d1f9908dc5f6d07384c698eaf2659e02b81a758a27e611aaa86ebad7647c2"
+    },
+    {
+      "path": "src/functions/f257.lua",
+      "bytes": 4220,
+      "sha256": "743acba6c958cf2aa00dcf7bc49e75538b37af81566e4d39971a308317cecbe6"
+    },
+    {
+      "path": "src/functions/f258.lua",
+      "bytes": 7746,
+      "sha256": "a24560e50cda8fb14d178b09488a0eb86a28c232b84c13d861804c8eb33379ae"
+    },
+    {
+      "path": "src/functions/f259.lua",
+      "bytes": 2655,
+      "sha256": "94395d54bdba2202b37e4729cce425596f140f3dadbb57339180a7e964dfd7ac"
+    },
+    {
+      "path": "src/functions/f260.lua",
+      "bytes": 2391,
+      "sha256": "33d087c42812db940bb07e2562fefe8adf55f9d28eb974ddad4973399e0c1b0c"
+    },
+    {
+      "path": "src/functions/f261.lua",
+      "bytes": 2375,
+      "sha256": "6d12ea64bf4da0334a4e3b78353bd6a40e56f61c7556c4c17d9cec34a0742623"
+    },
+    {
+      "path": "src/functions/f262.lua",
+      "bytes": 7424,
+      "sha256": "842ff55060e1a3d3202fbd9550c51964a2bd41ca5195772ab6225002e2f0c309"
+    },
+    {
+      "path": "src/functions/f263.lua",
+      "bytes": 8578,
+      "sha256": "0392dfd7897d2ce48c8adc77c6b2544e2e29520f2c3a8fb9e9e9f792ec0673bf"
+    },
+    {
+      "path": "src/functions/f264.lua",
+      "bytes": 15101,
+      "sha256": "d906fd95686eb7d8165c6b338495a88c8210859760517148d8b7fa4158a3e9d7"
+    },
+    {
+      "path": "src/functions/f265.lua",
+      "bytes": 4199,
+      "sha256": "b5aac0a8ad40dd1b510119705d7bbcd3e985311fb8467eafd8fade741d8ccc16"
+    },
+    {
+      "path": "src/functions/f266.lua",
+      "bytes": 2354,
+      "sha256": "7cb5a56e55e0ec4b4d4e3d3e167655037c7e0fa24afe14a72504b3fbe89f285a"
+    },
+    {
+      "path": "src/functions/f267.lua",
+      "bytes": 7075,
+      "sha256": "cd4997938578babcc622f6d3776fddc3940b4023a7f5e237d2d91f0f3e4c8082"
+    },
+    {
+      "path": "src/functions/f268.lua",
+      "bytes": 2703,
+      "sha256": "9399162073d6da943f8de6bb2de274ccf8b46bcd5e8d9be6357b0264ed76dcdb"
+    },
+    {
+      "path": "src/functions/f269.lua",
+      "bytes": 5840,
+      "sha256": "c47bdca84f868825ad99f2b58e47d8c469dbf892293c852773d5767024cd5c89"
+    },
+    {
+      "path": "src/functions/f270.lua",
+      "bytes": 1462,
+      "sha256": "6b29ab94aa7f19eca96bb86ab4f9a273fcb3b7e5d408570777786ebae72afd7c"
+    },
+    {
+      "path": "src/functions/f271.lua",
+      "bytes": 1243,
+      "sha256": "dc878017df2b07b6dd29e46a6b45a3d7d83d231396e491e903ded709d47db049"
+    },
+    {
+      "path": "src/functions/f272.lua",
+      "bytes": 2220,
+      "sha256": "62bd9d3692b6baf094dca74ddab5fd8e316af44571dabc4871a242040c7fd5a7"
+    },
+    {
+      "path": "src/functions/f273.lua",
+      "bytes": 1872,
+      "sha256": "08e2138d9a055004bb65d2ee8bf163cef922c5081aa856aad11c39b61836781c"
+    },
+    {
+      "path": "src/functions/f274.lua",
+      "bytes": 9767,
+      "sha256": "e3b8f9f9b712c6ddb07b383af494bdc0fc40ff18181b9152e217c04224fa6b33"
+    },
+    {
+      "path": "src/functions/f275.lua",
+      "bytes": 2036,
+      "sha256": "e24aa28dae325312788da2a8df07b6e5870122b775e561b2cfe1c7da27b85741"
+    },
+    {
+      "path": "src/functions/f276.lua",
+      "bytes": 39184,
+      "sha256": "c0cb1429005a5adde82e43ff5d2abafc85b6033044ef1c55eef2a0ad54735de1"
+    },
+    {
+      "path": "src/functions/f277.lua",
+      "bytes": 1502,
+      "sha256": "314d42474f900eb602dd688562d5bc34e91c4b1870f78529b8d67cd42667daab"
+    },
+    {
+      "path": "src/functions/f278.lua",
+      "bytes": 2807,
+      "sha256": "c15cefe666ac191c71c04a34d6159f95121ad0127841399ddb02841fcd45f4f8"
+    },
+    {
+      "path": "src/functions/f279.lua",
+      "bytes": 1989,
+      "sha256": "ce39684e27fe4868942e9301e87e211ed077bf5d0e57213b8782aafe9b595df4"
+    },
+    {
+      "path": "src/functions/f280.lua",
+      "bytes": 1366,
+      "sha256": "96a3e23aed3f882ac3b7ac9b81262b675de14cc7d84efff11b5e257519dd6e55"
+    },
+    {
+      "path": "src/functions/f281.lua",
+      "bytes": 1502,
+      "sha256": "9628b64687906664ebced649e5ce13cf893e29bc6f37dafe123fde9f30329ab2"
+    },
+    {
+      "path": "src/functions/f282.lua",
+      "bytes": 3895,
+      "sha256": "cd4760aa601171e6b587c7cabc1548bacf3ad12cd3402c748fccbe97cade005b"
+    },
+    {
+      "path": "src/functions/f283.lua",
+      "bytes": 11978,
+      "sha256": "ede4417f14587f9deb851db10e160f247f4c36eb81b89bbda7056ef65ef1d9b1"
+    },
+    {
+      "path": "src/functions/f284.lua",
+      "bytes": 2154,
+      "sha256": "d848551555011ef341d3d85f986997291b8dcd58b970542095a29a1647f263b2"
+    },
+    {
+      "path": "src/functions/f285.lua",
+      "bytes": 1937,
+      "sha256": "2550f938aa3c568e689626d4405d1d5ff31c741e7e23eab019159837b1888494"
+    },
+    {
+      "path": "src/functions/f286.lua",
+      "bytes": 10064,
+      "sha256": "fa918ffeb83da3ec9019710f1a01f66d8479f346fbd7caf8006364c602254859"
+    },
+    {
+      "path": "src/functions/f287.lua",
+      "bytes": 2708,
+      "sha256": "1f9ae01bc48a08a1cffbd7855cab80eaa848f888dc20b3f32bb9e3b974c2a68d"
+    },
+    {
+      "path": "src/functions/f288.lua",
+      "bytes": 3587,
+      "sha256": "e395fde414766b1ecdab16a623f80d9995e3304c845cae25b26f0d4247c3eaa2"
+    },
+    {
+      "path": "src/functions/f289.lua",
+      "bytes": 2947,
+      "sha256": "1406dbb6ce43fee1dd6ca6630ca3f18493a6fb916940aeb642881a87e33485f1"
+    },
+    {
+      "path": "src/functions/f290.lua",
+      "bytes": 4209,
+      "sha256": "88880c9c66d1ba447a8a1931dbe3c7df6e83b53c3681ec10673bb04cfe186a50"
+    },
+    {
+      "path": "src/functions/f291.lua",
+      "bytes": 4789,
+      "sha256": "63f98d8c17dd9ce37c01b73a0ce7b5d5410a0dcbe436ce093e5e8b733459f193"
+    },
+    {
+      "path": "src/functions/f292.lua",
+      "bytes": 14023,
+      "sha256": "ee53650f9c1ba3425dcb4ec8fadb3de7822c9be315d0c47bef7f0a567b2ec044"
+    },
+    {
+      "path": "src/functions/f293.lua",
+      "bytes": 3197,
+      "sha256": "88e07e8f7a83430f347a018bdb48637d222555426d4a0b7d1f820d94674ba04b"
+    },
+    {
+      "path": "src/functions/f294.lua",
+      "bytes": 4848,
+      "sha256": "c75b3236e10decb73cd625e9e738abab4e71e26f5d6e8002780170f1534fb768"
+    },
+    {
+      "path": "src/functions/f295.lua",
+      "bytes": 4189,
+      "sha256": "aba5b3124f39448114150476a232399a1f28fa352abb6be73310651f5d56727b"
+    },
+    {
+      "path": "src/functions/f296.lua",
+      "bytes": 6939,
+      "sha256": "254ccc730c49588dee86cd75d5cc9de0fe447c162ce9c43fd610833e7aad002e"
+    },
+    {
+      "path": "src/functions/f297.lua",
+      "bytes": 17705,
+      "sha256": "d811ef39182ff3e232aabf5cf34b671311a4f801697e0cdabe0e5fb83983d1fd"
+    },
+    {
+      "path": "src/functions/f298.lua",
+      "bytes": 3537,
+      "sha256": "81cf8e15b9a1bc5b125dd26521b1fac3e7b68c2524feb5054223185435498581"
+    },
+    {
+      "path": "src/functions/f299.lua",
+      "bytes": 2686,
+      "sha256": "0b21082f5c577e2f9abd0742715bd29138e9610761f47c33857018883bf1f717"
+    },
+    {
+      "path": "src/functions/f300.lua",
+      "bytes": 4766,
+      "sha256": "6e8c1baee04b94cb49f0e3676d56829ef983de1defc53e19c9a8e780b9d22c8b"
+    },
+    {
+      "path": "src/functions/f301.lua",
+      "bytes": 11185,
+      "sha256": "a63e13085b903d7f62f82df16686133c5728629bdae3a47d6bbb4b8b34ab62a9"
+    },
+    {
+      "path": "src/functions/f302.lua",
+      "bytes": 20154,
+      "sha256": "274ebbc419f69fb891acf3891077eb6ae24ca24a0b7b161c9f646542e8ba0d4b"
+    },
+    {
+      "path": "src/functions/f303.lua",
+      "bytes": 6557,
+      "sha256": "2af99f9dc2691b1ce6791ac0559a0d15b6ade856afe1657127d14c31498e7ef6"
+    },
+    {
+      "path": "src/functions/f304.lua",
+      "bytes": 4459,
+      "sha256": "f1e4308123999a4ea5343dcec1e89c142ca3de18508a6dc43bd4072459393158"
+    },
+    {
+      "path": "src/functions/f305.lua",
+      "bytes": 3063,
+      "sha256": "a4d1be0f41a6754b01fd744b23c8738b23cddf09a1c78c8b6ce7ed104234083d"
+    },
+    {
+      "path": "src/functions/f306.lua",
+      "bytes": 1975,
+      "sha256": "14da9dfbcea8d24cd39117fe9b31cabad4825e1eca79bf410f1fe9133be95e33"
+    },
+    {
+      "path": "src/functions/f307.lua",
+      "bytes": 2977,
+      "sha256": "c06cb839022cab10851a978d9937652059892d5335b4afde06171162c98d9aea"
+    },
+    {
+      "path": "src/functions/f308.lua",
+      "bytes": 11650,
+      "sha256": "94eea70b70d6d7770e253dfcd52d7553d632e079554558563052a6d74d36224d"
+    },
+    {
+      "path": "src/functions/f309.lua",
+      "bytes": 6162,
+      "sha256": "3dd1055726815780066b9a0206bc6a2346f6f89b095a2533db0695a4a8338942"
+    },
+    {
+      "path": "src/functions/f310.lua",
+      "bytes": 3766,
+      "sha256": "eb0472b7475ef9c8e227b6ee05d89cccecdfaac33e38d863936439bbaad6f223"
+    },
+    {
+      "path": "src/functions/f311.lua",
+      "bytes": 6555,
+      "sha256": "7041709ea406ba2baa95fd9cb10bdf32dbd4851d4e19ef76711755e84c6bdd9c"
+    },
+    {
+      "path": "src/functions/f312.lua",
+      "bytes": 3251,
+      "sha256": "49542a7f224d695c35497daec1becc677f2c3cfb13a9cc2910106da6dc0ceab2"
+    },
+    {
+      "path": "src/functions/f313.lua",
+      "bytes": 2595,
+      "sha256": "813f9fdc6fe29b9b8f14013203b94abdfeeb7ebe4575fc75d12cb676660e5fc8"
+    },
+    {
+      "path": "src/functions/f314.lua",
+      "bytes": 3402,
+      "sha256": "a22540753bd3cd8efa5306ffefa6ec2ab700fcd350aaf33b4bc418e6d91b3e28"
+    },
+    {
+      "path": "src/functions/f315.lua",
+      "bytes": 1460,
+      "sha256": "a5e7d80e75f62f0dc622d11cd70cc48dc513ef7c9e97957320ae386dd9453306"
+    },
+    {
+      "path": "src/functions/f316.lua",
+      "bytes": 1430,
+      "sha256": "731e970dad825b6e5eecb53181aa40597c565725264d1f4389d5cc22dab0f8b5"
+    },
+    {
+      "path": "src/functions/f317.lua",
+      "bytes": 3482,
+      "sha256": "5329d8f734b701ee822392cbc5a6e59ced98b194da1986eee1bc04649173743c"
+    },
+    {
+      "path": "src/functions/f318.lua",
+      "bytes": 6805,
+      "sha256": "7646d3ba9e0fc12fceb393281d5d507fbcdcb959e4d04d4f86c826f8925f36b3"
+    },
+    {
+      "path": "src/functions/f319.lua",
+      "bytes": 4165,
+      "sha256": "213c3af89d18ebfdc3df7df6f01e926f6bece84d61f5fe4714242cb8dc7e561f"
+    },
+    {
+      "path": "src/functions/f320.lua",
+      "bytes": 6269,
+      "sha256": "dcaac071d5368ed386f923a7d78645a3e0ea97202b972a39c50edb14eaa36fe9"
+    },
+    {
+      "path": "src/functions/f321.lua",
+      "bytes": 3731,
+      "sha256": "245faa7160aaa034f773666d1dcf80177ad3d5ce656ce6d7b55a7e509fbebae5"
+    },
+    {
+      "path": "src/functions/f322.lua",
+      "bytes": 7716,
+      "sha256": "54f42071a69a64dfc26c30387a753aaa4fb0eb397634757a43c0e5bcdd32aabe"
+    },
+    {
+      "path": "src/functions/f323.lua",
+      "bytes": 4001,
+      "sha256": "c2da26e8b7950ed53f7b3c9846ae6a14c736c69177744545f639ed0d4c73c156"
+    },
+    {
+      "path": "src/functions/f324.lua",
+      "bytes": 6185,
+      "sha256": "f42de307d82c6bd66607d839736233fc811963a7c4c5536dbc58af229a115b37"
+    },
+    {
+      "path": "src/functions/f325.lua",
+      "bytes": 1564,
+      "sha256": "c9a9509dfdee45322571927371c9faa4f12669ecaa67cbcca1e0bcafe285e9a0"
+    },
+    {
+      "path": "src/functions/f326.lua",
+      "bytes": 3682,
+      "sha256": "55b13dcd571bc41a6bf72254b91aa4d4d59940c6756282653260a4aeb385cf8f"
+    },
+    {
+      "path": "src/functions/f327.lua",
+      "bytes": 2489,
+      "sha256": "b7040fa26f36a27237b6fa6ee575d3e95a4d8f86763fd12fe87fb9e7111eacfc"
+    },
+    {
+      "path": "src/functions/f328.lua",
+      "bytes": 4106,
+      "sha256": "a650b987fd53014e0b9f4b86615a99d818fec5e8283d03ac9baf2f216fa0430c"
+    },
+    {
+      "path": "src/functions/f329.lua",
+      "bytes": 2265,
+      "sha256": "aad03926b4780f0186a48e422eb9e90c1ea9fe06ed9ed93a4e27f4b74b85ad9d"
+    },
+    {
+      "path": "src/functions/f330.lua",
+      "bytes": 4638,
+      "sha256": "3e2f0a11dd4b58084742a0fde1813965495794f22418f8fb2b5e9554f771daa0"
+    },
+    {
+      "path": "src/functions/f331.lua",
+      "bytes": 2325,
+      "sha256": "d35c1f553ab4c80360d8255e0f02e2744bb6269e0d2d9c1026decca80a48ddfb"
+    },
+    {
+      "path": "src/functions/f332.lua",
+      "bytes": 3271,
+      "sha256": "3306f20825a4e1913be3dd17869467dca3877d9cfb422a854fb9fd9025c07ed0"
+    },
+    {
+      "path": "src/functions/f333.lua",
+      "bytes": 4006,
+      "sha256": "f53ddcf69a86b5e22525507b2f5eac1a041cde7af8c48eda7c3d3d78aea781b9"
+    },
+    {
+      "path": "src/functions/f334.lua",
+      "bytes": 8736,
+      "sha256": "9a2738be98536eed383deb5f925ac70042549e6bf873e41c0e3c230c08d3248a"
+    },
+    {
+      "path": "src/functions/f335.lua",
+      "bytes": 16467,
+      "sha256": "c01e4eb367ac07961f75c2024c398ea98f377ca99e25510aec624f334550967f"
+    },
+    {
+      "path": "src/functions/f336.lua",
+      "bytes": 11451,
+      "sha256": "2e4384527a7100012c673f136ce88e8dce10e8ab4e861aa00b6e8bd443726aa6"
+    },
+    {
+      "path": "src/functions/f337.lua",
+      "bytes": 5587,
+      "sha256": "00751229d02718a7dc7a484e406fd96462ebf0fff70d50d0caafff95a210e2fc"
+    },
+    {
+      "path": "src/functions/f338.lua",
+      "bytes": 1507,
+      "sha256": "5dad0d98c32a48065b70a0c05fec39b03715841fc5b6439e5d9b96831d45aede"
+    },
+    {
+      "path": "src/functions/f339.lua",
+      "bytes": 1436,
+      "sha256": "ca1366c6f8e81728c90c7f7eeb71d0b1a7c0f621f4a1fa603832b32b5012d169"
+    },
+    {
+      "path": "src/functions/f340.lua",
+      "bytes": 2288,
+      "sha256": "a4a4e9f5eae8aeab1476e57d4be13141c7ec837ba126f58185dafb97968b3057"
+    },
+    {
+      "path": "src/functions/f341.lua",
+      "bytes": 5517,
+      "sha256": "bc89546c398b9e8de1fadc4d89d42551d369bbc04f87bf11c4915380276d2c53"
+    },
+    {
+      "path": "src/functions/f342.lua",
+      "bytes": 2574,
+      "sha256": "84b0fb4fc20ff6d452deae32993f109d900a6b47e27ad6efd4496b8f37005eee"
+    },
+    {
+      "path": "src/functions/f343.lua",
+      "bytes": 10290,
+      "sha256": "fb6270f151ecad6a46db3009ef236baed6e7c4d9910dfcf903fe1e05785b1ef2"
+    },
+    {
+      "path": "src/functions/f344.lua",
+      "bytes": 9519,
+      "sha256": "aed6414f3e8e78f16b9925defd44ac83228719be3a0364be2c60a323cd333a9d"
+    },
+    {
+      "path": "src/functions/f345.lua",
+      "bytes": 35081,
+      "sha256": "cdcc8dc6e786348a015e249c581c9d19bb1b449857505178b775f8f8d132d709"
+    },
+    {
+      "path": "src/functions/f346.lua",
+      "bytes": 7531,
+      "sha256": "47b57c61b07a1f3c5901a5a50b13437c6edb4a94b039bc3fc5fb6ffed6386c2d"
+    },
+    {
+      "path": "src/functions/f347.lua",
+      "bytes": 1454,
+      "sha256": "da874d14aca412991cd8a0a6c8d78eddd8bf41f5cf1115992c6e9191dd42ebcf"
+    },
+    {
+      "path": "src/functions/f348.lua",
+      "bytes": 2287,
+      "sha256": "ca5f2bac0f50d944bc406e3343a05c1216901682c871f36570ade37e00d929c6"
+    },
+    {
+      "path": "src/functions/f349.lua",
+      "bytes": 1489,
+      "sha256": "619d55aad458e3e27f3236e5a8d655f3dcce2e179269178d500b87b7e14d0f28"
+    },
+    {
+      "path": "src/functions/f350.lua",
+      "bytes": 1713,
+      "sha256": "e50841b0f27e95fed32376dc9ceac81934168d90fa4fd4b2076ebfc55afd9eae"
+    },
+    {
+      "path": "src/functions/f351.lua",
+      "bytes": 2012,
+      "sha256": "7aba6b7bea71d5601180c63d2007fc29b3c4bcb533a133105726f659db33aeec"
+    },
+    {
+      "path": "src/functions/f352.lua",
+      "bytes": 7682,
+      "sha256": "f40067b9be4ac3fd11bbba855a0b6b579ac7c661fdaea0b3c25600386ebe4329"
+    },
+    {
+      "path": "src/functions/f353.lua",
+      "bytes": 7435,
+      "sha256": "48ab513d6561482bf6faa2c98e10743ae30ef0c91b34d5036f431b980c55e783"
+    },
+    {
+      "path": "src/functions/f354.lua",
+      "bytes": 23733,
+      "sha256": "d19f705bdbfd3ecf22afbee813291b2c1ce49f91e2449f1fbb4c0edbab2f4cf9"
+    },
+    {
+      "path": "src/functions/f355.lua",
+      "bytes": 2087,
+      "sha256": "e9b8b707cc804692160357ebb5af8238fe14fa07a7b4ffccaaabe675c2c9654b"
+    },
+    {
+      "path": "src/functions/f356.lua",
+      "bytes": 2956,
+      "sha256": "f7da7e2eb39fee0893f97907fa6514677c5f05b300cc8a7c3309734329e49f9d"
+    },
+    {
+      "path": "src/functions/f357.lua",
+      "bytes": 4347,
+      "sha256": "87ce5eef599acc9501dfd6ec83bd7f32ee29f8b9ed134a254ead58c48140b8db"
+    },
+    {
+      "path": "src/functions/f358.lua",
+      "bytes": 5890,
+      "sha256": "9c17ce4e69cc2a742c59ec851a14145915daf4d01b36623883dd2d7c51ce84e2"
+    },
+    {
+      "path": "src/functions/f359.lua",
+      "bytes": 4428,
+      "sha256": "6b642d5418a87b3b61ef20c3ac15a6045c90f633f72ee620b0455ac310c92ef9"
+    },
+    {
+      "path": "src/functions/f360.lua",
+      "bytes": 11263,
+      "sha256": "7322b6fcea9ea072346b9d479f101a6279a5801b72f4ce3cde6c4bd1cd38fec6"
+    },
+    {
+      "path": "src/functions/f361.lua",
+      "bytes": 10075,
+      "sha256": "b41305aaf13b1388ec048a616a87be902596b950f2d2ef06554be61505b2257f"
+    },
+    {
+      "path": "src/functions/f362.lua",
+      "bytes": 1949,
+      "sha256": "f9dbbeac6056ca448ab9574478acaa5d93a28903c4bc9cc5ae1c46078425777d"
+    },
+    {
+      "path": "src/functions/f363.lua",
+      "bytes": 8640,
+      "sha256": "1294ed54250ee53f789319aa0875721925f8a263f48091e94633197cd12f013b"
+    },
+    {
+      "path": "src/functions/f364.lua",
+      "bytes": 16392,
+      "sha256": "17947f44a2cb580a612eae104f19316967f5dd7ed0f8027cace76b093f1735d2"
+    },
+    {
+      "path": "src/functions/f365.lua",
+      "bytes": 15421,
+      "sha256": "b6b71b57c8414cc7f4234d19750bcb10274d18c1c8814c2a1759a16a3c31df52"
+    },
+    {
+      "path": "src/functions/f366.lua",
+      "bytes": 3849,
+      "sha256": "604eef271d25615983896a7a7f234bc97ac845357b13e05dcf30a40184cf9e2e"
+    },
+    {
+      "path": "src/functions/f367.lua",
+      "bytes": 6127,
+      "sha256": "1908201d1fe22a5d1500b046ecab4820a0c0bd05c38f6ef1ced5cf5030a74bae"
+    },
+    {
+      "path": "src/functions/f368.lua",
+      "bytes": 4148,
+      "sha256": "e765fd26fd8a11a599de3424d66ea2b0653593987dc4a55dc685a6edec54f80b"
+    },
+    {
+      "path": "src/functions/f369.lua",
+      "bytes": 2118,
+      "sha256": "691b288a02b0722d26b41b1378ff81365f87d248f980d38c04de0e2f1a8b4f98"
+    },
+    {
+      "path": "src/functions/f370.lua",
+      "bytes": 6817,
+      "sha256": "2cb37e9cfb53e55fa0b8190bba1102353fa46a8c4e8702ac682a5d50ef28e126"
+    },
+    {
+      "path": "src/functions/f371.lua",
+      "bytes": 1949,
+      "sha256": "91517a01e23772e354b008bb60ea9624deb767a2ea9f8275e91f7244dc99f347"
+    },
+    {
+      "path": "src/functions/f372.lua",
+      "bytes": 1966,
+      "sha256": "db8efdcd61e3fe532d41301bf3d81e65714fbf09b1d151f302f45dbb68ba1b15"
+    },
+    {
+      "path": "src/functions/f373.lua",
+      "bytes": 2180,
+      "sha256": "3294a4b15811bb3561f35f09a14be24aef1fb38d639933ff141c707a9820553b"
+    },
+    {
+      "path": "src/functions/f374.lua",
+      "bytes": 3198,
+      "sha256": "bd5c61c24ee1753dc0335c78dd10c08f998cf732cace6add43fce7780575c171"
+    },
+    {
+      "path": "src/functions/f375.lua",
+      "bytes": 1438,
+      "sha256": "d1d29a71c17c07af9bfd1e4d8b742470e07f210e12c1f3b430be86bfc242b611"
+    },
+    {
+      "path": "src/functions/f376.lua",
+      "bytes": 2243,
+      "sha256": "4a0d5a30642e84f10bb8167c3e60f5fdd96a07b2087d74b1be8ab0640b036f5c"
+    },
+    {
+      "path": "src/functions/f377.lua",
+      "bytes": 2216,
+      "sha256": "4e3368e5ac0787cfdc95b30e453399c0e62890b45ea348c7b4f0c287c540de49"
+    },
+    {
+      "path": "src/functions/f378.lua",
+      "bytes": 5968,
+      "sha256": "cfa4ce386f79bd0e688cb26dbc3ee0bddedc469971510ddfa58c32544d0a6893"
+    },
+    {
+      "path": "src/functions/f379.lua",
+      "bytes": 8073,
+      "sha256": "1c430384402e00b1c8f77e80ac7a2072afd811abe158f85a9ea626950af6f166"
+    },
+    {
+      "path": "src/functions/f380.lua",
+      "bytes": 1744,
+      "sha256": "5eb2a64fa0e87a03d6676a1414ca300663de8d45a610f8989c1ec8207101b2ca"
+    },
+    {
+      "path": "src/functions/f381.lua",
+      "bytes": 1879,
+      "sha256": "b3dac4e884537861cfd33a41d66439e1772a56e9c7670351b1b62520b7e33653"
+    },
+    {
+      "path": "src/functions/f382.lua",
+      "bytes": 2165,
+      "sha256": "5afe6b5d3de8645aa8de6902085e813b1c968d6c6b4a8a5d0ad3235365e16469"
+    },
+    {
+      "path": "src/functions/f383.lua",
+      "bytes": 3244,
+      "sha256": "f0a64313bd5e98f9ee0491bf1d5fe938c76adf279fce465f3d9e92a3124dcfa7"
+    },
+    {
+      "path": "src/functions/f384.lua",
+      "bytes": 1891,
+      "sha256": "5c285bc0484906670751efd836504327c735e3b222bf387fff39ab5776d5ead4"
+    },
+    {
+      "path": "src/functions/f385.lua",
+      "bytes": 4140,
+      "sha256": "f12b1d25a5c9141e35195a3027a37b78503a5e12c829b775ead51e4f4ed1581b"
+    },
+    {
+      "path": "src/functions/f386.lua",
+      "bytes": 4270,
+      "sha256": "bc525e0ed186f2d33880d328bf569c8acf5eb062d82628514f3ca60fafc8e966"
+    },
+    {
+      "path": "src/functions/f387.lua",
+      "bytes": 6434,
+      "sha256": "6b5de83db22d1ba4b093efdba5cafb325cda0cc189c6654cbc971ac8a601b14e"
+    },
+    {
+      "path": "src/functions/f388.lua",
+      "bytes": 1431,
+      "sha256": "ce2b543d9afa3cef4be3a7bd632e5d2d914902df0752253e9242b4f26a766c98"
+    },
+    {
+      "path": "src/functions/f389.lua",
+      "bytes": 3832,
+      "sha256": "98bd8e144d940d13046e28b540c303e60befd4c44cf554c0b5d30caa49eddf66"
+    },
+    {
+      "path": "src/functions/f390.lua",
+      "bytes": 8561,
+      "sha256": "2bfd56f9caa836282a4070c29909d1bda17fcde33d1a3bce9674ffe077d29b88"
+    },
+    {
+      "path": "src/functions/f391.lua",
+      "bytes": 4144,
+      "sha256": "6a1c7217468b6614f9f2f3b4cfdcf8d6e5ff452c879ff891a5dbfbc0e4cde8a2"
+    },
+    {
+      "path": "src/functions/f392.lua",
+      "bytes": 6724,
+      "sha256": "61a868c0568627d8b89b4d72097962ae1d22436d3ad2b85d7ecd611a9f9f1d40"
+    },
+    {
+      "path": "src/functions/f393.lua",
+      "bytes": 5019,
+      "sha256": "01816680f1b0cf503f56a0160dc681e1b7e19d1a11cd01c3bf15205b39c4fe54"
+    },
+    {
+      "path": "src/functions/f394.lua",
+      "bytes": 11096,
+      "sha256": "81b942e7ce5216ef2541aca2982a4fc50dcacb8cd0aa5747e9be502b59d8e870"
+    },
+    {
+      "path": "src/functions/f395.lua",
+      "bytes": 3211,
+      "sha256": "3bbddb3c8c99ff6a73190e16b5d1f7bd312ea182b9b75b66e047a581662fe1f5"
+    },
+    {
+      "path": "src/functions/f396.lua",
+      "bytes": 5013,
+      "sha256": "10ded9772e22e91b25e0473e602645c53d97dadbe301e72dd51dfc3b68dd39e1"
+    },
+    {
+      "path": "src/functions/f397.lua",
+      "bytes": 15651,
+      "sha256": "778f0df22d3d18d29af30dfc1e3a21d72e85a3fe93548f12ca388837fb6b65fe"
+    },
+    {
+      "path": "src/functions/f398.lua",
+      "bytes": 2611,
+      "sha256": "c54eb2e1e2ba478def310012a45124d996560bfea445d4c3dc2e2fd00b0d7b17"
+    },
+    {
+      "path": "src/functions/f399.lua",
+      "bytes": 4437,
+      "sha256": "447094d9429f6588a11cc8edf10d01e6890dfbc1d3d608143aa755d9b238ae69"
+    },
+    {
+      "path": "src/functions/f400.lua",
+      "bytes": 2890,
+      "sha256": "1cd77274b97f6a42ea53449ee619b20cc38b6723c5cf8367d3b9db6ad7ce060e"
+    },
+    {
+      "path": "src/functions/f401.lua",
+      "bytes": 3123,
+      "sha256": "ee1f1826ecdf9bc88afe9fa204de8e9cb3a1fb6500000bfe374dbe180b1d6f0e"
+    },
+    {
+      "path": "src/functions/f402.lua",
+      "bytes": 20980,
+      "sha256": "8bbcfe2747b63bb67c929d976c4c679ca4fa003e9c875cdb746a34769350a1e1"
+    },
+    {
+      "path": "src/functions/f403_repeating_key_xor.lua",
+      "bytes": 381,
+      "sha256": "754c187f2ed0aef0d1e09fd90f208f4d72ef9125c9c2329447e1d552400eff33"
+    },
+    {
+      "path": "src/functions/f404.lua",
+      "bytes": 2725,
+      "sha256": "8ae155ee2a26d9abe53f25794e1c79b71c3bc23b494a9125331fb9b65ae0a861"
+    },
+    {
+      "path": "src/functions/f405.lua",
+      "bytes": 3731,
+      "sha256": "b529077730473146e3b9432be6237f05e48dd1b3516c084ccc17b4366dfc2c93"
+    },
+    {
+      "path": "src/functions/f406.lua",
+      "bytes": 4325,
+      "sha256": "ffa47af04611b23b2c1481fdd866400ccf83e671ec68b8e0e66584a0700be821"
+    },
+    {
+      "path": "src/functions/f407.lua",
+      "bytes": 13160,
+      "sha256": "48e7c29be2408d95a6ae1133a99c71d7c9e382cee63cd25a4a62fd6f7d383de9"
+    },
+    {
+      "path": "src/functions/f408.lua",
+      "bytes": 38541,
+      "sha256": "ae9c44bd030d688e98f6f47596762fd50fe02cfd702fad5ab4bf9e67231d80de"
+    },
+    {
+      "path": "src/functions/f409.lua",
+      "bytes": 2599,
+      "sha256": "1fdf06b71a47f839ed05268439c1ff5106558f320935944b0523eaff20b5006c"
+    },
+    {
+      "path": "src/functions/f410.lua",
+      "bytes": 2839,
+      "sha256": "5722168cedd6164c7bdbf50be134f0a2927a1cfa0b8a353c60f72da348e10435"
+    },
+    {
+      "path": "src/functions/f411.lua",
+      "bytes": 10059,
+      "sha256": "46beb762f04e2e2110ccfae368f66d29f32c30cf6ebb6e839946f8fb16066eda"
+    },
+    {
+      "path": "src/functions/f412.lua",
+      "bytes": 9602,
+      "sha256": "5873bf978d204eb90a74fa69865b52761e1d09e70d6e379893f2b715dc4e9b84"
+    },
+    {
+      "path": "src/functions/f413.lua",
+      "bytes": 3048,
+      "sha256": "296bcfe93e55907b09ebd4862ba10e3546a5e77bfd090c080c51b87f14d0c236"
+    },
+    {
+      "path": "src/functions/f414.lua",
+      "bytes": 2150,
+      "sha256": "9c6a928b632e94b363f20e80c67ebf01ac272eda254cae38c4cf929d189e5184"
+    },
+    {
+      "path": "src/functions/f415.lua",
+      "bytes": 6276,
+      "sha256": "601a0f5942e1bcb521df507d0c11f848f08de993de98d8c0c7dbd2b6aa8646f5"
+    },
+    {
+      "path": "src/functions/f416_removed_loader_handler.lua",
+      "bytes": 128,
+      "sha256": "bea1a3dd13dea2f92cbcb255c483fc761d8ad4cacf04222d987b280242627873"
+    },
+    {
+      "path": "src/functions/f417.lua",
+      "bytes": 1595,
+      "sha256": "78c962fb00f3bc890e8b237a462649ab37e11993f0a99fa42c02a54668838c77"
+    },
+    {
+      "path": "src/functions/f418_disabled_crash_trap.lua",
+      "bytes": 330,
+      "sha256": "016eba6e5fc4d4d99990a8dc6893a3a9d82cbec0400aaf84b8eac3b646e1e25c"
+    },
+    {
+      "path": "src/functions/f419_arithmetic_xor.lua",
+      "bytes": 3375,
+      "sha256": "ae4b603da4c0fdb1143461f26328c4862dabd18bebe5883734d6c7aec3e9e72f"
+    },
+    {
+      "path": "src/functions/f420.lua",
+      "bytes": 3547,
+      "sha256": "e1ad8c9d56e92e315989980262534141879842f7e214b4cfc02ca9c9abfa1672"
+    },
+    {
+      "path": "src/functions/f421.lua",
+      "bytes": 3650,
+      "sha256": "bc0189ee1041a72c4849904bfa391cf3cff96f1fd4accb5cd760e4d481a3909b"
+    },
+    {
+      "path": "src/functions/f422.lua",
+      "bytes": 5088,
+      "sha256": "c98e576e497491fea9bcfc6182a8412bc7eb80660e2f1dc51ba5c9e44c5c26e8"
+    },
+    {
+      "path": "src/functions/f423.lua",
+      "bytes": 12980,
+      "sha256": "13b0a6414136f6927dbc57f4c541fcc1f97a5dfe8d41019e29cff08fcf609275"
+    },
+    {
+      "path": "src/functions/f424.lua",
+      "bytes": 1520,
+      "sha256": "dff6a47df3de72fe44e90ade8b3cb9a0d634c0d72445756ba3f852b8006faab1"
+    },
+    {
+      "path": "src/functions/f425.lua",
+      "bytes": 2423,
+      "sha256": "0c8716a1c93a5b806e9236514afb21db074dc8205d29472af1de77723a66db4f"
+    },
+    {
+      "path": "src/functions/f426.lua",
+      "bytes": 2077,
+      "sha256": "54964de89ea722173a65bd4abd0770f1fe08abc2e4b40352fe47e25287413ca5"
+    },
+    {
+      "path": "src/functions/f427.lua",
+      "bytes": 1719,
+      "sha256": "9f28bc9a774e1d8176e6d93a799f084f3bd95fbf3a54790253b1feffd0c50b63"
+    },
+    {
+      "path": "src/functions/f428.lua",
+      "bytes": 3189,
+      "sha256": "2eb7d2402de90bea21c41803bf7ce0fc7e9434bff93dfce560fed4709920214a"
+    },
+    {
+      "path": "src/functions/f429.lua",
+      "bytes": 2167,
+      "sha256": "ff4914ba026a03bcc47cc7c9010a98d55694ca391910853731a07c2c75c88d9e"
+    },
+    {
+      "path": "src/functions/f430.lua",
+      "bytes": 4247,
+      "sha256": "754329bef9c3721acbfe821845eff74f13184463010699520f388d34143e3e96"
+    },
+    {
+      "path": "src/functions/f431.lua",
+      "bytes": 6954,
+      "sha256": "4e87430907a6660900f3cdc5b28e5414af6838964df1335f22f962a4ab52980a"
+    },
+    {
+      "path": "src/functions/f432.lua",
+      "bytes": 2952,
+      "sha256": "28ec79cd00ca3fda9bd2cc4a0dee6910264a0ce66ad96ab3dd2fa4002778a839"
+    },
+    {
+      "path": "src/functions/f433.lua",
+      "bytes": 1600,
+      "sha256": "58c5d8624c0ad22793ee159b353efa9bcc33239ee6606917b37039a4e0ac4488"
+    },
+    {
+      "path": "src/functions/f434.lua",
+      "bytes": 2981,
+      "sha256": "5ad8af3ef5e94d5b78751a43e5b7a1c6a5f5402dc7546d1a93755919e2f3a2ae"
+    },
+    {
+      "path": "src/functions/f435.lua",
+      "bytes": 3062,
+      "sha256": "4686d42b8eaf2b969c17d12a0f55de5a3251bfe3394fe9e05fdcfb3e3faa1874"
+    },
+    {
+      "path": "src/functions/f436.lua",
+      "bytes": 2646,
+      "sha256": "276233fbeceadd06409d96701c1de043be5bf123ff5adb6532992deeecca0068"
+    },
+    {
+      "path": "src/functions/f437.lua",
+      "bytes": 2586,
+      "sha256": "c8e08aae0049d237fb557afa6588ef35e1ce18a630cd0e2f7f99683ffae7127a"
+    },
+    {
+      "path": "src/functions/f438.lua",
+      "bytes": 4091,
+      "sha256": "8ef7d1d0728c5a813ade0c198781d30c2d0684463aa3e8735eb10b76b7031dd8"
+    },
+    {
+      "path": "src/functions/f439.lua",
+      "bytes": 4903,
+      "sha256": "6bccabda0c6a781da240563d5711436e9cc75b48be86161fcc90ec77097bb19c"
+    },
+    {
+      "path": "src/functions/f440.lua",
+      "bytes": 2501,
+      "sha256": "0e9920d38f84db98514311b9da899bea9b7b3947b7cc2a2110215e221d0f590d"
+    },
+    {
+      "path": "src/functions/f441.lua",
+      "bytes": 3424,
+      "sha256": "48e9ae62ff789374f7da279c6b75aad56627c06ee5e1f407a70e687e6cdbe51b"
+    },
+    {
+      "path": "src/functions/f442.lua",
+      "bytes": 5577,
+      "sha256": "6b664592acaed843fbe138f7e80d6e5516f5d76cbefd1c7239ee97861f3346bc"
+    },
+    {
+      "path": "src/functions/f443.lua",
+      "bytes": 5584,
+      "sha256": "ae3cb9bf88ac14e159c69db9dfd28522f576461207ed02e3b7b63075fb837767"
+    },
+    {
+      "path": "src/functions/f444.lua",
+      "bytes": 17825,
+      "sha256": "528b1308e40abc18c04fb432157e2e1798680f21c2c05e6b089446e7e5a01cd9"
+    },
+    {
+      "path": "src/functions/f445.lua",
+      "bytes": 1996,
+      "sha256": "b4eee810a68f00d829c921351145d6249fda49b604e76232bb61e5d17bd2290d"
+    },
+    {
+      "path": "src/functions/f446.lua",
+      "bytes": 2232,
+      "sha256": "59c2c523eb7ae9cc1746cca90d0bc6a8f6dece0d78fc6c2e57b8aa428d54f1bf"
+    },
+    {
+      "path": "src/functions/f447.lua",
+      "bytes": 2853,
+      "sha256": "02745c0f14e3accf2b890e9070030dc8e0a87471e8465f9a5354a30b7ebe641c"
+    },
+    {
+      "path": "src/functions/f448.lua",
+      "bytes": 1684,
+      "sha256": "c05efa3bc71600aa9099d6aeaa68a3e37686d6fb23f7db4453ad70d8871cf166"
+    },
+    {
+      "path": "src/functions/f449.lua",
+      "bytes": 2628,
+      "sha256": "4c30629e8ce0e2e91c0e2c44c380e7eaabded01e01856140745ffe5b99fa3e07"
+    },
+    {
+      "path": "src/functions/f450.lua",
+      "bytes": 2903,
+      "sha256": "16be558d033ac27f657f6ed231ec27159a3141281b348e4c8573c9c7512e4b85"
+    },
+    {
+      "path": "src/functions/f451.lua",
+      "bytes": 4730,
+      "sha256": "1ff66e2cbfc4a79c739c2994a3451eea747452b7d671c97219a52d7a9c60b490"
+    },
+    {
+      "path": "src/functions/f452.lua",
+      "bytes": 1752,
+      "sha256": "d6594173b3a34e65022f2cbb640def7c6a3a6b62863ebf00d4922837a8e37950"
+    },
+    {
+      "path": "src/functions/f453.lua",
+      "bytes": 5174,
+      "sha256": "3ba3d70decc81e30071bbbcf851e206d38fd9c35e78ec76ea63e5fc8628ca661"
+    },
+    {
+      "path": "src/functions/f454.lua",
+      "bytes": 7399,
+      "sha256": "40904a9689ae088de990cb619d35089aa1259cedfe323854d9d78b7deb924e74"
+    },
+    {
+      "path": "src/functions/f455.lua",
+      "bytes": 3149,
+      "sha256": "93b44b4addc1e8bcb631ad6b5d5a9e934aa71da6d9cb072c6d7ed6a675a32634"
+    },
+    {
+      "path": "src/functions/f456.lua",
+      "bytes": 3924,
+      "sha256": "5cd4387eddf9e3b9096f61bdb5d544a780ee9f31ad90bd0c53989c6a8622ee21"
+    },
+    {
+      "path": "src/functions/f457.lua",
+      "bytes": 2607,
+      "sha256": "3ed06e8f73a37acb55638f1d28ffdeb01029fb14cd773d764c6cbfdd3d84446a"
+    },
+    {
+      "path": "src/functions/f458.lua",
+      "bytes": 2677,
+      "sha256": "46de1aae686f53a53280c5217afdc2368187dcf68421fdbf43a42e705e91b855"
+    },
+    {
+      "path": "src/functions/f459.lua",
+      "bytes": 1949,
+      "sha256": "a94f741392dcadd196ac9ffd3da4adcf53e4721c035d5c66cc23e3d1678c49e2"
+    },
+    {
+      "path": "src/functions/f460.lua",
+      "bytes": 1942,
+      "sha256": "260566e6d12eec64dc784ba2f0cb202b6454f0de5355c050cc806f790875688b"
+    },
+    {
+      "path": "src/functions/f461.lua",
+      "bytes": 2307,
+      "sha256": "f95eff44ac353da540712e1ac2f2949d62d41fbfb0b24a08f9c19cef7ec58de8"
+    },
+    {
+      "path": "src/functions/f462.lua",
+      "bytes": 2275,
+      "sha256": "b1e7b82cb8c86ae4adb01384eea5c6ec26559597167c8fbdd00e99406b5db083"
+    },
+    {
+      "path": "src/functions/f463.lua",
+      "bytes": 2589,
+      "sha256": "cac5fe44a57d7b7cae6a075957f806861fa50cda9dc403895f57453e140975ec"
+    },
+    {
+      "path": "src/functions/f464.lua",
+      "bytes": 1878,
+      "sha256": "3b4d56ad888e73bb4f1e7c0523224e7e0aa50cfd6813f7e39eb24a88f0e24c03"
+    },
+    {
+      "path": "src/functions/f465.lua",
+      "bytes": 1895,
+      "sha256": "941f7310e77c611e5fa9ce72099cfc1782f21a9e2e7e6058e5d2f616a9ae2cd2"
+    },
+    {
+      "path": "src/functions/f466.lua",
+      "bytes": 3365,
+      "sha256": "0d18f23c1e0fa2bdf6c3485233f267ce75dbc8ca9dd01ffcb6fce00288ce74e9"
+    },
+    {
+      "path": "src/functions/f467.lua",
+      "bytes": 4159,
+      "sha256": "a2e267bdefc6bf053aa82be1e7a19eb10c9620f8571bc11e79f73e1e698aec0a"
+    },
+    {
+      "path": "src/functions/f468.lua",
+      "bytes": 3691,
+      "sha256": "7340f0debf5746fcbbaf689615ae7ea822a5621dc369349aa2305700b0cc0e5b"
+    },
+    {
+      "path": "src/functions/f469.lua",
+      "bytes": 1885,
+      "sha256": "ca790a75f1618a9e43444be393d3c08701112a7042e80e76d9cd6800cbd197e1"
+    },
+    {
+      "path": "src/functions/f470.lua",
+      "bytes": 7619,
+      "sha256": "e1c49f41e1fae0b8cfba65d9dad48fb67a93320eb8cf16672f06c8e5b13d8fb6"
+    },
+    {
+      "path": "src/functions/f471.lua",
+      "bytes": 10663,
+      "sha256": "bfbeef9d3e8d30e2dbe11da2b5857366be9465fb639177b6190b494100ae170c"
+    },
+    {
+      "path": "src/functions/f472.lua",
+      "bytes": 2327,
+      "sha256": "69578f027a17bc50e5d012b86e8c74433a784e7d3df7c501d042b8b51abd5579"
+    },
+    {
+      "path": "src/functions/f473.lua",
+      "bytes": 1868,
+      "sha256": "378a68dc15b9d470e50e6062004449c3582a64f0ea4b0289a127de4f7148fcf3"
+    },
+    {
+      "path": "src/functions/f474.lua",
+      "bytes": 2214,
+      "sha256": "b656d4341313472a523a15fb0959e17d1299bc3ce9903a09764584b9c27971ef"
+    },
+    {
+      "path": "src/functions/f475.lua",
+      "bytes": 1951,
+      "sha256": "1521050212793382eba7e5d9a6b058054567314949fa418af85baf88fc538657"
+    },
+    {
+      "path": "src/functions/f476.lua",
+      "bytes": 1856,
+      "sha256": "e9f284373b9d6f1b9203ad360b86903e8e96fc095a815937960195ce53a6184a"
+    },
+    {
+      "path": "src/functions/f477.lua",
+      "bytes": 2354,
+      "sha256": "4c47cd81d959994026dabae5d8c0e3e26a466d28b2e1db23b2e9a114f2c0e3db"
+    },
+    {
+      "path": "src/functions/f478.lua",
+      "bytes": 2855,
+      "sha256": "b774ad92da5d965a9a530d66f9a8babc6f95f9e692e1b9fa8710431f490ae0ec"
+    },
+    {
+      "path": "src/functions/f479.lua",
+      "bytes": 3611,
+      "sha256": "8a114ff3198935fcfac3aa7f7b1b72533b8aef2a8f2493d2c3f7d11a424fcf3d"
+    },
+    {
+      "path": "src/functions/f480.lua",
+      "bytes": 1472,
+      "sha256": "9b96956d95e566d134aa3ef5fff88e1edcd3e72b58aba92e4285a80063dfd3ba"
+    },
+    {
+      "path": "src/functions/f481.lua",
+      "bytes": 3657,
+      "sha256": "cce72e40e14afc5e2cef48d28469d1294eb92f7955e4464d9f2fd45a51f4c655"
+    },
+    {
+      "path": "src/functions/f482.lua",
+      "bytes": 2451,
+      "sha256": "4fec024cb2a6cf740a94d8c169e28b765c4131eb281132cda5f0f8f4ad6f901e"
+    },
+    {
+      "path": "src/functions/f483.lua",
+      "bytes": 5791,
+      "sha256": "b27d4c932d271eb4e9d88156340c1a33eb1dd1e3fb4abf7198655b5e2def0263"
+    },
+    {
+      "path": "src/functions/f484.lua",
+      "bytes": 17297,
+      "sha256": "5dc94b541505814211ee6d4648d13923b5af7d8c38d73da24ef4a3095a72bda1"
+    },
+    {
+      "path": "src/functions/f485.lua",
+      "bytes": 15821,
+      "sha256": "1454245fe344f18e96627750a285d0e613c0ea4c4a4f66ca2c1d71269f145b7b"
+    },
+    {
+      "path": "src/functions/f486.lua",
+      "bytes": 7037,
+      "sha256": "c07a7292af46a82401757cef5f1ec5daf15b6f8ba483dcc1143a48aa551d0a7e"
+    },
+    {
+      "path": "src/functions/f487.lua",
+      "bytes": 1952,
+      "sha256": "e6515c3e0f3942608334b4b5faa729482c3b171c0fed0cfcecf0657ba7adfa6c"
+    },
+    {
+      "path": "src/functions/f488.lua",
+      "bytes": 1945,
+      "sha256": "e741d1df71de846532ab89692841fdbc276cd80d251c867aab72fb75041bcd8c"
+    },
+    {
+      "path": "src/functions/f489.lua",
+      "bytes": 1981,
+      "sha256": "000e412fc3297cc8cfffb09d7d37ba1a350b4d23c5f60f5e88fdf761128e6749"
+    },
+    {
+      "path": "src/functions/f490.lua",
+      "bytes": 1965,
+      "sha256": "ae9e3d541e70d967deb441b293b4378aa3a58099823757d0691d6897c893bbe2"
+    },
+    {
+      "path": "src/functions/f491.lua",
+      "bytes": 1992,
+      "sha256": "a21363c807741cf147f1d2e919d4928603d641f72b5695ec908a67deeb4fc8d4"
+    },
+    {
+      "path": "src/functions/f492.lua",
+      "bytes": 2516,
+      "sha256": "535454c1bd3b666447a6e5c50da66f1fb6733ea674c8db1d6d8dd5fd67d609fe"
+    },
+    {
+      "path": "src/functions/f493.lua",
+      "bytes": 15548,
+      "sha256": "34bffbd4984f70e93a7a05353b217d0a7d0524ce12e34bf45abe187b7411365e"
+    },
+    {
+      "path": "src/functions/f494.lua",
+      "bytes": 1550,
+      "sha256": "e0b0e7cb2b1ba9dd02bfd464afeeafd3b1bbf2605fad1b227a72505c69941c33"
+    },
+    {
+      "path": "src/functions/f495.lua",
+      "bytes": 9771,
+      "sha256": "3fe80f04e12482d9706b8e1e65d6dabe4756c28ae3fa4158c7d0f038c2d1b1b7"
+    },
+    {
+      "path": "src/functions/f496.lua",
+      "bytes": 6243,
+      "sha256": "fe889234321d88ab4ae851a4c529fd1b010854ddfcaba5b941fda85ad5029e1e"
+    },
+    {
+      "path": "src/functions/f497.lua",
+      "bytes": 4661,
+      "sha256": "a06255875397e5b7d6bb4a4c8ef6fb7d8a99d3129215f51e61e5d003b4762c70"
+    },
+    {
+      "path": "src/functions/f498.lua",
+      "bytes": 2515,
+      "sha256": "0d5ebdc53a5387850f8c261c8dfb8c43f2c24ceb604d8a1f6691e2749d1326ad"
+    },
+    {
+      "path": "src/functions/f499.lua",
+      "bytes": 3436,
+      "sha256": "6560c0e66a9909e57ba93c1ef10f1331b30e806b5a0830e8700c417a0bdefeee"
+    },
+    {
+      "path": "src/functions/f500.lua",
+      "bytes": 3487,
+      "sha256": "8e0f500cda2f9c1cb5283a797c901dbeb1e7c5fe7a46f27ed0b16e01e49a0753"
+    },
+    {
+      "path": "src/functions/f501.lua",
+      "bytes": 7191,
+      "sha256": "bfe7437196b308929eda2e6c328081f999fd4bb7f86c67e359a587ca104490b0"
+    },
+    {
+      "path": "src/functions/f502.lua",
+      "bytes": 2481,
+      "sha256": "dfe0a9649e2f858a1d03904c0879154282016e85783d473b7c5d4383b34ee722"
+    },
+    {
+      "path": "src/functions/f503.lua",
+      "bytes": 3492,
+      "sha256": "fd54f54789b37fb27d40d1b0616b610912771fd8df595aff1288c57ce2ecea20"
+    },
+    {
+      "path": "src/functions/f504.lua",
+      "bytes": 3789,
+      "sha256": "e4232f4bfd257f49779b06a0ddf559da90ed61df188e1f9e33cc313686569e46"
+    },
+    {
+      "path": "src/functions/f505.lua",
+      "bytes": 2403,
+      "sha256": "7c0290cebc684aee33ab78ec067e231e801cc3c252ec150e13d734b314615c9c"
+    },
+    {
+      "path": "src/functions/f506.lua",
+      "bytes": 2978,
+      "sha256": "890dc69ac9663c4d64234333b54460387180df77d45882f00293bde30cd25ab0"
+    },
+    {
+      "path": "src/functions/f507.lua",
+      "bytes": 3022,
+      "sha256": "f9971f671ad8d52618bcd9e9a2009fc778f3e439d0b47aac4d333c7715f50fcd"
+    },
+    {
+      "path": "src/functions/f508.lua",
+      "bytes": 3562,
+      "sha256": "4c3a0cde46bafc5a0cc4b0d4801f379a614c433ff7f063cdfff7fdc859a34d6d"
+    },
+    {
+      "path": "src/functions/f509.lua",
+      "bytes": 2464,
+      "sha256": "26986fd80e0d4023bb0a4d8182cfd5be53ec25b65fc1ba08901a997845af0262"
+    },
+    {
+      "path": "src/functions/f510.lua",
+      "bytes": 3259,
+      "sha256": "869b0c1713d9b9e2083f2ab91c1e577013546f3a75709f0b3304a9e1dbdaa1e9"
+    },
+    {
+      "path": "src/functions/f511.lua",
+      "bytes": 1883,
+      "sha256": "e890b308df24f6261bfefa99ae4dd942c435fed9c4d95650af3e01ff736467c7"
+    },
+    {
+      "path": "src/functions/f512.lua",
+      "bytes": 3067,
+      "sha256": "7280723b84ada042404783d110008d7e0b71a8b02ef6bffe60a342b14cccc3e3"
+    },
+    {
+      "path": "src/functions/f513.lua",
+      "bytes": 16209,
+      "sha256": "ab3d70746e9de4d8a86795e9d44e79f6aec6e8f669332ddc3dc93c5af730b721"
+    },
+    {
+      "path": "src/functions/f514.lua",
+      "bytes": 2159,
+      "sha256": "3bd1e88f588505b50f8f70d4ee9da8d9a1b02ed538e37092652cf65e82998f90"
+    },
+    {
+      "path": "src/functions/f515.lua",
+      "bytes": 1899,
+      "sha256": "30ded296ad877b0cc4566d6ec838a904edb18813b230c7e110d7bed706c3d8d7"
+    },
+    {
+      "path": "src/functions/f516.lua",
+      "bytes": 2887,
+      "sha256": "c6a43f9519a162526f732a2d23351bb52121df7879a74d2cbd8186c8b3be845f"
+    },
+    {
+      "path": "src/functions/f517.lua",
+      "bytes": 9776,
+      "sha256": "eecc05c135937f0e7ab77ee4ba94ff90861d455db3eac580f6f4d9743d195057"
+    },
+    {
+      "path": "src/functions/f518.lua",
+      "bytes": 3926,
+      "sha256": "a5bb1f9af62752211319079fa6cdcffe4615e4334c8fcb1fd17f9faa849055f9"
+    },
+    {
+      "path": "src/functions/f519.lua",
+      "bytes": 7929,
+      "sha256": "22d1a38ef11bdd145daa7757577346982aa797fe25508c348278e8556ffb6b83"
+    },
+    {
+      "path": "src/functions/f520.lua",
+      "bytes": 3260,
+      "sha256": "19dd82150723777b440aa63d5de23576c8e14185b68d45946216768dfcdfc6d4"
+    },
+    {
+      "path": "src/functions/f521.lua",
+      "bytes": 3682,
+      "sha256": "9b1573ef11907fef49bdcf662864a121244ea753abf3e15a43ef4bef29e1e9a4"
+    },
+    {
+      "path": "src/functions/f522.lua",
+      "bytes": 3397,
+      "sha256": "523c8d3aa7af2ecc3d603b679397de59883811e46071dba983eaa5cb8f7f552c"
+    },
+    {
+      "path": "src/functions/f523.lua",
+      "bytes": 5602,
+      "sha256": "42bdeb48c18406c33ff695c044e803c3fc5773a370449b2e3768f47bba6c6038"
+    },
+    {
+      "path": "src/functions/f524.lua",
+      "bytes": 2087,
+      "sha256": "f85c2d8436af2a24b9bfbb86a8c777632392db7443e8819025f39de4fc4d32a3"
+    },
+    {
+      "path": "src/functions/f525.lua",
+      "bytes": 4224,
+      "sha256": "2bc96769f7c4f067bb9388fd3f6b97447a236b0263bbcdb1100490f619c649ee"
+    },
+    {
+      "path": "src/functions/f526.lua",
+      "bytes": 2450,
+      "sha256": "af43d7d755118521422d0fe7e6c73b10f5488a9e230595f67817e0ba185465a2"
+    },
+    {
+      "path": "src/functions/f527.lua",
+      "bytes": 1750,
+      "sha256": "7f47321c8561e1992463183168f40f23ad162e775e9dd4ff9c1821fae7cb7d49"
+    },
+    {
+      "path": "src/functions/f528.lua",
+      "bytes": 1907,
+      "sha256": "d020fa11495e984d1a1277678aae576998338489f5d122ee4c53a29999450fdd"
+    },
+    {
+      "path": "src/functions/f529.lua",
+      "bytes": 1473,
+      "sha256": "6a4bf7b448ddf4158f2c894d99ab05e9e39e36705aeb5c387467362d11139911"
+    },
+    {
+      "path": "src/functions/f530.lua",
+      "bytes": 2142,
+      "sha256": "a175128902cec752c676237785b8fbac203b1248143f187b25f58b501878b9bc"
+    },
+    {
+      "path": "src/functions/f531.lua",
+      "bytes": 5822,
+      "sha256": "a6d13a0418f998ebce1e2f0ba8e9de4321388f84985535ab7ff64a228e332a79"
+    },
+    {
+      "path": "src/functions/f532.lua",
+      "bytes": 5682,
+      "sha256": "901e099d7b2ea5a3948c253f1bac000be82bc9e0431b7cb98d591c49a1a0348f"
+    },
+    {
+      "path": "src/functions/f533.lua",
+      "bytes": 3728,
+      "sha256": "8280b57fbdcdaaa02f049891b1a24eec82e0c6ec3b20a6cc1523ac949bd2e0ba"
+    },
+    {
+      "path": "src/functions/f534.lua",
+      "bytes": 7080,
+      "sha256": "6f146b7e87144080fbf7c73e9bd7bacee1fbaca9b5c90d488ad53a0e2d3669dd"
+    },
+    {
+      "path": "src/functions/f535.lua",
+      "bytes": 1742,
+      "sha256": "b355947e34375622311ea4877d58972e9df471221b1c6671449a69e4fd4fccb2"
+    },
+    {
+      "path": "src/functions/f536.lua",
+      "bytes": 4514,
+      "sha256": "b658685e5f49e10333b2b2738d5c606e97a1c31f73093cce259f2728e88646f7"
+    },
+    {
+      "path": "src/functions/f537.lua",
+      "bytes": 6186,
+      "sha256": "b98b1689a487736e79203c498176b925bb2245aba13916847dbe6a792742029a"
+    },
+    {
+      "path": "src/functions/f538.lua",
+      "bytes": 12203,
+      "sha256": "eba58cd81bb7321627cf2c57f330639d77ea4506a30dff7128e66163e8e25e33"
+    },
+    {
+      "path": "src/functions/f539.lua",
+      "bytes": 3307,
+      "sha256": "ce3f871a0f41a2e3ecde1575f7887425c414203f90c0326fb91d91a264381145"
+    },
+    {
+      "path": "src/functions/f540.lua",
+      "bytes": 9185,
+      "sha256": "9755569f36cd378cdb6bbc227f85885443002af5bd7a50a9cc3af6f000c443d4"
+    },
+    {
+      "path": "src/functions/f541.lua",
+      "bytes": 7413,
+      "sha256": "9fc6a0e2831e87ac381f54a7175848d0128ea422777e608dfa7fa647cd2137cb"
+    },
+    {
+      "path": "src/functions/f542.lua",
+      "bytes": 6933,
+      "sha256": "5971c1aeda90956c4bb4d45a21955f0b956526a79f2b7b7ca80053b6fd385be1"
+    },
+    {
+      "path": "src/functions/f543.lua",
+      "bytes": 1251,
+      "sha256": "b618b760dce11a244bab5a3ea587b82a3a08d66be53f5b7c387b4d0734f4fe08"
+    },
+    {
+      "path": "src/functions/f544.lua",
+      "bytes": 6819,
+      "sha256": "68a691738057e1aead08377b2b580c1db4dbfdd76dd53b92ccb187f082a0c5d4"
+    },
+    {
+      "path": "src/functions/f545.lua",
+      "bytes": 3440,
+      "sha256": "8806846d18d252b2b0765d1920fdba773d242fe92cf358e1c194bf54562dc4f8"
+    },
+    {
+      "path": "src/functions/f546.lua",
+      "bytes": 1942,
+      "sha256": "d1b2507df2571dd43b7aae07e8a1b9ee2ab1843972e0e8246cb3aec980bc5345"
+    },
+    {
+      "path": "src/functions/f547.lua",
+      "bytes": 1245,
+      "sha256": "f6ad2b37efb946ed70baba52cf003d55c3cd40b10b1732d5a951a245dd5f7a62"
+    },
+    {
+      "path": "src/functions/f548.lua",
+      "bytes": 4419,
+      "sha256": "bbcc1066071444eb547d8491e07341d69f81f983d6e68ce3f4392f9cc6f1c03d"
+    },
+    {
+      "path": "src/functions/f549.lua",
+      "bytes": 7733,
+      "sha256": "81b0115d124fc1b6c4675f1d56a301e9e30825ffb7fbdd5becf9105626729f82"
+    },
+    {
+      "path": "src/functions/f550.lua",
+      "bytes": 1369,
+      "sha256": "94d55319832b89c2381cbfd085441998f97ae8de26f948145a3982283d00a562"
+    },
+    {
+      "path": "src/functions/f551.lua",
+      "bytes": 1366,
+      "sha256": "2030e4ca174b609a6dadd2b766f5c395996f7067c6155f5f382206e80692ea42"
+    },
+    {
+      "path": "src/functions/f552.lua",
+      "bytes": 7591,
+      "sha256": "78e880175cd9a9984278dc7a37a517f8e71f9c1aa61b1d48315afa436b830810"
+    },
+    {
+      "path": "src/functions/f553.lua",
+      "bytes": 1378,
+      "sha256": "b21aef7bf3c00dac66c1619075a0154ab044f15483d8bba1b3947e3f1cced1c3"
+    },
+    {
+      "path": "src/functions/f554.lua",
+      "bytes": 1374,
+      "sha256": "b270eacc5e86c0763906c11960df399ee5caff30449ce89f99e40f1d86380f94"
+    },
+    {
+      "path": "src/functions/f555.lua",
+      "bytes": 2055,
+      "sha256": "dfffad43ce5d434cb15ebe53eccb36fcc6a1ed252347da14672f71bac0dd5779"
+    },
+    {
+      "path": "src/functions/f556.lua",
+      "bytes": 1970,
+      "sha256": "8326faf32371739992141a0572aa8f44d281176294d5996b8bd7507f85bbdc99"
+    },
+    {
+      "path": "src/functions/f557.lua",
+      "bytes": 1978,
+      "sha256": "b6b6bbb09c53bdef74e186608fc3b894ff8a2927284f47ab4a6a0988480b25c3"
+    },
+    {
+      "path": "src/functions/f558.lua",
+      "bytes": 1962,
+      "sha256": "f5cf82078eb99a6ac0a40a0a946bed7aa296af435ad60c72b8b0bcca6f2a7c03"
+    },
+    {
+      "path": "src/functions/f559.lua",
+      "bytes": 1970,
+      "sha256": "90f65a53f3aec9a687a7d9643e7743b5114b85d86258ab6e20046e461cb589e9"
+    },
+    {
+      "path": "src/functions/f560.lua",
+      "bytes": 1961,
+      "sha256": "9d3e3d4ed185f71ce068b9727b329ec656165e3116ea6993edcfac0b16f18b8e"
+    },
+    {
+      "path": "src/functions/f561.lua",
+      "bytes": 1965,
+      "sha256": "f28c157947ad31142ee9f46f05a20c91eee21f2868fd796520d8199301249fe8"
+    },
+    {
+      "path": "src/functions/f562.lua",
+      "bytes": 1979,
+      "sha256": "5e200ecc5baf55c21b6b5ff34910309c0f6ff2f402fba8890474bf81781d15fa"
+    },
+    {
+      "path": "src/functions/f563.lua",
+      "bytes": 1969,
+      "sha256": "e7c4b7ddacdfca9090136619b5b4d9867df665a1e0ccf4964d0026a8dd23aea0"
+    },
+    {
+      "path": "src/functions/f564.lua",
+      "bytes": 1974,
+      "sha256": "ed2695b6701f44f30cfa1dc5c49c7cb994a59ffdf1f349542e4b9adc6a650f14"
+    },
+    {
+      "path": "src/optimizations.lua",
+      "bytes": 1274,
+      "sha256": "c27e7b7b5a54df0ffbf5fd71616ac2af316f587241881cedbc8a1ce7b2ff5821"
+    },
+    {
+      "path": "src/startup.lua",
+      "bytes": 3226,
+      "sha256": "9dbb89b3918e226507f3f336a07d45f611774a64d681d5c89fc8a592126d0fbc"
+    }
+  ],
+  "functions": [
+    {
+      "id": "f1",
+      "path": "src/functions/f001_standalone_entry.lua",
+      "role": "Самостоятельный запуск и привязки API",
+      "working_file_line": 5197,
+      "bytes": 3252
+    },
+    {
+      "id": "f2",
+      "path": "src/functions/f002_environment_failure.lua",
+      "role": "Обработчик отказа окружения",
+      "working_file_line": 5234,
+      "bytes": 190
+    },
+    {
+      "id": "f3",
+      "path": "src/functions/f003_arithmetic_xor.lua",
+      "role": "Арифметический XOR",
+      "working_file_line": 5241,
+      "bytes": 3369
+    },
+    {
+      "id": "f4",
+      "path": "src/functions/f004.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 5506,
+      "bytes": 3263
+    },
+    {
+      "id": "f5",
+      "path": "src/functions/f005.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 5756,
+      "bytes": 3467
+    },
+    {
+      "id": "f6",
+      "path": "src/functions/f006.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 6039,
+      "bytes": 4994
+    },
+    {
+      "id": "f7",
+      "path": "src/functions/f007.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 6472,
+      "bytes": 12694
+    },
+    {
+      "id": "f8",
+      "path": "src/functions/f008.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 7641,
+      "bytes": 40744
+    },
+    {
+      "id": "f9",
+      "path": "src/functions/f009.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 12304,
+      "bytes": 2799
+    },
+    {
+      "id": "f10",
+      "path": "src/functions/f010.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 12514,
+      "bytes": 2016
+    },
+    {
+      "id": "f11",
+      "path": "src/functions/f011.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 12610,
+      "bytes": 1370
+    },
+    {
+      "id": "f12",
+      "path": "src/functions/f012.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 12666,
+      "bytes": 1494
+    },
+    {
+      "id": "f13",
+      "path": "src/functions/f013.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 12736,
+      "bytes": 1494
+    },
+    {
+      "id": "f14",
+      "path": "src/functions/f014.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 12806,
+      "bytes": 1239
+    },
+    {
+      "id": "f15",
+      "path": "src/functions/f015.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 12852,
+      "bytes": 1247
+    },
+    {
+      "id": "f16",
+      "path": "src/functions/f016.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 12899,
+      "bytes": 1954
+    },
+    {
+      "id": "f17",
+      "path": "src/functions/f017.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 13003,
+      "bytes": 1968
+    },
+    {
+      "id": "f18",
+      "path": "src/functions/f018.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 13108,
+      "bytes": 1589
+    },
+    {
+      "id": "f19",
+      "path": "src/functions/f019.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 13193,
+      "bytes": 1461
+    },
+    {
+      "id": "f20",
+      "path": "src/functions/f020.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 13256,
+      "bytes": 1968
+    },
+    {
+      "id": "f21",
+      "path": "src/functions/f021.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 13361,
+      "bytes": 1975
+    },
+    {
+      "id": "f22",
+      "path": "src/functions/f022.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 13465,
+      "bytes": 1978
+    },
+    {
+      "id": "f23",
+      "path": "src/functions/f023.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 13570,
+      "bytes": 1970
+    },
+    {
+      "id": "f24",
+      "path": "src/functions/f024.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 13674,
+      "bytes": 1965
+    },
+    {
+      "id": "f25",
+      "path": "src/functions/f025.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 13778,
+      "bytes": 1958
+    },
+    {
+      "id": "f26",
+      "path": "src/functions/f026.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 13882,
+      "bytes": 2293
+    },
+    {
+      "id": "f27",
+      "path": "src/functions/f027.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 14000,
+      "bytes": 1575
+    },
+    {
+      "id": "f28",
+      "path": "src/functions/f028.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 14088,
+      "bytes": 1239
+    },
+    {
+      "id": "f29",
+      "path": "src/functions/f029_sha256_hmac_module.lua",
+      "role": "Модуль SHA256/HMAC",
+      "working_file_line": 14134,
+      "bytes": 17954
+    },
+    {
+      "id": "f30",
+      "path": "src/functions/f030.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 15598,
+      "bytes": 3084
+    },
+    {
+      "id": "f31",
+      "path": "src/functions/f031.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 15882,
+      "bytes": 1908
+    },
+    {
+      "id": "f32",
+      "path": "src/functions/f032.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 16008,
+      "bytes": 2418
+    },
+    {
+      "id": "f33",
+      "path": "src/functions/f033.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 16137,
+      "bytes": 1670
+    },
+    {
+      "id": "f34",
+      "path": "src/functions/f034.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 16229,
+      "bytes": 3305
+    },
+    {
+      "id": "f35",
+      "path": "src/functions/f035.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 16503,
+      "bytes": 2583
+    },
+    {
+      "id": "f36",
+      "path": "src/functions/f036.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 16694,
+      "bytes": 5990
+    },
+    {
+      "id": "f37",
+      "path": "src/functions/f037.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 17303,
+      "bytes": 2033
+    },
+    {
+      "id": "f38",
+      "path": "src/functions/f038.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 17419,
+      "bytes": 4205
+    },
+    {
+      "id": "f39",
+      "path": "src/functions/f039.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 17797,
+      "bytes": 3625
+    },
+    {
+      "id": "f40",
+      "path": "src/functions/f040.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 18124,
+      "bytes": 5077
+    },
+    {
+      "id": "f41",
+      "path": "src/functions/f041.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 18602,
+      "bytes": 21407
+    },
+    {
+      "id": "f42",
+      "path": "src/functions/f042.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 20829,
+      "bytes": 2364
+    },
+    {
+      "id": "f43",
+      "path": "src/functions/f043.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 20961,
+      "bytes": 1845
+    },
+    {
+      "id": "f44",
+      "path": "src/functions/f044.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 21077,
+      "bytes": 2673
+    },
+    {
+      "id": "f45",
+      "path": "src/functions/f045.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 21277,
+      "bytes": 9534
+    },
+    {
+      "id": "f46",
+      "path": "src/functions/f046.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 21758,
+      "bytes": 3404
+    },
+    {
+      "id": "f47",
+      "path": "src/functions/f047_disabled_crash_trap.lua",
+      "role": "Отключённая аварийная ловушка",
+      "working_file_line": 22063,
+      "bytes": 327
+    },
+    {
+      "id": "f48",
+      "path": "src/functions/f048_arithmetic_xor.lua",
+      "role": "Арифметический XOR",
+      "working_file_line": 22072,
+      "bytes": 3360
+    },
+    {
+      "id": "f49",
+      "path": "src/functions/f049_extract_bits.lua",
+      "role": "Извлечение битов",
+      "working_file_line": 22335,
+      "bytes": 3380
+    },
+    {
+      "id": "f50",
+      "path": "src/functions/f050_read_uint32.lua",
+      "role": "Вспомогательное чтение uint32",
+      "working_file_line": 22607,
+      "bytes": 3557
+    },
+    {
+      "id": "f51",
+      "path": "src/functions/f051_numeric_decoder.lua",
+      "role": "Числовой декодер",
+      "working_file_line": 22907,
+      "bytes": 5135
+    },
+    {
+      "id": "f52",
+      "path": "src/functions/f052.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 23366,
+      "bytes": 14244
+    },
+    {
+      "id": "f53",
+      "path": "src/functions/f053.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 24733,
+      "bytes": 39222
+    },
+    {
+      "id": "f54",
+      "path": "src/functions/f054.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 29281,
+      "bytes": 2937
+    },
+    {
+      "id": "f55",
+      "path": "src/functions/f055.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 29518,
+      "bytes": 1502
+    },
+    {
+      "id": "f56",
+      "path": "src/functions/f056.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 29589,
+      "bytes": 2016
+    },
+    {
+      "id": "f57",
+      "path": "src/functions/f057.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 29685,
+      "bytes": 1362
+    },
+    {
+      "id": "f58",
+      "path": "src/functions/f058.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 29740,
+      "bytes": 1498
+    },
+    {
+      "id": "f59",
+      "path": "src/functions/f059.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 29810,
+      "bytes": 1520
+    },
+    {
+      "id": "f60",
+      "path": "src/functions/f060.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 29889,
+      "bytes": 1968
+    },
+    {
+      "id": "f61",
+      "path": "src/functions/f061.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 29994,
+      "bytes": 1964
+    },
+    {
+      "id": "f62",
+      "path": "src/functions/f062.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 30099,
+      "bytes": 3098
+    },
+    {
+      "id": "f63",
+      "path": "src/functions/f063.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 30300,
+      "bytes": 2406
+    },
+    {
+      "id": "f64",
+      "path": "src/functions/f064.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 30476,
+      "bytes": 3662
+    },
+    {
+      "id": "f65",
+      "path": "src/functions/f065.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 30783,
+      "bytes": 17040
+    },
+    {
+      "id": "f66",
+      "path": "src/functions/f066.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 32239,
+      "bytes": 37909
+    },
+    {
+      "id": "f67",
+      "path": "src/functions/f067.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 36593,
+      "bytes": 1494
+    },
+    {
+      "id": "f68",
+      "path": "src/functions/f068.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 36663,
+      "bytes": 1502
+    },
+    {
+      "id": "f69",
+      "path": "src/functions/f069.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 36734,
+      "bytes": 2809
+    },
+    {
+      "id": "f70",
+      "path": "src/functions/f070.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 36945,
+      "bytes": 2016
+    },
+    {
+      "id": "f71",
+      "path": "src/functions/f071.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 37041,
+      "bytes": 1374
+    },
+    {
+      "id": "f72",
+      "path": "src/functions/f072.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 37097,
+      "bytes": 1247
+    },
+    {
+      "id": "f73",
+      "path": "src/functions/f073.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 37144,
+      "bytes": 1565
+    },
+    {
+      "id": "f74",
+      "path": "src/functions/f074.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 37229,
+      "bytes": 3767
+    },
+    {
+      "id": "f75",
+      "path": "src/functions/f075.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 37503,
+      "bytes": 1615
+    },
+    {
+      "id": "f76",
+      "path": "src/functions/f076.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 37595,
+      "bytes": 3152
+    },
+    {
+      "id": "f77",
+      "path": "src/functions/f077.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 37804,
+      "bytes": 1888
+    },
+    {
+      "id": "f78",
+      "path": "src/functions/f078.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 37927,
+      "bytes": 9931
+    },
+    {
+      "id": "f79",
+      "path": "src/functions/f079.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 38881,
+      "bytes": 2790
+    },
+    {
+      "id": "f80",
+      "path": "src/functions/f080.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 39077,
+      "bytes": 4649
+    },
+    {
+      "id": "f81",
+      "path": "src/functions/f081.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 39431,
+      "bytes": 1711
+    },
+    {
+      "id": "f82",
+      "path": "src/functions/f082.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 39527,
+      "bytes": 2196
+    },
+    {
+      "id": "f83",
+      "path": "src/functions/f083.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 39678,
+      "bytes": 8554
+    },
+    {
+      "id": "f84",
+      "path": "src/functions/f084.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 40431,
+      "bytes": 1895
+    },
+    {
+      "id": "f85",
+      "path": "src/functions/f085.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 40546,
+      "bytes": 1241
+    },
+    {
+      "id": "f86",
+      "path": "src/functions/f086.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 40592,
+      "bytes": 4550
+    },
+    {
+      "id": "f87",
+      "path": "src/functions/f087.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 41008,
+      "bytes": 3062
+    },
+    {
+      "id": "f88",
+      "path": "src/functions/f088.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 41279,
+      "bytes": 1553
+    },
+    {
+      "id": "f89",
+      "path": "src/functions/f089.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 41355,
+      "bytes": 2103
+    },
+    {
+      "id": "f90",
+      "path": "src/functions/f090.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 41491,
+      "bytes": 1633
+    },
+    {
+      "id": "f91",
+      "path": "src/functions/f091.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 41582,
+      "bytes": 2051
+    },
+    {
+      "id": "f92",
+      "path": "src/functions/f092.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 41700,
+      "bytes": 1305
+    },
+    {
+      "id": "f93",
+      "path": "src/functions/f093.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 41753,
+      "bytes": 2098
+    },
+    {
+      "id": "f94",
+      "path": "src/functions/f094.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 41898,
+      "bytes": 1820
+    },
+    {
+      "id": "f95",
+      "path": "src/functions/f095.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 42007,
+      "bytes": 1353
+    },
+    {
+      "id": "f96",
+      "path": "src/functions/f096_application.lua",
+      "role": "Основная часть: меню и регистрация функций",
+      "working_file_line": 42069,
+      "bytes": 1182083
+    },
+    {
+      "id": "f97",
+      "path": "src/functions/f097.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 142062,
+      "bytes": 1239
+    },
+    {
+      "id": "f98",
+      "path": "src/functions/f098.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 142108,
+      "bytes": 6865
+    },
+    {
+      "id": "f99",
+      "path": "src/functions/f099.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 142718,
+      "bytes": 6942
+    },
+    {
+      "id": "f100",
+      "path": "src/functions/f100.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 143329,
+      "bytes": 2329
+    },
+    {
+      "id": "f101",
+      "path": "src/functions/f101.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 143483,
+      "bytes": 10569
+    },
+    {
+      "id": "f102",
+      "path": "src/functions/f102.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 144494,
+      "bytes": 9584
+    },
+    {
+      "id": "f103",
+      "path": "src/functions/f103.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 145346,
+      "bytes": 7625
+    },
+    {
+      "id": "f104",
+      "path": "src/functions/f104.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 146036,
+      "bytes": 3992
+    },
+    {
+      "id": "f105",
+      "path": "src/functions/f105.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 146353,
+      "bytes": 3315
+    },
+    {
+      "id": "f106",
+      "path": "src/functions/f106.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 146608,
+      "bytes": 6791
+    },
+    {
+      "id": "f107",
+      "path": "src/functions/f107.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 147182,
+      "bytes": 2417
+    },
+    {
+      "id": "f108",
+      "path": "src/functions/f108_removed_loader_handler.lua",
+      "role": "Удалённый обработчик загрузчика",
+      "working_file_line": 147364,
+      "bytes": 128
+    },
+    {
+      "id": "f109",
+      "path": "src/functions/f109_disabled_crash_trap.lua",
+      "role": "Отключённая аварийная ловушка",
+      "working_file_line": 147368,
+      "bytes": 330
+    },
+    {
+      "id": "f110",
+      "path": "src/functions/f110.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 147377,
+      "bytes": 5178
+    },
+    {
+      "id": "f111",
+      "path": "src/functions/f111.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 147842,
+      "bytes": 12783
+    },
+    {
+      "id": "f112",
+      "path": "src/functions/f112_arithmetic_xor.lua",
+      "role": "Арифметический XOR",
+      "working_file_line": 149019,
+      "bytes": 3380
+    },
+    {
+      "id": "f113",
+      "path": "src/functions/f113.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 149284,
+      "bytes": 3394
+    },
+    {
+      "id": "f114",
+      "path": "src/functions/f114.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 149561,
+      "bytes": 3638
+    },
+    {
+      "id": "f115",
+      "path": "src/functions/f115_removed_loader_handler.lua",
+      "role": "Удалённый обработчик загрузчика",
+      "working_file_line": 149879,
+      "bytes": 128
+    },
+    {
+      "id": "f116",
+      "path": "src/functions/f116_disabled_crash_trap.lua",
+      "role": "Отключённая аварийная ловушка",
+      "working_file_line": 149883,
+      "bytes": 330
+    },
+    {
+      "id": "f117",
+      "path": "src/functions/f117_arithmetic_xor.lua",
+      "role": "Арифметический XOR",
+      "working_file_line": 149892,
+      "bytes": 3452
+    },
+    {
+      "id": "f118",
+      "path": "src/functions/f118.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 150172,
+      "bytes": 3316
+    },
+    {
+      "id": "f119",
+      "path": "src/functions/f119.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 150426,
+      "bytes": 3614
+    },
+    {
+      "id": "f120",
+      "path": "src/functions/f120.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 150737,
+      "bytes": 5199
+    },
+    {
+      "id": "f121",
+      "path": "src/functions/f121.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 151217,
+      "bytes": 12968
+    },
+    {
+      "id": "f122",
+      "path": "src/functions/f122.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 152446,
+      "bytes": 12007
+    },
+    {
+      "id": "f123",
+      "path": "src/functions/f123.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 153609,
+      "bytes": 9107
+    },
+    {
+      "id": "f124",
+      "path": "src/functions/f124.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 154488,
+      "bytes": 3971
+    },
+    {
+      "id": "f125",
+      "path": "src/functions/f125.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 154823,
+      "bytes": 10073
+    },
+    {
+      "id": "f126",
+      "path": "src/functions/f126.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 155976,
+      "bytes": 1517
+    },
+    {
+      "id": "f127",
+      "path": "src/functions/f127.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 156050,
+      "bytes": 2717
+    },
+    {
+      "id": "f128",
+      "path": "src/functions/f128.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 156240,
+      "bytes": 8670
+    },
+    {
+      "id": "f129",
+      "path": "src/functions/f129.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 156938,
+      "bytes": 29866
+    },
+    {
+      "id": "f130",
+      "path": "src/functions/f130.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 159906,
+      "bytes": 3033
+    },
+    {
+      "id": "f131",
+      "path": "src/functions/f131.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 160174,
+      "bytes": 1620
+    },
+    {
+      "id": "f132",
+      "path": "src/functions/f132.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 160263,
+      "bytes": 4200
+    },
+    {
+      "id": "f133",
+      "path": "src/functions/f133.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 160691,
+      "bytes": 7641
+    },
+    {
+      "id": "f134",
+      "path": "src/functions/f134.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 161365,
+      "bytes": 2058
+    },
+    {
+      "id": "f135",
+      "path": "src/functions/f135.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 161495,
+      "bytes": 5606
+    },
+    {
+      "id": "f136",
+      "path": "src/functions/f136.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 161988,
+      "bytes": 2939
+    },
+    {
+      "id": "f137",
+      "path": "src/functions/f137.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 162199,
+      "bytes": 31538
+    },
+    {
+      "id": "f138",
+      "path": "src/functions/f138.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 165171,
+      "bytes": 2818
+    },
+    {
+      "id": "f139",
+      "path": "src/functions/f139.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 165372,
+      "bytes": 7030
+    },
+    {
+      "id": "f140",
+      "path": "src/functions/f140.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 165972,
+      "bytes": 3825
+    },
+    {
+      "id": "f141",
+      "path": "src/functions/f141.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 166247,
+      "bytes": 2413
+    },
+    {
+      "id": "f142",
+      "path": "src/functions/f142.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 166420,
+      "bytes": 4425
+    },
+    {
+      "id": "f143",
+      "path": "src/functions/f143.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 166776,
+      "bytes": 6997
+    },
+    {
+      "id": "f144",
+      "path": "src/functions/f144.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 167401,
+      "bytes": 1786
+    },
+    {
+      "id": "f145",
+      "path": "src/functions/f145.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 167505,
+      "bytes": 6247
+    },
+    {
+      "id": "f146",
+      "path": "src/functions/f146.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 168041,
+      "bytes": 7416
+    },
+    {
+      "id": "f147",
+      "path": "src/functions/f147.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 168677,
+      "bytes": 3593
+    },
+    {
+      "id": "f148",
+      "path": "src/functions/f148.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 168946,
+      "bytes": 14487
+    },
+    {
+      "id": "f149",
+      "path": "src/functions/f149.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 170354,
+      "bytes": 5903
+    },
+    {
+      "id": "f150",
+      "path": "src/functions/f150.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 170935,
+      "bytes": 9672
+    },
+    {
+      "id": "f151",
+      "path": "src/functions/f151.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 171769,
+      "bytes": 3503
+    },
+    {
+      "id": "f152",
+      "path": "src/functions/f152.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 172080,
+      "bytes": 1867
+    },
+    {
+      "id": "f153",
+      "path": "src/functions/f153.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 172189,
+      "bytes": 6870
+    },
+    {
+      "id": "f154",
+      "path": "src/functions/f154.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 172920,
+      "bytes": 3660
+    },
+    {
+      "id": "f155",
+      "path": "src/functions/f155.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 173209,
+      "bytes": 31196
+    },
+    {
+      "id": "f156",
+      "path": "src/functions/f156.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 176362,
+      "bytes": 3641
+    },
+    {
+      "id": "f157",
+      "path": "src/functions/f157.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 176659,
+      "bytes": 2228
+    },
+    {
+      "id": "f158",
+      "path": "src/functions/f158.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 176800,
+      "bytes": 2521
+    },
+    {
+      "id": "f159",
+      "path": "src/functions/f159.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 176967,
+      "bytes": 1928
+    },
+    {
+      "id": "f160",
+      "path": "src/functions/f160.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 177087,
+      "bytes": 5963
+    },
+    {
+      "id": "f161",
+      "path": "src/functions/f161.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 177612,
+      "bytes": 2431
+    },
+    {
+      "id": "f162",
+      "path": "src/functions/f162.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 177789,
+      "bytes": 4153
+    },
+    {
+      "id": "f163",
+      "path": "src/functions/f163.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 178032,
+      "bytes": 2790
+    },
+    {
+      "id": "f164",
+      "path": "src/functions/f164.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 178230,
+      "bytes": 2817
+    },
+    {
+      "id": "f165",
+      "path": "src/functions/f165.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 178431,
+      "bytes": 2923
+    },
+    {
+      "id": "f166",
+      "path": "src/functions/f166.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 178657,
+      "bytes": 5279
+    },
+    {
+      "id": "f167",
+      "path": "src/functions/f167.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 179080,
+      "bytes": 3995
+    },
+    {
+      "id": "f168",
+      "path": "src/functions/f168.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 179374,
+      "bytes": 3359
+    },
+    {
+      "id": "f169",
+      "path": "src/functions/f169.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 179626,
+      "bytes": 1385
+    },
+    {
+      "id": "f170",
+      "path": "src/functions/f170.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 179689,
+      "bytes": 6319
+    },
+    {
+      "id": "f171",
+      "path": "src/functions/f171.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 180214,
+      "bytes": 4616
+    },
+    {
+      "id": "f172",
+      "path": "src/functions/f172.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 180596,
+      "bytes": 7902
+    },
+    {
+      "id": "f173",
+      "path": "src/functions/f173.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 181312,
+      "bytes": 1429
+    },
+    {
+      "id": "f174",
+      "path": "src/functions/f174.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 181381,
+      "bytes": 1832
+    },
+    {
+      "id": "f175",
+      "path": "src/functions/f175.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 181494,
+      "bytes": 1251
+    },
+    {
+      "id": "f176",
+      "path": "src/functions/f176.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 181541,
+      "bytes": 1243
+    },
+    {
+      "id": "f177",
+      "path": "src/functions/f177.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 181587,
+      "bytes": 16515
+    },
+    {
+      "id": "f178",
+      "path": "src/functions/f178.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 183310,
+      "bytes": 2143
+    },
+    {
+      "id": "f179",
+      "path": "src/functions/f179_signed_round.lua",
+      "role": "Округление положительных и отрицательных чисел",
+      "working_file_line": 183440,
+      "bytes": 2165
+    },
+    {
+      "id": "f180",
+      "path": "src/functions/f180.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 183579,
+      "bytes": 2307
+    },
+    {
+      "id": "f181",
+      "path": "src/functions/f181.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 183749,
+      "bytes": 8662
+    },
+    {
+      "id": "f182",
+      "path": "src/functions/f182.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 184504,
+      "bytes": 3169
+    },
+    {
+      "id": "f183",
+      "path": "src/functions/f183.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 184705,
+      "bytes": 9917
+    },
+    {
+      "id": "f184",
+      "path": "src/functions/f184.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 185463,
+      "bytes": 17432
+    },
+    {
+      "id": "f185",
+      "path": "src/functions/f185.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 187080,
+      "bytes": 5274
+    },
+    {
+      "id": "f186",
+      "path": "src/functions/f186.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 187510,
+      "bytes": 1620
+    },
+    {
+      "id": "f187",
+      "path": "src/functions/f187.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 187600,
+      "bytes": 9501
+    },
+    {
+      "id": "f188",
+      "path": "src/functions/f188.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 188515,
+      "bytes": 9009
+    },
+    {
+      "id": "f189",
+      "path": "src/functions/f189.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 189343,
+      "bytes": 6337
+    },
+    {
+      "id": "f190",
+      "path": "src/functions/f190.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 189760,
+      "bytes": 6745
+    },
+    {
+      "id": "f191",
+      "path": "src/functions/f191.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 190357,
+      "bytes": 2288
+    },
+    {
+      "id": "f192",
+      "path": "src/functions/f192.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 190500,
+      "bytes": 2272
+    },
+    {
+      "id": "f193",
+      "path": "src/functions/f193.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 190641,
+      "bytes": 1476
+    },
+    {
+      "id": "f194",
+      "path": "src/functions/f194.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 190713,
+      "bytes": 1484
+    },
+    {
+      "id": "f195",
+      "path": "src/functions/f195.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 190786,
+      "bytes": 3761
+    },
+    {
+      "id": "f196",
+      "path": "src/functions/f196.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 191053,
+      "bytes": 7989
+    },
+    {
+      "id": "f197",
+      "path": "src/functions/f197.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 191752,
+      "bytes": 7344
+    },
+    {
+      "id": "f198",
+      "path": "src/functions/f198.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 192433,
+      "bytes": 1724
+    },
+    {
+      "id": "f199",
+      "path": "src/functions/f199.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 192523,
+      "bytes": 2416
+    },
+    {
+      "id": "f200",
+      "path": "src/functions/f200.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 192699,
+      "bytes": 5987
+    },
+    {
+      "id": "f201",
+      "path": "src/functions/f201.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 193184,
+      "bytes": 53331
+    },
+    {
+      "id": "f202",
+      "path": "src/functions/f202.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 198097,
+      "bytes": 2361
+    },
+    {
+      "id": "f203",
+      "path": "src/functions/f203.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 198244,
+      "bytes": 1579
+    },
+    {
+      "id": "f204",
+      "path": "src/functions/f204.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 198328,
+      "bytes": 1578
+    },
+    {
+      "id": "f205",
+      "path": "src/functions/f205.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 198412,
+      "bytes": 1585
+    },
+    {
+      "id": "f206",
+      "path": "src/functions/f206.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 198496,
+      "bytes": 1580
+    },
+    {
+      "id": "f207",
+      "path": "src/functions/f207.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 198581,
+      "bytes": 1572
+    },
+    {
+      "id": "f208",
+      "path": "src/functions/f208.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 198665,
+      "bytes": 1573
+    },
+    {
+      "id": "f209",
+      "path": "src/functions/f209.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 198749,
+      "bytes": 4351
+    },
+    {
+      "id": "f210",
+      "path": "src/functions/f210.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 199112,
+      "bytes": 3128
+    },
+    {
+      "id": "f211",
+      "path": "src/functions/f211.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 199332,
+      "bytes": 2669
+    },
+    {
+      "id": "f212",
+      "path": "src/functions/f212.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 199521,
+      "bytes": 2517
+    },
+    {
+      "id": "f213",
+      "path": "src/functions/f213.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 199716,
+      "bytes": 1841
+    },
+    {
+      "id": "f214",
+      "path": "src/functions/f214.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 199829,
+      "bytes": 1690
+    },
+    {
+      "id": "f215",
+      "path": "src/functions/f215.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 199920,
+      "bytes": 4314
+    },
+    {
+      "id": "f216",
+      "path": "src/functions/f216.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 200232,
+      "bytes": 2976
+    },
+    {
+      "id": "f217",
+      "path": "src/functions/f217.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 200442,
+      "bytes": 4989
+    },
+    {
+      "id": "f218",
+      "path": "src/functions/f218.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 200817,
+      "bytes": 2111
+    },
+    {
+      "id": "f219",
+      "path": "src/functions/f219.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 200956,
+      "bytes": 2719
+    },
+    {
+      "id": "f220",
+      "path": "src/functions/f220.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 201134,
+      "bytes": 4757
+    },
+    {
+      "id": "f221",
+      "path": "src/functions/f221.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 201547,
+      "bytes": 9147
+    },
+    {
+      "id": "f222",
+      "path": "src/functions/f222.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 202383,
+      "bytes": 1431
+    },
+    {
+      "id": "f223",
+      "path": "src/functions/f223.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 202452,
+      "bytes": 6670
+    },
+    {
+      "id": "f224",
+      "path": "src/functions/f224.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 203072,
+      "bytes": 15404
+    },
+    {
+      "id": "f225",
+      "path": "src/functions/f225.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 204564,
+      "bytes": 4515
+    },
+    {
+      "id": "f226",
+      "path": "src/functions/f226.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 204946,
+      "bytes": 3221
+    },
+    {
+      "id": "f227",
+      "path": "src/functions/f227.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 205216,
+      "bytes": 5524
+    },
+    {
+      "id": "f228",
+      "path": "src/functions/f228.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 205722,
+      "bytes": 7406
+    },
+    {
+      "id": "f229",
+      "path": "src/functions/f229.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 206424,
+      "bytes": 4589
+    },
+    {
+      "id": "f230",
+      "path": "src/functions/f230.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 206825,
+      "bytes": 1539
+    },
+    {
+      "id": "f231",
+      "path": "src/functions/f231.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 206900,
+      "bytes": 14594
+    },
+    {
+      "id": "f232",
+      "path": "src/functions/f232.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 208275,
+      "bytes": 1243
+    },
+    {
+      "id": "f233",
+      "path": "src/functions/f233.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 208321,
+      "bytes": 5429
+    },
+    {
+      "id": "f234",
+      "path": "src/functions/f234.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 208715,
+      "bytes": 2452
+    },
+    {
+      "id": "f235",
+      "path": "src/functions/f235.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 208882,
+      "bytes": 4132
+    },
+    {
+      "id": "f236",
+      "path": "src/functions/f236.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 209224,
+      "bytes": 2842
+    },
+    {
+      "id": "f237",
+      "path": "src/functions/f237.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 209426,
+      "bytes": 3709
+    },
+    {
+      "id": "f238",
+      "path": "src/functions/f238.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 209736,
+      "bytes": 5167
+    },
+    {
+      "id": "f239",
+      "path": "src/functions/f239.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 210173,
+      "bytes": 2311
+    },
+    {
+      "id": "f240",
+      "path": "src/functions/f240.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 210322,
+      "bytes": 5035
+    },
+    {
+      "id": "f241",
+      "path": "src/functions/f241.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 210765,
+      "bytes": 6368
+    },
+    {
+      "id": "f242",
+      "path": "src/functions/f242.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 211320,
+      "bytes": 5831
+    },
+    {
+      "id": "f243",
+      "path": "src/functions/f243.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 211806,
+      "bytes": 4433
+    },
+    {
+      "id": "f244",
+      "path": "src/functions/f244.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 212163,
+      "bytes": 2655
+    },
+    {
+      "id": "f245",
+      "path": "src/functions/f245.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 212348,
+      "bytes": 5545
+    },
+    {
+      "id": "f246",
+      "path": "src/functions/f246.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 212821,
+      "bytes": 1567
+    },
+    {
+      "id": "f247",
+      "path": "src/functions/f247.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 212907,
+      "bytes": 2909
+    },
+    {
+      "id": "f248",
+      "path": "src/functions/f248.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 213113,
+      "bytes": 5670
+    },
+    {
+      "id": "f249",
+      "path": "src/functions/f249.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 213554,
+      "bytes": 8631
+    },
+    {
+      "id": "f250",
+      "path": "src/functions/f250.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 214307,
+      "bytes": 4211
+    },
+    {
+      "id": "f251",
+      "path": "src/functions/f251.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 214629,
+      "bytes": 3090
+    },
+    {
+      "id": "f252",
+      "path": "src/functions/f252.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 214842,
+      "bytes": 6060
+    },
+    {
+      "id": "f253",
+      "path": "src/functions/f253.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 215333,
+      "bytes": 1808
+    },
+    {
+      "id": "f254",
+      "path": "src/functions/f254.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 215445,
+      "bytes": 2602
+    },
+    {
+      "id": "f255",
+      "path": "src/functions/f255_screen_anchor.lua",
+      "role": "Положение элемента относительно краёв экрана",
+      "working_file_line": 215643,
+      "bytes": 7545
+    },
+    {
+      "id": "f256",
+      "path": "src/functions/f256.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 216254,
+      "bytes": 13053
+    },
+    {
+      "id": "f257",
+      "path": "src/functions/f257.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 217490,
+      "bytes": 4220
+    },
+    {
+      "id": "f258",
+      "path": "src/functions/f258.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 217841,
+      "bytes": 7746
+    },
+    {
+      "id": "f259",
+      "path": "src/functions/f259.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 218549,
+      "bytes": 2655
+    },
+    {
+      "id": "f260",
+      "path": "src/functions/f260.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 218737,
+      "bytes": 2391
+    },
+    {
+      "id": "f261",
+      "path": "src/functions/f261.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 218883,
+      "bytes": 2375
+    },
+    {
+      "id": "f262",
+      "path": "src/functions/f262.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 219027,
+      "bytes": 7424
+    },
+    {
+      "id": "f263",
+      "path": "src/functions/f263.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 219690,
+      "bytes": 8578
+    },
+    {
+      "id": "f264",
+      "path": "src/functions/f264.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 220498,
+      "bytes": 15101
+    },
+    {
+      "id": "f265",
+      "path": "src/functions/f265.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 221942,
+      "bytes": 4199
+    },
+    {
+      "id": "f266",
+      "path": "src/functions/f266.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 222299,
+      "bytes": 2354
+    },
+    {
+      "id": "f267",
+      "path": "src/functions/f267.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 222456,
+      "bytes": 7075
+    },
+    {
+      "id": "f268",
+      "path": "src/functions/f268.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 223119,
+      "bytes": 2703
+    },
+    {
+      "id": "f269",
+      "path": "src/functions/f269.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 223312,
+      "bytes": 5840
+    },
+    {
+      "id": "f270",
+      "path": "src/functions/f270.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 223793,
+      "bytes": 1462
+    },
+    {
+      "id": "f271",
+      "path": "src/functions/f271.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 223856,
+      "bytes": 1243
+    },
+    {
+      "id": "f272",
+      "path": "src/functions/f272.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 223902,
+      "bytes": 2220
+    },
+    {
+      "id": "f273",
+      "path": "src/functions/f273.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 224043,
+      "bytes": 1872
+    },
+    {
+      "id": "f274",
+      "path": "src/functions/f274.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 224135,
+      "bytes": 9767
+    },
+    {
+      "id": "f275",
+      "path": "src/functions/f275.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 225060,
+      "bytes": 2036
+    },
+    {
+      "id": "f276",
+      "path": "src/functions/f276.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 225186,
+      "bytes": 39184
+    },
+    {
+      "id": "f277",
+      "path": "src/functions/f277.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 229687,
+      "bytes": 1502
+    },
+    {
+      "id": "f278",
+      "path": "src/functions/f278.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 229757,
+      "bytes": 2807
+    },
+    {
+      "id": "f279",
+      "path": "src/functions/f279.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 229968,
+      "bytes": 1989
+    },
+    {
+      "id": "f280",
+      "path": "src/functions/f280.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 230065,
+      "bytes": 1366
+    },
+    {
+      "id": "f281",
+      "path": "src/functions/f281.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 230120,
+      "bytes": 1502
+    },
+    {
+      "id": "f282",
+      "path": "src/functions/f282.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 230190,
+      "bytes": 3895
+    },
+    {
+      "id": "f283",
+      "path": "src/functions/f283.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 230513,
+      "bytes": 11978
+    },
+    {
+      "id": "f284",
+      "path": "src/functions/f284.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 231707,
+      "bytes": 2154
+    },
+    {
+      "id": "f285",
+      "path": "src/functions/f285.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 231850,
+      "bytes": 1937
+    },
+    {
+      "id": "f286",
+      "path": "src/functions/f286.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 231967,
+      "bytes": 10064
+    },
+    {
+      "id": "f287",
+      "path": "src/functions/f287.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 232835,
+      "bytes": 2708
+    },
+    {
+      "id": "f288",
+      "path": "src/functions/f288.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 233037,
+      "bytes": 3587
+    },
+    {
+      "id": "f289",
+      "path": "src/functions/f289.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 233308,
+      "bytes": 2947
+    },
+    {
+      "id": "f290",
+      "path": "src/functions/f290.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 233542,
+      "bytes": 4209
+    },
+    {
+      "id": "f291",
+      "path": "src/functions/f291.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 233898,
+      "bytes": 4789
+    },
+    {
+      "id": "f292",
+      "path": "src/functions/f292.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 234297,
+      "bytes": 14023
+    },
+    {
+      "id": "f293",
+      "path": "src/functions/f293.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 235615,
+      "bytes": 3197
+    },
+    {
+      "id": "f294",
+      "path": "src/functions/f294.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 235876,
+      "bytes": 4848
+    },
+    {
+      "id": "f295",
+      "path": "src/functions/f295.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 236374,
+      "bytes": 4189
+    },
+    {
+      "id": "f296",
+      "path": "src/functions/f296.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 236742,
+      "bytes": 6939
+    },
+    {
+      "id": "f297",
+      "path": "src/functions/f297.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 237312,
+      "bytes": 17705
+    },
+    {
+      "id": "f298",
+      "path": "src/functions/f298.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 238843,
+      "bytes": 3537
+    },
+    {
+      "id": "f299",
+      "path": "src/functions/f299.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 239107,
+      "bytes": 2686
+    },
+    {
+      "id": "f300",
+      "path": "src/functions/f300.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 239306,
+      "bytes": 4766
+    },
+    {
+      "id": "f301",
+      "path": "src/functions/f301.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 239742,
+      "bytes": 11185
+    },
+    {
+      "id": "f302",
+      "path": "src/functions/f302.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 240789,
+      "bytes": 20154
+    },
+    {
+      "id": "f303",
+      "path": "src/functions/f303.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 242762,
+      "bytes": 6557
+    },
+    {
+      "id": "f304",
+      "path": "src/functions/f304.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 243336,
+      "bytes": 4459
+    },
+    {
+      "id": "f305",
+      "path": "src/functions/f305.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 243673,
+      "bytes": 3063
+    },
+    {
+      "id": "f306",
+      "path": "src/functions/f306.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 243899,
+      "bytes": 1975
+    },
+    {
+      "id": "f307",
+      "path": "src/functions/f307.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 244015,
+      "bytes": 2977
+    },
+    {
+      "id": "f308",
+      "path": "src/functions/f308.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 244227,
+      "bytes": 11650
+    },
+    {
+      "id": "f309",
+      "path": "src/functions/f309.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 245239,
+      "bytes": 6162
+    },
+    {
+      "id": "f310",
+      "path": "src/functions/f310.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 245758,
+      "bytes": 3766
+    },
+    {
+      "id": "f311",
+      "path": "src/functions/f311.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 246063,
+      "bytes": 6555
+    },
+    {
+      "id": "f312",
+      "path": "src/functions/f312.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 246652,
+      "bytes": 3251
+    },
+    {
+      "id": "f313",
+      "path": "src/functions/f313.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 246869,
+      "bytes": 2595
+    },
+    {
+      "id": "f314",
+      "path": "src/functions/f314.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 247045,
+      "bytes": 3402
+    },
+    {
+      "id": "f315",
+      "path": "src/functions/f315.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 247256,
+      "bytes": 1460
+    },
+    {
+      "id": "f316",
+      "path": "src/functions/f316.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 247318,
+      "bytes": 1430
+    },
+    {
+      "id": "f317",
+      "path": "src/functions/f317.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 247387,
+      "bytes": 3482
+    },
+    {
+      "id": "f318",
+      "path": "src/functions/f318.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 247647,
+      "bytes": 6805
+    },
+    {
+      "id": "f319",
+      "path": "src/functions/f319.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 248302,
+      "bytes": 4165
+    },
+    {
+      "id": "f320",
+      "path": "src/functions/f320.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 248678,
+      "bytes": 6269
+    },
+    {
+      "id": "f321",
+      "path": "src/functions/f321.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 249279,
+      "bytes": 3731
+    },
+    {
+      "id": "f322",
+      "path": "src/functions/f322.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 249563,
+      "bytes": 7716
+    },
+    {
+      "id": "f323",
+      "path": "src/functions/f323.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 250335,
+      "bytes": 4001
+    },
+    {
+      "id": "f324",
+      "path": "src/functions/f324.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 250629,
+      "bytes": 6185
+    },
+    {
+      "id": "f325",
+      "path": "src/functions/f325.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 251185,
+      "bytes": 1564
+    },
+    {
+      "id": "f326",
+      "path": "src/functions/f326.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 251272,
+      "bytes": 3682
+    },
+    {
+      "id": "f327",
+      "path": "src/functions/f327.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 251565,
+      "bytes": 2489
+    },
+    {
+      "id": "f328",
+      "path": "src/functions/f328.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 251737,
+      "bytes": 4106
+    },
+    {
+      "id": "f329",
+      "path": "src/functions/f329.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 252040,
+      "bytes": 2265
+    },
+    {
+      "id": "f330",
+      "path": "src/functions/f330.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 252185,
+      "bytes": 4638
+    },
+    {
+      "id": "f331",
+      "path": "src/functions/f331.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 252589,
+      "bytes": 2325
+    },
+    {
+      "id": "f332",
+      "path": "src/functions/f332.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 252738,
+      "bytes": 3271
+    },
+    {
+      "id": "f333",
+      "path": "src/functions/f333.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 253001,
+      "bytes": 4006
+    },
+    {
+      "id": "f334",
+      "path": "src/functions/f334.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 253349,
+      "bytes": 8736
+    },
+    {
+      "id": "f335",
+      "path": "src/functions/f335.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 254116,
+      "bytes": 16467
+    },
+    {
+      "id": "f336",
+      "path": "src/functions/f336.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 255709,
+      "bytes": 11451
+    },
+    {
+      "id": "f337",
+      "path": "src/functions/f337.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 256724,
+      "bytes": 5587
+    },
+    {
+      "id": "f338",
+      "path": "src/functions/f338.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 257195,
+      "bytes": 1507
+    },
+    {
+      "id": "f339",
+      "path": "src/functions/f339.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 257272,
+      "bytes": 1436
+    },
+    {
+      "id": "f340",
+      "path": "src/functions/f340.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 257342,
+      "bytes": 2288
+    },
+    {
+      "id": "f341",
+      "path": "src/functions/f341.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 257501,
+      "bytes": 5517
+    },
+    {
+      "id": "f342",
+      "path": "src/functions/f342.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 257965,
+      "bytes": 2574
+    },
+    {
+      "id": "f343",
+      "path": "src/functions/f343.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 258147,
+      "bytes": 10290
+    },
+    {
+      "id": "f344",
+      "path": "src/functions/f344.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 259076,
+      "bytes": 9519
+    },
+    {
+      "id": "f345",
+      "path": "src/functions/f345.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 259963,
+      "bytes": 35081
+    },
+    {
+      "id": "f346",
+      "path": "src/functions/f346.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 263422,
+      "bytes": 7531
+    },
+    {
+      "id": "f347",
+      "path": "src/functions/f347.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 264152,
+      "bytes": 1454
+    },
+    {
+      "id": "f348",
+      "path": "src/functions/f348.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 264214,
+      "bytes": 2287
+    },
+    {
+      "id": "f349",
+      "path": "src/functions/f349.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 264359,
+      "bytes": 1489
+    },
+    {
+      "id": "f350",
+      "path": "src/functions/f350.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 264431,
+      "bytes": 1713
+    },
+    {
+      "id": "f351",
+      "path": "src/functions/f351.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 264520,
+      "bytes": 2012
+    },
+    {
+      "id": "f352",
+      "path": "src/functions/f352.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 264647,
+      "bytes": 7682
+    },
+    {
+      "id": "f353",
+      "path": "src/functions/f353.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 265357,
+      "bytes": 7435
+    },
+    {
+      "id": "f354",
+      "path": "src/functions/f354.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 266043,
+      "bytes": 23733
+    },
+    {
+      "id": "f355",
+      "path": "src/functions/f355.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 268053,
+      "bytes": 2087
+    },
+    {
+      "id": "f356",
+      "path": "src/functions/f356.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 268190,
+      "bytes": 2956
+    },
+    {
+      "id": "f357",
+      "path": "src/functions/f357.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 268384,
+      "bytes": 4347
+    },
+    {
+      "id": "f358",
+      "path": "src/functions/f358.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 268736,
+      "bytes": 5890
+    },
+    {
+      "id": "f359",
+      "path": "src/functions/f359.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 269286,
+      "bytes": 4428
+    },
+    {
+      "id": "f360",
+      "path": "src/functions/f360.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 269601,
+      "bytes": 11263
+    },
+    {
+      "id": "f361",
+      "path": "src/functions/f361.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 270659,
+      "bytes": 10075
+    },
+    {
+      "id": "f362",
+      "path": "src/functions/f362.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 271514,
+      "bytes": 1949
+    },
+    {
+      "id": "f363",
+      "path": "src/functions/f363.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 271629,
+      "bytes": 8640
+    },
+    {
+      "id": "f364",
+      "path": "src/functions/f364.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 272435,
+      "bytes": 16392
+    },
+    {
+      "id": "f365",
+      "path": "src/functions/f365.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 274064,
+      "bytes": 15421
+    },
+    {
+      "id": "f366",
+      "path": "src/functions/f366.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 275362,
+      "bytes": 3849
+    },
+    {
+      "id": "f367",
+      "path": "src/functions/f367.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 275681,
+      "bytes": 6127
+    },
+    {
+      "id": "f368",
+      "path": "src/functions/f368.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 276186,
+      "bytes": 4148
+    },
+    {
+      "id": "f369",
+      "path": "src/functions/f369.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 276529,
+      "bytes": 2118
+    },
+    {
+      "id": "f370",
+      "path": "src/functions/f370.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 276668,
+      "bytes": 6817
+    },
+    {
+      "id": "f371",
+      "path": "src/functions/f371.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 277297,
+      "bytes": 1949
+    },
+    {
+      "id": "f372",
+      "path": "src/functions/f372.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 277412,
+      "bytes": 1966
+    },
+    {
+      "id": "f373",
+      "path": "src/functions/f373.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 277518,
+      "bytes": 2180
+    },
+    {
+      "id": "f374",
+      "path": "src/functions/f374.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 277663,
+      "bytes": 3198
+    },
+    {
+      "id": "f375",
+      "path": "src/functions/f375.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 277884,
+      "bytes": 1438
+    },
+    {
+      "id": "f376",
+      "path": "src/functions/f376.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 277953,
+      "bytes": 2243
+    },
+    {
+      "id": "f377",
+      "path": "src/functions/f377.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 278106,
+      "bytes": 2216
+    },
+    {
+      "id": "f378",
+      "path": "src/functions/f378.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 278259,
+      "bytes": 5968
+    },
+    {
+      "id": "f379",
+      "path": "src/functions/f379.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 278795,
+      "bytes": 8073
+    },
+    {
+      "id": "f380",
+      "path": "src/functions/f380.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 279592,
+      "bytes": 1744
+    },
+    {
+      "id": "f381",
+      "path": "src/functions/f381.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 279694,
+      "bytes": 1879
+    },
+    {
+      "id": "f382",
+      "path": "src/functions/f382.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 279810,
+      "bytes": 2165
+    },
+    {
+      "id": "f383",
+      "path": "src/functions/f383.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 279962,
+      "bytes": 3244
+    },
+    {
+      "id": "f384",
+      "path": "src/functions/f384.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 280223,
+      "bytes": 1891
+    },
+    {
+      "id": "f385",
+      "path": "src/functions/f385.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 280332,
+      "bytes": 4140
+    },
+    {
+      "id": "f386",
+      "path": "src/functions/f386.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 280680,
+      "bytes": 4270
+    },
+    {
+      "id": "f387",
+      "path": "src/functions/f387.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 281042,
+      "bytes": 6434
+    },
+    {
+      "id": "f388",
+      "path": "src/functions/f388.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 281610,
+      "bytes": 1431
+    },
+    {
+      "id": "f389",
+      "path": "src/functions/f389.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 281679,
+      "bytes": 3832
+    },
+    {
+      "id": "f390",
+      "path": "src/functions/f390.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 282058,
+      "bytes": 8561
+    },
+    {
+      "id": "f391",
+      "path": "src/functions/f391.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 282928,
+      "bytes": 4144
+    },
+    {
+      "id": "f392",
+      "path": "src/functions/f392.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 283297,
+      "bytes": 6724
+    },
+    {
+      "id": "f393",
+      "path": "src/functions/f393.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 283909,
+      "bytes": 5019
+    },
+    {
+      "id": "f394",
+      "path": "src/functions/f394.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 284365,
+      "bytes": 11096
+    },
+    {
+      "id": "f395",
+      "path": "src/functions/f395.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 285475,
+      "bytes": 3211
+    },
+    {
+      "id": "f396",
+      "path": "src/functions/f396.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 285715,
+      "bytes": 5013
+    },
+    {
+      "id": "f397",
+      "path": "src/functions/f397.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 286166,
+      "bytes": 15651
+    },
+    {
+      "id": "f398",
+      "path": "src/functions/f398.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 287684,
+      "bytes": 2611
+    },
+    {
+      "id": "f399",
+      "path": "src/functions/f399.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 287861,
+      "bytes": 4437
+    },
+    {
+      "id": "f400",
+      "path": "src/functions/f400.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 288282,
+      "bytes": 2890
+    },
+    {
+      "id": "f401",
+      "path": "src/functions/f401.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 288489,
+      "bytes": 3123
+    },
+    {
+      "id": "f402",
+      "path": "src/functions/f402.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 288710,
+      "bytes": 20980
+    },
+    {
+      "id": "f403",
+      "path": "src/functions/f403_repeating_key_xor.lua",
+      "role": "XOR строки повторяющимся ключом",
+      "working_file_line": 290593,
+      "bytes": 381
+    },
+    {
+      "id": "f404",
+      "path": "src/functions/f404.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 290604,
+      "bytes": 2725
+    },
+    {
+      "id": "f405",
+      "path": "src/functions/f405.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 290792,
+      "bytes": 3731
+    },
+    {
+      "id": "f406",
+      "path": "src/functions/f406.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 291084,
+      "bytes": 4325
+    },
+    {
+      "id": "f407",
+      "path": "src/functions/f407.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 291425,
+      "bytes": 13160
+    },
+    {
+      "id": "f408",
+      "path": "src/functions/f408.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 292720,
+      "bytes": 38541
+    },
+    {
+      "id": "f409",
+      "path": "src/functions/f409.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 296234,
+      "bytes": 2599
+    },
+    {
+      "id": "f410",
+      "path": "src/functions/f410.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 296418,
+      "bytes": 2839
+    },
+    {
+      "id": "f411",
+      "path": "src/functions/f411.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 296624,
+      "bytes": 10059
+    },
+    {
+      "id": "f412",
+      "path": "src/functions/f412.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 297590,
+      "bytes": 9602
+    },
+    {
+      "id": "f413",
+      "path": "src/functions/f413.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 298485,
+      "bytes": 3048
+    },
+    {
+      "id": "f414",
+      "path": "src/functions/f414.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 298707,
+      "bytes": 2150
+    },
+    {
+      "id": "f415",
+      "path": "src/functions/f415.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 298857,
+      "bytes": 6276
+    },
+    {
+      "id": "f416",
+      "path": "src/functions/f416_removed_loader_handler.lua",
+      "role": "Удалённый обработчик загрузчика",
+      "working_file_line": 299368,
+      "bytes": 128
+    },
+    {
+      "id": "f417",
+      "path": "src/functions/f417.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 299373,
+      "bytes": 1595
+    },
+    {
+      "id": "f418",
+      "path": "src/functions/f418_disabled_crash_trap.lua",
+      "role": "Отключённая аварийная ловушка",
+      "working_file_line": 299457,
+      "bytes": 330
+    },
+    {
+      "id": "f419",
+      "path": "src/functions/f419_arithmetic_xor.lua",
+      "role": "Арифметический XOR",
+      "working_file_line": 299466,
+      "bytes": 3375
+    },
+    {
+      "id": "f420",
+      "path": "src/functions/f420.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 299731,
+      "bytes": 3547
+    },
+    {
+      "id": "f421",
+      "path": "src/functions/f421.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 300039,
+      "bytes": 3650
+    },
+    {
+      "id": "f422",
+      "path": "src/functions/f422.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 300358,
+      "bytes": 5088
+    },
+    {
+      "id": "f423",
+      "path": "src/functions/f423.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 300809,
+      "bytes": 12980
+    },
+    {
+      "id": "f424",
+      "path": "src/functions/f424.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 302026,
+      "bytes": 1520
+    },
+    {
+      "id": "f425",
+      "path": "src/functions/f425.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 302098,
+      "bytes": 2423
+    },
+    {
+      "id": "f426",
+      "path": "src/functions/f426.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 302258,
+      "bytes": 2077
+    },
+    {
+      "id": "f427",
+      "path": "src/functions/f427.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 302411,
+      "bytes": 1719
+    },
+    {
+      "id": "f428",
+      "path": "src/functions/f428.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 302501,
+      "bytes": 3189
+    },
+    {
+      "id": "f429",
+      "path": "src/functions/f429.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 302700,
+      "bytes": 2167
+    },
+    {
+      "id": "f430",
+      "path": "src/functions/f430.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 302832,
+      "bytes": 4247
+    },
+    {
+      "id": "f431",
+      "path": "src/functions/f431.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 303194,
+      "bytes": 6954
+    },
+    {
+      "id": "f432",
+      "path": "src/functions/f432.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 303815,
+      "bytes": 2952
+    },
+    {
+      "id": "f433",
+      "path": "src/functions/f433.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 304014,
+      "bytes": 1600
+    },
+    {
+      "id": "f434",
+      "path": "src/functions/f434.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 304097,
+      "bytes": 2981
+    },
+    {
+      "id": "f435",
+      "path": "src/functions/f435.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 304320,
+      "bytes": 3062
+    },
+    {
+      "id": "f436",
+      "path": "src/functions/f436.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 304550,
+      "bytes": 2646
+    },
+    {
+      "id": "f437",
+      "path": "src/functions/f437.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 304730,
+      "bytes": 2586
+    },
+    {
+      "id": "f438",
+      "path": "src/functions/f438.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 304903,
+      "bytes": 4091
+    },
+    {
+      "id": "f439",
+      "path": "src/functions/f439.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 305246,
+      "bytes": 4903
+    },
+    {
+      "id": "f440",
+      "path": "src/functions/f440.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 305663,
+      "bytes": 2501
+    },
+    {
+      "id": "f441",
+      "path": "src/functions/f441.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 305828,
+      "bytes": 3424
+    },
+    {
+      "id": "f442",
+      "path": "src/functions/f442.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 306089,
+      "bytes": 5577
+    },
+    {
+      "id": "f443",
+      "path": "src/functions/f443.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 306587,
+      "bytes": 5584
+    },
+    {
+      "id": "f444",
+      "path": "src/functions/f444.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 307086,
+      "bytes": 17825
+    },
+    {
+      "id": "f445",
+      "path": "src/functions/f445.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 308882,
+      "bytes": 1996
+    },
+    {
+      "id": "f446",
+      "path": "src/functions/f446.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 309006,
+      "bytes": 2232
+    },
+    {
+      "id": "f447",
+      "path": "src/functions/f447.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 309141,
+      "bytes": 2853
+    },
+    {
+      "id": "f448",
+      "path": "src/functions/f448.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 309323,
+      "bytes": 1684
+    },
+    {
+      "id": "f449",
+      "path": "src/functions/f449.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 309410,
+      "bytes": 2628
+    },
+    {
+      "id": "f450",
+      "path": "src/functions/f450.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 309607,
+      "bytes": 2903
+    },
+    {
+      "id": "f451",
+      "path": "src/functions/f451.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 309833,
+      "bytes": 4730
+    },
+    {
+      "id": "f452",
+      "path": "src/functions/f452.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 310251,
+      "bytes": 1752
+    },
+    {
+      "id": "f453",
+      "path": "src/functions/f453.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 310349,
+      "bytes": 5174
+    },
+    {
+      "id": "f454",
+      "path": "src/functions/f454.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 310800,
+      "bytes": 7399
+    },
+    {
+      "id": "f455",
+      "path": "src/functions/f455.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 311500,
+      "bytes": 3149
+    },
+    {
+      "id": "f456",
+      "path": "src/functions/f456.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 311716,
+      "bytes": 3924
+    },
+    {
+      "id": "f457",
+      "path": "src/functions/f457.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 312041,
+      "bytes": 2607
+    },
+    {
+      "id": "f458",
+      "path": "src/functions/f458.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 312218,
+      "bytes": 2677
+    },
+    {
+      "id": "f459",
+      "path": "src/functions/f459.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 312408,
+      "bytes": 1949
+    },
+    {
+      "id": "f460",
+      "path": "src/functions/f460.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 312523,
+      "bytes": 1942
+    },
+    {
+      "id": "f461",
+      "path": "src/functions/f461.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 312635,
+      "bytes": 2307
+    },
+    {
+      "id": "f462",
+      "path": "src/functions/f462.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 312785,
+      "bytes": 2275
+    },
+    {
+      "id": "f463",
+      "path": "src/functions/f463.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 312943,
+      "bytes": 2589
+    },
+    {
+      "id": "f464",
+      "path": "src/functions/f464.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 313110,
+      "bytes": 1878
+    },
+    {
+      "id": "f465",
+      "path": "src/functions/f465.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 313224,
+      "bytes": 1895
+    },
+    {
+      "id": "f466",
+      "path": "src/functions/f466.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 313330,
+      "bytes": 3365
+    },
+    {
+      "id": "f467",
+      "path": "src/functions/f467.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 313575,
+      "bytes": 4159
+    },
+    {
+      "id": "f468",
+      "path": "src/functions/f468.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 313930,
+      "bytes": 3691
+    },
+    {
+      "id": "f469",
+      "path": "src/functions/f469.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 314228,
+      "bytes": 1885
+    },
+    {
+      "id": "f470",
+      "path": "src/functions/f470.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 314337,
+      "bytes": 7619
+    },
+    {
+      "id": "f471",
+      "path": "src/functions/f471.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 315061,
+      "bytes": 10663
+    },
+    {
+      "id": "f472",
+      "path": "src/functions/f472.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 316078,
+      "bytes": 2327
+    },
+    {
+      "id": "f473",
+      "path": "src/functions/f473.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 316234,
+      "bytes": 1868
+    },
+    {
+      "id": "f474",
+      "path": "src/functions/f474.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 316341,
+      "bytes": 2214
+    },
+    {
+      "id": "f475",
+      "path": "src/functions/f475.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 316493,
+      "bytes": 1951
+    },
+    {
+      "id": "f476",
+      "path": "src/functions/f476.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 316614,
+      "bytes": 1856
+    },
+    {
+      "id": "f477",
+      "path": "src/functions/f477.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 316722,
+      "bytes": 2354
+    },
+    {
+      "id": "f478",
+      "path": "src/functions/f478.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 316874,
+      "bytes": 2855
+    },
+    {
+      "id": "f479",
+      "path": "src/functions/f479.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 317079,
+      "bytes": 3611
+    },
+    {
+      "id": "f480",
+      "path": "src/functions/f480.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 317336,
+      "bytes": 1472
+    },
+    {
+      "id": "f481",
+      "path": "src/functions/f481.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 317406,
+      "bytes": 3657
+    },
+    {
+      "id": "f482",
+      "path": "src/functions/f482.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 317678,
+      "bytes": 2451
+    },
+    {
+      "id": "f483",
+      "path": "src/functions/f483.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 317848,
+      "bytes": 5791
+    },
+    {
+      "id": "f484",
+      "path": "src/functions/f484.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 318370,
+      "bytes": 17297
+    },
+    {
+      "id": "f485",
+      "path": "src/functions/f485.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 320081,
+      "bytes": 15821
+    },
+    {
+      "id": "f486",
+      "path": "src/functions/f486.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 321545,
+      "bytes": 7037
+    },
+    {
+      "id": "f487",
+      "path": "src/functions/f487.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 322187,
+      "bytes": 1952
+    },
+    {
+      "id": "f488",
+      "path": "src/functions/f488.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 322305,
+      "bytes": 1945
+    },
+    {
+      "id": "f489",
+      "path": "src/functions/f489.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 322421,
+      "bytes": 1981
+    },
+    {
+      "id": "f490",
+      "path": "src/functions/f490.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 322541,
+      "bytes": 1965
+    },
+    {
+      "id": "f491",
+      "path": "src/functions/f491.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 322659,
+      "bytes": 1992
+    },
+    {
+      "id": "f492",
+      "path": "src/functions/f492.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 322794,
+      "bytes": 2516
+    },
+    {
+      "id": "f493",
+      "path": "src/functions/f493.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 322973,
+      "bytes": 15548
+    },
+    {
+      "id": "f494",
+      "path": "src/functions/f494.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 324394,
+      "bytes": 1550
+    },
+    {
+      "id": "f495",
+      "path": "src/functions/f495.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 324471,
+      "bytes": 9771
+    },
+    {
+      "id": "f496",
+      "path": "src/functions/f496.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 325308,
+      "bytes": 6243
+    },
+    {
+      "id": "f497",
+      "path": "src/functions/f497.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 325880,
+      "bytes": 4661
+    },
+    {
+      "id": "f498",
+      "path": "src/functions/f498.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 326281,
+      "bytes": 2515
+    },
+    {
+      "id": "f499",
+      "path": "src/functions/f499.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 326448,
+      "bytes": 3436
+    },
+    {
+      "id": "f500",
+      "path": "src/functions/f500.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 326704,
+      "bytes": 3487
+    },
+    {
+      "id": "f501",
+      "path": "src/functions/f501.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 326983,
+      "bytes": 7191
+    },
+    {
+      "id": "f502",
+      "path": "src/functions/f502.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 327626,
+      "bytes": 2481
+    },
+    {
+      "id": "f503",
+      "path": "src/functions/f503.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 327803,
+      "bytes": 3492
+    },
+    {
+      "id": "f504",
+      "path": "src/functions/f504.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 328095,
+      "bytes": 3789
+    },
+    {
+      "id": "f505",
+      "path": "src/functions/f505.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 328406,
+      "bytes": 2403
+    },
+    {
+      "id": "f506",
+      "path": "src/functions/f506.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 328571,
+      "bytes": 2978
+    },
+    {
+      "id": "f507",
+      "path": "src/functions/f507.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 328780,
+      "bytes": 3022
+    },
+    {
+      "id": "f508",
+      "path": "src/functions/f508.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 328996,
+      "bytes": 3562
+    },
+    {
+      "id": "f509",
+      "path": "src/functions/f509.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 329300,
+      "bytes": 2464
+    },
+    {
+      "id": "f510",
+      "path": "src/functions/f510.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 329461,
+      "bytes": 3259
+    },
+    {
+      "id": "f511",
+      "path": "src/functions/f511.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 329725,
+      "bytes": 1883
+    },
+    {
+      "id": "f512",
+      "path": "src/functions/f512.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 329830,
+      "bytes": 3067
+    },
+    {
+      "id": "f513",
+      "path": "src/functions/f513.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 330047,
+      "bytes": 16209
+    },
+    {
+      "id": "f514",
+      "path": "src/functions/f514.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 331799,
+      "bytes": 2159
+    },
+    {
+      "id": "f515",
+      "path": "src/functions/f515.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 331930,
+      "bytes": 1899
+    },
+    {
+      "id": "f516",
+      "path": "src/functions/f516.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 332040,
+      "bytes": 2887
+    },
+    {
+      "id": "f517",
+      "path": "src/functions/f517.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 332245,
+      "bytes": 9776
+    },
+    {
+      "id": "f518",
+      "path": "src/functions/f518.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 332972,
+      "bytes": 3926
+    },
+    {
+      "id": "f519",
+      "path": "src/functions/f519.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 333304,
+      "bytes": 7929
+    },
+    {
+      "id": "f520",
+      "path": "src/functions/f520.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 334076,
+      "bytes": 3260
+    },
+    {
+      "id": "f521",
+      "path": "src/functions/f521.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 334338,
+      "bytes": 3682
+    },
+    {
+      "id": "f522",
+      "path": "src/functions/f522.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 334634,
+      "bytes": 3397
+    },
+    {
+      "id": "f523",
+      "path": "src/functions/f523.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 334900,
+      "bytes": 5602
+    },
+    {
+      "id": "f524",
+      "path": "src/functions/f524.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 335394,
+      "bytes": 2087
+    },
+    {
+      "id": "f525",
+      "path": "src/functions/f525.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 335530,
+      "bytes": 4224
+    },
+    {
+      "id": "f526",
+      "path": "src/functions/f526.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 335852,
+      "bytes": 2450
+    },
+    {
+      "id": "f527",
+      "path": "src/functions/f527.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 336006,
+      "bytes": 1750
+    },
+    {
+      "id": "f528",
+      "path": "src/functions/f528.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 336112,
+      "bytes": 1907
+    },
+    {
+      "id": "f529",
+      "path": "src/functions/f529.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 336221,
+      "bytes": 1473
+    },
+    {
+      "id": "f530",
+      "path": "src/functions/f530.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 336288,
+      "bytes": 2142
+    },
+    {
+      "id": "f531",
+      "path": "src/functions/f531.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 336420,
+      "bytes": 5822
+    },
+    {
+      "id": "f532",
+      "path": "src/functions/f532.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 336896,
+      "bytes": 5682
+    },
+    {
+      "id": "f533",
+      "path": "src/functions/f533.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 337328,
+      "bytes": 3728
+    },
+    {
+      "id": "f534",
+      "path": "src/functions/f534.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 337646,
+      "bytes": 7080
+    },
+    {
+      "id": "f535",
+      "path": "src/functions/f535.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 338231,
+      "bytes": 1742
+    },
+    {
+      "id": "f536",
+      "path": "src/functions/f536.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 338339,
+      "bytes": 4514
+    },
+    {
+      "id": "f537",
+      "path": "src/functions/f537.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 338713,
+      "bytes": 6186
+    },
+    {
+      "id": "f538",
+      "path": "src/functions/f538.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 339263,
+      "bytes": 12203
+    },
+    {
+      "id": "f539",
+      "path": "src/functions/f539.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 340464,
+      "bytes": 3307
+    },
+    {
+      "id": "f540",
+      "path": "src/functions/f540.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 340707,
+      "bytes": 9185
+    },
+    {
+      "id": "f541",
+      "path": "src/functions/f541.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 341537,
+      "bytes": 7413
+    },
+    {
+      "id": "f542",
+      "path": "src/functions/f542.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 342253,
+      "bytes": 6933
+    },
+    {
+      "id": "f543",
+      "path": "src/functions/f543.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 342837,
+      "bytes": 1251
+    },
+    {
+      "id": "f544",
+      "path": "src/functions/f544.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 342884,
+      "bytes": 6819
+    },
+    {
+      "id": "f545",
+      "path": "src/functions/f545.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 343478,
+      "bytes": 3440
+    },
+    {
+      "id": "f546",
+      "path": "src/functions/f546.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 343689,
+      "bytes": 1942
+    },
+    {
+      "id": "f547",
+      "path": "src/functions/f547.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 343795,
+      "bytes": 1245
+    },
+    {
+      "id": "f548",
+      "path": "src/functions/f548.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 343841,
+      "bytes": 4419
+    },
+    {
+      "id": "f549",
+      "path": "src/functions/f549.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 344200,
+      "bytes": 7733
+    },
+    {
+      "id": "f550",
+      "path": "src/functions/f550.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 344887,
+      "bytes": 1369
+    },
+    {
+      "id": "f551",
+      "path": "src/functions/f551.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 344943,
+      "bytes": 1366
+    },
+    {
+      "id": "f552",
+      "path": "src/functions/f552.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 344999,
+      "bytes": 7591
+    },
+    {
+      "id": "f553",
+      "path": "src/functions/f553.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 345657,
+      "bytes": 1378
+    },
+    {
+      "id": "f554",
+      "path": "src/functions/f554.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 345714,
+      "bytes": 1374
+    },
+    {
+      "id": "f555",
+      "path": "src/functions/f555.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 345771,
+      "bytes": 2055
+    },
+    {
+      "id": "f556",
+      "path": "src/functions/f556.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 345889,
+      "bytes": 1970
+    },
+    {
+      "id": "f557",
+      "path": "src/functions/f557.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 345994,
+      "bytes": 1978
+    },
+    {
+      "id": "f558",
+      "path": "src/functions/f558.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 346100,
+      "bytes": 1962
+    },
+    {
+      "id": "f559",
+      "path": "src/functions/f559.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 346204,
+      "bytes": 1970
+    },
+    {
+      "id": "f560",
+      "path": "src/functions/f560.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 346308,
+      "bytes": 1961
+    },
+    {
+      "id": "f561",
+      "path": "src/functions/f561.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 346412,
+      "bytes": 1965
+    },
+    {
+      "id": "f562",
+      "path": "src/functions/f562.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 346516,
+      "bytes": 1979
+    },
+    {
+      "id": "f563",
+      "path": "src/functions/f563.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 346621,
+      "bytes": 1969
+    },
+    {
+      "id": "f564",
+      "path": "src/functions/f564.lua",
+      "role": "Восстановленная функция",
+      "working_file_line": 346725,
+      "bytes": 1974
+    }
+  ]
+}

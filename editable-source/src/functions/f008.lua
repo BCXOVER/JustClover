@@ -1,0 +1,4663 @@
+
+-- Function f8; 546 recovered instruction blocks.
+F.f8=function(function_metadata,upvalues)
+local operand_i,operand_w,operand_g,operand_I,code_metadata,operand_t,operand_k=function_metadata[2],function_metadata[10],function_metadata[6],function_metadata[1],function_metadata[8],function_metadata[3],function_metadata[11]
+local frame_size=function_metadata[7]
+return function(...)
+if startup_blocked then return end
+local registers,top,environment,W,n,m,x,N,H,v,R,Q,q=new_frame(frame_size),1,andromeda_environment,1
+local T,U,_,S,z,a=0
+local instructions_left=startup_instruction_limit
+local branch_taken
+local function tick(pc)
+ current_function,current_pc="f8",pc
+ if startup_active then
+  instructions_left=instructions_left-1
+  if instructions_left<=0 then error("ANDROMEDA_STARTUP_LIMIT: f8 pc="..pc,0) end
+  startup_poll_remaining=startup_poll_remaining-1
+if startup_poll_remaining<=0 then
+startup_poll_remaining=startup_poll_interval
+check_startup_clock()
+end
+ end
+end
+ tick(1)
+goto p2
+::p2::
+do
+do
+_, Q = pack_returns(...)
+end
+
+end
+::p3::
+do
+do
+registers[1] = Q[W]
+end
+
+end
+::p4::
+do
+do
+(registers)[2] = environment["string"]
+end
+
+end
+::p5::
+do
+do
+registers[2] = (registers[2]["byte"])
+end
+
+end
+goto p407
+::p15::
+tick(15)
+do
+do
+registers[21][0] = 12
+end
+
+end
+::p16::
+do
+do
+registers[22] = (13)
+end
+
+end
+::p17::
+do
+do
+registers[23] = (14)
+end
+
+end
+::p18::
+do
+do
+registers[24] = (15)
+end
+
+end
+goto p483
+::p20::
+tick(20)
+do
+do
+registers[26] = (13)
+end
+
+end
+::p21::
+do
+do
+registers[27] = (10)
+end
+
+end
+::p22::
+do
+do
+registers[28] = (11)
+end
+
+end
+goto p75
+::p24::
+tick(24)
+do
+do
+registers[20] = (255)
+end
+
+end
+::p25::
+do
+do
+registers[21] = (1)
+end
+
+end
+::p26::
+branch_taken=false
+do
+do
+R = {
+    [1] = R,
+    [3] = v,
+    [5] = U,
+    [2] = n,
+}
+a = 19
+U = registers[a + 2] + 0
+n = (registers[a + 1] + 0)
+v = (registers[a] - U)
+branch_taken=true
+end
+
+end
+if branch_taken then goto p756 end
+::p27::
+tick(27)
+do
+do
+registers[18] = (1)
+end
+
+end
+::p28::
+do
+do
+registers[19] = (0)
+end
+
+end
+::p29::
+do
+do
+registers[20] = (3)
+end
+
+end
+::p30::
+do
+do
+registers[21] = (2)
+end
+
+end
+::p31::
+do
+do
+registers[22] = (13)
+end
+
+end
+goto p703
+::p33::
+tick(33)
+do
+do
+(registers[16])[registers[13]] = registers[22]
+end
+
+end
+::p34::
+do
+do
+(registers[17])[registers[13]] = registers[13]
+end
+
+end
+::p35::
+do
+do
+(registers)[22] = registers[14] * registers[13]
+end
+
+end
+::p36::
+do
+do
+(registers)[22] = registers[22] + registers[15]
+end
+
+end
+::p37::
+do
+do
+registers[13] = registers[22] % 256
+end
+
+end
+goto p561
+::p39::
+tick(39)
+do
+do
+registers[21] = (10)
+end
+
+end
+::p40::
+do
+do
+registers[22] = (13)
+end
+
+end
+::p41::
+do
+do
+registers[23] = (12)
+end
+
+end
+goto p51
+::p43::
+tick(43)
+do
+do
+registers[17] = (registers[17] / registers[14])
+end
+
+end
+::p44::
+do
+do
+(registers)[18] = (registers[14] ^ registers[14])
+end
+
+end
+::p45::
+do
+do
+registers[17] = registers[17] % registers[18]
+end
+
+end
+goto p128
+::p47::
+tick(47)
+do
+do
+a = (13)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+::p48::
+do
+do
+registers[14] = new_frame(15)
+end
+
+end
+::p49::
+do
+do
+registers[14][0] = 5
+end
+
+end
+goto p71
+::p51::
+do
+do
+registers[24] = (15)
+end
+
+end
+::p52::
+do
+do
+registers[25] = (14)
+end
+
+end
+::p53::
+do
+do
+a = (10)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+goto p190
+::p55::
+tick(55)
+do
+do
+registers[24] = (15)
+end
+
+end
+::p56::
+do
+do
+registers[25] = (12)
+end
+
+end
+::p57::
+do
+do
+registers[26] = (13)
+end
+
+end
+::p58::
+do
+do
+registers[27] = (10)
+end
+
+end
+goto p465
+::p62::
+tick(62)
+do
+do
+registers[18] = (8)
+end
+
+end
+::p63::
+do
+do
+registers[19] = (9)
+end
+
+end
+::p64::
+do
+do
+registers[20] = (10)
+end
+
+end
+::p65::
+do
+do
+registers[21] = (11)
+end
+
+end
+goto p258
+::p67::
+tick(67)
+do
+do
+(registers)[15] = registers[16]
+end
+
+end
+::p68::
+do
+do
+registers[16] = (registers[14] <= registers[14])
+end
+
+end
+::p69::
+branch_taken=false
+do
+do
+if not registers[16] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p420 end
+goto p312
+::p71::
+do
+do
+registers[15] = (4)
+end
+
+end
+::p72::
+do
+do
+registers[16] = (7)
+end
+
+end
+::p73::
+do
+do
+registers[17] = (6)
+end
+
+end
+goto p27
+::p75::
+do
+do
+registers[29] = (8)
+end
+
+end
+::p76::
+do
+do
+registers[30] = (9)
+end
+
+end
+::p77::
+do
+do
+a = (15)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+::p78::
+do
+do
+registers[16] = new_frame(15)
+end
+
+end
+::p79::
+do
+do
+registers[16][0] = 7
+end
+
+end
+goto p811
+::p81::
+tick(81)
+do
+do
+(registers)[2] = environment["math"]
+end
+
+end
+::p82::
+do
+do
+registers[2] = (registers[2]["floor"])
+end
+
+end
+::p83::
+do
+do
+(registers)[3] = environment["math"]
+end
+
+end
+::p84::
+do
+do
+registers[3] = (registers[3]["pi"])
+end
+
+end
+::p85::
+do
+do
+a = (2);
+(registers)[a] = registers[a](registers[a + 1])
+top = (a)
+end
+
+end
+goto p293
+::p87::
+tick(87)
+do
+do
+registers[22] = (5)
+end
+
+end
+::p88::
+do
+do
+registers[23] = (#registers[1])
+end
+
+end
+::p89::
+do
+do
+registers[24] = (1)
+end
+
+end
+::p90::
+branch_taken=false
+do
+do
+R = {
+    [1] = R,
+    [3] = v,
+    [5] = U,
+    [2] = n,
+}
+a = 22
+U = registers[a + 2] + 0
+n = (registers[a + 1] + 0)
+v = (registers[a] - U)
+branch_taken=true
+end
+
+end
+if branch_taken then goto p519 end
+::p91::
+tick(91)
+do
+do
+registers[31] = (6)
+end
+
+end
+::p92::
+do
+do
+registers[32] = (7)
+end
+
+end
+::p93::
+do
+do
+registers[33] = (4)
+end
+
+end
+goto p439
+::p95::
+tick(95)
+branch_taken=false
+do
+do
+if not registers[16] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p340 end
+goto p364
+::p97::
+tick(97)
+do
+do
+(registers)[17] = registers[12]
+end
+
+end
+::p98::
+do
+do
+(registers)[18] = nil
+end
+
+end
+::p99::
+branch_taken=false
+do
+do
+R = ({
+    [1] = R,
+    [3] = v,
+    [5] = U,
+    [2] = n,
+})
+top = (16)
+v = (registers[top])
+n = (registers[top + 1])
+U = (registers[top + 2])
+branch_taken=true
+end
+
+end
+if branch_taken then goto p671 end
+::p100::
+tick(100)
+do
+do
+registers[15] = (true)
+end
+
+end
+::p101::
+do
+do
+(registers[12])[registers[17]] = registers[14]
+end
+
+end
+goto p671
+::p103::
+tick(103)
+do
+do
+registers[14] = registers[14] + 1
+end
+
+end
+::p104::
+do
+do
+registers[15] = (registers[12][2])
+end
+
+end
+::p105::
+do
+do
+registers[15] = registers[15] % 128
+end
+
+end
+goto p212
+::p107::
+tick(107)
+do
+do
+registers[31] = (8)
+end
+
+end
+::p108::
+do
+do
+a = (16)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+::p109::
+do
+do
+registers[17] = new_frame(15)
+end
+
+end
+::p110::
+do
+do
+registers[17][0] = 8
+end
+
+end
+::p111::
+do
+do
+registers[18] = (9)
+end
+
+end
+::p112::
+do
+do
+registers[19] = (10)
+end
+
+end
+::p113::
+do
+do
+registers[20] = (11)
+end
+
+end
+::p114::
+do
+do
+registers[21] = (12)
+end
+
+end
+goto p348
+::p116::
+tick(116)
+do
+do
+a = 2
+top = a + 4 - 1;
+(registers)[a] = registers[a](unpack_range(top, registers, a + 1))
+top = a
+end
+
+end
+::p117::
+do
+do
+registers[2] = registers[2] + 192
+end
+
+end
+::p118::
+do
+do
+(registers)[2] = (registers[2] ~= 324)
+end
+
+end
+::p119::
+branch_taken=false
+do
+do
+if not registers[2] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p293 end
+goto p81
+::p123::
+tick(123)
+do
+do
+registers[33] = (6)
+end
+
+end
+::p124::
+do
+do
+registers[34] = (5)
+end
+
+end
+::p125::
+do
+do
+registers[35] = (4)
+end
+
+end
+::p126::
+do
+do
+registers[36] = (3)
+end
+
+end
+goto p366
+::p128::
+do
+do
+registers[15] = (registers[16] - registers[17])
+end
+
+end
+::p129::
+do
+do
+registers[16] = registers[14] == registers[14]
+end
+
+end
+::p130::
+branch_taken=false
+do
+do
+if not registers[16] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p557 end
+goto p344
+::p132::
+tick(132)
+do
+do
+(registers)[13] = registers[6]
+end
+
+end
+::p133::
+do
+do
+(registers)[14] = registers[12]
+end
+
+end
+::p134::
+do
+do
+(registers)[15] = nil
+end
+
+end
+::p135::
+do
+do
+a = 13;
+(registers[a])(registers[a + 1], registers[a + 2])
+top = a - 1
+end
+
+end
+::p136::
+do
+do
+registers[13] = {
+}
+end
+
+end
+goto p320
+::p138::
+tick(138)
+do
+do
+registers[26] = (9)
+end
+
+end
+::p139::
+do
+do
+registers[27] = (10)
+end
+
+end
+::p140::
+do
+do
+registers[28] = (11)
+end
+
+end
+goto p47
+::p143::
+tick(143)
+do
+do
+a = (22)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+::p144::
+do
+do
+registers[23] = new_frame(15)
+end
+
+end
+::p145::
+do
+do
+registers[23][0] = 14
+end
+
+end
+goto p55
+::p147::
+tick(147)
+do
+do
+registers[23] = (12)
+end
+
+end
+::p148::
+do
+do
+registers[24] = (15)
+end
+
+end
+::p149::
+do
+do
+registers[25] = (14)
+end
+
+end
+::p150::
+do
+do
+registers[26] = (1)
+end
+
+end
+::p152::
+do
+do
+registers[27] = (0)
+end
+
+end
+::p153::
+do
+do
+registers[28] = (3)
+end
+
+end
+::p154::
+do
+do
+registers[29] = (2)
+end
+
+end
+goto p638
+::p171::
+tick(171)
+do
+do
+(registers)[17] = registers[14]
+end
+
+end
+::p172::
+do
+do
+(registers)[18] = registers[14]
+end
+
+end
+::p173::
+do
+do
+a = 16
+registers[a] = registers[a](registers[a + 1], registers[a + 2])
+top = (a)
+end
+
+end
+goto p95
+::p182::
+tick(182)
+do
+do
+(registers)[8] = environment["next"]
+end
+
+end
+::p183::
+do
+do
+registers[9] = new_frame(15)
+end
+
+end
+::p184::
+do
+do
+registers[10] = new_frame(15)
+end
+
+end
+::p185::
+do
+do
+registers[10][0] = 0
+end
+
+end
+::p186::
+do
+do
+registers[11] = (1)
+end
+
+end
+::p187::
+do
+do
+registers[12] = (2)
+end
+
+end
+::p188::
+do
+do
+registers[13] = (3)
+end
+
+end
+goto p601
+::p190::
+do
+do
+registers[11] = new_frame(15)
+end
+
+end
+::p191::
+do
+do
+registers[11][0] = 2
+end
+
+end
+::p192::
+do
+do
+registers[12] = (3)
+end
+
+end
+goto p356
+::p199::
+tick(199)
+do
+do
+registers[2] = (301)
+end
+
+end
+goto p738
+::p201::
+tick(201)
+branch_taken=false
+do
+do
+R = {
+    [1] = R,
+    [3] = v,
+    [5] = U,
+    [2] = n,
+}
+a = 18
+U = registers[a + 2] + 0
+n = (registers[a + 1] + 0)
+v = (registers[a] - U)
+branch_taken=true
+end
+
+end
+if branch_taken then goto p561 end
+::p202::
+do
+do
+(registers)[47] = (operand_i)
+end
+
+end
+::p203::
+do
+do
+registers[48] = operand_k
+end
+
+end
+::p204::
+do
+do
+(registers)[49] = 40 - 101
+end
+
+end
+::p205::
+do
+do
+(registers)[49] = (registers[49] - 341)
+end
+
+end
+::p206::
+do
+do
+registers[49] = 23389 + registers[49]
+end
+
+end
+::p207::
+do
+do
+registers[49] = registers[49] + -22971
+end
+
+end
+::p208::
+do
+do
+registers[47][173] = (registers[49])
+end
+
+end
+::p209::
+do
+do
+registers[48][194] = 741
+end
+
+end
+::p210::
+do
+do
+for f = 41, 52, 1 do
+    (registers)[f] = nil
+end
+end
+
+end
+goto p742
+::p212::
+do
+do
+(registers)[15] = 2 * registers[15]
+end
+
+end
+::p213::
+do
+do
+(registers)[15] = (registers[15] - 1)
+end
+
+end
+::p214::
+do
+do
+registers[16] = {
+}
+end
+
+end
+goto p695
+::p216::
+tick(216)
+do
+do
+(registers)[2] = environment["string"]
+end
+
+end
+::p217::
+do
+do
+registers[2] = (registers[2]["byte"])
+end
+
+end
+::p218::
+do
+do
+registers[3] = ("\238o\026D\198")
+end
+
+end
+::p219::
+do
+do
+registers[4] = (5)
+end
+
+end
+goto p493
+::p232::
+tick(232)
+do
+do
+registers[17] = (registers[14] .. registers[14])
+end
+
+end
+::p233::
+do
+do
+registers[18] = registers[14] .. ""
+end
+
+end
+::p234::
+do
+do
+registers[19] = "" .. registers[14]
+end
+
+end
+::p235::
+do
+do
+a = (16)
+top = a + 4 - 1
+registers[a](unpack_range(top, registers, a + 1))
+top = (a - 1)
+end
+
+end
+::p236::
+do
+do
+(registers[14])[registers[14]] = registers[14]
+end
+
+end
+::p237::
+do
+do
+(registers)[16] = registers[14][registers[14]]
+end
+
+end
+::p238::
+do
+do
+(registers[14])[registers[14]] = registers[16]
+end
+
+end
+::p239::
+do
+do
+(registers)[12] = registers[3]
+end
+
+end
+::p240::
+branch_taken=false
+do
+do
+if not registers[12] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p700 end
+goto p335
+::p251::
+tick(251)
+do
+do
+(registers)[2] = environment["string"]
+end
+
+end
+::p252::
+do
+do
+registers[2] = (registers[2]["len"])
+end
+
+end
+::p253::
+do
+do
+registers[3] = ("b\150")
+end
+
+end
+::p254::
+do
+do
+a = (2);
+(registers)[a] = registers[a](registers[a + 1])
+top = (a)
+end
+
+end
+goto p754
+::p256::
+tick(256)
+do
+do
+registers[2] = (440)
+end
+
+end
+goto p766
+::p258::
+do
+do
+registers[22] = (12)
+end
+
+end
+::p259::
+do
+do
+registers[23] = (13)
+end
+
+end
+::p260::
+do
+do
+registers[24] = (14)
+end
+
+end
+::p261::
+do
+do
+registers[25] = (15)
+end
+
+end
+::p262::
+do
+do
+a = (10)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+::p263::
+do
+do
+registers[9][0] = (registers[10])
+end
+
+end
+::p264::
+do
+do
+registers[10] = new_frame(15)
+end
+
+end
+::p265::
+do
+do
+registers[10][0] = 1
+end
+
+end
+goto p748
+::p267::
+tick(267)
+do
+do
+registers[32] = (7)
+end
+
+end
+::p268::
+do
+do
+registers[33] = (6)
+end
+
+end
+::p269::
+do
+do
+registers[34] = (1)
+end
+
+end
+goto p621
+::p271::
+tick(271)
+do
+do
+v = R[3]
+n = R[2]
+U = R[5]
+R = R[1]
+end
+
+end
+::p272::
+do
+do
+registers[19] = (0)
+end
+
+end
+::p273::
+do
+do
+registers[20] = (0)
+end
+
+end
+::p274::
+do
+do
+registers[21] = ("")
+end
+
+end
+goto p87
+::p284::
+tick(284)
+do
+do
+registers[25] = (14)
+end
+
+end
+::p285::
+do
+do
+registers[26] = (13)
+end
+
+end
+::p286::
+do
+do
+registers[27] = (12)
+end
+
+end
+::p287::
+do
+do
+registers[28] = (3)
+end
+
+end
+::p288::
+do
+do
+registers[29] = (2)
+end
+
+end
+::p289::
+do
+do
+registers[30] = (1)
+end
+
+end
+::p290::
+do
+do
+registers[31] = (0)
+end
+
+end
+::p291::
+do
+do
+registers[32] = (7)
+end
+
+end
+goto p302
+::p293::
+branch_taken=false
+do
+do
+if registers[2] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p646 end
+goto p673
+::p295::
+tick(295)
+do
+do
+registers[25] = (14)
+end
+
+end
+::p296::
+do
+do
+registers[26] = (13)
+end
+
+end
+::p297::
+do
+do
+registers[27] = (12)
+end
+
+end
+::p298::
+do
+do
+registers[28] = (11)
+end
+
+end
+::p299::
+do
+do
+registers[29] = (10)
+end
+
+end
+::p300::
+do
+do
+registers[30] = (9)
+end
+
+end
+goto p107
+::p302::
+do
+do
+registers[33] = (6)
+end
+
+end
+::p303::
+do
+do
+registers[34] = (5)
+end
+
+end
+::p304::
+do
+do
+registers[35] = (4)
+end
+
+end
+::p305::
+do
+do
+a = (20)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+::p306::
+do
+do
+registers[21] = new_frame(15)
+end
+
+end
+goto p15
+::p308::
+tick(308)
+do
+do
+registers[34] = (5)
+end
+
+end
+::p309::
+do
+do
+a = (19)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+::p310::
+do
+do
+registers[20] = new_frame(15)
+end
+
+end
+goto p443
+::p312::
+do
+do
+registers[16] = (registers[14] >= registers[14])
+end
+
+end
+goto p420
+::p317::
+tick(317)
+do
+do
+(registers)[2] = (registers[2] ~= 425)
+end
+
+end
+::p318::
+branch_taken=false
+do
+do
+if not registers[2] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p738 end
+goto p199
+::p320::
+do
+do
+registers[14] = {
+}
+end
+
+end
+::p321::
+do
+do
+registers[15] = (false)
+end
+
+end
+::p322::
+do
+do
+(registers)[16] = registers[8]
+end
+
+end
+goto p97
+::p324::
+tick(324)
+do
+do
+registers[13]["__mod"] = (registers[12])
+end
+
+end
+::p325::
+do
+do
+registers[13]["__pow"] = (registers[12])
+end
+
+end
+::p326::
+do
+do
+registers[13]["__eq"] = (registers[12])
+end
+
+end
+::p327::
+do
+do
+registers[13]["__lt"] = (registers[12])
+end
+
+end
+::p328::
+do
+do
+registers[13]["__le"] = (registers[12])
+end
+
+end
+goto p594
+::p330::
+tick(330)
+do
+do
+a = (14)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+::p331::
+do
+do
+registers[15] = new_frame(15)
+end
+
+end
+::p332::
+do
+do
+registers[15][0] = 6
+end
+
+end
+::p333::
+do
+do
+registers[16] = (7)
+end
+
+end
+goto p712
+::p335::
+do
+do
+(registers)[13] = environment["type"]
+end
+
+end
+::p336::
+do
+do
+(registers)[14] = registers[12]
+end
+
+end
+::p337::
+do
+do
+a = (13);
+(registers)[a] = registers[a](registers[a + 1])
+top = (a)
+end
+
+end
+::p338::
+branch_taken=false
+do
+do
+if registers[13] ~= "table" then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p700 end
+goto p707
+::p340::
+tick(340)
+branch_taken=false
+do
+do
+if registers[16] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p515 end
+goto p642
+::p344::
+do
+do
+registers[16] = (registers[14] ~= registers[14])
+end
+
+end
+goto p557
+::p348::
+do
+do
+registers[22] = (13)
+end
+
+end
+::p349::
+do
+do
+registers[23] = (14)
+end
+
+end
+::p350::
+do
+do
+registers[24] = (15)
+end
+
+end
+::p351::
+do
+do
+registers[25] = (0)
+end
+
+end
+::p352::
+do
+do
+registers[26] = (1)
+end
+
+end
+::p353::
+do
+do
+registers[27] = (2)
+end
+
+end
+::p354::
+do
+do
+registers[28] = (3)
+end
+
+end
+goto p613
+::p356::
+do
+do
+registers[13] = (0)
+end
+
+end
+::p357::
+do
+do
+registers[14] = (1)
+end
+
+end
+::p358::
+do
+do
+registers[15] = (6)
+end
+
+end
+::p359::
+do
+do
+registers[16] = (7)
+end
+
+end
+::p360::
+do
+do
+registers[17] = (4)
+end
+
+end
+::p361::
+do
+do
+registers[18] = (5)
+end
+
+end
+goto p565
+::p364::
+do
+do
+(registers)[16] = registers[14]
+end
+
+end
+goto p340
+::p366::
+do
+do
+registers[37] = (2)
+end
+
+end
+::p367::
+do
+do
+registers[38] = (1)
+end
+
+end
+::p368::
+do
+do
+registers[39] = (0)
+end
+
+end
+::p369::
+do
+do
+a = (24)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+::p370::
+do
+do
+a = (9)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+::p371::
+do
+do
+a = (D.f9)
+z = (a[4])
+q = (#z)
+m = q > 0 and {
+}
+x = make_function(a, m);
+(setfenv)(x, environment);
+(registers)[10] = x
+if m then
+    for f = 1, q do
+        a = (z[f])
+        x = (a[2])
+        S = (a[1])
+        if x == 0 then
+            if not N then
+                N = {
+                }
+            end
+            H = N[S]
+            if not H then
+                H = ({
+                    [2] = registers,
+                    [1] = S,
+                });
+                (N)[S] = H
+            end
+            (m)[f - 1] = H
+        else
+            if x ~= 1 then
+                (m)[f - 1] = upvalues[S]
+            else
+                m[f - 1] = (registers[S])
+            end
+        end
+    end
+end
+end
+
+end
+::p372::
+do
+do
+a = (D.f10)
+z = (a[4])
+q = (#z)
+m = q > 0 and {
+}
+x = make_function(a, m);
+(setfenv)(x, environment);
+(registers)[11] = x
+if m then
+    for f = 1, q do
+        a = (z[f])
+        x = (a[2])
+        S = (a[1])
+        if x == 0 then
+            if not N then
+                N = {
+                }
+            end
+            H = N[S]
+            if not H then
+                H = ({
+                    [2] = registers,
+                    [1] = S,
+                });
+                (N)[S] = H
+            end
+            (m)[f - 1] = H
+        else
+            if x ~= 1 then
+                (m)[f - 1] = upvalues[S]
+            else
+                m[f - 1] = (registers[S])
+            end
+        end
+    end
+end
+end
+
+end
+goto p785
+::p376::
+tick(376)
+do
+do
+registers[26] = (13)
+end
+
+end
+::p377::
+do
+do
+registers[27] = (12)
+end
+
+end
+::p378::
+do
+do
+a = (12)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+goto p826
+::p380::
+tick(380)
+do
+do
+registers[23] = (14)
+end
+
+end
+::p381::
+do
+do
+registers[24] = (15)
+end
+
+end
+::p382::
+do
+do
+registers[25] = (12)
+end
+
+end
+::p383::
+do
+do
+registers[26] = (13)
+end
+
+end
+::p384::
+do
+do
+a = (11)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+::p385::
+do
+do
+registers[12] = new_frame(15)
+end
+
+end
+::p386::
+do
+do
+registers[12][0] = 3
+end
+
+end
+::p387::
+do
+do
+registers[13] = (2)
+end
+
+end
+::p388::
+do
+do
+registers[14] = (1)
+end
+
+end
+::p389::
+do
+do
+registers[15] = (0)
+end
+
+end
+::p390::
+do
+do
+registers[16] = (7)
+end
+
+end
+goto p835
+::p392::
+tick(392)
+do
+do
+(registers)[26] = registers[10]
+end
+
+end
+::p393::
+do
+do
+(registers)[27] = registers[5]
+end
+
+end
+::p394::
+do
+do
+(registers)[28] = registers[1]
+end
+
+end
+::p395::
+do
+do
+(registers)[29] = registers[25]
+end
+
+end
+::p396::
+do
+do
+a = 27
+registers[a] = registers[a](registers[a + 1], registers[a + 2])
+top = (a)
+end
+
+end
+::p397::
+do
+do
+(registers)[28] = registers[17][registers[19]]
+end
+
+end
+::p398::
+do
+do
+(registers)[29] = registers[17][registers[20]]
+end
+
+end
+goto p489
+::p400::
+tick(400)
+do
+do
+registers[20] = (11)
+end
+
+end
+::p401::
+do
+do
+registers[21] = (10)
+end
+
+end
+::p402::
+do
+do
+registers[22] = (9)
+end
+
+end
+::p403::
+do
+do
+registers[23] = (8)
+end
+
+end
+::p404::
+do
+do
+registers[24] = (15)
+end
+
+end
+::p405::
+do
+do
+registers[25] = (14)
+end
+
+end
+goto p376
+::p407::
+do
+do
+registers[3] = (",b")
+end
+
+end
+::p408::
+do
+do
+registers[4] = (1)
+end
+
+end
+::p409::
+do
+do
+registers[5] = (1)
+end
+
+end
+goto p116
+::p416::
+tick(416)
+do
+do
+registers[20] = (11)
+end
+
+end
+::p417::
+do
+do
+registers[21] = (10)
+end
+
+end
+::p418::
+do
+do
+registers[22] = (13)
+end
+
+end
+goto p147
+::p420::
+do
+do
+(registers)[15] = registers[16]
+end
+
+end
+::p421::
+do
+do
+(registers)[16] = registers[14]
+end
+
+end
+::p422::
+do
+do
+(registers)[17] = registers[14]
+end
+
+end
+::p423::
+do
+do
+(registers)[18] = registers[14]
+end
+
+end
+goto p500
+::p425::
+tick(425)
+do
+do
+registers[26] = (9)
+end
+
+end
+::p426::
+do
+do
+registers[27] = (8)
+end
+
+end
+::p427::
+do
+do
+registers[28] = (11)
+end
+
+end
+::p428::
+do
+do
+registers[29] = (10)
+end
+
+end
+goto p330
+::p430::
+tick(430)
+do
+do
+registers[20] = registers[26] % 256
+end
+
+end
+::p431::
+do
+do
+(registers)[26] = registers[17][registers[20]]
+end
+
+end
+::p432::
+do
+do
+(registers)[28] = registers[17][registers[19]]
+end
+
+end
+::p433::
+do
+do
+(registers[17])[registers[20]] = registers[28]
+end
+
+end
+::p434::
+do
+do
+(registers[17])[registers[19]] = registers[26]
+end
+
+end
+goto p392
+::p436::
+tick(436)
+do
+do
+v = R[3]
+n = R[2]
+U = R[5]
+R = R[1]
+end
+
+end
+::p437::
+do
+do
+(registers)[22] = registers[21]
+end
+
+end
+::p438::
+do
+do
+if not (N) then
+
+else
+    for T, environment, W in next, N do
+        if not (T >= 1) then
+
+        else
+            environment[2] = environment;
+            (environment)[3] = (registers[T]);
+            (environment)[1] = (3)
+            N[T] = nil
+        end
+    end
+end
+return registers[22]
+end
+
+end
+::p439::
+do
+do
+registers[34] = (5)
+end
+
+end
+::p440::
+do
+do
+registers[35] = (2)
+end
+
+end
+::p441::
+do
+do
+registers[36] = (3)
+end
+
+end
+goto p802
+::p443::
+do
+do
+registers[20][0] = 11
+end
+
+end
+::p444::
+do
+do
+registers[21] = (10)
+end
+
+end
+::p445::
+do
+do
+registers[22] = (9)
+end
+
+end
+::p446::
+do
+do
+registers[23] = (8)
+end
+
+end
+::p447::
+do
+do
+registers[24] = (15)
+end
+
+end
+goto p284
+::p450::
+tick(450)
+branch_taken=false
+do
+do
+a = false
+v = v + U
+if U <= 0 then
+    a = (v >= n)
+else
+    a = (v <= n)
+end
+if a then
+    (registers)[13 + 3] = v
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p691 end
+goto p526
+::p452::
+tick(452)
+do
+do
+v = R[3]
+n = R[2]
+U = R[5]
+R = R[1]
+end
+
+end
+::p453::
+do
+do
+registers[18] = (0)
+end
+
+end
+::p454::
+do
+do
+registers[19] = (0)
+end
+
+end
+goto p24
+::p462::
+tick(462)
+do
+do
+registers[14] = (4)
+end
+
+end
+::p463::
+do
+do
+registers[15] = (1)
+end
+
+end
+::p464::
+branch_taken=false
+do
+do
+R = {
+    [1] = R,
+    [3] = v,
+    [5] = U,
+    [2] = n,
+}
+a = 13
+U = registers[a + 2] + 0
+n = (registers[a + 1] + 0)
+v = (registers[a] - U)
+branch_taken=true
+end
+
+end
+if branch_taken then goto p450 end
+::p465::
+do
+do
+registers[28] = (11)
+end
+
+end
+::p466::
+do
+do
+registers[29] = (8)
+end
+
+end
+::p467::
+do
+do
+registers[30] = (9)
+end
+
+end
+goto p91
+::p483::
+do
+do
+registers[25] = (8)
+end
+
+end
+::p484::
+do
+do
+registers[26] = (9)
+end
+
+end
+::p485::
+do
+do
+registers[27] = (10)
+end
+
+end
+::p486::
+do
+do
+registers[28] = (11)
+end
+
+end
+::p487::
+do
+do
+registers[29] = (4)
+end
+
+end
+goto p816
+::p489::
+do
+do
+(registers)[28] = registers[28] + registers[29]
+end
+
+end
+::p490::
+do
+do
+registers[28] = registers[28] % 256
+end
+
+end
+::p491::
+do
+do
+(registers)[28] = registers[17][registers[28]]
+end
+
+end
+goto p667
+::p493::
+do
+do
+registers[5] = (5)
+end
+
+end
+::p494::
+do
+do
+a = 2
+top = a + 4 - 1;
+(registers)[a] = registers[a](unpack_range(top, registers, a + 1))
+top = a
+end
+
+end
+goto p317
+::p496::
+tick(496)
+do
+do
+v = R[3]
+n = R[2]
+U = R[5]
+R = R[1]
+end
+
+end
+::p497::
+branch_taken=false
+do
+do
+if not registers[15] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p740 end
+goto p736
+::p500::
+do
+do
+(registers)[19] = registers[14]
+end
+
+end
+::p501::
+do
+do
+(registers)[20] = registers[14]
+end
+
+end
+::p502::
+do
+do
+a = (19);
+(registers)[a] = registers[a](registers[a + 1])
+top = (a)
+end
+
+end
+::p503::
+do
+do
+(registers)[20] = registers[14]
+end
+
+end
+::p504::
+do
+do
+a = 20
+z = (1)
+q = 0
+if z == 0 then
+
+else
+    top = (a + z - 1)
+end
+m, x = nil
+if z ~= 1 then
+    m, x = pack_returns(registers[a](unpack_range(top, registers, a + 1)))
+else
+    m, x = pack_returns(registers[a]())
+end
+if q ~= 1 then
+    if q ~= 0 then
+        m = a + q - 2
+        top = (m + 1)
+    else
+        m = m + a - 1
+        top = m
+    end
+    z = 0
+    for f = a, m do
+        z = (z + 1);
+        (registers)[f] = x[z]
+    end
+else
+    top = a - 1
+end
+end
+
+end
+::p505::
+do
+do
+a = 16;
+(registers[a])(unpack_range(top, registers, a + 1))
+top = a - 1
+end
+
+end
+::p506::
+do
+do
+(registers)[16] = registers[14]
+end
+
+end
+goto p232
+::p515::
+tick(515)
+do
+do
+(registers)[15] = registers[16]
+end
+
+end
+::p516::
+do
+do
+(registers)[16] = registers[14] + registers[14]
+end
+
+end
+::p517::
+do
+do
+(registers)[17] = registers[14] * registers[14]
+end
+
+end
+goto p43
+::p519::
+tick(519)
+branch_taken=false
+do
+do
+a = false
+v = v + U
+if U <= 0 then
+    a = (v >= n)
+else
+    a = (v <= n)
+end
+if a then
+    (registers)[22 + 3] = v
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p839 end
+goto p436
+::p526::
+do
+do
+v = R[3]
+n = R[2]
+U = R[5]
+R = R[1]
+end
+
+end
+::p527::
+do
+do
+registers[13] = (registers[12][3])
+end
+
+end
+::p528::
+do
+do
+registers[14] = (registers[12][1])
+end
+
+end
+::p529::
+do
+do
+registers[14] = registers[14] % 64
+end
+
+end
+::p530::
+do
+do
+(registers)[14] = 4 * registers[14]
+end
+
+end
+goto p103
+::p532::
+tick(532)
+do
+do
+registers[23] = (14)
+end
+
+end
+::p533::
+do
+do
+registers[24] = (15)
+end
+
+end
+::p534::
+do
+do
+registers[25] = (12)
+end
+
+end
+goto p20
+::p536::
+tick(536)
+do
+do
+registers[21] = (2)
+end
+
+end
+::p537::
+do
+do
+registers[22] = (1)
+end
+
+end
+::p538::
+do
+do
+registers[23] = (0)
+end
+
+end
+::p539::
+do
+do
+registers[24] = (15)
+end
+
+end
+goto p295
+::p541::
+tick(541)
+do
+do
+registers[29] = (10)
+end
+
+end
+::p542::
+do
+do
+registers[30] = (5)
+end
+
+end
+::p543::
+do
+do
+registers[31] = (4)
+end
+
+end
+goto p267
+::p545::
+tick(545)
+do
+do
+a = (17)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+::p546::
+do
+do
+registers[18] = new_frame(15)
+end
+
+end
+::p547::
+do
+do
+registers[18][0] = 9
+end
+
+end
+::p548::
+do
+do
+registers[19] = (8)
+end
+
+end
+goto p416
+::p550::
+tick(550)
+do
+do
+registers[15] = (6)
+end
+
+end
+::p551::
+do
+do
+registers[16] = (7)
+end
+
+end
+::p552::
+do
+do
+registers[17] = (0)
+end
+
+end
+::p553::
+do
+do
+registers[18] = (1)
+end
+
+end
+::p554::
+do
+do
+registers[19] = (2)
+end
+
+end
+::p555::
+do
+do
+registers[20] = (3)
+end
+
+end
+goto p719
+::p557::
+do
+do
+(registers)[15] = registers[16]
+end
+
+end
+::p558::
+do
+do
+(registers)[16] = registers[14] < registers[14]
+end
+
+end
+::p559::
+branch_taken=false
+do
+do
+if not registers[16] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p67 end
+goto p629
+::p561::
+branch_taken=false
+do
+do
+a = false
+v = v + U
+if U <= 0 then
+    a = (v >= n)
+else
+    a = (v <= n)
+end
+if a then
+    (registers)[18 + 3] = v
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p649 end
+goto p452
+::p565::
+do
+do
+registers[19] = (10)
+end
+
+end
+::p566::
+do
+do
+registers[20] = (11)
+end
+
+end
+::p567::
+do
+do
+registers[21] = (8)
+end
+
+end
+::p568::
+do
+do
+registers[22] = (9)
+end
+
+end
+goto p380
+::p583::
+tick(583)
+do
+do
+registers[28] = (11)
+end
+
+end
+::p584::
+do
+do
+registers[29] = (10)
+end
+
+end
+::p585::
+do
+do
+registers[30] = (9)
+end
+
+end
+::p586::
+do
+do
+registers[31] = (8)
+end
+
+end
+::p587::
+do
+do
+registers[32] = (7)
+end
+
+end
+goto p123
+::p590::
+tick(590)
+do
+do
+registers[17] = registers[2] % 1
+end
+
+end
+::p591::
+do
+do
+registers[2] = (registers[2] - registers[17])
+end
+
+end
+goto p450
+::p594::
+do
+do
+registers[13]["__concat"] = (registers[12])
+end
+
+end
+::p595::
+do
+do
+registers[13]["__index"] = (registers[12])
+end
+
+end
+::p596::
+do
+do
+registers[13]["__newindex"] = (registers[12])
+end
+
+end
+::p597::
+do
+do
+registers[13]["__metatable"] = false
+end
+
+end
+goto p742
+::p601::
+do
+do
+registers[14] = (4)
+end
+
+end
+::p602::
+do
+do
+registers[15] = (5)
+end
+
+end
+::p603::
+do
+do
+registers[16] = (6)
+end
+
+end
+::p604::
+do
+do
+registers[17] = (7)
+end
+
+end
+goto p62
+::p606::
+tick(606)
+do
+do
+a = (21)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+::p607::
+do
+do
+registers[22] = new_frame(15)
+end
+
+end
+::p608::
+do
+do
+registers[22][0] = 13
+end
+
+end
+::p609::
+do
+do
+registers[23] = (12)
+end
+
+end
+::p610::
+do
+do
+registers[24] = (15)
+end
+
+end
+goto p830
+::p613::
+do
+do
+registers[29] = (4)
+end
+
+end
+::p614::
+do
+do
+registers[30] = (5)
+end
+
+end
+::p615::
+do
+do
+registers[31] = (6)
+end
+
+end
+::p616::
+do
+do
+registers[32] = (7)
+end
+
+end
+goto p545
+::p618::
+tick(618)
+do
+do
+(registers[17])[registers[18]] = registers[25]
+end
+
+end
+::p619::
+do
+do
+(registers[17])[registers[22]] = registers[23]
+end
+
+end
+goto p756
+::p621::
+do
+do
+registers[35] = (0)
+end
+
+end
+::p622::
+do
+do
+registers[36] = (3)
+end
+
+end
+::p623::
+do
+do
+registers[37] = (2)
+end
+
+end
+goto p143
+::p625::
+tick(625)
+do
+do
+registers[27] = (2)
+end
+
+end
+::p626::
+do
+do
+registers[28] = (3)
+end
+
+end
+::p627::
+do
+do
+registers[29] = (0)
+end
+
+end
+goto p780
+::p629::
+do
+do
+registers[16] = registers[14] > registers[14]
+end
+
+end
+goto p67
+::p631::
+tick(631)
+do
+do
+(registers)[18] = registers[1]
+end
+
+end
+::p632::
+do
+do
+registers[19] = (1)
+end
+
+end
+::p633::
+do
+do
+registers[20] = (4)
+end
+
+end
+::p634::
+do
+do
+a = 17
+z = (4)
+q = 0
+if z == 0 then
+
+else
+    top = (a + z - 1)
+end
+m, x = nil
+if z ~= 1 then
+    m, x = pack_returns(registers[a](unpack_range(top, registers, a + 1)))
+else
+    m, x = pack_returns(registers[a]())
+end
+if q ~= 1 then
+    if q ~= 0 then
+        m = a + q - 2
+        top = (m + 1)
+    else
+        m = m + a - 1
+        top = m
+    end
+    z = 0
+    for f = a, m do
+        z = (z + 1);
+        (registers)[f] = x[z]
+    end
+else
+    top = a - 1
+end
+end
+
+end
+::p635::
+do
+do
+a = (12)
+z = (0)
+q = (registers[a])
+for f = 1, top - a do
+    q[z + f] = (registers[a + f])
+end
+end
+
+end
+::p636::
+do
+do
+registers[13] = (1)
+end
+
+end
+goto p462
+::p638::
+do
+do
+registers[30] = (5)
+end
+
+end
+::p639::
+do
+do
+registers[31] = (4)
+end
+
+end
+::p640::
+do
+do
+registers[32] = (7)
+end
+
+end
+goto p675
+::p642::
+do
+do
+(registers)[16] = registers[14]
+end
+
+end
+goto p515
+::p644::
+tick(644)
+branch_taken=false
+do
+do
+if registers[13] ~= registers[18] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p671 end
+goto p100
+::p646::
+tick(646)
+do
+do
+registers[2] = (registers[2] >= 461)
+end
+
+end
+::p647::
+branch_taken=false
+do
+do
+if not registers[2] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p754 end
+goto p251
+::p649::
+do
+do
+(registers)[22] = registers[4]
+end
+
+end
+::p650::
+do
+do
+(registers)[23] = registers[13]
+end
+
+end
+::p651::
+do
+do
+a = (22);
+(registers)[a] = registers[a](registers[a + 1])
+top = (a)
+end
+
+end
+goto p33
+::p653::
+tick(653)
+do
+do
+registers[22] = (9)
+end
+
+end
+::p654::
+do
+do
+registers[23] = (14)
+end
+
+end
+::p655::
+do
+do
+registers[24] = (15)
+end
+
+end
+::p656::
+do
+do
+registers[25] = (12)
+end
+
+end
+::p657::
+do
+do
+registers[26] = (13)
+end
+
+end
+goto p625
+::p661::
+tick(661)
+do
+do
+registers[16] = (7)
+end
+
+end
+::p662::
+do
+do
+registers[17] = (6)
+end
+
+end
+::p663::
+do
+do
+registers[18] = (9)
+end
+
+end
+::p664::
+do
+do
+registers[19] = (8)
+end
+
+end
+::p665::
+do
+do
+registers[20] = (11)
+end
+
+end
+goto p39
+::p667::
+do
+do
+a = 26
+registers[a] = registers[a](registers[a + 1], registers[a + 2])
+top = (a)
+end
+
+end
+::p668::
+do
+do
+(registers)[26] = registers[16][registers[26]]
+end
+
+end
+::p669::
+do
+do
+registers[21] = (registers[21] .. registers[26])
+end
+
+end
+goto p519
+::p671::
+branch_taken=false
+do
+do
+a = (16)
+z, q = v(n, U)
+if not (z) then
+
+else
+    registers[a + 1] = (z);
+    (registers)[a + 2] = q
+    branch_taken=true
+    U = (z)
+end
+end
+
+end
+if branch_taken then goto p644 end
+goto p496
+::p673::
+do
+do
+registers[2] = (352)
+end
+
+end
+goto p646
+::p675::
+do
+do
+registers[33] = (6)
+end
+
+end
+::p676::
+do
+do
+a = (18)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+::p677::
+do
+do
+registers[19] = new_frame(15)
+end
+
+end
+::p678::
+do
+do
+registers[19][0] = 10
+end
+
+end
+::p679::
+do
+do
+registers[20] = (11)
+end
+
+end
+::p680::
+do
+do
+registers[21] = (8)
+end
+
+end
+goto p653
+::p682::
+tick(682)
+do
+do
+registers[12] = new_frame(4)
+end
+
+end
+::p683::
+do
+do
+for f = 13, 16, 1 do
+    (registers)[f] = nil
+end
+end
+
+end
+::p684::
+do
+do
+(registers)[17] = registers[5]
+end
+
+end
+goto p631
+::p686::
+tick(686)
+do
+do
+(registers)[5] = environment["string"]
+end
+
+end
+::p687::
+do
+do
+registers[5] = (registers[5]["byte"])
+end
+
+end
+::p688::
+do
+do
+(registers)[6] = environment["setmetatable"]
+end
+
+end
+::p689::
+do
+do
+(registers)[7] = environment["getmetatable"]
+end
+
+end
+goto p182
+::p691::
+do
+do
+registers[17] = registers[2] % 256
+end
+
+end
+::p692::
+do
+do
+(registers[12])[registers[16]] = registers[17]
+end
+
+end
+::p693::
+do
+do
+registers[2] = registers[2] / 256
+end
+
+end
+goto p590
+::p695::
+do
+do
+registers[17] = {
+}
+end
+
+end
+::p696::
+do
+do
+registers[18] = (0)
+end
+
+end
+::p697::
+do
+do
+registers[19] = (255)
+end
+
+end
+::p698::
+do
+do
+registers[20] = (1)
+end
+
+end
+goto p201
+::p700::
+tick(700)
+do
+do
+(registers)[13] = registers[11]
+end
+
+end
+::p701::
+do
+do
+if not (N) then
+
+else
+    for f, F, u in next, N do
+        if f >= 1 then
+            (F)[2] = F;
+            (F)[3] = (registers[f])
+            F[1] = (3)
+            N[f] = (nil)
+        end
+    end
+end
+return registers[13]()
+end
+
+end
+::p703::
+do
+do
+registers[23] = (12)
+end
+
+end
+::p704::
+do
+do
+registers[24] = (15)
+end
+
+end
+::p705::
+do
+do
+registers[25] = (14)
+end
+
+end
+goto p425
+::p707::
+do
+do
+(registers)[14] = registers[7]
+end
+
+end
+::p708::
+do
+do
+(registers)[15] = registers[12]
+end
+
+end
+::p709::
+do
+do
+a = (14);
+(registers)[a] = registers[a](registers[a + 1])
+top = (a)
+end
+
+end
+::p710::
+branch_taken=false
+do
+do
+if registers[14] == registers[0] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p132 end
+goto p700
+::p712::
+do
+do
+registers[17] = (4)
+end
+
+end
+::p713::
+do
+do
+registers[18] = (5)
+end
+
+end
+::p714::
+do
+do
+registers[19] = (2)
+end
+
+end
+::p715::
+do
+do
+registers[20] = (3)
+end
+
+end
+::p716::
+do
+do
+registers[21] = (0)
+end
+
+end
+::p717::
+do
+do
+registers[22] = (1)
+end
+
+end
+goto p532
+::p719::
+do
+do
+registers[21] = (12)
+end
+
+end
+::p720::
+do
+do
+registers[22] = (13)
+end
+
+end
+::p721::
+do
+do
+registers[23] = (14)
+end
+
+end
+::p722::
+do
+do
+registers[24] = (15)
+end
+
+end
+::p723::
+do
+do
+registers[25] = (8)
+end
+
+end
+goto p138
+::p725::
+tick(725)
+do
+do
+registers[24] = registers[24] + 1
+end
+
+end
+::p726::
+do
+do
+(registers)[24] = registers[12][registers[24]]
+end
+
+end
+::p727::
+do
+do
+(registers)[23] = registers[23] + registers[24]
+end
+
+end
+::p728::
+do
+do
+registers[18] = registers[23] % 256
+end
+
+end
+::p729::
+do
+do
+(registers)[23] = registers[17][registers[18]]
+end
+
+end
+::p730::
+do
+do
+(registers)[25] = registers[17][registers[22]]
+end
+
+end
+goto p618
+::p732::
+tick(732)
+do
+do
+(registers)[23] = registers[17][registers[22]]
+end
+
+end
+::p733::
+do
+do
+(registers)[23] = registers[18] + registers[23]
+end
+
+end
+::p734::
+do
+do
+registers[24] = registers[22] % 8
+end
+
+end
+goto p725
+::p736::
+branch_taken=false
+do
+do
+if registers[13] == registers[14] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p682 end
+goto p740
+::p738::
+branch_taken=false
+do
+do
+if registers[2] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p766 end
+goto p256
+::p740::
+do
+do
+(registers)[16] = registers[11]
+end
+
+end
+::p741::
+do
+do
+if not (N) then
+
+else
+    for f, F, u in next, N do
+        if f >= 1 then
+            (F)[2] = F;
+            (F)[3] = (registers[f])
+            F[1] = (3)
+            N[f] = (nil)
+        end
+    end
+end
+return registers[16]()
+end
+
+end
+::p742::
+do
+do
+(registers)[14] = registers[6]
+end
+
+end
+::p743::
+do
+do
+registers[15] = {
+}
+end
+
+end
+::p744::
+do
+do
+(registers)[16] = registers[13]
+end
+
+end
+::p745::
+do
+do
+a = 14
+registers[a] = registers[a](registers[a + 1], registers[a + 2])
+top = (a)
+end
+
+end
+goto p772
+::p748::
+do
+do
+registers[11] = (0)
+end
+
+end
+::p749::
+do
+do
+registers[12] = (3)
+end
+
+end
+::p750::
+do
+do
+registers[13] = (2)
+end
+
+end
+::p751::
+do
+do
+registers[14] = (5)
+end
+
+end
+::p752::
+do
+do
+registers[15] = (4)
+end
+
+end
+goto p661
+::p754::
+branch_taken=false
+do
+do
+if registers[2] then
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p317 end
+goto p216
+::p756::
+branch_taken=false
+do
+do
+a = false
+v = v + U
+if U <= 0 then
+    a = (v >= n)
+else
+    a = (v <= n)
+end
+if a then
+    (registers)[19 + 3] = v
+    branch_taken=true
+end
+end
+
+end
+if branch_taken then goto p732 end
+goto p271
+::p766::
+do
+do
+registers[2] = registers[2] + 385
+end
+
+end
+::p767::
+do
+do
+registers[2] = -621382508 + registers[2]
+end
+
+end
+::p768::
+do
+do
+(registers)[3] = (registers)
+end
+
+end
+::p769::
+do
+do
+(registers)[4] = environment["string"]
+end
+
+end
+::p770::
+do
+do
+registers[4] = (registers[4]["char"])
+end
+
+end
+goto p686
+::p772::
+do
+do
+(registers)[15] = registers[14]
+end
+
+end
+::p773::
+do
+do
+(registers)[16] = registers[14]
+end
+
+end
+::p774::
+do
+do
+(registers)[17] = registers[14]
+end
+
+end
+::p775::
+do
+do
+(registers)[18] = registers[14]
+end
+
+end
+::p776::
+do
+do
+a = 18
+z = (1)
+q = 0
+if z == 0 then
+
+else
+    top = (a + z - 1)
+end
+m, x = nil
+if z ~= 1 then
+    m, x = pack_returns(registers[a](unpack_range(top, registers, a + 1)))
+else
+    m, x = pack_returns(registers[a]())
+end
+if q ~= 1 then
+    if q ~= 0 then
+        m = a + q - 2
+        top = (m + 1)
+    else
+        m = m + a - 1
+        top = m
+    end
+    z = 0
+    for f = a, m do
+        z = (z + 1);
+        (registers)[f] = x[z]
+    end
+else
+    top = a - 1
+end
+end
+
+end
+::p777::
+do
+do
+a = 15
+registers[a] = registers[a](unpack_range(top, registers, a + 1))
+top = a
+end
+
+end
+::p778::
+do
+do
+a = (D.f12)
+z = (a[4])
+q = (#z)
+m = q > 0 and {
+}
+x = make_function(a, m);
+(setfenv)(x, environment);
+(registers)[16] = x
+if m then
+    for f = 1, q do
+        a = (z[f])
+        x = (a[2])
+        S = (a[1])
+        if x == 0 then
+            if not N then
+                N = {
+                }
+            end
+            H = N[S]
+            if not H then
+                H = ({
+                    [2] = registers,
+                    [1] = S,
+                });
+                (N)[S] = H
+            end
+            (m)[f - 1] = H
+        else
+            if x ~= 1 then
+                (m)[f - 1] = upvalues[S]
+            else
+                m[f - 1] = (registers[S])
+            end
+        end
+    end
+end
+end
+
+end
+goto p171
+::p780::
+do
+do
+registers[30] = (1)
+end
+
+end
+::p781::
+do
+do
+registers[31] = (6)
+end
+
+end
+::p782::
+do
+do
+registers[32] = (7)
+end
+
+end
+::p783::
+do
+do
+registers[33] = (4)
+end
+
+end
+goto p308
+::p785::
+do
+do
+a = (D.f13)
+z = (a[4])
+q = (#z)
+m = q > 0 and {
+}
+x = make_function(a, m);
+(setfenv)(x, environment);
+(registers)[12] = x
+if m then
+    for f = 1, q do
+        a = (z[f])
+        x = (a[2])
+        S = (a[1])
+        if x == 0 then
+            if not N then
+                N = {
+                }
+            end
+            H = N[S]
+            if not H then
+                H = ({
+                    [2] = registers,
+                    [1] = S,
+                });
+                (N)[S] = H
+            end
+            (m)[f - 1] = H
+        else
+            if x ~= 1 then
+                (m)[f - 1] = upvalues[S]
+            else
+                m[f - 1] = (registers[S])
+            end
+        end
+    end
+end
+end
+
+end
+::p786::
+do
+do
+registers[13] = {
+}
+end
+
+end
+::p787::
+do
+do
+registers[13]["__tostring"] = (registers[11])
+end
+
+end
+::p789::
+do
+do
+registers[13]["__call"] = (registers[12])
+end
+
+end
+::p790::
+do
+do
+registers[13]["__add"] = (registers[12])
+end
+
+end
+::p791::
+do
+do
+registers[13]["__sub"] = (registers[12])
+end
+
+end
+::p792::
+do
+do
+registers[13]["__mul"] = (registers[12])
+end
+
+end
+::p793::
+do
+do
+registers[13]["__div"] = (registers[12])
+end
+
+end
+goto p324
+::p802::
+do
+do
+registers[37] = (0)
+end
+
+end
+::p803::
+do
+do
+registers[38] = (1)
+end
+
+end
+::p804::
+do
+do
+a = (23)
+z = 0
+q = registers[a]
+for f = 1, 15, 1 do
+    (q)[z + f] = registers[a + f]
+end
+end
+
+end
+::p805::
+do
+do
+registers[24] = new_frame(15)
+end
+
+end
+::p806::
+do
+do
+registers[24][0] = 15
+end
+
+end
+::p807::
+do
+do
+registers[25] = (14)
+end
+
+end
+::p808::
+do
+do
+registers[26] = (13)
+end
+
+end
+::p809::
+do
+do
+registers[27] = (12)
+end
+
+end
+goto p583
+::p811::
+do
+do
+registers[17] = (6)
+end
+
+end
+::p812::
+do
+do
+registers[18] = (5)
+end
+
+end
+::p813::
+do
+do
+registers[19] = (4)
+end
+
+end
+::p814::
+do
+do
+registers[20] = (3)
+end
+
+end
+goto p536
+::p816::
+do
+do
+registers[30] = (5)
+end
+
+end
+::p817::
+do
+do
+registers[31] = (6)
+end
+
+end
+::p818::
+do
+do
+registers[32] = (7)
+end
+
+end
+::p819::
+do
+do
+registers[33] = (0)
+end
+
+end
+::p820::
+do
+do
+registers[34] = (1)
+end
+
+end
+::p821::
+do
+do
+registers[35] = (2)
+end
+
+end
+::p822::
+do
+do
+registers[36] = (3)
+end
+
+end
+goto p606
+::p826::
+do
+do
+registers[13] = new_frame(15)
+end
+
+end
+::p827::
+do
+do
+registers[13][0] = 4
+end
+
+end
+::p828::
+do
+do
+registers[14] = (5)
+end
+
+end
+goto p550
+::p830::
+do
+do
+registers[25] = (14)
+end
+
+end
+::p831::
+do
+do
+registers[26] = (9)
+end
+
+end
+::p832::
+do
+do
+registers[27] = (8)
+end
+
+end
+::p833::
+do
+do
+registers[28] = (11)
+end
+
+end
+goto p541
+::p835::
+do
+do
+registers[17] = (6)
+end
+
+end
+::p836::
+do
+do
+registers[18] = (5)
+end
+
+end
+::p837::
+do
+do
+registers[19] = (4)
+end
+
+end
+goto p400
+::p839::
+do
+do
+registers[26] = registers[19] + 1
+end
+
+end
+::p840::
+do
+do
+registers[19] = registers[26] % 256
+end
+
+end
+::p841::
+do
+do
+(registers)[26] = registers[17][registers[19]]
+end
+
+end
+::p842::
+do
+do
+(registers)[26] = registers[20] + registers[26]
+end
+
+end
+goto p430
+end
+end
