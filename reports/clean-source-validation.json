@@ -1,0 +1,65 @@
+{
+  "artifact": {
+    "file": "andromeda.lua",
+    "sha256": "163fbc7b324bc335ffb9d67e325fde36faca0151462552458418188d8a16d219",
+    "bytes": 2535676,
+    "lines": 49417,
+    "functions": 411,
+    "gamesense_executed": false,
+    "scope": "Actual single-file artifact, including cooperative startup; GameSense UI, modules and engine are mocked. Gameplay callbacks are not exercised.",
+    "checks": [
+      {
+        "runtime": "lupa.luajit20",
+        "compiled": true,
+        "actual_artifact_initialization_completed": true,
+        "ui_calls": 1791,
+        "scheduled_resumptions": 10
+      },
+      {
+        "runtime": "lupa.luajit21",
+        "compiled": true,
+        "actual_artifact_initialization_completed": true,
+        "ui_calls": 1791,
+        "scheduled_resumptions": 10
+      }
+    ]
+  },
+  "archive": {
+    "file": "Andromeda_clean_source.zip",
+    "sha256": "c7620501001a9c47ed491078a459743228952b0d40643c7fb2ae61c3f49d41d6",
+    "bytes": 179545,
+    "members": [
+      "andromeda.lua"
+    ]
+  },
+  "pure_fixture_comparison": {
+    "matched_outputs": 338,
+    "invalid_inputs_rejected_by_both": 284,
+    "budget_skips": 2,
+    "differences": []
+  },
+  "ui_initialization_comparison": [
+    {
+      "runtime": "lupa.luajit20",
+      "baseline_completed": true,
+      "clean_completed": true,
+      "baseline_ui_calls": 1791,
+      "clean_ui_calls": 1791,
+      "equal_prefix": 1791,
+      "baseline_result": "None",
+      "clean_result": "None",
+      "all_ui_calls_equal": true
+    },
+    {
+      "runtime": "lupa.luajit21",
+      "baseline_completed": true,
+      "clean_completed": true,
+      "baseline_ui_calls": 1791,
+      "clean_ui_calls": 1791,
+      "equal_prefix": 1791,
+      "baseline_result": "None",
+      "clean_result": "None",
+      "all_ui_calls_equal": true
+    }
+  ]
+}
