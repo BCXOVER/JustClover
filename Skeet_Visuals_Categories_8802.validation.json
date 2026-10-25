@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "archive": "Skeet_Visuals_Categories_8802.zip",
+  "bytes": 10156891,
+  "sha256": "b536710d6d102afd015b8313aa14758f6c801d6f8e2a2d3c96956991432a39e6",
+  "dll_sha256": "6574e01d5d607574257cf33ec7f31072618f122d4c6988bfabdb688e038d36a0",
+  "manifest_files": 94,
+  "zip_crc_verified": true,
+  "visuals_categories_integrated": true,
+  "custom_backtrack_patch": false,
+  "patches_always_enabled": true,
+  "skinchanger_restyled": false,
+  "full_cs2_menu_replica": false,
+  "game_tested": false
+}
