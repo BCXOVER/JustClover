@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "native_binding_and_input_checks": {
+    "native_style_profiles": 5,
+    "esp_toggle_and_invalidation_cases": 25,
+    "input_ownership_cases": 12,
+    "real_win32_abi_cases": 7,
+    "native_renderer_depth_abi_cases": 10
+  },
+  "preview_layout_cases": 75,
+  "bounded_mesh_rotation_cases": 12,
+  "illustrative_geometry": true,
+  "uses_game_mdl_models": false,
+  "new_game_shaders": false,
+  "color_presets": [
+    "Glacier",
+    "Amethyst",
+    "Crimson",
+    "Champagne"
+  ],
+  "game_tested": false
+}
