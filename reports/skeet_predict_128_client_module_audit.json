@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "source_file": "client.dll",
+  "sha256": "183d42fac8a4ecc24dc02edf5f09122f37fe9e7533ca093a867718b25cfdeb03",
+  "pe_timestamp": 1697062949,
+  "mapped_image_size": 89165824,
+  "facts": {
+    "animation_yaw_limits": {
+      "rva": "0x43e928",
+      "bytes": "c78634030000000068c2c7863803000000006842"
+    },
+    "local_inventory_getter": {
+      "rva": "0x6c9af0",
+      "bytes": "8b8100830300c3"
+    },
+    "equip_update_gc_send_call": {
+      "rva": "0x6e6812",
+      "bytes": "e889471400"
+    }
+  },
+  "animation_yaw_limits": [
+    -58,
+    58
+  ],
+  "server_yaw_limit_verified": false,
+  "desync_60_patch_installed": false,
+  "inventory_manager_vtable_rva": "0xcace9c",
+  "inventory_manager_vtable_methods": 36,
+  "inventory_slot_29_sends_gc": true,
+  "gc_send_rva": "0x82afa0",
+  "inventory_added_to_release": false,
+  "dll_executed": false
+}
