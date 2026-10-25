@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "archive": "Skeet_Hitscan_Predict_AlwaysOn_8802.zip",
+  "bytes": 9983128,
+  "sha256": "2c02c13be3e85028e8f977807586afcb64048e82aa0689b27040d9a6ecec9f3e",
+  "dll_sha256": "706685c9537c9fd85dba787d62dec92559fc3e7dd48b562b3c72a72c8c95fcc9",
+  "manifest_files": 81,
+  "zip_crc_verified": true,
+  "patch_controls": 0,
+  "custom_backtrack_patch": false,
+  "menu_cs2_replica": false,
+  "awaiting": "Confirmed Gamesense CS2 visual reference",
+  "game_tested": false
+}
