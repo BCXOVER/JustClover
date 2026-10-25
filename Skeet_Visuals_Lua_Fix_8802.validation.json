@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "archive": "Skeet_Visuals_Lua_Fix_8802.zip",
+  "bytes": 10159314,
+  "sha256": "684fec9915a9a3e4801abe9104205704e7c24085592590b9cdb1d1361fca927f",
+  "dll_sha256": "76a439b874985a41d9963b6d5d2a10ca0e78344a4c2bd6e21c7d4f20aff1282c",
+  "manifest_files": 97,
+  "zip_crc_verified": true,
+  "supersampled_category_icons": true,
+  "lua_lifecycle_cases": 53,
+  "reload_category_and_values_preserved": true,
+  "unsupported_visuals_control_types": [
+    "textbox",
+    "listbox"
+  ],
+  "unsupported_layout_recovers_after_script_unload": true,
+  "custom_backtrack_patch": false,
+  "patches_always_enabled": true,
+  "inventory_changer_added": false,
+  "skin_peer_sync_added": false,
+  "game_tested": false
+}
