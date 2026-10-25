@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "native_binding_and_input_checks": {
+    "native_preset_controls_added": false,
+    "removed_color_presets": [
+      "Glacier",
+      "Amethyst",
+      "Crimson",
+      "Champagne"
+    ],
+    "esp_toggle_and_invalidation_cases": 20,
+    "category_child_preview_render_cases": 4,
+    "preview_render_without_hwnd_or_alpha": true,
+    "native_clip_restored": true,
+    "input_ownership_cases": 12,
+    "real_win32_abi_cases": 7,
+    "native_renderer_depth_abi_cases": 10
+  },
+  "preview_layout_cases": 75,
+  "bounded_mesh_rotation_cases": 12,
+  "always_open": true,
+  "model_and_controls_together": true,
+  "docking_layout_cases": 75,
+  "illustrative_geometry": true,
+  "uses_game_mdl_models": false,
+  "new_game_shaders": false,
+  "color_presets": [],
+  "native_preset_controls_removed": true,
+  "embedded_category_draw_pass": true,
+  "game_tested": false
+}
