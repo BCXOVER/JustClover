@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "native_skin_ui_cases": 27,
+  "weapon_skin_callback_without_inventory_editor": true,
+  "reselection_updates_same_weapon_preset": true,
+  "preset_capture_from_live_sources": true,
+  "ambiguous_weapon_rejected": true,
+  "knife_model_and_unique_weapon_context": true,
+  "game_tested": false
+}

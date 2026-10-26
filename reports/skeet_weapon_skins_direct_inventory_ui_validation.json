@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "extra_sync_checkboxes": 0,
+  "fresh_native_controls": 56,
+  "rgb_pickers": 4,
+  "native_button_callback_dispatches": 5,
+  "removed_inventory_child_recovery": true,
+  "resize_roundtrip_cases": 5,
+  "external_inventory_controls_survive_skin_invalidation": true,
+  "idle_and_reopen_allocate_nothing": true,
+  "weapon_and_paint_initial_values_preserved": true,
+  "source_sha256": "473736a2a315fda2ac634b4e244eff54119725838f6ea295449e568853432664",
+  "game_tested": false
+}
