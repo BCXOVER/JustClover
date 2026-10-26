@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "native_skin_ui_cases": 26,
+  "preset_capture_from_live_sources": true,
+  "ambiguous_weapon_rejected": true,
+  "knife_model_and_unique_weapon_context": true,
+  "game_tested": false
+}

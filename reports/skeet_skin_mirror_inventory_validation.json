@@ -1,0 +1,21 @@
+{
+  "owned_equipped_flags_cleared_before_delete": true,
+  "passed": true,
+  "portable_state_cases": 117,
+  "native_session_and_allocator_constructor": true,
+  "native_paint_kit_getter": true,
+  "native_type_cache_add_remove_executed": true,
+  "native_derived_inventory_event_abi_cases": 3,
+  "native_attribute_abi_cases": 3,
+  "utf8_name_tag_forwarded": true,
+  "native_palette_read_write_restore": true,
+  "external_palette_changes_preserved": true,
+  "missing_module_and_wrong_build_rejected": true,
+  "gc_equip_method_called": false,
+  "native_local_equip_state_and_loadout_slot_executed": true,
+  "native_local_loadout_setter_and_panorama_event": true,
+  "manual_loadout_choice_preserved": true,
+  "game_startup_executed": false,
+  "game_tested": false,
+  "palette_scope": "All local instances using this paint kit; only owned-item image caches refreshed"
+}

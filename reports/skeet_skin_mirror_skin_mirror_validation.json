@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "debounce_ms": 350,
+  "duplicate_prevention": true,
+  "preset_replacement": true,
+  "disable_restores_previous_loadout": true,
+  "later_manual_loadout_preserved": true,
+  "manual_delete_suppresses_recreation_until_change": true,
+  "account_change_drops_old_references": true,
+  "manually_created_items_not_deleted_by_mirror": true,
+  "game_tested": false,
+  "source_sha256": {
+    "skin_mirror.h": "4ece65a72f577cf5b52c5fec807bc529491723f8eca80ea15b6126ff6ef84f10",
+    "local_loadout.h": "8f26bb71bccf229660218e6108d3f857278ca50acf599161e8145433d9675b27"
+  }
+}
