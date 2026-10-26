@@ -1,0 +1,78 @@
+{
+  "passed": true,
+  "core_sha256": "bf5cd94cd3511f09f4241d952ed8bdde3eb8fb95d12534fbf4e23bd6b9789fc3",
+  "skin_tab_vtable": "0x43470684",
+  "skin_tab_bytes": 344,
+  "native_records_pointer_field": "0x130",
+  "record_node_hash": "0xb6218fec",
+  "record_node_type": 6,
+  "record_count": 65,
+  "record_bytes": 16,
+  "record_fields": {
+    "enabled": 0,
+    "stattrak": 1,
+    "quality_percent": 4,
+    "seed": 8,
+    "paint_kit": 12
+  },
+  "native_bind_function": "0x4333ff8d",
+  "native_bind_knife_slots": {
+    "T": 59,
+    "CT": 42
+  },
+  "knife_index_to_definition": [
+    500,
+    505,
+    506,
+    507,
+    508,
+    509,
+    515,
+    512,
+    516,
+    514,
+    519,
+    520,
+    522,
+    523,
+    503,
+    517,
+    518,
+    521,
+    525
+  ],
+  "knife_enabled_fields": [
+    "0xc8",
+    "0xcc"
+  ],
+  "knife_model_fields": [
+    "0xd0",
+    "0xd4"
+  ],
+  "glove_enabled_fields": [
+    "0xa8",
+    "0xac"
+  ],
+  "glove_definition_fields": [
+    "0xb0",
+    "0xb4"
+  ],
+  "glove_paint_fields": [
+    "0xb8",
+    "0xbc"
+  ],
+  "agent_enabled_fields": [
+    "0xc0",
+    "0xc4"
+  ],
+  "agent_combo_fields": [
+    "0x110",
+    "0x114"
+  ],
+  "agent_value_field": "0x5c",
+  "native_config_complete_callback": "0x4334c8ac",
+  "config_hook_bytes": 8,
+  "filter_by_weapon_changes_snapshot": false,
+  "paint_origin_weapon_used_as_model": false,
+  "game_tested": false
+}

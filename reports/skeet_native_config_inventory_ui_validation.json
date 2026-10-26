@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "fresh_native_controls": 7,
+  "extra_pages": 0,
+  "extra_buttons": 0,
+  "extra_sync_checkboxes": 0,
+  "rgb_pickers": 4,
+  "inline_name_utf8": true,
+  "unrelated_source_textboxes_preserved": true,
+  "name_per_weapon": true,
+  "typing_not_reset_by_polling": true,
+  "palette_write_bound_to_original_paint": true,
+  "pending_color_committed_with_menu_closed": true,
+  "palette_debounce_ms": 75,
+  "resize_roundtrip_cases": 5,
+  "idle_allocate_nothing": true,
+  "stale_inline_tag_recovery": true,
+  "source_sha256": "f6179ca5f145b6c351af323af0e57f1db9baab9be3e07e5fe7f3b581e793531f",
+  "game_tested": false
+}
