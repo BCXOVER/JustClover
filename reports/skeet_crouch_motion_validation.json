@@ -1,0 +1,34 @@
+{
+  "passed": true,
+  "checks": {
+    "coherent_pose": 313,
+    "native_selector": 42,
+    "forecast": 9,
+    "rejections": 21,
+    "bounds": 39,
+    "toggle_snapshot": 2
+  },
+  "native_blend_call_relocations": 34,
+  "native_bones_per_pose": 19,
+  "engine_trace_adapter_cases": 6,
+  "native_rotation_blend_cases": 4,
+  "pose_sets": 4,
+  "production_policy": {
+    "extrapolation_ticks": 8,
+    "interpolation_gap_ticks": 8,
+    "new_menu_controls": 1,
+    "minimum_forecast_samples": 3,
+    "direction_cosine_squared_min": 0.94
+  },
+  "custom_backtrack_depth_removed": true,
+  "native_lower_window_preserved": true,
+  "mismatch_fixed": {
+    "requested_tick": 98,
+    "native_applied_tick_before": 94,
+    "prepared_applied_tick_after": 98
+  },
+  "core_sha256": "bf5cd94cd3511f09f4241d952ed8bdde3eb8fb95d12534fbf4e23bd6b9789fc3",
+  "scope": "Execute production callbacks, native pose blending, selector and apply prefix.\n\nClosed x86 fixtures only. TLS, memcpy and engine hull tracing are controlled\nsubstitutes. No DLL entry point, protected startup or game process is run.\n",
+  "game_tested": false,
+  "real_network_ping_tested": false
+}

@@ -1,0 +1,181 @@
+{
+  "passed": true,
+  "resolver_cases": 34,
+  "execution_environment": "Unicorn x86 with controlled WinAPI stubs",
+  "windows_loader_tested": false,
+  "game_tested": false,
+  "cases": [
+    {
+      "base": "0x10000000",
+      "case": "exact screenshot profile with signature ending at section boundary",
+      "accepted": true
+    },
+    {
+      "base": "0x10000000",
+      "case": "wildcard ModRM 0x5f",
+      "accepted": true
+    },
+    {
+      "base": "0x10000000",
+      "case": "wildcard ModRM 0x7b",
+      "accepted": true
+    },
+    {
+      "base": "0x10000000",
+      "case": "wildcard ModRM 0x83",
+      "accepted": true
+    },
+    {
+      "base": "0x10000000",
+      "case": "wildcard ModRM 0xff",
+      "accepted": true
+    },
+    {
+      "base": "0x10000000",
+      "case": "missing overlay",
+      "accepted": false
+    },
+    {
+      "base": "0x10000000",
+      "case": "missing return signature",
+      "accepted": false
+    },
+    {
+      "base": "0x10000000",
+      "case": "missing reference signature",
+      "accepted": false
+    },
+    {
+      "base": "0x10000000",
+      "case": "ambiguous return signature",
+      "accepted": false
+    },
+    {
+      "base": "0x10000000",
+      "case": "ambiguous reference signature",
+      "accepted": false
+    },
+    {
+      "base": "0x10000000",
+      "case": "reference operand outside image",
+      "accepted": false
+    },
+    {
+      "base": "0x10000000",
+      "case": "reference operand in inaccessible page",
+      "accepted": false
+    },
+    {
+      "base": "0x10000000",
+      "case": "guarded text section",
+      "accepted": false
+    },
+    {
+      "base": "0x10000000",
+      "case": "invalid DOS header",
+      "accepted": false
+    },
+    {
+      "base": "0x10000000",
+      "case": "invalid NT header",
+      "accepted": false
+    },
+    {
+      "base": "0x10000000",
+      "case": "wrong machine x64",
+      "accepted": false
+    },
+    {
+      "base": "0x10000000",
+      "case": "section outside image",
+      "accepted": false
+    },
+    {
+      "base": "0x12000000",
+      "case": "exact screenshot profile with signature ending at section boundary",
+      "accepted": true
+    },
+    {
+      "base": "0x12000000",
+      "case": "wildcard ModRM 0x5f",
+      "accepted": true
+    },
+    {
+      "base": "0x12000000",
+      "case": "wildcard ModRM 0x7b",
+      "accepted": true
+    },
+    {
+      "base": "0x12000000",
+      "case": "wildcard ModRM 0x83",
+      "accepted": true
+    },
+    {
+      "base": "0x12000000",
+      "case": "wildcard ModRM 0xff",
+      "accepted": true
+    },
+    {
+      "base": "0x12000000",
+      "case": "missing overlay",
+      "accepted": false
+    },
+    {
+      "base": "0x12000000",
+      "case": "missing return signature",
+      "accepted": false
+    },
+    {
+      "base": "0x12000000",
+      "case": "missing reference signature",
+      "accepted": false
+    },
+    {
+      "base": "0x12000000",
+      "case": "ambiguous return signature",
+      "accepted": false
+    },
+    {
+      "base": "0x12000000",
+      "case": "ambiguous reference signature",
+      "accepted": false
+    },
+    {
+      "base": "0x12000000",
+      "case": "reference operand outside image",
+      "accepted": false
+    },
+    {
+      "base": "0x12000000",
+      "case": "reference operand in inaccessible page",
+      "accepted": false
+    },
+    {
+      "base": "0x12000000",
+      "case": "guarded text section",
+      "accepted": false
+    },
+    {
+      "base": "0x12000000",
+      "case": "invalid DOS header",
+      "accepted": false
+    },
+    {
+      "base": "0x12000000",
+      "case": "invalid NT header",
+      "accepted": false
+    },
+    {
+      "base": "0x12000000",
+      "case": "wrong machine x64",
+      "accepted": false
+    },
+    {
+      "base": "0x12000000",
+      "case": "section outside image",
+      "accepted": false
+    }
+  ],
+  "probe_sha256": "afd5e72b509ccadeba8f4bb03fc3a81d8340501aef0b87a34b0e79ece0d4e4bc",
+  "production_header_sha256": "4fbbc1aa506c8f2fe5ead2f7c16124ca099d695dcafdd3d4c7ba1b2d71c9267d"
+}

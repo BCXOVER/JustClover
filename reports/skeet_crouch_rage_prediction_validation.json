@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "forecast_checks": 305,
+  "native_worker_prolog_abi_cases": 6,
+  "core_sha256": "bf5cd94cd3511f09f4241d952ed8bdde3eb8fb95d12534fbf4e23bd6b9789fc3",
+  "horizon_ticks": 8,
+  "translation_cap_units": 64,
+  "minimum_samples": 3,
+  "long_forecast_minimum_samples": 4,
+  "collision_sweep_each_tick": true,
+  "native_time_window_preserved": true,
+  "historical_ring_never_modified": true,
+  "off_preserves_native_job": true,
+  "game_tested": false,
+  "scope": "Bounded x86 fixtures: real Rage worker prolog, production bridge and forecast.\nEngine hull tests are substituted, not an in-game accuracy benchmark.\n"
+}

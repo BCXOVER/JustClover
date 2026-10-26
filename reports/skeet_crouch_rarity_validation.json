@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "catalog_paint_kits": 1147,
+  "weapon_variants": 1713,
+  "context_dependent_paint_kits": 37,
+  "source_commit": "e63fc7fdb8dfb4f1873f0db214c0cc16613d5beb",
+  "source_schema_sha256": "469cf0ef8a2c53503f0845b60d3c0dc576625dfbbfb9aff885ee8282b45beaec",
+  "source": "Valve legacy item schema via SteamDatabase GameTracking",
+  "ordinal_names_validated": true,
+  "unknown_or_ambiguous_color": "neutral grey",
+  "selected_markers_keep_rarity_color": true,
+  "game_tested": false
+}

@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "native_record_defaults_executed": 65,
+  "native_profile_binding_executed": true,
+  "native_record_offsets": [
+    0,
+    1,
+    4,
+    8,
+    12
+  ],
+  "all_config_profiles_read_without_opening_skin_tab": true,
+  "m9_devtexture_stays_m9": true,
+  "filter_toggle_preserves_inventory_snapshot": true,
+  "agent_and_glove_team_settings_read": true,
+  "identical_team_items_merged": true,
+  "bad_node_and_model_rejected": true,
+  "source_sha256": "bf5cd94cd3511f09f4241d952ed8bdde3eb8fb95d12534fbf4e23bd6b9789fc3",
+  "game_startup_executed": false,
+  "game_tested": false,
+  "scope": "Native record initialization and binding executed in closed x86 fixture; schema/UI event boundaries mocked."
+}
