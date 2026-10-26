@@ -1,0 +1,32 @@
+{
+  "baseline_commit": "9b16e59f1bc1fd6fa47d966593aa90696715fbb3",
+  "reports": [
+    "resolver_validation",
+    "rarity_validation",
+    "scan_patch_validation",
+    "precision_validation",
+    "client_module_audit",
+    "inventory_validation",
+    "skin_native_validation"
+  ],
+  "unchanged_source_sha256": {
+    "scan_patch.h": "280118cc8afbb848f6f84cdbdd250f0779bafe88ab3331db38e7ae78332b2421",
+    "precision_patch.h": "3e483dfb8382175e7dafc3b7d3e40ec70c4670b4be863fdf194117b17e55c0fe",
+    "overlay_loader.h": "4fbbc1aa506c8f2fe5ead2f7c16124ca099d695dcafdd3d4c7ba1b2d71c9267d",
+    "skin_rarity.h": "92e94ddd57b8e55f1dbf6449eab5e3e06baea8f638d1f407effa127242db797e",
+    "inventory_catalog.h": "7c9241b0ea20144730b7c28ef7f7b7e5f32c4c413177cf595cc1257108d69e7f",
+    "local_inventory.h": "fb2237fc39a22dbb7b6b305f143e187eaff9329e595be72173d4379a2c69eb3f",
+    "local_inventory_client.h": "6d95df9da16de931ff45bcfc88bfe86ce351aa9e35e42dc3ca82857401481e95",
+    "local_inventory_ui.h": "4a75205fc83cea1884b3e3ee6ac057117b20416b5df3b957a3d05f062e301a72",
+    "skin_mirror.h": "876d68ae31aee7947fb8916f1efefa23ecfcd6334d0f7e87b58f521bf0779b44",
+    "skin_mirror_ui.h": "6ead874218b3009aff2e089e9c85c865f37555c62b6e19a9bbafd7dfb7961289",
+    "skin_native_state.h": "e328f4b77aebb3b54a129d4924b2c1e86ecad29ef50d12130cc1959ca32d9601",
+    "skin_native_client.h": "b46d53b3d66916b5ca5c31b22ea127894169964a098ad99e4a3bf1a5c81e93b5",
+    "local_loadout.h": "8f03176fb879bcedf5908ed2a7dba0654b95d78981193de46d8c0258b882f081",
+    "local_loadout_client.h": "c2c510f8bfaa9081d19a805d84094cb77b57ec0bcb79ea784a2391efb6651365",
+    "local_client_interfaces.h": "301701051837c3204e6e4546e5f9df4de696455a619bacda446d7b3372f13e68",
+    "local_weapon_names.h": "c7981340d25a056e7d8187c39aa95286e009e6c539b8725381987469820dfd4a",
+    "agent_inventory_client.h": "878313656736416119982f93ae5acde7c2b9961ce4341cf4d6e5ea6ca1451893"
+  },
+  "note": "Reports reused only for byte-identical modules; new motion/Rage bridge, DT removal, UI, and final PE are validated afresh."
+}
