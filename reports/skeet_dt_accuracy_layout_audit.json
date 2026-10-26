@@ -1,0 +1,76 @@
+{
+  "passed": true,
+  "core_sha256": "bf5cd94cd3511f09f4241d952ed8bdde3eb8fb95d12534fbf4e23bd6b9789fc3",
+  "client_sha256": "183d42fac8a4ecc24dc02edf5f09122f37fe9e7533ca093a867718b25cfdeb03",
+  "recvprop_initializers": [
+    {
+      "field": "clip",
+      "rva": "0x6f33",
+      "offset": "0x3274",
+      "instruction": "c70560e5341574320000"
+    },
+    {
+      "field": "next_primary_attack",
+      "rva": "0x647b",
+      "offset": "0x3248",
+      "instruction": "c705a8e0341548320000"
+    },
+    {
+      "field": "next_attack",
+      "rva": "0xa8ab",
+      "offset": "0x2d80",
+      "instruction": "c705880f3515802d0000"
+    },
+    {
+      "field": "health",
+      "rva": "0x3a7b8",
+      "offset": "0x100",
+      "instruction": "c7052440361500010000"
+    }
+  ],
+  "sites": [
+    {
+      "address": "0x4341bc00",
+      "bytes": "33d20fb64c240bb880000000f30f1087d4000000",
+      "length": 20
+    },
+    {
+      "address": "0x433ce8ab",
+      "bytes": "5e83c41cc20800",
+      "length": 7
+    },
+    {
+      "address": "0x4341b4c8",
+      "bytes": "81ec98720000",
+      "length": 6
+    },
+    {
+      "address": "0x4341c736",
+      "bytes": "83f8407ce5",
+      "length": 5
+    },
+    {
+      "address": "0x4341c727",
+      "bytes": "8984c4d4020000",
+      "length": 7
+    },
+    {
+      "address": "0x4341c72e",
+      "bytes": "898cc4d0020000",
+      "length": 7
+    },
+    {
+      "address": "0x4341c7a7",
+      "bytes": "8d8424d4020000",
+      "length": 7
+    },
+    {
+      "address": "0x4341c7d3",
+      "bytes": "8db424d0020000",
+      "length": 7
+    }
+  ],
+  "new_instruction_bytes": 66,
+  "host_exception_handlers_do_not_overlap_new_sites": true,
+  "game_tested": false
+}

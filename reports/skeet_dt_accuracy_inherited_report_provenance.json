@@ -1,0 +1,26 @@
+{
+  "baseline_commit": "aa9b5d97e8377d35b39c511b2769a098e9aae3db",
+  "reports": [
+    "resolver_validation",
+    "rarity_validation",
+    "scan_patch_validation",
+    "precision_validation",
+    "motion_validation",
+    "client_module_audit"
+  ],
+  "unchanged_source_sha256": {
+    "scan_patch.h": "280118cc8afbb848f6f84cdbdd250f0779bafe88ab3331db38e7ae78332b2421",
+    "precision_patch.h": "3e483dfb8382175e7dafc3b7d3e40ec70c4670b4be863fdf194117b17e55c0fe",
+    "motion_patch.h": "17385939482c910a6571f522969a4bffe14b5f1c6b55bf7095eef11c483a7835",
+    "motion_plan.h": "f2f851c127a6e908a412788a2aa50b9b5205534f426f4f8db88af2a30d153980",
+    "motion_records.h": "cfbd8205c0b5901ed0ac317aeb858a342c3575fcd67ebbc5136ac94413c5c209",
+    "motion_trace.h": "e296e592023e1668190e9f685fd725c6630a5748ce942ffb2a1e1ec45ab2832d",
+    "motion_settings.h": "98711254d6bde228cb2615107309ffa966e0d92ad2e7b6e55f7569b6f1a5dd6d",
+    "motion_blend_sites.h": "d21d3e2eac47a335653da8014c399619a36f9d19e6732c42e603b51725092d56",
+    "record_eligibility.h": "5191e68b1996a0207ce04c82ae4cbc217659a7c1e87d05ee8c2d888da5305d97",
+    "overlay_loader.h": "4fbbc1aa506c8f2fe5ead2f7c16124ca099d695dcafdd3d4c7ba1b2d71c9267d",
+    "skin_rarity.h": "92e94ddd57b8e55f1dbf6449eab5e3e06baea8f638d1f407effa127242db797e",
+    "inventory_catalog.h": "7c9241b0ea20144730b7c28ef7f7b7e5f32c4c413177cf595cc1257108d69e7f"
+  },
+  "note": "These unchanged modules retain their earlier passing reports. New combined patch ownership is validated separately."
+}
