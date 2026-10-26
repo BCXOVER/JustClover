@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "native_skin_ui_cases": 29,
+  "weapon_skin_callback_without_inventory_editor": true,
+  "reselection_updates_same_weapon_preset": true,
+  "config_completion_trampoline_and_original_children_executed": true,
+  "native_profile_array_capture": true,
+  "catalog_weapon_inference_removed": true,
+  "cross_weapon_finish_preserves_model": true,
+  "config_snapshot_without_visiting_each_weapon": true,
+  "game_tested": false
+}

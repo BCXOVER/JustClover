@@ -1,0 +1,47 @@
+{
+  "passed": true,
+  "client_sha256": "183d42fac8a4ecc24dc02edf5f09122f37fe9e7533ca093a867718b25cfdeb03",
+  "recvprop_initializers": [
+    {
+      "name": "m_AttributeManager",
+      "initializer_rva": "0x60c00",
+      "value": "0x2d90",
+      "instruction": "c70554203915902d0000"
+    },
+    {
+      "name": "m_Item",
+      "initializer_rva": "0x5fe9e",
+      "value": "0x40",
+      "instruction": "c705941d391540000000"
+    },
+    {
+      "name": "m_iItemDefinitionIndex",
+      "initializer_rva": "0x621ab",
+      "value": "0x1ea",
+      "instruction": "c705f8303915ea010000"
+    },
+    {
+      "name": "m_szCustomName",
+      "initializer_rva": "0x62524",
+      "value": "0x27c",
+      "instruction": "c7059c3239157c020000"
+    },
+    {
+      "name": "m_szCustomName buffer bytes",
+      "initializer_rva": "0x62542",
+      "value": "0xa1",
+      "instruction": "c7057c323915a1000000"
+    }
+  ],
+  "custom_name_absolute_offset": "0x304c",
+  "custom_name_buffer_bytes": 161,
+  "weapon_definition_absolute_offset": "0x2fba",
+  "weapon_handles_offset": "0x2e08",
+  "weapon_handle_count": 64,
+  "owner_handle_offset": "0x14c",
+  "schema_vtable_rva": "0xcad6a8",
+  "schema_definition_getter_rva": "0x6d16b0",
+  "schema_attribute_getter_rva": "0x6d1720",
+  "native_textbox_input": "0x43344b4d",
+  "game_tested": false
+}
