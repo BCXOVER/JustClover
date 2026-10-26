@@ -1,0 +1,197 @@
+{
+  "passed": true,
+  "native_loader_lifecycle_cases": 9,
+  "guard_load_precedes_original_neverlose_load": true,
+  "original_ntopenfile_compatibility_path_preserved": true,
+  "remote_loadlibrary_owner_rva_verified": true,
+  "unicode_patch_dll_path": true,
+  "timeout_allocation_retained": true,
+  "artifacts": [
+    {
+      "name": "injector.exe",
+      "bytes": 202240,
+      "sha256": "75b8491019e01b9c29e8eebc927d9cd08319ddcd8c7ba67826574d815d824042",
+      "machine": "x86 PE32",
+      "imports": {
+        "USER32.dll": [
+          "FindWindowA",
+          "GetWindowThreadProcessId"
+        ],
+        "api-ms-win-crt-heap-l1-1-0.dll": [
+          "_set_new_mode",
+          "calloc",
+          "free",
+          "malloc",
+          "realloc"
+        ],
+        "api-ms-win-crt-private-l1-1-0.dll": [
+          "memchr",
+          "wcsrchr"
+        ],
+        "api-ms-win-crt-runtime-l1-1-0.dll": [
+          "__p___argc",
+          "__p___argv",
+          "_cexit",
+          "_configure_narrow_argv",
+          "_crt_atexit",
+          "_errno",
+          "_exit",
+          "_fpreset",
+          "_initialize_narrow_environment",
+          "_initterm",
+          "_set_app_type",
+          "_set_invalid_parameter_handler",
+          "abort",
+          "exit",
+          "signal"
+        ],
+        "api-ms-win-crt-stdio-l1-1-0.dll": [
+          "__acrt_iob_func",
+          "__p__commode",
+          "__p__fmode",
+          "__stdio_common_vfprintf",
+          "__stdio_common_vsprintf",
+          "fflush",
+          "fputc",
+          "fwrite",
+          "putchar",
+          "puts"
+        ],
+        "api-ms-win-crt-string-l1-1-0.dll": [
+          "_wcsicmp",
+          "isxdigit",
+          "strcmp",
+          "strlen",
+          "strncmp",
+          "wcscat_s",
+          "wcscpy",
+          "wcslen"
+        ],
+        "KERNEL32.dll": [
+          "AcquireSRWLockExclusive",
+          "AcquireSRWLockShared",
+          "CloseHandle",
+          "CreateRemoteThread",
+          "CreateToolhelp32Snapshot",
+          "DeleteCriticalSection",
+          "EnterCriticalSection",
+          "FlsAlloc",
+          "FlsGetValue",
+          "FlsSetValue",
+          "FreeLibrary",
+          "GetCurrentProcess",
+          "GetExitCodeThread",
+          "GetFileAttributesW",
+          "GetFullPathNameA",
+          "GetLastError",
+          "GetModuleFileNameW",
+          "GetModuleHandleA",
+          "GetModuleHandleExW",
+          "GetModuleHandleW",
+          "GetProcAddress",
+          "GetProcessId",
+          "GetSystemDirectoryW",
+          "InitOnceExecuteOnce",
+          "InitializeCriticalSection",
+          "IsWow64Process",
+          "K32EnumProcessModules",
+          "LeaveCriticalSection",
+          "LoadLibraryExW",
+          "LoadLibraryW",
+          "Module32FirstW",
+          "Module32NextW",
+          "OpenProcess",
+          "ReadProcessMemory",
+          "ReleaseSRWLockExclusive",
+          "ReleaseSRWLockShared",
+          "SetConsoleTitleA",
+          "SetLastError",
+          "SetUnhandledExceptionFilter",
+          "Sleep",
+          "VirtualAllocEx",
+          "VirtualFreeEx",
+          "VirtualProtect",
+          "VirtualProtectEx",
+          "VirtualQuery",
+          "WaitForSingleObject",
+          "WriteProcessMemory"
+        ],
+        "api-ms-win-crt-math-l1-1-0.dll": [
+          "__setusermatherr",
+          "frexp",
+          "pow"
+        ],
+        "api-ms-win-crt-environment-l1-1-0.dll": [
+          "__p__environ"
+        ]
+      }
+    },
+    {
+      "name": "missing_entity_fix.dll",
+      "bytes": 32768,
+      "sha256": "ef30ff7c78b21c1f03d55e80da7d6703ebc41abb112530d9884624307c75219b",
+      "machine": "x86 PE32",
+      "imports": {
+        "api-ms-win-crt-runtime-l1-1-0.dll": [
+          "__p___argc",
+          "__p___argv",
+          "__p___wargv",
+          "_configure_narrow_argv",
+          "_configure_wide_argv",
+          "_crt_at_quick_exit",
+          "_crt_atexit",
+          "_execute_onexit_table",
+          "_exit",
+          "_initialize_narrow_environment",
+          "_initialize_onexit_table",
+          "_initialize_wide_environment",
+          "_initterm",
+          "_register_onexit_function",
+          "abort"
+        ],
+        "KERNEL32.dll": [
+          "DeleteCriticalSection",
+          "DisableThreadLibraryCalls",
+          "EnterCriticalSection",
+          "FlushInstructionCache",
+          "GetCurrentProcess",
+          "GetLastError",
+          "GetModuleHandleW",
+          "InitializeCriticalSection",
+          "LeaveCriticalSection",
+          "Sleep",
+          "TlsGetValue",
+          "VirtualProtect",
+          "VirtualQuery"
+        ],
+        "api-ms-win-crt-stdio-l1-1-0.dll": [
+          "__acrt_iob_func",
+          "__stdio_common_vfprintf",
+          "__stdio_common_vfwprintf",
+          "fwrite"
+        ],
+        "api-ms-win-crt-environment-l1-1-0.dll": [
+          "__p__environ",
+          "__p__wenviron"
+        ],
+        "api-ms-win-crt-heap-l1-1-0.dll": [
+          "_set_new_mode",
+          "calloc",
+          "free"
+        ],
+        "api-ms-win-crt-time-l1-1-0.dll": [
+          "__daylight",
+          "__timezone",
+          "__tzname",
+          "_tzset"
+        ],
+        "api-ms-win-crt-string-l1-1-0.dll": [
+          "strlen",
+          "strncmp"
+        ]
+      }
+    }
+  ],
+  "game_tested": false,
+  "scope": "Closed x86 load-argument and allocation lifecycle checks; WinAPI substituted."
+}

@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "engine_sha256": "bcca98731eab8b72d1ef34fa5fe420f26ac98e8dd1d91698171d0ecd9935faa6",
+  "engine_image_size": 60555264,
+  "original_missing_ent_3_reproduced": true,
+  "native_queue_cases": 128,
+  "runtime_scanner_and_atomic_patch_cases": 24,
+  "portable_pattern_checks": "site=d7092 checks=46 two-byte patch verified",
+  "patch_bytes": 2,
+  "original_bytes": "ff37",
+  "replacement_bytes": "eb18",
+  "engine_rva": "0xd7092",
+  "valid_entity_postdataupdates_preserved": true,
+  "missing_entries_skip_to_native_loop_advance": true,
+  "stage_begin_end_and_profiling_cleanup_preserved": true,
+  "no_null_vtable_call": true,
+  "game_tested": false,
+  "protected_neverlose_startup_tested": false,
+  "scope": "Actual engine post-data loop plus production patch in closed x86 fixtures.\nNo game process, uploaded executable or protected core startup is run.\n"
+}
