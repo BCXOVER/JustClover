@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "scope": "Static module bytes; execution cases are separate closed Unicorn fixtures.",
+  "client_item_id_getter_rva": "0x6bce60",
+  "client_soc_getter_rva": "0x7169b0",
+  "item_view_high_low_account_offsets": [
+    "0x200",
+    "0x204",
+    "0x208"
+  ],
+  "engine_load_named_sky_rva": "0x137780",
+  "sky_name_register": "ECX",
+  "sky_returns_success_in_al": true,
+  "native_backend_scissor_rva": "0x0dd99e",
+  "d3d_scissor_render_state": 174,
+  "scissor_false_disables": true,
+  "game_tested": false,
+  "material_enumeration_slots": [
+    86,
+    87,
+    88,
+    89
+  ],
+  "material_invalid_handle": 65535,
+  "materialsystem_sha256": "011e6fb57fa1856ae946a442a2aa2c930d5b15447b03c7e67a64337571f92cce",
+  "menu_render_return_rva": "0x9c628",
+  "popup_submission_after_native_tabs": true
+}

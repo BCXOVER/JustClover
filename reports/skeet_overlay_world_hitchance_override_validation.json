@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "snapshot_native_branch_threshold_cases": 72,
+  "preserved_integer_and_sse_state": true,
+  "native_hc_not_overwritten": true,
+  "early_zero_and_threshold_share_snapshot": true,
+  "disabled_uses_native_chance": true,
+  "game_tested": false
+}

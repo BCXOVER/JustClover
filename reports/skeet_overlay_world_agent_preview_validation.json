@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "game_tested": false,
+  "native_mdl_constructor_executed": true,
+  "native_set_mdl_string_and_merge_dispatch_executed": true,
+  "native_mdl_draw_transform_executed": true,
+  "owned_bone_callback_and_matrix_projection_checked": true,
+  "actual_model_draw_and_game_asset_io": "mocked boundaries",
+  "native_texture_handle_and_d3d_texture_getters_executed": true,
+  "render_target_creations": 1,
+  "cpu_texture_registrations": 1,
+  "repeat_frames_no_model_reloads": true,
+  "state_restore_checked": [
+    "matrix stacks",
+    "matrix mode",
+    "render target push/pop",
+    "cubemap",
+    "clear color",
+    "studio camera",
+    "ambient cube",
+    "local lights",
+    "color/alpha",
+    "forced material"
+  ],
+  "device_loss_rebind_checked": true,
+  "existing_shadow_interface_preserved": true,
+  "source_sha256": "7f3ece2f8ccb7351b7496a56c62cd097ec66934f5d84e101a4b5c7f5e0a70fc2"
+}

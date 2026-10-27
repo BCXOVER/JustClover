@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "core_sha256": "bf5cd94cd3511f09f4241d952ed8bdde3eb8fb95d12534fbf4e23bd6b9789fc3",
+  "frame_setup_cases": 24,
+  "native_generator_cases": 24,
+  "threshold_cases": 98172,
+  "full_sample_loop_cases": 252,
+  "relocated_scope_guard_cases": 6,
+  "distinct_seeds": [
+    32,
+    128
+  ],
+  "scope": "Original x86 generator and caller blocks, relocated scopes, production-generated thunks; engine spread and tracing are mocked.",
+  "game_tested": false
+}

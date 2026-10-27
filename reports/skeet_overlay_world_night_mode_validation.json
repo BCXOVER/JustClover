@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "material_fixture_count": 200,
+  "max_material_operations_per_frame": 64,
+  "only_world_and_static_props_modified": true,
+  "intensity_zero_preserves_original": true,
+  "palette_update_bounded": true,
+  "rescan_deduplicates_materials": true,
+  "retained_references_balanced": true,
+  "map_reset_restores_then_recaptures": true,
+  "disable_restores_owned_modulation": true,
+  "later_external_modulation_preserved_on_disable": true,
+  "source_sha256": "831e1498c2b0bba64a30d56f155a2140f099b34b45b9c88327d4eaed87943c8c",
+  "game_tested": false
+}

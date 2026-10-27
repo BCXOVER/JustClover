@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "native_append_and_geometry_cases": 899,
+  "off_or_standing_fast_path_cases": 504,
+  "native_pre_trace_direction_cases": 2,
+  "hook_placements": 3,
+  "native_point_stride": 24,
+  "historical_duck_record_offset": "0x3c",
+  "source_points_centers_and_records_preserved": true,
+  "all_metadata_bytes_preserved": true,
+  "both_center_append_sites_preserved": true,
+  "sse_flags_registers_stack_preserved": true,
+  "head_scale": 0.88,
+  "torso_scale": 0.82,
+  "other_hitgroups_unchanged": true,
+  "crouch_blend_start": 0.55,
+  "crouch_blend_end": 0.9,
+  "owned_instruction_bytes": 10,
+  "core_sha256": "bf5cd94cd3511f09f4241d952ed8bdde3eb8fb95d12534fbf4e23bd6b9789fc3",
+  "game_tested": false,
+  "scope": "Actual native pre-scan append and caller fragments with compiled geometry hook.\nNo original DLL startup or game process is executed. Native record capture and\npoint/ray preparation are bounded x86 fixtures, not an in-game accuracy test.\n"
+}

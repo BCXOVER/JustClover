@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "esp_element_rows_moved_to_preview_only": 10,
+  "unrelated_esp_controls_retained": 3,
+  "original_esp_models_remain_visible_and_unchanged": true,
+  "preview_rgba_forwards_original_callbacks_once": true,
+  "noneditable_rgba_unchanged": true,
+  "rage_windowed_cursor_without_preview_open": true,
+  "per_weapon_capture_cases": 4,
+  "native_profile_mapping_cases": 8,
+  "cloned_renderer_supported_and_chained": true,
+  "later_lua_hook_not_rewrapped": true,
+  "preview_title_drawn_with_live_child_renderer": true,
+  "preview_inside_menu": true,
+  "preview_visible_outside_native_category_scissor": true,
+  "preview_click_survives_geometry_then_draw": true,
+  "preview_escape_closes_settings": true,
+  "game_tested": false
+}
