@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "lua_version": "LuaJIT 2.1",
+  "restricted_api_fixture": true,
+  "modules_loaded_without_external_requires": true,
+  "internal_ui_values_survive_lua_reload": true,
+  "world_fog_clamps_end_after_start": true,
+  "fog_and_lighting_restore_on_disable": true,
+  "sky_restore_and_invalid_name_rejected": true,
+  "sticker_search_bounded_choices": 62,
+  "four_slots_and_per_weapon_isolation": true,
+  "none_removes_sticker": true,
+  "per_weapon_config_serialization_by_sticker_id": true,
+  "config_load_ignores_transient_filtered_combo_indices": true,
+  "invalid_sticker_config_is_atomic_noop": true,
+  "knives_hide_sticker_editor": true,
+  "watermark_cpu_frequency_usage_and_ram_drawn": true,
+  "uploaded_hit_log_rendered": true,
+  "compiled_script_sha256": "ebc9010deecc0a0931b5debbb8a168253294e6bd9764fd1bf45d961d68dd97db",
+  "game_tested": false
+}

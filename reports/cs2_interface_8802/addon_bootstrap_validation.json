@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "warmup_delay_ms": 1500,
+  "exact_embedded_script_written_once": true,
+  "native_loader_filename_abi": true,
+  "reload_after_lua_unload_detected": true,
+  "minimized_resume_does_not_reload_immediately": true,
+  "loader_permission_scoped_and_restored": true,
+  "filesystem_and_lua_loader_mocked": true,
+  "game_tested": false
+}

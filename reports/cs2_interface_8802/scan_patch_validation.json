@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "core_sha256": "bf5cd94cd3511f09f4241d952ed8bdde3eb8fb95d12534fbf4e23bd6b9789fc3",
+  "threshold_cases": 49995,
+  "record_guard_cases": 180,
+  "live_switch_checks_without_code_rewrite": 48,
+  "changed_threshold_decisions_across_three_locations": 558,
+  "code_locations": [
+    "0x10000000",
+    "0x60000000",
+    "0xf0000000"
+  ],
+  "scope": "Original x86 callers and production-generated thunks; both mocked results and original native empty-history/teleport rejection paths. Engine index query and snapshot destructor mocked.",
+  "windows_game_tested": false
+}

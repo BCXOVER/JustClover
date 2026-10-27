@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "native_d3d_scissor_boolean_semantics_verified": true,
+  "presentation_cases": 54,
+  "native_text_xy_only": true,
+  "native_text_abi_and_preserved_registers": true,
+  "default_menu_friendly_ambiguous_passthrough": true,
+  "window_drag_capture_cancel": true,
+  "native_flags_use_bitmasks": true,
+  "real_gear_frame_click_does_not_toggle_peek": true,
+  "opening_click_suppressed_until_release": true,
+  "popup_visible_same_frame": true,
+  "popup_occludes_main_gears": true,
+  "native_rage_views": 18,
+  "gear_groups": 7,
+  "override_binds_in_popup": true,
+  "blank_companions_routed": true,
+  "source_models_preserved": true,
+  "native_callbacks_forwarded_once": true,
+  "retired_callback_invalidated": true,
+  "popup_close_checked": true,
+  "native_key_capture_keeps_parent_popup": true,
+  "damage_anchor_variants": [
+    "checkbox",
+    "label",
+    "hotkey"
+  ],
+  "game_tested": false
+}
