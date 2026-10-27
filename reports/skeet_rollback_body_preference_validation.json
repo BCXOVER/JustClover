@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "portable_selection_cases": 1264,
+  "native_hook_and_point_copy_cases": 30,
+  "native_failed_hitchance_backup_retries": 12,
+  "integer_and_sse_state_preserved": true,
+  "point_payload_copied_by_native_code": true,
+  "only_original_evaluated_pool_used": true,
+  "priority_mask_preserved": true,
+  "existing_alternates_preserved": true,
+  "custom_backtrack_added": false,
+  "new_prediction_horizon_added": false,
+  "owned_instruction_bytes": 7,
+  "site": "0x43360774",
+  "scope": "Native Rage scan worker first finalized point pool; lethal chest/stomach over selected leg, with native backup retry available",
+  "core_sha256": "bf5cd94cd3511f09f4241d952ed8bdde3eb8fb95d12534fbf4e23bd6b9789fc3",
+  "game_tested": false
+}

@@ -1,0 +1,58 @@
+{
+  "baseline_commit": "75c36c2980dd48dff405e2594c9a4cba55e7b84f",
+  "reports": [
+    "resolver_validation",
+    "rarity_validation",
+    "scan_patch_validation",
+    "precision_validation",
+    "client_module_audit",
+    "body_preference_validation",
+    "inventory_validation",
+    "skin_native_validation",
+    "launcher_validation",
+    "motion_validation"
+  ],
+  "unchanged_source_sha256": {
+    "source/skeet/scan_patch.h": "280118cc8afbb848f6f84cdbdd250f0779bafe88ab3331db38e7ae78332b2421",
+    "source/skeet/precision_patch.h": "3e483dfb8382175e7dafc3b7d3e40ec70c4670b4be863fdf194117b17e55c0fe",
+    "source/skeet/motion_plan.h": "f2f851c127a6e908a412788a2aa50b9b5205534f426f4f8db88af2a30d153980",
+    "source/skeet/motion_records.h": "eb791362cad0c4effd31e6ff8bbc06fcf63c2c55bc89b1909fabb6e6754ca882",
+    "source/skeet/motion_trace.h": "e296e592023e1668190e9f685fd725c6630a5748ce942ffb2a1e1ec45ab2832d",
+    "source/skeet/motion_blend_sites.h": "d21d3e2eac47a335653da8014c399619a36f9d19e6732c42e603b51725092d56",
+    "source/skeet/record_eligibility.h": "5191e68b1996a0207ce04c82ae4cbc217659a7c1e87d05ee8c2d888da5305d97",
+    "source/skeet/body_preference.h": "13d6fd19334b25a0c049bdcd8086ac50f83fbc11dff0d84a4c48560e34a71a83",
+    "source/skeet/body_preference_patch.h": "dd8a8e65b01aaeb5ccb273266c2858365462ba6b7b165413f46a714f9f614113",
+    "source/skeet/overlay_loader.h": "4fbbc1aa506c8f2fe5ead2f7c16124ca099d695dcafdd3d4c7ba1b2d71c9267d",
+    "source/skeet/skin_rarity.h": "92e94ddd57b8e55f1dbf6449eab5e3e06baea8f638d1f407effa127242db797e",
+    "source/skeet/inventory_catalog.h": "7c9241b0ea20144730b7c28ef7f7b7e5f32c4c413177cf595cc1257108d69e7f",
+    "source/skeet/local_inventory.h": "fb2237fc39a22dbb7b6b305f143e187eaff9329e595be72173d4379a2c69eb3f",
+    "source/skeet/local_inventory_client.h": "6d95df9da16de931ff45bcfc88bfe86ce351aa9e35e42dc3ca82857401481e95",
+    "source/skeet/local_inventory_ui.h": "4a75205fc83cea1884b3e3ee6ac057117b20416b5df3b957a3d05f062e301a72",
+    "source/skeet/skin_mirror.h": "876d68ae31aee7947fb8916f1efefa23ecfcd6334d0f7e87b58f521bf0779b44",
+    "source/skeet/skin_mirror_ui.h": "6ead874218b3009aff2e089e9c85c865f37555c62b6e19a9bbafd7dfb7961289",
+    "source/skeet/skin_native_state.h": "e328f4b77aebb3b54a129d4924b2c1e86ecad29ef50d12130cc1959ca32d9601",
+    "source/skeet/skin_native_client.h": "b46d53b3d66916b5ca5c31b22ea127894169964a098ad99e4a3bf1a5c81e93b5",
+    "source/skeet/local_loadout.h": "8f03176fb879bcedf5908ed2a7dba0654b95d78981193de46d8c0258b882f081",
+    "source/skeet/local_loadout_client.h": "c2c510f8bfaa9081d19a805d84094cb77b57ec0bcb79ea784a2391efb6651365",
+    "source/skeet/local_client_interfaces.h": "301701051837c3204e6e4546e5f9df4de696455a619bacda446d7b3372f13e68",
+    "source/skeet/local_weapon_names.h": "c7981340d25a056e7d8187c39aa95286e009e6c539b8725381987469820dfd4a",
+    "source/skeet/agent_inventory_client.h": "878313656736416119982f93ae5acde7c2b9961ce4341cf4d6e5ea6ca1451893",
+    "source/steam/steam.cpp": "d84c3e8b4e12a3ae11c66c37a59fccbaad57b4bda78a39a824e844c55fcca20f",
+    "source/steam/steam_discovery.h": "2b1c9d54de35550d04f73c832fb16b868c30b9acf4a7a77ddc8dbd870b57f9d3",
+    "source/steam/legacy_launch.h": "3d49eb8427536ae6ec20b9b91539ca36260a04f8003b6f8ff6e9491a19fd47c0",
+    "source/steam/launch_policy.h": "55a8d54aa9cd14b0bb37af628bc3aaa9649a8d94b150e80c35337f234161740f",
+    "source/skeet/motion_patch.h": "17385939482c910a6571f522969a4bffe14b5f1c6b55bf7095eef11c483a7835",
+    "source/skeet/motion_settings.h": "f02310fef0b8683c4005257582c2dcadd73e22a672ffdd5c58b0a2e82c10b29b"
+  },
+  "fresh_reports": [
+    "rollback_validation",
+    "visuals_validation",
+    "crouch_multipoint_validation",
+    "release_validation"
+  ],
+  "note": "New record/animation hooks and mode UI removed. Remaining common modules compared byte-for-byte; UI, original-site restoration and crouch geometry checked separately. No in-game accuracy claim.",
+  "restored_from_commit": "61623fc178fadf54a1a0f676a09e161e3af5d039",
+  "restored_source_sha256": {
+    "source/skeet/crouch_multipoint.h": "95fd8b3fa31bf8fb4a447b8fdd90f0c11148bd6046c2049597f2e862637cb7f4"
+  }
+}

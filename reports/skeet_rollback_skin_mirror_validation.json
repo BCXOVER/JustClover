@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "pending_agent_retains_old_team_selection": true,
+  "pending_agent_does_not_delay_weapon_config": true,
+  "resolved_agent_side_replaces_independently": true,
+  "name_only_update_keeps_inventory_id": true,
+  "name_clear_keeps_inventory_id": true,
+  "debounce_ms": 350,
+  "native_snapshot_debounce_ms": 0,
+  "default_agent_does_not_block_weapon_snapshot": true,
+  "duplicate_prevention": true,
+  "missing_cached_item_recreated": true,
+  "failed_old_item_removal_retried": true,
+  "full_config_snapshot_without_visiting_presets": true,
+  "bounded_batch_operations_per_frame": 4,
+  "butterfly_to_m9_cross_weapon_finish_replacement": true,
+  "removed_config_items_retired": true,
+  "agent_lifecycle": true,
+  "preset_replacement": true,
+  "independent_weapon_presets_with_shared_paint": true,
+  "disable_restores_previous_loadout": true,
+  "later_manual_loadout_preserved": true,
+  "manual_delete_suppresses_recreation_until_change": true,
+  "account_change_drops_old_references": true,
+  "manually_created_items_not_deleted_by_mirror": true,
+  "game_tested": false,
+  "source_sha256": {
+    "skin_mirror.h": "876d68ae31aee7947fb8916f1efefa23ecfcd6334d0f7e87b58f521bf0779b44",
+    "local_loadout.h": "8f03176fb879bcedf5908ed2a7dba0654b95d78981193de46d8c0258b882f081",
+    "skin_native_state.h": "e328f4b77aebb3b54a129d4924b2c1e86ecad29ef50d12130cc1959ca32d9601",
+    "skin_native_client.h": "b46d53b3d66916b5ca5c31b22ea127894169964a098ad99e4a3bf1a5c81e93b5"
+  }
+}

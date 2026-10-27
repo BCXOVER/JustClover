@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "withdrawn_commit": "75c36c2980dd48dff405e2594c9a4cba55e7b84f",
+  "crouch_source_restored_from": "61623fc178fadf54a1a0f676a09e161e3af5d039",
+  "crouch_source_sha256": "95fd8b3fa31bf8fb4a447b8fdd90f0c11148bd6046c2049597f2e862637cb7f4",
+  "native_sites_preserved_by_combined_plan": [
+    "0x43351a0b",
+    "0x433544f5",
+    "0x433c32a9",
+    "0x433c5cf2",
+    "0x4340eb67",
+    "0x43415024",
+    "0x4335cd45"
+  ],
+  "custom_record_retry_installed": false,
+  "custom_shot_record_preference_installed": false,
+  "animation_10_11_repair_installed": false,
+  "neverlose_mode_present": false,
+  "extra_extrapolation_enabled": false,
+  "extrapolation_horizon_ticks": 0,
+  "combined_owned_instruction_bytes": 98,
+  "dll_sha256": "bad33591213387e725f625590b73c6326ea55b027b56970842d113458061d518",
+  "game_tested": false,
+  "accuracy_regression_cause_confirmed": false
+}
