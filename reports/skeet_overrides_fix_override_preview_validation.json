@@ -1,9 +1,13 @@
 {
   "passed": true,
+  "rage_windowed_cursor_without_preview_open": true,
   "per_weapon_capture_cases": 4,
   "native_profile_mapping_cases": 8,
   "cloned_renderer_supported_and_chained": true,
+  "later_lua_hook_not_rewrapped": true,
   "preview_title_drawn_with_live_child_renderer": true,
   "preview_inside_menu": true,
+  "preview_click_survives_geometry_then_draw": true,
+  "preview_escape_closes_settings": true,
   "game_tested": false
 }

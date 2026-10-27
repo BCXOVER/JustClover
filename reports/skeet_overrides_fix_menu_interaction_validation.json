@@ -14,6 +14,7 @@
   "native_callbacks_forwarded_once": true,
   "retired_callback_invalidated": true,
   "popup_close_checked": true,
+  "native_key_capture_keeps_parent_popup": true,
   "damage_anchor_variants": [
     "checkbox",
     "label",

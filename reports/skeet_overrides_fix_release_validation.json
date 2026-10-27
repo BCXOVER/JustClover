@@ -4,10 +4,10 @@
     {
       "file": "skeet.dll",
       "bytes": 16615424,
-      "sha256": "e39a23e44f1bba00808443d6bca17b34f776eb2bd4ffeb31e10882934ce0f883",
+      "sha256": "328d86c8ab5a6dcea5fdd43c8f8fe2fad38d61b1965b81bb64f0795b5a971601",
       "machine": "i386 PE32",
       "image_base": "0x10000000",
-      "entry_point_rva": "0x201cf0",
+      "entry_point_rva": "0x201e20",
       "aslr": true,
       "nx_compatible": true,
       "imports": {
@@ -237,7 +237,7 @@
         ]
       },
       "pefile_warnings": [
-        "Byte 0x20 makes up 19.8615% of the file's contents. This may indicate truncation / malformation."
+        "Byte 0x20 makes up 19.8623% of the file's contents. This may indicate truncation / malformation."
       ],
       "loader_status_export_rva": "0x49e278",
       "resources": [
@@ -267,7 +267,7 @@
     {
       "file": "injector.exe",
       "bytes": 418304,
-      "sha256": "caa2fadfc9fbc37f8e1bc6cce2538c966d8671e2f2cd7c08e9ec4477029aa287",
+      "sha256": "474953f452a03a4b15a2bac3af27b0aa9cf3b434e4952045ffc5da8789229e90",
       "machine": "i386 PE32",
       "image_base": "0x400000",
       "entry_point_rva": "0x1300",
