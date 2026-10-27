@@ -1,0 +1,177 @@
+{
+  "passed": true,
+  "module_fingerprints": [
+    {
+      "module": "client.dll",
+      "sha256": "183d42fac8a4ecc24dc02edf5f09122f37fe9e7533ca093a867718b25cfdeb03",
+      "timestamp": "0x65272025",
+      "size_of_image": "0x5509000"
+    },
+    {
+      "module": "materialsystem.dll",
+      "sha256": "011e6fb57fa1856ae946a442a2aa2c930d5b15447b03c7e67a64337571f92cce",
+      "timestamp": "0x63dc3de4",
+      "size_of_image": "0x114000"
+    },
+    {
+      "module": "studiorender.dll",
+      "sha256": "391e9a1fe6c4eddff185cd0001e731494f0347f9d7660a2792de509d436300ab",
+      "timestamp": "0x63dc118b",
+      "size_of_image": "0x45e000"
+    },
+    {
+      "module": "shaderapidx9.dll",
+      "sha256": "18ba7e4ea0fb5a51e26b4517999911582ae91e7209267532882855f53cbf230a",
+      "timestamp": "0x63dc1158",
+      "size_of_image": "0xce000"
+    }
+  ],
+  "verified_virtual_calls": [
+    {
+      "module": "materialsystem.dll",
+      "vtable_rva": "0x9a80c",
+      "slot": 84,
+      "function_rva": "0x1af30",
+      "stack_argument_bytes": 16
+    },
+    {
+      "module": "materialsystem.dll",
+      "vtable_rva": "0x9a80c",
+      "slot": 91,
+      "function_rva": "0x1b440",
+      "stack_argument_bytes": 16
+    },
+    {
+      "module": "materialsystem.dll",
+      "vtable_rva": "0x9a80c",
+      "slot": 97,
+      "function_rva": "0x1ecd0",
+      "stack_argument_bytes": 32
+    },
+    {
+      "module": "materialsystem.dll",
+      "vtable_rva": "0x9a80c",
+      "slot": 115,
+      "function_rva": "0x181b0",
+      "stack_argument_bytes": 0
+    },
+    {
+      "module": "studiorender.dll",
+      "vtable_rva": "0x7a090",
+      "slot": 21,
+      "function_rva": "0x530d0",
+      "stack_argument_bytes": 4
+    },
+    {
+      "module": "studiorender.dll",
+      "vtable_rva": "0x7a090",
+      "slot": 22,
+      "function_rva": "0x53140",
+      "stack_argument_bytes": 8
+    },
+    {
+      "module": "studiorender.dll",
+      "vtable_rva": "0x7a090",
+      "slot": 23,
+      "function_rva": "0x52f40",
+      "stack_argument_bytes": 16
+    },
+    {
+      "module": "studiorender.dll",
+      "vtable_rva": "0x7a090",
+      "slot": 27,
+      "function_rva": "0x531b0",
+      "stack_argument_bytes": 4
+    },
+    {
+      "module": "studiorender.dll",
+      "vtable_rva": "0x7a090",
+      "slot": 28,
+      "function_rva": "0x531e0",
+      "stack_argument_bytes": 4
+    },
+    {
+      "module": "studiorender.dll",
+      "vtable_rva": "0x7a090",
+      "slot": 33,
+      "function_rva": "0x52e60",
+      "stack_argument_bytes": 12
+    },
+    {
+      "module": "studiorender.dll",
+      "vtable_rva": "0x7a090",
+      "slot": 34,
+      "function_rva": "0x52f00",
+      "stack_argument_bytes": 0
+    },
+    {
+      "module": "materialsystem.dll",
+      "vtable_rva": "0x9ed88",
+      "slot": 22,
+      "function_rva": "0x3aba0",
+      "stack_argument_bytes": 4
+    },
+    {
+      "module": "materialsystem.dll",
+      "vtable_rva": "0x9ed88",
+      "slot": 23,
+      "function_rva": "0x3abe0",
+      "stack_argument_bytes": 0
+    },
+    {
+      "module": "materialsystem.dll",
+      "vtable_rva": "0x9ed88",
+      "slot": 24,
+      "function_rva": "0x3ac00",
+      "stack_argument_bytes": 0
+    },
+    {
+      "module": "materialsystem.dll",
+      "vtable_rva": "0x9ed88",
+      "slot": 25,
+      "function_rva": "0x3acb0",
+      "stack_argument_bytes": 4
+    },
+    {
+      "module": "materialsystem.dll",
+      "vtable_rva": "0x9ed88",
+      "slot": 26,
+      "function_rva": "0x3ac80",
+      "stack_argument_bytes": 4
+    },
+    {
+      "module": "materialsystem.dll",
+      "vtable_rva": "0x9ed88",
+      "slot": 117,
+      "function_rva": "0x3a570",
+      "stack_argument_bytes": 20
+    },
+    {
+      "module": "materialsystem.dll",
+      "vtable_rva": "0x9ed88",
+      "slot": 120,
+      "function_rva": "0x3a680",
+      "stack_argument_bytes": 0
+    },
+    {
+      "module": "materialsystem.dll",
+      "vtable_rva": "0x9fa4c",
+      "slot": 52,
+      "function_rva": "0x46fc0",
+      "stack_argument_bytes": 8
+    },
+    {
+      "module": "shaderapidx9.dll",
+      "vtable_rva": "0x6e930",
+      "slot": 289,
+      "function_rva": "0x21040",
+      "stack_argument_bytes": 4
+    }
+  ],
+  "native_merged_mdl_size": 1884,
+  "native_color_byte_offset": 70,
+  "owned_bone_callback_return_rva": "0x9af0b0",
+  "native_model_matrix_mode": 10,
+  "shaderapi_texture_handles": "native Texture_t pointers",
+  "game_tested": false
+}

@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "portable_policy_result": "35 Steam discovery/environment fixture checks passed",
+  "native_launch_and_cleanup_cases": 5,
+  "starts_only_csgo_exe_pe32": true,
+  "steam_library_manifest_discovery": true,
+  "child_only_steam_app_ids": 730,
+  "startup_flags": [
+    "-steam",
+    "-insecure",
+    "-console"
+  ],
+  "reserve_before_resume": true,
+  "startup_module_timeout_seconds": 120,
+  "mocked_apis": [
+    "CreateProcessW",
+    "ResumeThread",
+    "environment",
+    "heap"
+  ],
+  "game_or_steam_executed": false,
+  "windows_loader_tested": false,
+  "scope": "Steam text fixtures and bounded native launcher API/cleanup fixtures.\nCreateProcess/ResumeThread are mocked. No game, Steam or uploaded EXE runs.\n"
+}
