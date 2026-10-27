@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "presentation_cases": 49,
+  "native_text_xy_only": true,
+  "native_text_abi_and_preserved_registers": true,
+  "default_menu_friendly_ambiguous_passthrough": true,
+  "window_drag_capture_cancel": true,
+  "native_flags_use_bitmasks": true,
+  "native_rage_views": 18,
+  "gear_groups": 7,
+  "override_binds_in_popup": true,
+  "blank_companions_routed": true,
+  "source_models_preserved": true,
+  "native_callbacks_forwarded_once": true,
+  "retired_callback_invalidated": true,
+  "popup_close_checked": true,
+  "damage_anchor_variants": [
+    "checkbox",
+    "label",
+    "hotkey"
+  ],
+  "game_tested": false
+}

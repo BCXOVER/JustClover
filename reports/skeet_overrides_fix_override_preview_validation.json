@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "per_weapon_capture_cases": 4,
+  "native_profile_mapping_cases": 8,
+  "cloned_renderer_supported_and_chained": true,
+  "preview_title_drawn_with_live_child_renderer": true,
+  "preview_inside_menu": true,
+  "game_tested": false
+}
