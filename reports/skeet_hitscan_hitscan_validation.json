@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "choices_cases": 147,
+  "native_record_copy_routing_cases": 84,
+  "all_four_native_argument_setups_executed": true,
+  "both_encrypted_animation_dispatch_setups_executed": true,
+  "native_animation_dispatch_cases": 84,
+  "client_guard_cases": 12,
+  "probe_relocation_placements": 3,
+  "raw_shot_time_offset": "0x54",
+  "raw_simulation_tick_offset": "0x4c",
+  "animation_layers": [
+    10,
+    11
+  ],
+  "normal_animation_values_preserved": true,
+  "native_dispatch_and_return_path_preserved": true,
+  "shot_window_pairs": 4,
+  "retry_tick_radius": 1,
+  "max_lookup_calls": 4,
+  "native_time_window_preserved": true,
+  "ring_records_unmodified": true,
+  "job_tick_matches_selected_record": true,
+  "default_hitscan": "Neverlose (open-source correction set)",
+  "closed_neverlose_core_transferred": false,
+  "custom_extrapolation_enabled": false,
+  "core_sha256": "bf5cd94cd3511f09f4241d952ed8bdde3eb8fb95d12534fbf4e23bd6b9789fc3",
+  "client_sha256": "183d42fac8a4ecc24dc02edf5f09122f37fe9e7533ca093a867718b25cfdeb03",
+  "game_tested": false,
+  "limits": "Bounded x86 fixtures for production record/animation routing.\nExecutes native record selection/copy/return and its original animation\ncall dispatcher. Final entity/bone application is stubbed; game startup is not run.\n"
+}
